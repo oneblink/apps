@@ -1,4 +1,9 @@
 // @flow
 'use strict'
 
-export * as offlineService from 'offline-service'
+import * as offlineService from 'offline-service'
+
+export { offlineService }
+export default {
+  offlineService,
+}

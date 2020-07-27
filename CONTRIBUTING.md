@@ -24,11 +24,7 @@ This project adheres to [GitHub Flow](https://guides.github.com/introduction/flo
    git push && git push --tags
    ```
 
-1. Publish changes to npm
-
-   ```
-   npm publish --tag beta
-   ```
+1. Publishes to `npm` are automated via CI on tag creation
 
 ## Production Release Process
 
@@ -62,8 +58,4 @@ This project adheres to [GitHub Flow](https://guides.github.com/introduction/flo
    git push && git push --tags
    ```
 
-1. Publish changes to npm
-
-   ```
-   npm publish
-   ```
+1. Publishes to `npm` are automated via CI on tag creation

@@ -29,6 +29,7 @@
   "keywords": [],
   "license": "GPL-3.0-only",
   "main": "index.js",
+  "module": "index.js",
   "publishConfig": {
     "access": "public"
   },

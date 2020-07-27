@@ -1,0 +1,47 @@
+{
+  "name": "@oneblink/apps",
+  "description": "Helper functions for OneBlink apps in JavaScript.",
+  "version": "0.0.1-beta.0",
+  "author": "OneBlink <developers@oneblink.io> (https://oneblink.io)",
+  "bugs": {
+    "url": "https://github.com/oneblink/apps/issues"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/plugin-transform-modules-commonjs": "^7.10.4",
+    "eslint": "^7.5.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "fixpack": "^3.0.6",
+    "flow-bin": "^0.130.0",
+    "jest": "^26.1.0",
+    "prettier": "^2.0.5"
+  },
+  "directories": {
+    "doc": "docs"
+  },
+  "engines": {
+    "node": ">=12",
+    "npm": ">=6"
+  },
+  "files": [],
+  "homepage": "https://github.com/oneblink/apps",
+  "keywords": [],
+  "license": "GPL-3.0-only",
+  "main": "index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oneblink/apps.git"
+  },
+  "scripts": {
+    "eslint": "eslint --fix --cache .",
+    "fixpack": "fixpack",
+    "flow_check": "flow check",
+    "jest": "jest",
+    "pretest": "npm run eslint && npm run flow_check && npm run fixpack",
+    "test": "npm run jest"
+  }
+}

@@ -1,4 +1,4 @@
 // @flow
-'use strict';
+'use strict'
 
-export default {};
+export * as offlineService from 'offline-service'

@@ -6,6 +6,7 @@
 
 [libs]
 flow-typed
+node_modules/@oneblink/flow-types/flow-typed/
 
 [lints]
 deprecated-utility=off

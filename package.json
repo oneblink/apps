@@ -24,7 +24,10 @@
     "node": ">=12",
     "npm": ">=6"
   },
-  "files": [],
+  "files": [
+    "src",
+    "index.js"
+  ],
   "homepage": "https://github.com/oneblink/apps",
   "keywords": [],
   "license": "GPL-3.0-only",

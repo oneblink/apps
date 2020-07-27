@@ -15,10 +15,10 @@ deploy:
     tag: beta
     on:
       tags: true
-      condition: $TRAVIS_TAG =~ (beta)
+      condition: tag =~ (beta)
   - provider: npm
     email: developers@oneblink.io
     api_key: $NPM_ACCESS_TOKEN
     on:
       tags: true
-      condition: $TRAVIS_TAG =~ (\d+\.\d+\.\d+)$
+      condition: tag !~ (beta)

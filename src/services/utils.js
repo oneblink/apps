@@ -3,7 +3,6 @@
 
 import $localForage from 'localforage'
 import _cloneDeep from 'lodash.clonedeep'
-import _startsWith from 'lodash.startswith'
 
 const pSeries = async (
   funcs /*: Array<() => Promise<mixed>> */
@@ -16,7 +15,7 @@ const pSeries = async (
 function getLocalForageKeys(keyPrefix) /* : Promise<string[]> */ {
   return $localForage
     .keys()
-    .then((keys) => keys.filter((key) => _startsWith(key, keyPrefix)))
+    .then((keys) => keys.filter((key) => key.startsWith(keyPrefix)))
 }
 
 function setValuesOnData(items, data) {

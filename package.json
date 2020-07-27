@@ -8,8 +8,7 @@
   },
   "dependencies": {
     "localforage": "^1.8.1",
-    "lodash.clonedeep": "^4.5.0",
-    "lodash.startswith": "^4.2.1"
+    "lodash.clonedeep": "^4.5.0"
   },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.10.4",

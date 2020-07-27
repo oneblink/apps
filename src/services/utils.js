@@ -3,9 +3,7 @@
 
 import $localForage from 'localforage'
 import _cloneDeep from 'lodash.clonedeep'
-import _find from 'lodash.find'
 import _startsWith from 'lodash.startswith'
-import * as bulmaToast from 'bulma-toast'
 
 const pSeries = async (
   funcs /*: Array<() => Promise<mixed>> */
@@ -29,7 +27,7 @@ function setValuesOnData(items, data) {
     const value = data[property]
 
     if (typeof value === 'string') {
-      const item = _find(items, (item) => item && item.key === value)
+      const item = items.find((item) => item && item.key === value)
       if (item) {
         data[property] = item.value
       }
@@ -50,7 +48,7 @@ async function getLocalForageItem /* ::<T>*/(
     const item = await $localForage.getItem(localForageKey)
     items.push(item)
   }
-  const rootItem = _find(items, (item) => item && item.key === key)
+  const rootItem = items.find((item) => item && item.key === key)
   if (!rootItem || !rootItem.value) {
     return null
   }

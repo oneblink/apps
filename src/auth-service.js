@@ -33,7 +33,7 @@ export function init(
     useSAML,
   } /* : {
   oAuthClientId: string,
-  useSAML: ?string,
+  useSAML: boolean,
 } */
 ) {
   authTenant = tenant
@@ -79,7 +79,7 @@ export function getIssuerFromJWT(
   }
 }
 
-async function isAuthorised(
+export async function isAuthorised(
   formsAppId /* : number */
 ) /* : Promise<boolean> */ {
   const userProfile = getUserProfile()

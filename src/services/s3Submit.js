@@ -149,13 +149,6 @@ const uploadFormSubmission = (
   )
 }
 
-const uploadPreFillData = /* :: <T> */ (
-  s3Configuration /* : S3UploadCredentials */,
-  preFillData /* : T */
-) /* : Promise<void> */ => {
-  return uploadToS3(s3Configuration, preFillData)
-}
-
 const downloadPreFillData = (
   { credentials, s3: s3Meta } /* : S3UploadCredentials */
 ) => {
@@ -228,4 +221,4 @@ const downloadPreFillData = (
     })
 }
 
-export { uploadFormSubmission, uploadPreFillData, downloadPreFillData }
+export { uploadFormSubmission, downloadPreFillData }

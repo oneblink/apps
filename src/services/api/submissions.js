@@ -3,18 +3,9 @@
 
 import { postRequest } from '../fetch'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
-
-// FNs
-import { downloadDraftData, uploadDraftData, putDrafts } from './drafts'
-import { uploadPreFillFormData, downloadPreFillFormData } from './prefill'
-import {
-  generatePaymentConfiguration,
-  acknowledgeCPPayTransaction,
-  verifyPaymentTransaction,
-} from './payment'
 import tenants from '../../tenants'
 
-const generateSubmissionCredentials = async (
+export const generateSubmissionCredentials = async (
   submissionData /* : FormSubmissionResult */
 ) /* : Promise<S3UploadCredentials> */ => {
   return postRequest(
@@ -80,16 +71,4 @@ const generateSubmissionCredentials = async (
       }
     }
   })
-}
-
-export {
-  uploadDraftData,
-  downloadDraftData,
-  putDrafts,
-  uploadPreFillFormData,
-  downloadPreFillFormData,
-  generatePaymentConfiguration,
-  acknowledgeCPPayTransaction,
-  verifyPaymentTransaction,
-  generateSubmissionCredentials,
 }

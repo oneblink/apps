@@ -14,6 +14,7 @@ import {
   getUserProfile,
 } from './services/cognito'
 import { getRequest, postRequest } from './services/fetch'
+import tenants from './tenants'
 
 export {
   login,
@@ -24,10 +25,9 @@ export {
   logout,
 }
 
-let authTenant = null
+let isInitialized = null
 
 export function init(
-  tenant /* : OneBlinkAppsTenant */,
   {
     oAuthClientId,
     useSAML,
@@ -36,12 +36,12 @@ export function init(
   useSAML: boolean,
 } */
 ) {
-  authTenant = tenant
   initCognito({
-    loginDomain: tenant.loginDomain,
+    loginDomain: tenants.current.loginDomain,
     oAuthClientId,
     samlIdentityProviderName: useSAML ? oAuthClientId : null,
   })
+  isInitialized = true
 }
 
 export function getUserFriendlyName() /* : string | null */ {
@@ -92,13 +92,7 @@ export async function isAuthorised(
     return true
   }
 
-  if (!authTenant) {
-    throw new Error(
-      '"authService" has not been initiated. You must call the init() function before checking if the current user is authorised for this app.'
-    )
-  }
-
-  const url = `${authTenant.apiOrigin}/forms-apps/${formsAppId}/my-forms-app-user`
+  const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/my-forms-app-user`
   return getRequest(url)
     .then(() => true)
     .catch((error) => {
@@ -126,14 +120,8 @@ export async function requestAccess(
     )
   }
 
-  if (!authTenant) {
-    throw new Error(
-      '"authService" has not been initiated. You must call the init() function before requesting access for the current user.'
-    )
-  }
-
   try {
-    const url = `${authTenant.apiOrigin}/forms-apps/${formsAppId}/request-access`
+    const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/request-access`
     await postRequest(url)
   } catch (error) {
     console.warn('Error while requesting access to forms app', error)

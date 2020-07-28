@@ -3,12 +3,13 @@
 
 import { postRequest } from '../fetch'
 import { downloadPreFillData, uploadPreFillData } from '../s3Submit'
+import tenants from '../../tenants'
 
 async function uploadPreFillFormData /* :: <T> */(
   formId /* : number */,
   preFillData /* : T */
 ) /* : Promise<string> */ {
-  const url = `/forms/${formId}/pre-fill-credentials`
+  const url = `${tenants.current.apiOrigin}/forms/${formId}/pre-fill-credentials`
   console.log('Attempting to get Credentials to upload pre fill form data', url)
 
   const data = await postRequest(url)
@@ -21,7 +22,7 @@ async function downloadPreFillFormData /* :: <T> */(
   formId /* : number */,
   preFillFormDataId /* : string */
 ) /* : Promise<T> */ {
-  const url = `/forms/${formId}/pre-fill-retrieval-credentials/${preFillFormDataId}`
+  const url = `${tenants.current.apiOrigin}/forms/${formId}/pre-fill-retrieval-credentials/${preFillFormDataId}`
   console.log(
     'Attempting to get Credentials to download pre fill form data',
     url

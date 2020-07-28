@@ -27,9 +27,7 @@ import { authService } from '@oneblink/apps'
 Initialize the service with required configuration. **This must be done before using before some of the function in this service.**
 
 ```js
-import { tenants } from '@oneblink/apps'
-
-authService.init(tenants.oneblink, {
+authService.init({
   oAuthClientId: 'YOUR_OAUTH_CLIENT_ID',
   useSAML: false,
 })

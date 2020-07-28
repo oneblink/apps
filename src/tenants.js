@@ -1,16 +1,14 @@
 // @flow
 'use strict'
 
-const tenants /* : {
-  test: {
-    oneblink: OneBlinkAppsTenant,
-    civicplus: OneBlinkAppsTenant,
-  },
-  prod: {
-    oneblink: OneBlinkAppsTenant,
-    civicplus: OneBlinkAppsTenant,
-  },
-} */ = {
+/* ::
+type OneBlinkAppsTenant = {|
+  loginDomain: string,
+  apiOrigin: string,
+|}
+*/
+
+const tenants = {
   test: {
     oneblink: {
       loginDomain: 'login-test.oneblink.io',
@@ -34,20 +32,37 @@ const tenants /* : {
 }
 
 class Tenants {
+  /* ::
+  tenant: 'oneblink' | 'civicplus'
+  */
+  constructor() {
+    this.tenant = 'oneblink'
+  }
+
   get isTestEnvironment() {
     return window.ONEBLINK_APPS_ENVIRONMENT === 'test'
   }
 
-  get oneblink() {
-    return this.isTestEnvironment
-      ? tenants.test.oneblink
-      : tenants.prod.oneblink
+  get current() /* : OneBlinkAppsTenant */ {
+    switch (this.tenant) {
+      case 'civicplus':
+        return this.isTestEnvironment
+          ? tenants.test.civicplus
+          : tenants.prod.civicplus
+      case 'oneblink':
+      default:
+        return this.isTestEnvironment
+          ? tenants.test.oneblink
+          : tenants.prod.oneblink
+    }
   }
 
-  get civicplus() {
-    return this.isTestEnvironment
-      ? tenants.test.civicplus
-      : tenants.prod.civicplus
+  useOneBlink() {
+    this.tenant = 'oneblink'
+  }
+
+  useCivicPlus() {
+    this.tenant = 'civicplus'
   }
 }
 

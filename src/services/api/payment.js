@@ -114,7 +114,7 @@ const verifyPaymentTransaction = /* :: <T> */ (
 }
 
 const acknowledgeCPPayTransaction = (
-  formId /* : FormId */,
+  formId /* : number */,
   payload /* : mixed */
 ) /* : Promise<void> */ => {
   const url = `${tenants.current.apiOrigin}/forms/${formId}/cp-pay-acknowledge`

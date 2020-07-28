@@ -83,6 +83,7 @@ const draft = {
   jobId: '0ac41494-723b-4a5d-90bb-534b8360f31d'
 }
 const data = {
+  formsAppId: 1,
   submission: {
     form: 'data'
     goes: 'here'
@@ -120,6 +121,7 @@ const draft = {
   jobId: '0ac41494-723b-4a5d-90bb-534b8360f31d'
 }
 const data = {
+  formsAppId: 1,
   submission: {
     form: 'data'
     goes: 'here'
@@ -169,3 +171,10 @@ await draftService.syncDrafts({
   formsAppId: 1,
 })
 ```
+
+#### Parameters
+
+| Property             | Type      | Description                                          |
+| -------------------- | --------- | ---------------------------------------------------- |
+| `options.throwError` | `boolean` | `true` to throw errors while syncing                 |
+| `options.formsAppId` | `number`  | The id of the OneBlink Forms App to sync drafts with |

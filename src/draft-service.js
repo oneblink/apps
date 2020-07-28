@@ -114,7 +114,12 @@ export async function addDraft(
           .then(() => executeDraftsListeners(draftsData))
       })
     })
-    .then(() => syncDrafts())
+    .then(() =>
+      syncDrafts({
+        throwError: false,
+        formsAppId: draftSubmission.formsAppId,
+      })
+    )
     .catch(errorHandler)
 }
 
@@ -162,7 +167,12 @@ export async function updateDraft(
             .then(() => executeDraftsListeners(draftsData))
         })
     })
-    .then(() => syncDrafts())
+    .then(() =>
+      syncDrafts({
+        throwError: false,
+        formsAppId: draftSubmission.formsAppId,
+      })
+    )
     .catch(errorHandler)
 }
 
@@ -221,7 +231,8 @@ export async function getDraftAndData(
 }
 
 export async function deleteDraft(
-  draftId /* : string */
+  draftId /* : string */,
+  formsAppId /* : number */
 ) /* : Promise<void> */ {
   const username = getUsername()
   if (!username) {
@@ -245,7 +256,12 @@ export async function deleteDraft(
       return removeDraftData(draft.draftDataId)
         .then(() => localForage.setItem(`DRAFTS_${username}`, draftsData))
         .then(() => executeDraftsListeners(draftsData))
-        .then(() => syncDrafts())
+        .then(() =>
+          syncDrafts({
+            throwError: false,
+            formsAppId,
+          })
+        )
     })
     .catch(errorHandler)
 }
@@ -263,10 +279,9 @@ async function setDrafts(draftsData) /* : Promise<void> */ {
 
 let _isSyncingDrafts = false
 
-export async function syncDrafts({
-  formsAppId,
-  throwError,
-} /* : { formsAppId: number, throwError?:boolean } */ = {}) /* : Promise<void> */ {
+export async function syncDrafts(
+  { formsAppId, throwError } /* : { formsAppId: number, throwError?:boolean } */
+) /* : Promise<void> */ {
   if (!isDraftsEnabled) {
     return
   }

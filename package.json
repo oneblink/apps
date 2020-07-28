@@ -8,15 +8,18 @@
   },
   "dependencies": {
     "amazon-cognito-auth-js": "1.2.4",
+    "aws-sdk": "^2.721.0",
+    "big-json": "^3.1.0",
     "jwt-decode": "^2.2.0",
     "local-storage": "^2.0.0",
     "localforage": "^1.8.1",
     "lodash.clonedeep": "^4.5.0",
-    "query-string": "^6.13.1"
+    "query-string": "^6.13.1",
+    "s3-upload-stream": "^1.0.7"
   },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.10.4",
-    "@oneblink/flow-types": "github:oneblink/flow-types",
+    "@oneblink/flow-types": "github:oneblink/flow-types#master",
     "eslint": "^7.5.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-prettier": "^3.1.4",

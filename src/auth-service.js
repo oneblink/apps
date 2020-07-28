@@ -3,7 +3,7 @@
 
 import jwtDecode from 'jwt-decode'
 
-import OneBlinkFormsAppError from './services/errors/oneBlinkFormsAppError'
+import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import {
   init as initCognito,
   isLoggedIn,
@@ -118,7 +118,7 @@ export async function requestAccess(
   formsAppId /* : number */
 ) /* : Promise<void> */ {
   if (!isLoggedIn()) {
-    throw new OneBlinkFormsAppError(
+    throw new OneBlinkAppsError(
       'You must login before requesting access to this application',
       {
         requiresLogin: true,
@@ -137,7 +137,7 @@ export async function requestAccess(
     await postRequest(url)
   } catch (error) {
     console.warn('Error while requesting access to forms app', error)
-    throw new OneBlinkFormsAppError(
+    throw new OneBlinkAppsError(
       'Sorry, we could not request access automatically right now, please try again. If the problem persists, please contact your administrator yourself.',
       {
         originalError: error,

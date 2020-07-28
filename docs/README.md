@@ -27,4 +27,4 @@ This helper library supports all OneBlink Productivity instances. There are some
 
 ## Errors
 
-- [`OneBlinkFormsAppError`](./oneBlinkFormsAppError.md)
+- [`OneBlinkAppsError`](./oneBlinkAppsError.md)

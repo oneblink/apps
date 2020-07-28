@@ -38,18 +38,6 @@ Get an array of [Draft](#draft)s for the currently logged in user.
 const drafts = await draftService.getDrafts()
 ```
 
-#### Draft
-
-| Property      | Type                 | Description                                                  |
-| ------------- | -------------------- | ------------------------------------------------------------ |
-| `draftId`     | `string`             | The id of the draft                                          |
-| `draftDataId` | `string`             | The id of the draft data stored                              |
-| `title`       | `string`             | The title input by the user to display the draft             |
-| `formId`      | `number`             | The id of the form the draft was saved against               |
-| `externalId`  | `string | undefined` | the external id provided by a developer                      |
-| `jobId`       | `string | undefined` | The id of the job associated with the draft                  |
-| `updatedAt`   | `string`             | The date and time (in ISO format) the draft was last updated |
-
 ### `getDraftAndData()`
 
 Get a single [Draft](#draft) and the associated submission data.

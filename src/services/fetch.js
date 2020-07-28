@@ -43,7 +43,7 @@ export class HTTPError extends Error {
   status: number
   */
 
-  constructor(statusCode /* : number */, message /* : string */) {
+  constructor(statusCode /* : number */, message /* : string */) {
     super(message)
     this.status = statusCode
   }

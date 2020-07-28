@@ -28,6 +28,7 @@ The default tenant is the [OneBlink Console](https://console.oneblink.io) which 
 - [`authService`](./auth-service.md)
 - [`draftService`](./draft-service.md)
 - [`prefillService`](./prefill-service.md)
+- [`paymentService`](./payment-service.md)
 
 ## Errors
 

@@ -1,23 +1,10 @@
 // @flow
 'use strict'
 
-import {
-  getRequest,
-  searchRequest,
-  postRequest,
-  putRequest,
-  HTTPError,
-} from './fetch'
-import { isLoggedIn } from '../auth-service'
-import {
-  uploadFormSubmission,
-  downloadPreFillData,
-  uploadPreFillData,
-} from './s3Submit'
-import OneBlinkAppsError from './errors/oneBlinkAppsError'
-
-const formsHostnameConfiguration = window.formsHostnameConfiguration || {}
-const formsAppId = formsHostnameConfiguration.formsAppId || 'UNKNOWN'
+import { postRequest, putRequest } from '../fetch'
+import { isLoggedIn } from '../../auth-service'
+import { uploadFormSubmission, downloadPreFillData } from '../s3Submit'
+import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 
 const uploadDraftData = async (
   draft /* : FormsAppDraft */,
@@ -91,7 +78,8 @@ const uploadDraftData = async (
 }
 
 const putDrafts = async (
-  draftsData /* : FormsAppDrafts */
+  draftsData /* : FormsAppDrafts */,
+  formsAppId /* : number */
 ) /* : Promise<FormsAppDrafts>*/ => {
   if (!isLoggedIn()) {
     console.log(
@@ -180,30 +168,4 @@ async function downloadDraftData /* :: <T> */(
   return downloadPreFillData(data)
 }
 
-async function uploadPreFillFormData /* :: <T> */(
-  formId /* : number */,
-  preFillData /* : T */
-) /* : Promise<string> */ {
-  const url = `/forms/${formId}/pre-fill-credentials`
-  console.log('Attempting to get Credentials to upload pre fill form data', url)
-
-  const data = await postRequest(url)
-  console.log('Attempting to upload pre fill form data:', data)
-  await uploadPreFillData(data, preFillData)
-  return data.preFillFormDataId
-}
-
-async function downloadPreFillFormData /* :: <T> */(
-  formId /* : number */,
-  preFillFormDataId /* : string */
-) /* : Promise<T> */ {
-  const url = `/forms/${formId}/pre-fill-retrieval-credentials/${preFillFormDataId}`
-  console.log(
-    'Attempting to get Credentials to download pre fill form data',
-    url
-  )
-
-  const data = await postRequest(url)
-  console.log('Attempting to download pre fill form data:', data)
-  return downloadPreFillData(data)
-}
+export { uploadDraftData, putDrafts, downloadDraftData }

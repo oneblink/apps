@@ -1,38 +1,54 @@
 // @flow
 'use strict'
 
-const isTestEnvironment = window.ONEBLINK_APP_ENVIRONMENT === 'test'
-
 const tenants /* : {
   test: {
-    ONEBLINK: OneBlinkAppsTenant,
-    CIVICPLUS: OneBlinkAppsTenant,
+    oneblink: OneBlinkAppsTenant,
+    civicplus: OneBlinkAppsTenant,
   },
   prod: {
-    ONEBLINK: OneBlinkAppsTenant,
-    CIVICPLUS: OneBlinkAppsTenant,
+    oneblink: OneBlinkAppsTenant,
+    civicplus: OneBlinkAppsTenant,
   },
 } */ = {
   test: {
-    ONEBLINK: {
+    oneblink: {
       loginDomain: 'login-test.oneblink.io',
       apiOrigin: 'https://auth-api-test.blinkm.io',
     },
-    CIVICPLUS: {
+    civicplus: {
       loginDomain: 'login-test.transform.civicplus.com',
       apiOrigin: 'https://auth-api-test.transform.civicplus.com',
     },
   },
   prod: {
-    ONEBLINK: {
+    oneblink: {
       loginDomain: 'login.oneblink.io',
       apiOrigin: 'https://auth-api.blinkm.io',
     },
-    CIVICPLUS: {
+    civicplus: {
       loginDomain: 'login.transform.civicplus.com',
       apiOrigin: 'https://auth-api.transform.civicplus.com',
     },
   },
 }
 
-export default isTestEnvironment ? tenants.test : tenants.prod
+class Tenants {
+  get isTestEnvironment() {
+    return window.ONEBLINK_APPS_ENVIRONMENT === 'test'
+  }
+
+  get ONEBLINK() {
+    return this.isTestEnvironment
+      ? tenants.test.oneblink
+      : tenants.prod.oneblink
+  }
+
+  get CIVICPLUS() {
+    return this.isTestEnvironment
+      ? tenants.test.civicplus
+      : tenants.prod.civicplus
+  }
+}
+
+export default new Tenants()

@@ -4,7 +4,7 @@
 
 Helper functions for handling user authentication and authorisation.
 
-**NOTE: `init()` must be called before using any other function in the service.**
+**NOTE: `init()` must be called before some of the function in this service.**
 
 ```js
 import { authService } from '@oneblink/apps'
@@ -12,8 +12,8 @@ import { authService } from '@oneblink/apps'
 
 - [`init()`](#init)
 - [`isLoggedIn()`](#isloggedin)
-- [`login()`](#login)
-- [`handleAuthentication()`](#handleauthentication)
+- [`login()`](#login) - requires `init()` to be called first
+- [`handleAuthentication()`](#handleauthentication) - requires `init()` to be called first
 - [`getIdToken()`](#getidtoken)
 - [`getUserProfile()`](#getuserprofile)
 - [`getUserFriendlyName()`](#getuserfriendlyname)
@@ -24,12 +24,12 @@ import { authService } from '@oneblink/apps'
 
 ### `init()`
 
-Initialize the service with required configuration. **This must be done before using any other function in the service.**
+Initialize the service with required configuration. **This must be done before using before some of the function in this service.**
 
 ```js
 import { tenants } from '@oneblink/apps'
 
-authService.init(tenants.ONEBLINK, {
+authService.init(tenants.oneblink, {
   oAuthClientId: 'YOUR_OAUTH_CLIENT_ID',
   useSAML: false,
 })

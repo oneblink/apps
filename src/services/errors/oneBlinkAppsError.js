@@ -1,7 +1,7 @@
 // @flow
 'use strict'
 
-export default class OneBlinkFormsAppError extends Error {
+export default class OneBlinkAppsError extends Error {
   /* :: title: string */
   /* :: isOffline: boolean */
   /* :: requiresAccessRequest: boolean */

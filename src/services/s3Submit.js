@@ -7,7 +7,7 @@ import s3UploadStream from 's3-upload-stream'
 import queryString from 'query-string'
 
 import { getUserProfile } from '../auth-service'
-import OneBlinkFormsAppError from './errors/oneBlinkFormsAppError'
+import OneBlinkAppsError from './errors/oneBlinkAppsError'
 
 const getDeviceInformation = () => {
   if (window.cordova) {
@@ -216,7 +216,7 @@ const downloadPreFillData = (
       // (because our API should always return valid credentials) we can tell
       // the user that their data has been removed from OneBlink's stores.
       if (error.name === 'AccessDenied') {
-        throw new OneBlinkFormsAppError(
+        throw new OneBlinkAppsError(
           "Data has been removed based on your administrator's prefill data retention policy.",
           {
             originalError: error,

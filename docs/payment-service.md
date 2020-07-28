@@ -17,7 +17,7 @@ import { paymentService } from '@oneblink/apps'
 
 | Property         | Type            | Description                                            |
 | ---------------- | --------------- | ------------------------------------------------------ |
-| `isSuccess`      | `boolean`       | `true` if the transaction was successfull              |
+| `isSuccess`      | `boolean`       | `true` if the transaction was successful               |
 | `errorMessage`   | `string | null` | The error message to display if `isSuccess` is `false` |
 | `id`             | `string | null` | The id the transaction                                 |
 | `creditCardMask` | `string | null` | A mask of the credit card used e.g. _1234....7890_     |

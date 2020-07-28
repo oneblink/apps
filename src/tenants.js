@@ -38,13 +38,13 @@ class Tenants {
     return window.ONEBLINK_APPS_ENVIRONMENT === 'test'
   }
 
-  get ONEBLINK() {
+  get oneblink() {
     return this.isTestEnvironment
       ? tenants.test.oneblink
       : tenants.prod.oneblink
   }
 
-  get CIVICPLUS() {
+  get civicplus() {
     return this.isTestEnvironment
       ? tenants.test.civicplus
       : tenants.prod.civicplus

@@ -6,6 +6,7 @@ import * as authService from './src/auth-service'
 import * as draftService from './src/draft-service'
 import * as prefillService from './src/prefill-service'
 import * as paymentService from './src/payment-service'
+import * as jobService from './src/job-service'
 import OneBlinkAppsError from './src/services/errors/oneBlinkAppsError'
 import tenants from './src/tenants'
 
@@ -19,4 +20,5 @@ export {
   draftService,
   prefillService,
   paymentService,
+  jobService,
 }

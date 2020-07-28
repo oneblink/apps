@@ -25,8 +25,6 @@ export {
   logout,
 }
 
-let isInitialized = null
-
 export function init(
   {
     oAuthClientId,
@@ -41,7 +39,6 @@ export function init(
     oAuthClientId,
     samlIdentityProviderName: useSAML ? oAuthClientId : null,
   })
-  isInitialized = true
 }
 
 export function getUserFriendlyName() /* : string | null */ {

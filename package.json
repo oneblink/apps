@@ -15,6 +15,7 @@
     "localforage": "^1.8.1",
     "lodash.clonedeep": "^4.5.0",
     "lodash.differenceby": "^4.8.0",
+    "lodash.orderby": "^4.6.0",
     "query-string": "^6.13.1",
     "s3-upload-stream": "^1.0.7",
     "uuid": "^8.3.0"

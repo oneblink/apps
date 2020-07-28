@@ -27,7 +27,7 @@ throw new OneBlinkFormsAppError('Something went wrong!', options)
 
 An Options object that can be passed to the `OneBlinkFormsAppError` class.
 
-| Parameter             | Required | Type      | Description                                    |
+| Property              | Required | Type      | Description                                    |
 | --------------------- | -------- | --------- | ---------------------------------------------- |
 | title                 | no       | `string`  | The title of the error                         |
 | isOffline             | no       | `boolean` | Whether the application state is offline       |

@@ -9,7 +9,12 @@ import {
   HTTPError,
 } from './fetch'
 import { isLoggedIn } from '../auth-service'
-import OneBlinkFormsAppError from './errors/oneBlinkFormsAppError'
+import {
+  uploadFormSubmission,
+  downloadPreFillData,
+  uploadPreFillData,
+} from './s3Submit'
+import OneBlinkAppsError from './errors/oneBlinkAppsError'
 
 const formsHostnameConfiguration = window.formsHostnameConfiguration || {}
 const formsAppId = formsHostnameConfiguration.formsAppId || 'UNKNOWN'
@@ -24,13 +29,14 @@ const uploadDraftData = async (
   try {
     const data = await postRequest(url)
     console.log('Attempting to upload draft data:', data)
-    await s3SubmitService.uploadFormSubmission(
+    await uploadFormSubmission(
       data,
       {
         definition: draftSubmission.definition,
         submission: draftSubmission.submission,
         submissionTimestamp: data.submissionTimestamp,
         keyId: draftSubmission.keyId,
+        formsAppId: 4,
       },
       {
         externalId: draft.externalId,
@@ -42,7 +48,7 @@ const uploadDraftData = async (
     console.warn('Error occurred while attempting to upload draft data', error)
     switch (error.status) {
       case 401: {
-        throw new OneBlinkFormsAppError(
+        throw new OneBlinkAppsError(
           'You cannot save drafts until you have logged in. Please login and try again.',
           {
             originalError: error,
@@ -52,7 +58,7 @@ const uploadDraftData = async (
         )
       }
       case 403: {
-        throw new OneBlinkFormsAppError(
+        throw new OneBlinkAppsError(
           'You do not have access to drafts for this application. Please contact your administrator to gain the correct level of access.',
           {
             originalError: error,
@@ -63,7 +69,7 @@ const uploadDraftData = async (
       }
       case 400:
       case 404: {
-        throw new OneBlinkFormsAppError(
+        throw new OneBlinkAppsError(
           'We could not find the application your attempting upload a draft for. Please contact your administrator to ensure your application configuration has been completed successfully.',
           {
             originalError: error,
@@ -73,7 +79,7 @@ const uploadDraftData = async (
         )
       }
       default: {
-        throw new OneBlinkFormsAppError(
+        throw new OneBlinkAppsError(
           'An unknown error has occurred. Please contact support if the problem persists.',
           {
             originalError: error,
@@ -120,7 +126,7 @@ const putDrafts = async (
     )
     switch (error.status) {
       case 401: {
-        throw new OneBlinkFormsAppError(
+        throw new OneBlinkAppsError(
           'You cannot sync your drafts until you have logged in. Please login and try again.',
           {
             originalError: error,
@@ -130,7 +136,7 @@ const putDrafts = async (
         )
       }
       case 403: {
-        throw new OneBlinkFormsAppError(
+        throw new OneBlinkAppsError(
           'You do not have access to drafts for this application. Please contact your administrator to gain the correct level of access.',
           {
             originalError: error,
@@ -141,7 +147,7 @@ const putDrafts = async (
       }
       case 400:
       case 404: {
-        throw new OneBlinkFormsAppError(
+        throw new OneBlinkAppsError(
           'We could not find the application your attempting sync drafts for. Please contact your administrator to ensure your application configuration has been completed successfully.',
           {
             originalError: error,
@@ -151,7 +157,7 @@ const putDrafts = async (
         )
       }
       default: {
-        throw new OneBlinkFormsAppError(
+        throw new OneBlinkAppsError(
           'An unknown error has occurred. Please contact support if the problem persists.',
           {
             originalError: error,
@@ -171,7 +177,7 @@ async function downloadDraftData /* :: <T> */(
 
   const data = await postRequest(url)
   console.log('Attempting to download draft form data:', data)
-  return s3SubmitService.downloadPreFillData(data)
+  return downloadPreFillData(data)
 }
 
 async function uploadPreFillFormData /* :: <T> */(
@@ -183,7 +189,7 @@ async function uploadPreFillFormData /* :: <T> */(
 
   const data = await postRequest(url)
   console.log('Attempting to upload pre fill form data:', data)
-  await s3SubmitService.uploadPreFillData(data, preFillData)
+  await uploadPreFillData(data, preFillData)
   return data.preFillFormDataId
 }
 
@@ -199,5 +205,5 @@ async function downloadPreFillFormData /* :: <T> */(
 
   const data = await postRequest(url)
   console.log('Attempting to download pre fill form data:', data)
-  return s3SubmitService.downloadPreFillData(data)
+  return downloadPreFillData(data)
 }

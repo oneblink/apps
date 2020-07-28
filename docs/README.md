@@ -2,28 +2,31 @@
 
 ## Tenants
 
-This helper library supports all OneBlink Productivity instances. There are some functions that required a tenant to be passed in. The available tenants are:
+This helper library supports all OneBlink Productivity instances.. There are some functions that require tenant based configuration. Before you use any of the services documented below, be sure to set the current tenant. The available tenants (and how to set them) are:
 
 - [OneBlink Console](https://console.oneblink.io)
 
   ```js
-  import { tenants } from '@oneblink/apps'
+  import { useTenantOneBlink } from '@oneblink/apps'
 
-  const oneblinkTenant = tenants.oneblink
+  useTenantOneBlink()
   ```
 
 - [CivicOptimize Productivity](https://console.transform.civicplus.com)
 
   ```js
-  import { tenants } from '@oneblink/apps'
+  import { useTenantCivicPlus } from '@oneblink/apps'
 
-  const civicplusTenant = tenants.civicplus
+  useTenantCivicPlus()
   ```
+
+The default tenant is the [OneBlink Console](https://console.oneblink.io) which will be used if no tenant is explicitly set.
 
 ## Services
 
 - [`offlineService`](./offline-service.md)
 - [`authService`](./auth-service.md)
+- [`draftService`](./draft-service.md)
 
 ## Errors
 

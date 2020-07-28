@@ -5,12 +5,13 @@ import { postRequest, putRequest } from '../fetch'
 import { isLoggedIn } from '../../auth-service'
 import { uploadFormSubmission, downloadPreFillData } from '../s3Submit'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
+import tenants from '../../tenants'
 
 const uploadDraftData = async (
   draft /* : FormsAppDraft */,
   draftSubmission /* : FormSubmissionResult */
 ) /* : Promise<string>*/ => {
-  const url = `/forms/${draft.formId}/upload-draft-data-credentials`
+  const url = `${tenants.current.apiOrigin}/forms/${draft.formId}/upload-draft-data-credentials`
   console.log('Attempting to get Credentials to upload draft data', url)
 
   try {
@@ -94,7 +95,7 @@ const putDrafts = async (
     (draft) => !draft.draftDataId || draft.draftId === draft.draftDataId
   )
 
-  const url = `/forms-apps/${formsAppId}/drafts`
+  const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/drafts`
   console.log('Attempting to sync drafts with API', draftsData)
 
   try {
@@ -160,7 +161,7 @@ async function downloadDraftData /* :: <T> */(
   formId /* : number */,
   draftDataId /* : string */
 ) /* : Promise<T> */ {
-  const url = `/forms/${formId}/download-draft-data-credentials/${draftDataId}`
+  const url = `${tenants.current.apiOrigin}/forms/${formId}/download-draft-data-credentials/${draftDataId}`
   console.log('Attempting to get Credentials to download draft data', url)
 
   const data = await postRequest(url)

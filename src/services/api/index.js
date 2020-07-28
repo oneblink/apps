@@ -12,12 +12,13 @@ import {
   acknowledgeCPPayTransaction,
   verifyPaymentTransaction,
 } from './payment'
+import tenants from '../../tenants'
 
 const generateSubmissionCredentials = async (
   submissionData /* : FormSubmissionResult */
 ) /* : Promise<S3UploadCredentials> */ => {
   return postRequest(
-    `/forms/${submissionData.definition.id}/submission-credentials`,
+    `${tenants.current.apiOrigin}/forms/${submissionData.definition.id}/submission-credentials`,
     {
       submissionId: submissionData.submissionId || undefined,
       recaptchas: (submissionData.captchaTokens || []).map((token) => ({

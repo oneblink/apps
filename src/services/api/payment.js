@@ -3,11 +3,13 @@
 
 import { postRequest } from '../fetch'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
+import tenants from '../../tenants'
 
 const generatePaymentConfiguration = (
-  url /* : string */,
+  path /* : string */,
   payload /* : mixed */
 ) /* : Promise<{ hostedFormUrl: string, submissionId: string }> */ => {
+  const url = `${tenants.current.apiOrigin}${path}`
   console.log('Attempting to generate payment configuration', url)
   return postRequest(url, payload).catch((error) => {
     console.warn(
@@ -58,9 +60,10 @@ const generatePaymentConfiguration = (
 }
 
 const verifyPaymentTransaction = /* :: <T> */ (
-  url /* : string */,
+  path /* : string */,
   payload /* : mixed */
 ) /* : Promise<T> */ => {
+  const url = `${tenants.current.apiOrigin}${path}`
   console.log('Attempting to verify payment transaction', url)
   return postRequest(url, payload).catch((error) => {
     console.warn(
@@ -114,7 +117,7 @@ const acknowledgeCPPayTransaction = (
   formId /* : FormId */,
   payload /* : mixed */
 ) /* : Promise<void> */ => {
-  const url = `/forms/${formId}/cp-pay-acknowledge`
+  const url = `${tenants.current.apiOrigin}/forms/${formId}/cp-pay-acknowledge`
   console.log('Attempting to acknowledge CP Pay transaction', url)
   return postRequest(url, payload).catch((error) => {
     console.warn(

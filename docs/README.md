@@ -7,4 +7,4 @@
 
 ## Errors
 
-- [`OneBlinkFormsAppError`](./oneBlinkFormsAppError.md)
+- [`OneBlinkAppsError`](./oneBlinkAppsError.md)

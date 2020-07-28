@@ -1,16 +1,16 @@
 # OneBlink Apps | Usage
 
-## OneBlinkFormsAppError
+## OneBlinkAppsError
 
 An error class that extends `Error`
 
 ```js
-import { OneBlinkFormsAppError } from '@oneblink/apps'
+import { OneBlinkAppsError } from '@oneblink/apps'
 ```
 
 ## Constructor
 
-used to create an instance of the `OneBlinkFormsAppError` class.
+used to create an instance of the `OneBlinkAppsError` class.
 
 | Parameter | Required | Type     | Description                           |
 | --------- | -------- | -------- | ------------------------------------- |
@@ -20,12 +20,12 @@ used to create an instance of the `OneBlinkFormsAppError` class.
 ### Example
 
 ```js
-throw new OneBlinkFormsAppError('Something went wrong!', options)
+throw new OneBlinkAppsError('Something went wrong!', options)
 ```
 
 ## OneBlinkFormsAppErrorOptions
 
-An Options object that can be passed to the `OneBlinkFormsAppError` class.
+An Options object that can be passed to the `OneBlinkAppsError` class.
 
 | Property              | Required | Type      | Description                                    |
 | --------------------- | -------- | --------- | ---------------------------------------------- |

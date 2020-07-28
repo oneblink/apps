@@ -3,7 +3,7 @@
 
 import * as offlineService from './src/offline-service'
 import * as authService from './src/auth-service'
-import OneBlinkFormsAppError from './src/services/errors/oneBlinkFormsAppError'
+import OneBlinkAppsError from './src/services/errors/oneBlinkAppsError'
 import tenants from './src/tenants'
 
-export { offlineService, OneBlinkFormsAppError, authService, tenants }
+export { offlineService, OneBlinkAppsError, authService, tenants }

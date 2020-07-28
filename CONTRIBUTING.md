@@ -4,6 +4,16 @@
 
 This project adheres to [GitHub Flow](https://guides.github.com/introduction/flow/).
 
+## Development (Not for customers)
+
+To use the test environment while developing features for this repository, set the `ONEBLINK_APPS_ENVIRONMENT` property on the `window` before using the `tenants` export:
+
+```js
+import { tenants } from '@oneblink/apps'
+window.ONEBLINK_APPS_ENVIRONMENT = 'test'
+// tenants will now use the "test" environment and is safe to use
+```
+
 ## Beta Release Process
 
 1. Checkout `master` and get the latest code

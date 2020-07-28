@@ -2,5 +2,5 @@
 'use strict'
 
 import * as offlineService from './src/offline-service'
-
-export { offlineService }
+import OneBlinkFormsAppError from './src/services/errors/oneBlinkFormsAppError'
+export { offlineService, OneBlinkFormsAppError }

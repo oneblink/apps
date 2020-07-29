@@ -192,8 +192,4 @@ async function unsubscribe(formsAppId /* : number */) /* : Promise<void> */ {
   }
 }
 
-export default {
-  isSubscribed,
-  subscribe,
-  unsubscribe,
-}
+export { isSubscribed, subscribe, unsubscribe }

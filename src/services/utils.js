@@ -4,14 +4,6 @@
 import $localForage from 'localforage'
 import _cloneDeep from 'lodash.clonedeep'
 
-const pSeries = async (
-  funcs /*: Array<() => Promise<mixed>> */
-) /*: Promise<void> */ => {
-  for (const func of funcs) {
-    await func()
-  }
-}
-
 function getLocalForageKeys(keyPrefix) /* : Promise<string[]> */ {
   return $localForage
     .keys()
@@ -100,46 +92,7 @@ async function removeLocalForageItem(key /* : string */) /* : Promise<void> */ {
   }
 }
 
-function forEachElement(
-  elements /* : FormElement[] */,
-  forEach /* : (FormElement, FormElement[]) => void */
-) {
-  findElement(elements, (formElement, parentElements) => {
-    forEach(formElement, parentElements)
-    return false
-  })
-}
-
-function findElement(
-  elements /* : FormElement[] */,
-  predicate /* : (FormElement, FormElement[]) => boolean */,
-  parentElements /* : FormElement[] */ = []
-) {
-  for (const element of elements) {
-    if (predicate(element, parentElements)) {
-      return element
-    }
-
-    if (
-      (element.type === 'repeatableSet' || element.type === 'page') &&
-      Array.isArray(element.elements)
-    ) {
-      const nestedElement = findElement(element.elements, predicate, [
-        ...parentElements,
-        element,
-      ])
-
-      if (nestedElement) {
-        return nestedElement
-      }
-    }
-  }
-}
-
 export default {
-  forEachElement,
-  findElement,
-  pSeries,
   getLocalForageItem,
   setLocalForageItem,
   removeLocalForageItem,

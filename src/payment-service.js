@@ -7,6 +7,7 @@ import {
   verifyPaymentTransaction,
   generatePaymentConfiguration,
 } from './services/api/payment'
+import { findFormElement } from './form-service'
 import utilsService from './services/utils'
 
 /* ::
@@ -168,7 +169,7 @@ export async function handlePaymentSubmissionEvent(
     throw new Error('Payment submission event has already been processed')
   }
 
-  const amountElement = utilsService.findElement(
+  const amountElement = findFormElement(
     form.elements,
     (element) => element.id === paymentSubmissionEvent.configuration.elementId
   )

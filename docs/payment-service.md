@@ -31,7 +31,7 @@ Handle a submission result with a payment submission event. Will throw an error 
 const submissionResult = {
   formsAppId: 1,
   submission: {
-    form: 'data'
+    form: 'data',
     goes: 'here',
     amount: 1.50,
   }

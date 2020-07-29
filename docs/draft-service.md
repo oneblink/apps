@@ -73,7 +73,7 @@ const draft = {
 const data = {
   formsAppId: 1,
   submission: {
-    form: 'data'
+    form: 'data',
     goes: 'here'
   },
   definition: OneBlinkForm,
@@ -111,7 +111,7 @@ const draft = {
 const data = {
   formsAppId: 1,
   submission: {
-    form: 'data'
+    form: 'data',
     goes: 'here'
   },
   definition: OneBlinkForm,

@@ -32,6 +32,7 @@ The default tenant is the [OneBlink Console](https://console.oneblink.io) which 
 - [`jobService`](./job-service.md)
 - [`submissionService`](./submission-service.md)
 - [`autoSaveService`](./auto-save-service.md)
+- [`notificationService`](./notification-service.md)
 
 ## Errors
 

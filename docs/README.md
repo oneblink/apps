@@ -41,4 +41,4 @@ The default tenant is the [OneBlink Console](https://console.oneblink.io) which 
 
 ## Helpers
 
-- [`localForageInstance`](./local-forgage-instance.md)
+- [`localForageInstance`](./local-forage-instance.md)

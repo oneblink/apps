@@ -1,8 +1,6 @@
 // @flow
 'use strict'
 
-import $localForage from 'localforage'
-
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import utilsService from './utils'
 
@@ -52,7 +50,7 @@ export async function addSubmissionToPendingQueue(
       ...formSubmissionResult,
       submission: undefined,
     })
-    await $localForage.setItem('submissions', submissions)
+    await utilsService.localForage.setItem('submissions', submissions)
     executePendingQueueListeners(submissions)
   } catch (error) {
     errorHandler(error)
@@ -71,7 +69,7 @@ export async function updatePendingQueueSubmission(
       }
       return submission
     })
-    await $localForage.setItem('submissions', newSubmissions)
+    await utilsService.localForage.setItem('submissions', newSubmissions)
     executePendingQueueListeners(newSubmissions)
   } catch (error) {
     errorHandler(error)
@@ -79,7 +77,7 @@ export async function updatePendingQueueSubmission(
 }
 
 export function getPendingQueueSubmissions() /* : Promise<PendingFormSubmissionResult[]> */ {
-  return $localForage
+  return utilsService.localForage
     .getItem('submissions')
     .then((submissions) => (Array.isArray(submissions) ? submissions : []))
 }
@@ -98,7 +96,7 @@ export async function deletePendingQueueSubmission(
       (submission /* : PendingFormSubmissionResult */) =>
         submission.pendingTimestamp !== pendingTimestamp
     )
-    await $localForage.setItem('submissions', newSubmissions)
+    await utilsService.localForage.setItem('submissions', newSubmissions)
     executePendingQueueListeners(newSubmissions)
   } catch (error) {
     errorHandler(error)

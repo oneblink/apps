@@ -1,8 +1,6 @@
 // @flow
 'use strict'
 
-import localForage from 'localforage'
-
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import utilsService from './utils'
 
@@ -95,7 +93,7 @@ export async function ensureDraftsDataExists(drafts /* : FormsAppDraft[] */) {
     return
   }
 
-  const keys = await localForage.keys()
+  const keys = await utilsService.localForage.keys()
   for (const draft of drafts) {
     const draftDataId = draft.draftDataId
     if (

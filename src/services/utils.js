@@ -1,17 +1,17 @@
 // @flow
 'use strict'
 
-import $localForage from 'localforage'
+import { createInstance } from 'localforage'
 import _cloneDeep from 'lodash.clonedeep'
 
-$localForage.config({
+const localForage = createInstance({
   name: 'OneBlinkForms',
   storeName: 'FORMS_V1',
   description: 'Store of forms related data',
 })
 
 function getLocalForageKeys(keyPrefix) /* : Promise<string[]> */ {
-  return $localForage
+  return localForage
     .keys()
     .then((keys) => keys.filter((key) => key.startsWith(keyPrefix)))
 }
@@ -42,7 +42,7 @@ async function getLocalForageItem /* ::<T>*/(
 
   const items = []
   for (const localForageKey of localForageKeys) {
-    const item = await $localForage.getItem(localForageKey)
+    const item = await localForage.getItem(localForageKey)
     items.push(item)
   }
   const rootItem = items.find((item) => item && item.key === key)
@@ -85,7 +85,7 @@ async function setLocalForageItem /*:: <T: {}> */(
     const index = keyValues.keys.findIndex((k) => k === keyToSet)
     const item = keyValues.items[index]
     if (item) {
-      await $localForage.setItem(keyToSet, item)
+      await localForage.setItem(keyToSet, item)
     }
   }
   return originalData
@@ -94,11 +94,12 @@ async function setLocalForageItem /*:: <T: {}> */(
 async function removeLocalForageItem(key /* : string */) /* : Promise<void> */ {
   const keysToDelete = await getLocalForageKeys(key)
   for (const keyToDelete of keysToDelete) {
-    await $localForage.removeItem(keyToDelete)
+    await localForage.removeItem(keyToDelete)
   }
 }
 
 export default {
+  localForage,
   getLocalForageItem,
   setLocalForageItem,
   removeLocalForageItem,

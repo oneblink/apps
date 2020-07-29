@@ -38,3 +38,7 @@ The default tenant is the [OneBlink Console](https://console.oneblink.io) which 
 ## Errors
 
 - [`OneBlinkAppsError`](./oneBlinkAppsError.md)
+
+## Helpers
+
+- [`localForageInstance`](./local-forgage-instance.md)

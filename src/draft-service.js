@@ -3,8 +3,8 @@
 
 import _differenceBy from 'lodash.differenceby'
 import { v4 as uuidv4 } from 'uuid'
-import localForage from 'localforage'
 
+import utilsService from './services/utils'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { isOffline } from './offline-service'
 import { getUsername, isLoggedIn } from './services/cognito'
@@ -109,7 +109,7 @@ export async function addDraft(
           ...draft,
           draftDataId,
         })
-        return localForage
+        return utilsService.localForage
           .setItem(`DRAFTS_${username}`, draftsData)
           .then(() => executeDraftsListeners(draftsData))
       })
@@ -162,7 +162,7 @@ export async function updateDraft(
           existingDraft.draftDataId = draftDataId
           existingDraft.title = draft.title
           existingDraft.updatedAt = new Date().toISOString()
-          return localForage
+          return utilsService.localForage
             .setItem(`DRAFTS_${username}`, draftsData)
             .then(() => executeDraftsListeners(draftsData))
         })
@@ -187,7 +187,7 @@ async function getDraftsData() /* : Promise<{
       drafts: [],
     }
   }
-  return localForage
+  return utilsService.localForage
     .getItem(`DRAFTS_${username}`)
     .then((data) => data || { drafts: [] })
     .catch(errorHandler)
@@ -254,7 +254,9 @@ export async function deleteDraft(
         (draft) => draft.draftId !== draftId
       )
       return removeDraftData(draft.draftDataId)
-        .then(() => localForage.setItem(`DRAFTS_${username}`, draftsData))
+        .then(() =>
+          utilsService.localForage.setItem(`DRAFTS_${username}`, draftsData)
+        )
         .then(() => executeDraftsListeners(draftsData))
         .then(() =>
           syncDrafts({
@@ -273,7 +275,7 @@ async function setDrafts(draftsData) /* : Promise<void> */ {
       requiresLogin: true,
     })
   }
-  await localForage.setItem(`DRAFTS_${username}`, draftsData)
+  await utilsService.localForage.setItem(`DRAFTS_${username}`, draftsData)
   executeDraftsListeners(draftsData)
 }
 

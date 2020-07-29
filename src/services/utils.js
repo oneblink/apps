@@ -4,6 +4,12 @@
 import $localForage from 'localforage'
 import _cloneDeep from 'lodash.clonedeep'
 
+$localForage.config({
+  name: 'OneBlinkForms',
+  storeName: 'FORMS_V1',
+  description: 'Store of forms related data',
+})
+
 function getLocalForageKeys(keyPrefix) /* : Promise<string[]> */ {
   return $localForage
     .keys()

@@ -9,7 +9,7 @@ import tenants from '../../tenants'
 
 const uploadDraftData = async (
   draft /* : FormsAppDraft */,
-  draftSubmission /* : FormSubmissionResult */
+  draftSubmission /* : DraftSubmission */
 ) /* : Promise<string>*/ => {
   const url = `${tenants.current.apiOrigin}/forms/${draft.formId}/upload-draft-data-credentials`
   console.log('Attempting to get Credentials to upload draft data', url)

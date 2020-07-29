@@ -12,7 +12,7 @@ function getDraftDataKey(draftDataId) {
 
 async function getLocalDraftData(
   draftDataId /*: ?string */
-) /* : Promise<FormSubmissionResult | null> */ {
+) /* : Promise<DraftSubmission | null> */ {
   if (!draftDataId) {
     return null
   }
@@ -22,8 +22,8 @@ async function getLocalDraftData(
 
 async function setLocalDraftData(
   draftDataId /* : string */,
-  model /* : FormSubmissionResult */
-) /* : Promise<FormSubmissionResult> */ {
+  model /* : DraftSubmission */
+) /* : Promise<DraftSubmission> */ {
   const key = getDraftDataKey(draftDataId)
   return utilsService.setLocalForageItem(key, model)
 }
@@ -40,7 +40,7 @@ export async function removeDraftData(
 
 export function saveDraftData(
   draft /* : FormsAppDraft */,
-  draftSubmission /* : FormSubmissionResult */,
+  draftSubmission /* : DraftSubmission */,
   defaultDraftDataId /* : string */
 ) /* : Promise<string> */ {
   return uploadDraftData(draft, draftSubmission)
@@ -58,7 +58,7 @@ export function saveDraftData(
 export async function getDraftData(
   formId /* : number */,
   draftDataId /* : string */
-) /* : Promise<FormSubmissionResult> */ {
+) /* : Promise<DraftSubmission> */ {
   return getLocalDraftData(draftDataId)
     .then((draftData) => {
       if (draftData) return draftData

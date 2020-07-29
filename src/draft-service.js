@@ -57,7 +57,7 @@ function executeDraftsListeners(draftsData) {
 
 async function upsertDraftByKey(
   draft /* : FormsAppDraft */,
-  draftSubmission /* : FormSubmissionResult */
+  draftSubmission /* : DraftSubmission */
 ) /* : Promise<string> */ {
   if (!draftSubmission.keyId) {
     throw new Error('Could not create draft for key without a keyId')
@@ -78,7 +78,7 @@ async function upsertDraftByKey(
 
 export async function addDraft(
   newDraft /* : NewFormsAppDraft */,
-  draftSubmission /* : FormSubmissionResult */,
+  draftSubmission /* : DraftSubmission */,
   accessKey /* : ?string */
 ) /* : Promise<void> */ {
   const draft /* : FormsAppDraft */ = {
@@ -125,7 +125,7 @@ export async function addDraft(
 
 export async function updateDraft(
   draft /* : FormsAppDraft */,
-  draftSubmission /* : FormSubmissionResult */,
+  draftSubmission /* : DraftSubmission */,
   accessKey /* : ?string */
 ) /* : Promise<void> */ {
   draftSubmission.keyId = getIssuerFromJWT(accessKey)

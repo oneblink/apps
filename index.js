@@ -10,8 +10,8 @@ import * as jobService from './src/job-service'
 import OneBlinkAppsError from './src/services/errors/oneBlinkAppsError'
 import tenants from './src/tenants'
 
-export const useTenantCivicPlus = tenants.useCivicPlus
-export const useTenantOneBlink = tenants.useOneBlink
+export const useTenantCivicPlus = () => tenants.useCivicPlus()
+export const useTenantOneBlink = () => tenants.useOneBlink()
 
 export {
   offlineService,

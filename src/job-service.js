@@ -11,6 +11,7 @@ import { ensurePrefillFormDataExists } from './services/job-prefill'
 import { isOffline } from './offline-service'
 import { isLoggedIn } from './auth-service'
 import { getDrafts } from './draft-service'
+import tenants from './tenants'
 
 async function removePendingSubmissions(jobList) {
   // Get list of pending submissions, remove jobs that are in the pending queue
@@ -39,9 +40,12 @@ export async function getJobs(
     return []
   }
 
-  return searchRequest(`/forms-apps/${formsAppId}/jobs`, {
-    isSubmitted: false,
-  })
+  return searchRequest(
+    `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/jobs`,
+    {
+      isSubmitted: false,
+    }
+  )
     .then((data) => {
       const recentlySubmittedJobIds = recentlySubmittedJobsService.get()
       // Remove recently submitted jobs ids that have not been returned from the server

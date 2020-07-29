@@ -9,6 +9,7 @@ import * as paymentService from './src/payment-service'
 import * as jobService from './src/job-service'
 import * as submissionService from './src/submission-service'
 import * as autoSaveService from './src/auto-save-service'
+import * as notificationService from './src/notification-service'
 import OneBlinkAppsError from './src/services/errors/oneBlinkAppsError'
 import tenants from './src/tenants'
 
@@ -25,4 +26,5 @@ export {
   jobService,
   submissionService,
   autoSaveService,
+  notificationService,
 }

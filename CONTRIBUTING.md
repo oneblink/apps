@@ -9,9 +9,11 @@ This project adheres to [GitHub Flow](https://guides.github.com/introduction/flo
 To use the test environment while developing features for this repository, set the `ONEBLINK_APPS_ENVIRONMENT` property on the `window` before using the `tenants` export:
 
 ```js
-import { tenants } from '@oneblink/apps'
+import { ... } '@oneblink/apps'
 window.ONEBLINK_APPS_ENVIRONMENT = 'test'
-// tenants will now use the "test" environment and is safe to use
+// exports that required environment based configuration
+// (e.g. the URL to make requests to the OneBlink API)
+// will now use the "test" environment configuration
 ```
 
 ## Beta Release Process

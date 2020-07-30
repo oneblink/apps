@@ -7,6 +7,8 @@ import {
   prefillService,
   jobService,
   submissionService,
+  autoSaveService,
+  notificationService,
   FormTypes,
   useTenantCivicPlus,
   useTenantOneBlink,
@@ -429,4 +431,42 @@ const testSubmissionService = async () => {
       captchaTokens: ['sasds'],
     },
   })
+}
+
+// AUTO SAVE SERVICE
+const testAutoSaveService = async () => {
+  let str: string
+  let num: number
+  const getResult = await autoSaveService.getAutoSaveData<
+    Array<{
+      name: string
+      age: number
+    }>
+  >(24, 'key')
+  if (getResult) {
+    for (const row of getResult) {
+      str = row.name
+      num = row.age
+    }
+  }
+
+  await autoSaveService.deleteAutoSaveData(24, 'key')
+
+  const upsertResult = await autoSaveService.upsertAutoSaveData<{
+    name: string
+    age: number
+  }>(24, 'key', {
+    name: 'Zac',
+    age: 25,
+  })
+  str = upsertResult.name
+  num = upsertResult.age
+}
+
+// NOTIFICATION SERVICE
+const testNotificationService = async () => {
+  let bool: boolean
+  bool = await notificationService.isSubscribed()
+  const didSubscribe: boolean = await notificationService.subscribe(24)
+  await notificationService.unsubscribe(24)
 }

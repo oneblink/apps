@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.10.4",
-    "@oneblink/flow-types": "github:oneblink/flow-types",
+    "@oneblink/flow-types": "github:oneblink/flow-types#master",
     "eslint": "^7.5.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-prettier": "^3.1.4",

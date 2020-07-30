@@ -569,6 +569,23 @@ export type FormElementsCalculationPath = FormElementCalculationPath[]
 
 //////////// NEW
 
+declare interface DraftSubmission {
+  submission: {
+    [key: string]: unknown
+  }
+  definition: Form
+  formsAppId: number
+  draftId: string | null
+  jobId: string | null
+  externalId: string | null
+  preFillFormDataId: string | null
+  keyId?: string
+}
+
+declare type FormSubmission = DraftSubmission & {
+  captchaTokens: string[]
+}
+
 export interface FormSubmissionResult {
   submission: {
     [key: string]: unknown

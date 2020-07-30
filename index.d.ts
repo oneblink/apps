@@ -71,12 +71,12 @@ declare namespace draftService {
   ): () => void
   function addDraft(
     newDraft: FormTypes.NewFormsAppDraft,
-    draftSubmission: FormTypes.FormSubmissionResult,
+    draftSubmission: FormTypes.DraftSubmission,
     accessKey: NoU | string
   ): Promise<void>
   function updateDraft(
     draft: FormTypes.FormsAppDraft,
-    draftSubmission: FormTypes.FormSubmissionResult,
+    draftSubmission: FormTypes.DraftSubmission,
     accessKey: NoU | string
   ): Promise<void>
   function getDrafts(): Promise<FormTypes.FormsAppDraft[]>
@@ -110,9 +110,9 @@ declare namespace paymentService {
     submissionResult: FormTypes.FormSubmissionResult
   }>
   function handlePaymentSubmissionEvent(
-    submissionResult: FormTypes.FormSubmissionResult,
+    formSubmission: FormTypes.FormSubmission,
     paymentSubmissionEvent: SubmissionEventTypes.PaymentSubmissionEvent
-  ): Promise<FormTypes.FormSubmissionResult | undefined>
+  ): Promise<FormTypes.FormSubmissionResult | void>
 }
 
 declare namespace prefillService {

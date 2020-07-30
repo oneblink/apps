@@ -6,7 +6,6 @@
   "bugs": {
     "url": "https://github.com/oneblink/apps/issues"
   },
-  "types": "index.d.ts",
   "dependencies": {
     "amazon-cognito-auth-js": "1.2.4",
     "aws-sdk": "^2.721.0",
@@ -42,7 +41,8 @@
   },
   "files": [
     "src",
-    "index.js"
+    "index.js",
+    "index.d.ts"
   ],
   "homepage": "https://github.com/oneblink/apps",
   "keywords": [],

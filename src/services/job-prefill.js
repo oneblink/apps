@@ -1,8 +1,6 @@
 // @flow
 'use strict'
 
-import localForage from 'localforage'
-
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import utilsService from './utils'
 import { downloadPreFillFormData } from './api/prefill'
@@ -67,7 +65,7 @@ export async function ensurePrefillFormDataExists(
     return
   }
 
-  const keys = await localForage.keys()
+  const keys = await utilsService.localForage.keys()
   for (const { formId, preFillFormDataId } of jobs) {
     if (
       !preFillFormDataId ||

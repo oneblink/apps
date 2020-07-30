@@ -5,6 +5,7 @@
 type OneBlinkAppsTenant = {|
   loginDomain: string,
   apiOrigin: string,
+  vapidPublicKey: string,
 |}
 */
 
@@ -13,20 +14,28 @@ const tenants = {
     oneblink: {
       loginDomain: 'login-test.oneblink.io',
       apiOrigin: 'https://auth-api-test.blinkm.io',
+      vapidPublicKey:
+        'BE5wtYdaQW3z7DWc08rzNlOwPuituVWFRLW_lUMD78ZJatFOjio8fYDHaIpQCRyeKsJ5j4kLaFU374J4dM90iUc',
     },
     civicplus: {
       loginDomain: 'login-test.transform.civicplus.com',
       apiOrigin: 'https://auth-api-test.transform.civicplus.com',
+      vapidPublicKey:
+        'BLg2Dn9sYj1a0I3AcS22Fg71uubdMLwoemG8zfnPOljgFKB-5MR3FIxc2Mtt0AzM3zk2QWl3YzEy6EEwIUmz19k',
     },
   },
   prod: {
     oneblink: {
       loginDomain: 'login.oneblink.io',
       apiOrigin: 'https://auth-api.blinkm.io',
+      vapidPublicKey:
+        'BADH0JnMngI0uFKUnbC79VGXy5d6WutccnEvVuFBMx--BrZtFAHGTgOBiABJXmE8_VHC92_jK5K-2qdP2kZeius',
     },
     civicplus: {
       loginDomain: 'login.transform.civicplus.com',
       apiOrigin: 'https://auth-api.transform.civicplus.com',
+      vapidPublicKey:
+        'BLoDtCutrC7tEd75x89zBaIyz3Fk8AeWOcABasV3YO4Tei5UO8WjJVPFyilNLYxeseaiKlgoa0DOh1HoR59M_G4',
     },
   },
 }

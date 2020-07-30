@@ -4,7 +4,7 @@
 
 Helper functions for handling user authentication and authorisation.
 
-**NOTE: `init()` must be called before some of the function in this service.**
+**NOTE: `init()` must be called before using some of the functions in this service.**
 
 ```js
 import { authService } from '@oneblink/apps'

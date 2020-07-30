@@ -136,6 +136,7 @@ async function submit(
         isInPendingQueue: false,
         submissionTimestamp: null,
         submissionId: null,
+        payment: null,
       }
     }
 
@@ -149,6 +150,7 @@ async function submit(
       isInPendingQueue: true,
       submissionTimestamp: null,
       submissionId: null,
+      payment: null,
     }))
   }
 
@@ -193,7 +195,7 @@ async function submit(
   }
   const submissionResult = {
     ...submissionData,
-    cpPay: null,
+    payment: null,
     isOffline: false,
     isInPendingQueue: false,
     submissionTimestamp: data.submissionTimestamp,

@@ -31,7 +31,14 @@ The default tenant is the [OneBlink Console](https://console.oneblink.io) which 
 - [`paymentService`](./payment-service.md)
 - [`jobService`](./job-service.md)
 - [`submissionService`](./submission-service.md)
+- [`autoSaveService`](./auto-save-service.md)
+- [`notificationService`](./notification-service.md)
+- [`formService`](./form-service.md)
 
 ## Errors
 
 - [`OneBlinkAppsError`](./oneBlinkAppsError.md)
+
+## Helpers
+
+- [`localForageInstance`](./local-forage-instance.md)

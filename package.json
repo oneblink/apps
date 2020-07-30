@@ -18,6 +18,7 @@
     "lodash.orderby": "^4.6.0",
     "query-string": "^6.13.1",
     "s3-upload-stream": "^1.0.7",
+    "typescript": "^3.9.7",
     "uuid": "^8.3.0"
   },
   "devDependencies": {
@@ -59,7 +60,8 @@
     "fixpack": "fixpack",
     "flow_check": "flow check",
     "jest": "jest",
-    "pretest": "npm run eslint && npm run flow_check && npm run fixpack",
+    "tsc": "tsc",
+    "pretest": "npm run eslint && npm run flow_check && npm run tsc && npm run fixpack",
     "test": "npm run jest"
   }
 }

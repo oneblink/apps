@@ -82,7 +82,9 @@ export function getPendingQueueSubmissions() /* : Promise<PendingFormSubmissionR
     .then((submissions) => (Array.isArray(submissions) ? submissions : []))
 }
 
-export function getPendingQueueSubmission(pendingTimestamp /* : string */) {
+export function getPendingQueueSubmission(
+  pendingTimestamp /* : string */
+) /* : Promise<PendingFormSubmissionResult | null> */ {
   return utilsService.getLocalForageItem(`SUBMISSION_${pendingTimestamp}`)
 }
 

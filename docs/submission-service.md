@@ -68,18 +68,27 @@ const formSubmission = {
     goes: 'here',
   },
   definition: OneBlinkForm,
-  payment: null,
   captchaTokens: [],
   draftId: '2974602c-2c5b-4b46-b086-87ee9b2aa233',
   jobId: 'bb37d1da-9cda-4950-a36a-22f58b25de3a',
   preFillFormDataId: '7763f828-4aaf-49dc-9c1b-e2eeea8fa990',
   externalId: 'external-id-set-by-developer',
 }
-const faasToken = 'a valid token using a OneBlink Developer Key'
-const submissionResult = await submissionService.submit(
+
+// Pass accessKey if submitting using a OneBlink FaaS Key
+const accessKey = 'a valid token created using a OneBlink FaaS Key'
+
+// Pass submissionId if submitting a form after a payment
+const submissionId = '89c6e98e-f56f-45fc-84fe-c4fc62331d34'
+
+// Pass paymentReceiptUrl if submission may require a payment
+const paymentReceiptUrl = `${window.location.origin}/payment-receipt`
+
+const submissionResult = await submissionService.submit({
   submissionResult,
-  faasToken
-)
+  accessKey,
+  submissionId,
+})
 
 if (submissionResult.payment) {
   // Redirect user to payment form

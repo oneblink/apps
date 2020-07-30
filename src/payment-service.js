@@ -158,7 +158,8 @@ export function handlePaymentQuerystring(
 
 export async function handlePaymentSubmissionEvent(
   formSubmission /* : FormSubmission */,
-  paymentSubmissionEvent /* : PaymentSubmissionEvent */
+  paymentSubmissionEvent /* : PaymentSubmissionEvent */,
+  paymentReceiptUrl /* : string */
 ) /* : Promise<FormSubmissionResult | void> */ {
   console.log('Attempting to handle submission with payment submission event')
   const { definition: form, submission } = formSubmission
@@ -215,7 +216,7 @@ export async function handlePaymentSubmissionEvent(
     path,
     {
       amount,
-      redirectUrl: `${window.location.origin}/forms/${form.id}/payment-receipt`,
+      redirectUrl: paymentReceiptUrl,
     }
   )
   console.log('Created Payment configuration to start transaction')

@@ -6,12 +6,13 @@ import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 
 export const generateSubmissionCredentials = async (
-  submissionData /* : FormSubmissionResult */
+  submissionData /* : FormSubmission */,
+  submissionId /* : ?string */
 ) /* : Promise<S3UploadCredentials> */ => {
   return postRequest(
     `${tenants.current.apiOrigin}/forms/${submissionData.definition.id}/submission-credentials`,
     {
-      submissionId: submissionData.submissionId || undefined,
+      submissionId: submissionId || undefined,
       recaptchas: (submissionData.captchaTokens || []).map((token) => ({
         token,
       })),

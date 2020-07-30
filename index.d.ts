@@ -27,6 +27,11 @@ interface UserProfile {
       }
     | NoU
 }
+
+interface QueryParameters {
+  [property: string]: string | Array<string | number> | null
+}
+
 declare namespace offlineService {
   function isOffline(): boolean
 }
@@ -93,9 +98,6 @@ declare namespace draftService {
   }): Promise<void>
 }
 
-interface QueryParameters {
-  [property: string]: string | Array<string | number> | null
-}
 declare namespace paymentService {
   function handlePaymentQuerystring(
     query: QueryParameters
@@ -136,6 +138,37 @@ declare namespace jobService {
     jobs: FormTypes.FormsAppJob[]
   ): Promise<void>
 }
+
+declare namespace submissionService {
+  function submit(options: {
+    formSubmission: FormTypes.FormSubmission
+    accessKey?: string
+    paymentReceiptUrl?: string
+    submissionId?: string
+  }): Promise<FormTypes.FormSubmissionResult>
+
+  function executePostSubmissionAction(
+    submissionResult: FormTypes.FormSubmissionResult,
+    push: (url: string) => void
+  ): Promise<void>
+
+  function cancelForm(): Promise<void>
+
+  function getPendingQueueSubmissions(): Promise<
+    FormTypes.PendingFormSubmissionResult[]
+  >
+
+  function deletePendingQueueSubmission(pendingTimestamp: string): Promise<void>
+
+  function registerPendingQueueListener(
+    listener: (
+      pendingFormSubmissionResults: FormTypes.PendingFormSubmissionResult[]
+    ) => unknown
+  ): () => void
+
+  function processPendingQueue(): Promise<void>
+}
+
 export {
   offlineService,
   authService,
@@ -143,6 +176,7 @@ export {
   paymentService,
   prefillService,
   jobService,
+  submissionService,
   OneBlinkAppsError,
   FormTypes,
   SubmissionEventTypes,

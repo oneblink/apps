@@ -6,6 +6,7 @@ import {
   paymentService,
   prefillService,
   jobService,
+  submissionService,
   FormTypes,
   useTenantCivicPlus,
   useTenantOneBlink,
@@ -395,4 +396,37 @@ const testJobService = async () => {
   }
 
   await jobService.ensurePrefillFormDataExists(result)
+}
+
+// SUBMISSION SERVICE
+const testSubmissionService = async () => {
+  await submissionService.cancelForm()
+  await submissionService.deletePendingQueueSubmission('timeStamp')
+  await submissionService.executePostSubmissionAction(
+    formSubmissionResult,
+    (myString) => {}
+  )
+
+  const results = await submissionService.getPendingQueueSubmissions()
+  for (const row of results) {
+    const pendingFormSubmissionResult: FormTypes.PendingFormSubmissionResult = row
+  }
+
+  await submissionService.processPendingQueue()
+
+  const cancelPendingQueueListener = await submissionService.registerPendingQueueListener(
+    (results) => {
+      return 'unknown-this-could-be-anything'
+    }
+  )
+
+  const formSubResult = await submissionService.submit({
+    accessKey: 'sasds',
+    paymentReceiptUrl: 'my-url.com',
+    submissionId: 'subId',
+    formSubmission: {
+      ...formSubmissionResult,
+      captchaTokens: ['sasds'],
+    },
+  })
 }

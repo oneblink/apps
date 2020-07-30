@@ -4,38 +4,16 @@
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 // TypeScript Version: 3.9
 
-import type { NoU } from './typescript/misc'
+import type {
+  NoU,
+  GenericObject,
+  UserProfile,
+  QueryParameters,
+} from './typescript/misc'
 import * as FormTypes from './typescript/forms'
 import * as SubmissionEventTypes from './typescript/submissionEvents'
 import { createInstance } from 'localforage'
-interface UserProfile {
-  isSAMLUser: boolean
-  providerType: string
-  providerUserId: string
-  userId: string
-  username: string
-  email: string | NoU
-  firstName: string | NoU
-  lastName: string | NoU
-  fullName: string | NoU
-  picture: string | NoU
-  role: string | NoU
-  supervisor:
-    | {
-        fullName: string | NoU
-        email: string | NoU
-        providerUserId: string | NoU
-      }
-    | NoU
-}
 
-interface QueryParameters {
-  [property: string]: string | Array<string | number> | null
-}
-
-interface GenericObject {
-  [property: string]: unknown
-}
 declare namespace offlineService {
   function isOffline(): boolean
 }

@@ -72,7 +72,7 @@ async function processPendingQueue() /* : Promise<void>  */ {
         submission
       )
 
-      await submit(existingSubmission)
+      await submit({ formSubmission: existingSubmission })
 
       await deletePendingQueueSubmission(submission.pendingTimestamp)
 
@@ -103,11 +103,20 @@ async function processPendingQueue() /* : Promise<void>  */ {
 }
 
 async function submit(
-  submissionData /* : FormSubmissionResult */,
-  accessKey /* : ?string */
+  {
+    formSubmission,
+    accessKey,
+    paymentReceiptUrl,
+    submissionId,
+  } /* : {
+  formSubmission: FormSubmission,
+  accessKey?: string,
+  paymentReceiptUrl?: string,
+  submissionId?: string,
+}*/
 ) /* : Promise<FormSubmissionResult> */ {
-  submissionData.keyId = getIssuerFromJWT(accessKey)
-  const submissionEvents = submissionData.definition.submissionEvents || []
+  formSubmission.keyId = getIssuerFromJWT(accessKey)
+  const submissionEvents = formSubmission.definition.submissionEvents || []
   const paymentSubmissionEvent = submissionEvents.reduce(
     (p, submissionEvent) => {
       if (
@@ -126,74 +135,77 @@ async function submit(
   }
 
   if (isOffline()) {
-    if (paymentSubmissionEvent && !submissionData.payment) {
+    if (paymentSubmissionEvent) {
       console.log(
         'Offline - form has a payment submission event and payment has not been processed yet, return offline'
       )
       return {
-        ...submissionData,
+        ...formSubmission,
         isOffline: true,
         isInPendingQueue: false,
         submissionTimestamp: null,
         submissionId: null,
+        payment: null,
       }
     }
 
     console.log('Offline - saving submission to pending queue..')
     return addSubmissionToPendingQueue({
-      ...submissionData,
+      ...formSubmission,
       pendingTimestamp: new Date().toISOString(),
     }).then(() => ({
-      ...submissionData,
+      ...formSubmission,
       isOffline: true,
       isInPendingQueue: true,
       submissionTimestamp: null,
       submissionId: null,
+      payment: null,
     }))
   }
 
-  if (!submissionData.payment && paymentSubmissionEvent) {
+  if (paymentSubmissionEvent && paymentReceiptUrl) {
     const paymentSubmissionResult = await handlePaymentSubmissionEvent(
       {
-        ...submissionData,
+        ...formSubmission,
         isOffline: false,
         isInPendingQueue: false,
       },
-      paymentSubmissionEvent
+      paymentSubmissionEvent,
+      paymentReceiptUrl
     )
     if (paymentSubmissionResult) {
       return paymentSubmissionResult
     }
   }
 
-  const data = await generateSubmissionCredentials(submissionData)
+  const data = await generateSubmissionCredentials(formSubmission, submissionId)
 
   await uploadFormSubmission(
     data,
     {
-      formsAppId: submissionData.formsAppId,
-      definition: submissionData.definition,
-      submission: submissionData.submission,
+      formsAppId: formSubmission.formsAppId,
+      definition: formSubmission.definition,
+      submission: formSubmission.submission,
       submissionTimestamp: data.submissionTimestamp,
-      keyId: submissionData.keyId,
+      keyId: formSubmission.keyId,
     },
     {
-      externalId: submissionData.externalId,
-      jobId: submissionData.jobId,
+      externalId: formSubmission.externalId,
+      jobId: formSubmission.jobId,
     }
   )
-  if (submissionData.draftId) {
-    await deleteDraft(submissionData.draftId, submissionData.formsAppId)
+  if (formSubmission.draftId) {
+    await deleteDraft(formSubmission.draftId, formSubmission.formsAppId)
   }
-  if (submissionData.preFillFormDataId) {
-    await removePrefillFormData(submissionData.preFillFormDataId)
+  if (formSubmission.preFillFormDataId) {
+    await removePrefillFormData(formSubmission.preFillFormDataId)
   }
-  if (submissionData.jobId) {
-    await recentlySubmittedJobsService.add(submissionData.jobId)
+  if (formSubmission.jobId) {
+    await recentlySubmittedJobsService.add(formSubmission.jobId)
   }
   const submissionResult = {
-    ...submissionData,
-    cpPay: null,
+    ...formSubmission,
+    payment: null,
     isOffline: false,
     isInPendingQueue: false,
     submissionTimestamp: data.submissionTimestamp,

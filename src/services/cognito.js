@@ -6,9 +6,9 @@ import {
   CognitoIdToken,
   CognitoAccessToken,
 } from 'amazon-cognito-auth-js'
-import localForage from 'localforage'
 import store from 'local-storage'
 
+import utilsService from './utils'
 import * as offlineService from '../offline-service'
 
 let cognitoAuth = null
@@ -125,7 +125,7 @@ export async function handleAuthentication() /* : Promise<string> */ {
 
 export function logout() {
   console.log('Logging out...')
-  return localForage
+  return utilsService.localForage
     .clear()
     .catch((error) =>
       console.warn('Could not clear localForage before logging out', error)

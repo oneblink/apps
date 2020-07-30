@@ -7,6 +7,7 @@ import {
   verifyPaymentTransaction,
   generatePaymentConfiguration,
 } from './services/api/payment'
+import { findFormElement } from './form-service'
 import utilsService from './services/utils'
 
 /* ::
@@ -156,19 +157,14 @@ export function handlePaymentQuerystring(
 }
 
 export async function handlePaymentSubmissionEvent(
-  submissionResult /* : FormSubmissionResult */,
-  paymentSubmissionEvent /* : PaymentSubmissionEvent */
+  formSubmission /* : FormSubmission */,
+  paymentSubmissionEvent /* : PaymentSubmissionEvent */,
+  paymentReceiptUrl /* : string */
 ) /* : Promise<FormSubmissionResult | void> */ {
   console.log('Attempting to handle submission with payment submission event')
-  const { definition: form, submission } = submissionResult
+  const { definition: form, submission } = formSubmission
 
-  // If we are attempting to submit and already have a submissionId
-  // we assume the transaction has already taken place.
-  if (submissionResult.payment && submissionResult.submissionId) {
-    throw new Error('Payment submission event has already been processed')
-  }
-
-  const amountElement = utilsService.findElement(
+  const amountElement = findFormElement(
     form.elements,
     (element) => element.id === paymentSubmissionEvent.configuration.elementId
   )
@@ -220,14 +216,20 @@ export async function handlePaymentSubmissionEvent(
     path,
     {
       amount,
-      redirectUrl: `${window.location.origin}/forms/${form.id}/payment-receipt`,
+      redirectUrl: paymentReceiptUrl,
     }
   )
   console.log('Created Payment configuration to start transaction')
-  submissionResult.submissionId = submissionId
-  submissionResult.payment = {
-    submissionEvent: paymentSubmissionEvent,
-    hostedFormUrl,
+  const submissionResult = {
+    ...formSubmission,
+    submissionTimestamp: null,
+    submissionId,
+    payment: {
+      submissionEvent: paymentSubmissionEvent,
+      hostedFormUrl,
+    },
+    isInPendingQueue: false,
+    isOffline: false,
   }
   await utilsService.setLocalForageItem(KEY, submissionResult)
 

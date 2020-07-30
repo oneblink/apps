@@ -17,6 +17,9 @@ const baseSubmissionResult = {
   submissionId: null,
   submissionTimestamp: null,
   payment: null,
+  captchaTokens: [],
+  isInPendingQueue: false,
+  isOffline: false,
 }
 describe('Form redirect URL', () => {
   test('should replace all instances of {ELEMENT} with correct property value', () => {

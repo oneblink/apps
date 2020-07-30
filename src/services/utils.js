@@ -1,19 +1,17 @@
 // @flow
 'use strict'
 
-import $localForage from 'localforage'
+import { createInstance } from 'localforage'
 import _cloneDeep from 'lodash.clonedeep'
 
-const pSeries = async (
-  funcs /*: Array<() => Promise<mixed>> */
-) /*: Promise<void> */ => {
-  for (const func of funcs) {
-    await func()
-  }
-}
+const localForage = createInstance({
+  name: 'OneBlinkForms',
+  storeName: 'FORMS_V1',
+  description: 'Store of forms related data',
+})
 
 function getLocalForageKeys(keyPrefix) /* : Promise<string[]> */ {
-  return $localForage
+  return localForage
     .keys()
     .then((keys) => keys.filter((key) => key.startsWith(keyPrefix)))
 }
@@ -44,7 +42,7 @@ async function getLocalForageItem /* ::<T>*/(
 
   const items = []
   for (const localForageKey of localForageKeys) {
-    const item = await $localForage.getItem(localForageKey)
+    const item = await localForage.getItem(localForageKey)
     items.push(item)
   }
   const rootItem = items.find((item) => item && item.key === key)
@@ -87,7 +85,7 @@ async function setLocalForageItem /*:: <T: {}> */(
     const index = keyValues.keys.findIndex((k) => k === keyToSet)
     const item = keyValues.items[index]
     if (item) {
-      await $localForage.setItem(keyToSet, item)
+      await localForage.setItem(keyToSet, item)
     }
   }
   return originalData
@@ -96,50 +94,12 @@ async function setLocalForageItem /*:: <T: {}> */(
 async function removeLocalForageItem(key /* : string */) /* : Promise<void> */ {
   const keysToDelete = await getLocalForageKeys(key)
   for (const keyToDelete of keysToDelete) {
-    await $localForage.removeItem(keyToDelete)
-  }
-}
-
-function forEachElement(
-  elements /* : FormElement[] */,
-  forEach /* : (FormElement, FormElement[]) => void */
-) {
-  findElement(elements, (formElement, parentElements) => {
-    forEach(formElement, parentElements)
-    return false
-  })
-}
-
-function findElement(
-  elements /* : FormElement[] */,
-  predicate /* : (FormElement, FormElement[]) => boolean */,
-  parentElements /* : FormElement[] */ = []
-) {
-  for (const element of elements) {
-    if (predicate(element, parentElements)) {
-      return element
-    }
-
-    if (
-      (element.type === 'repeatableSet' || element.type === 'page') &&
-      Array.isArray(element.elements)
-    ) {
-      const nestedElement = findElement(element.elements, predicate, [
-        ...parentElements,
-        element,
-      ])
-
-      if (nestedElement) {
-        return nestedElement
-      }
-    }
+    await localForage.removeItem(keyToDelete)
   }
 }
 
 export default {
-  forEachElement,
-  findElement,
-  pSeries,
+  localForage,
   getLocalForageItem,
   setLocalForageItem,
   removeLocalForageItem,

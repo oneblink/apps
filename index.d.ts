@@ -9,9 +9,9 @@ import type {
   GenericObject,
   UserProfile,
   QueryParameters,
-} from './typescript/misc'
-import * as FormTypes from './typescript/forms'
-import * as SubmissionEventTypes from './typescript/submissionEvents'
+} from './typescript/types/misc'
+import * as FormTypes from './typescript/types/forms'
+import * as SubmissionEventTypes from './typescript/types/submissionEvents'
 import { createInstance } from 'localforage'
 
 declare namespace offlineService {

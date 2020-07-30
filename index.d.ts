@@ -7,6 +7,7 @@
 import type { NoU } from './typescript/misc'
 import * as FormTypes from './typescript/forms'
 import * as SubmissionEventTypes from './typescript/submissionEvents'
+import { createInstance } from 'localforage'
 interface UserProfile {
   isSAMLUser: boolean
   providerType: string
@@ -32,6 +33,9 @@ interface QueryParameters {
   [property: string]: string | Array<string | number> | null
 }
 
+interface GenericObject {
+  [property: string]: unknown
+}
 declare namespace offlineService {
   function isOffline(): boolean
 }
@@ -119,11 +123,10 @@ declare namespace paymentService {
 
 declare namespace prefillService {
   function removePrefillFormData(prefillFormDataId: string): Promise<void>
-  function getPrefillFormData<
-    T extends {
-      [property: string]: unknown
-    }
-  >(formId: number, prefillFormDataId: string | NoU): Promise<T | null>
+  function getPrefillFormData<T extends GenericObject>(
+    formId: number,
+    prefillFormDataId: string | NoU
+  ): Promise<T | null>
 }
 
 declare function useTenantCivicPlus(): void
@@ -169,6 +172,81 @@ declare namespace submissionService {
   function processPendingQueue(): Promise<void>
 }
 
+declare namespace autoSaveService {
+  function getAutoSaveData<T>(
+    formId: number,
+    autoSaveKey: string | NoU
+  ): Promise<T | null>
+
+  function upsertAutoSaveData<T extends GenericObject>(
+    formId: number,
+    autoSaveKey: string | NoU,
+    model: T
+  ): Promise<T>
+
+  function deleteAutoSaveData(
+    formId: number,
+    autoSaveKey: string | NoU
+  ): Promise<void>
+}
+
+declare namespace notificationService {
+  function isSubscribed(): Promise<boolean>
+  function subscribe(formsAppId: number): Promise<boolean>
+  function unsubscribe(formsAppId: number): Promise<void>
+}
+
+declare namespace formService {
+  function getForms(formsAppId: number): Promise<FormTypes.Form[]>
+
+  function getForm(formsAppId: number, formId: number): Promise<FormTypes.Form>
+
+  function getFormElementLookups(
+    organisationId: string,
+    formsAppEnvironmentId: number
+  ): Promise<Array<FormTypes.FormElementLookup & { url: string }>>
+
+  function getFormElementLookupById(
+    organisationId: string,
+    formsAppEnvironmentId: number,
+    formElementLookupId: number
+  ): Promise<(FormTypes.FormElementLookup & { url: string }) | void>
+
+  function getFormElementOptionsSets(
+    organisationId: string,
+    formsAppEnvironmentId: number
+  ): Promise<Array<FormTypes.FormElementDynamicOptionSet & { url: string }>>
+
+  function getFormElementOptionsSetById(
+    organisationId: string,
+    formsAppEnvironmentId: number,
+    dynamicOptionsSetId: number
+  ): Promise<(FormTypes.FormElementDynamicOptionSet & { url: string }) | void>
+
+  function getFormElementDynamicOptions(
+    form: FormTypes.Form,
+    element: FormTypes.FormElement
+  ): Promise<FormTypes.ChoiceElementOption[] | void>
+
+  function forEachFormElement(
+    elements: FormTypes.FormElement[],
+    forEach: (
+      element: FormTypes.FormElement,
+      elements: FormTypes.FormElement[]
+    ) => void
+  ): void
+
+  function findFormElement(
+    elements: FormTypes.FormElement[],
+    predicate: (
+      element: FormTypes.FormElement,
+      elements: FormTypes.FormElement[]
+    ) => boolean,
+    parentElements?: FormTypes.FormElement[]
+  ): FormTypes.FormElement | void
+}
+
+declare type localForageInstance = ReturnType<typeof createInstance>
 export {
   offlineService,
   authService,
@@ -177,9 +255,13 @@ export {
   prefillService,
   jobService,
   submissionService,
+  autoSaveService,
+  notificationService,
+  formService,
   OneBlinkAppsError,
   FormTypes,
   SubmissionEventTypes,
   useTenantCivicPlus,
   useTenantOneBlink,
+  localForageInstance,
 }

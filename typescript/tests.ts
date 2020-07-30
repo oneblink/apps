@@ -250,7 +250,10 @@ const testPaymentService = async () => {
   }
 
   const result = await paymentService.handlePaymentSubmissionEvent(
-    formSubmissionResult,
+    {
+      ...formSubmissionResult,
+      captchaTokens: ['sasds'],
+    },
     {
       isDraft: false,
       type: 'CP_PAY',

@@ -2,28 +2,12 @@
 
 import queryString from 'query-string'
 
-import { getIdToken } from './cognito'
-
-let faasToken = null
-
-export function init({ faasKey } /* : {
-  faasKey: ?string
-} */) {
-  faasToken = faasKey
-}
+import { getIdToken } from './forms-key'
 
 async function generateHeaders() {
   const headers = {
     'Content-Type': 'application/json',
     Accept: 'application/json',
-  }
-
-  // Check for a token for FaaS
-  if (faasToken) {
-    return {
-      ...headers,
-      Authorization: `Bearer ${faasToken}`,
-    }
   }
 
   // Check auth service for a token if user is logged in

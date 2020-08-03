@@ -20,7 +20,8 @@ import { authService } from '@oneblink/apps'
 - [`isAuthorised()`](#isauthorised)
 - [`requestAccess()`](#requestaccess)
 - [`logout()`](#logout)
-- [`getIssuerFromJWT()`](#getIssuerFromJWT)
+- [`setFormsKeyToken()`](#setformskeytoken)
+- [`getFormsKeyId()`](#getformskeyid)
 
 ### `init()`
 
@@ -154,10 +155,21 @@ Log the current user out and remove an data stored locally by the user e.g. draf
 await authService.logout()
 ```
 
-### `getIssuerFromJWT()`
+### `setFormsKeyToken()`
 
-Helper function that can be used to pull out the `iss` property from a json web token. This can be used to extract the `keyId` from a OneBlink Developer Key.
+Set the Forms Key token being used to make requests to the OneBlink API on behalf of the user.
 
 ```js
-const keyId = authService.getIssuerFromJWT('a valid json web token')
+authService.setFormsKeyToken('a valid json web token')
+```
+
+### `getFormsKeyId()`
+
+Can be used to extract the `keyId` from the Forms Key token passed to [setFormsKeyToken()](#setformskeytoken). Will be `undefined` if the token has not been set yet.
+
+```js
+const keyId = authService.getFormsKeyId()
+if (keyId) {
+  // Use keyId here...
+}
 ```

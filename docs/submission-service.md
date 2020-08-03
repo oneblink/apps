@@ -35,16 +35,16 @@ import { submissionService } from '@oneblink/apps'
 
 Inherits properties from [`FormSubmission`](#formsubmission)
 
-| Property                         | Type            | Description                                                                       |
-| -------------------------------- | --------------- | --------------------------------------------------------------------------------- |
-| `submissionId`                   | `string | null` | `null` if the form submission was unsuccessful                                    |
-| `submissionTimestamp`            | `string | null` | `null` if the form submission was unsuccessful                                    |
-| `payment`                        | `object | null` | `null` if the form submission does not require a payment                          |
-| `payment.hostedFormUrl`          | `string`        | The URL to redirect the user to to complete the payment process                   |
-| `payment.paymentSubmissionEvent` | `object`        | The payment submission event                                                      |
-| `keyId`                          | `string | null` | The id of the FaaS key passed in to [`submit()`](#submit)                         |
-| `isInPendingQueue`               | `boolean`       | `true` if the submission was not submitted yet and was added to the pending queue |
-| `isOffline`                      | `boolean`       | `true` if the submission was attempted offline                                    |
+| Property                         | Type            | Description                                                                                                                                 |
+| -------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `submissionId`                   | `string | null` | `null` if the form submission was unsuccessful                                                                                              |
+| `submissionTimestamp`            | `string | null` | `null` if the form submission was unsuccessful                                                                                              |
+| `payment`                        | `object | null` | `null` if the form submission does not require a payment                                                                                    |
+| `payment.hostedFormUrl`          | `string`        | The URL to redirect the user to to complete the payment process                                                                             |
+| `payment.paymentSubmissionEvent` | `object`        | The payment submission event                                                                                                                |
+| `keyId`                          | `string | null` | The id of the Forms Developer Key used to create the token passed to [`authService.setFormsKeyToken()`](./auth-service.md#setformskeytoken) |
+| `isInPendingQueue`               | `boolean`       | `true` if the submission was not submitted yet and was added to the pending queue                                                           |
+| `isOffline`                      | `boolean`       | `true` if the submission was attempted offline                                                                                              |
 
 ### PendingFormSubmission
 
@@ -75,9 +75,6 @@ const formSubmission = {
   externalId: 'external-id-set-by-developer',
 }
 
-// Pass accessKey if submitting using a OneBlink FaaS Key
-const accessKey = 'a valid token created using a OneBlink FaaS Key'
-
 // Pass submissionId if submitting a form after a payment
 const submissionId = '89c6e98e-f56f-45fc-84fe-c4fc62331d34'
 
@@ -85,9 +82,9 @@ const submissionId = '89c6e98e-f56f-45fc-84fe-c4fc62331d34'
 const paymentReceiptUrl = `${window.location.origin}/payment-receipt`
 
 const submissionResult = await submissionService.submit({
-  submissionResult,
-  accessKey,
+  paymentReceiptUrl,
   submissionId,
+  paymentReceiptUrl,
 })
 
 if (submissionResult.payment) {

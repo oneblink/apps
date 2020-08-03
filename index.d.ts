@@ -21,7 +21,8 @@ declare namespace offlineService {
 declare namespace authService {
   function init(options: { oAuthClientId: string; useSAML: boolean }): void
   function getUserFriendlyName(): string | null
-  function getIssuerFromJWT(jwt: string | NoU): string | void
+  function getFormsKeyId(): string | void
+  function setFormsKeyToken(formsKeyToken: string): void
   function isAuthorised(formsAppId: number): Promise<boolean>
   function requestAccess(formsAppId: number): Promise<void>
   function login(): Promise<string>
@@ -58,13 +59,11 @@ declare namespace draftService {
   ): () => void
   function addDraft(
     newDraft: FormTypes.NewFormsAppDraft,
-    draftSubmission: FormTypes.DraftSubmission,
-    accessKey: NoU | string
+    draftSubmission: FormTypes.DraftSubmission
   ): Promise<void>
   function updateDraft(
     draft: FormTypes.FormsAppDraft,
-    draftSubmission: FormTypes.DraftSubmission,
-    accessKey: NoU | string
+    draftSubmission: FormTypes.DraftSubmission
   ): Promise<void>
   function getDrafts(): Promise<FormTypes.FormsAppDraft[]>
   function getDraftAndData(
@@ -123,7 +122,6 @@ declare namespace jobService {
 declare namespace submissionService {
   function submit(options: {
     formSubmission: FormTypes.FormSubmission
-    accessKey?: string
     paymentReceiptUrl?: string
     submissionId?: string
   }): Promise<FormTypes.FormSubmissionResult>

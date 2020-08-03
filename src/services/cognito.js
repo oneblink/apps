@@ -144,7 +144,7 @@ export function isLoggedIn() /* : boolean */ {
   )
 }
 
-export async function getIdToken() /* : Promise<string | void> */ {
+export async function getCognitoIdToken() /* : Promise<string | void> */ {
   if (!isLoggedIn()) {
     return
   }

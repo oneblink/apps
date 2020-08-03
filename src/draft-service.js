@@ -8,7 +8,7 @@ import utilsService from './services/utils'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { isOffline } from './offline-service'
 import { getUsername, isLoggedIn } from './services/cognito'
-import { getIssuerFromJWT } from './auth-service'
+import { getFormsKeyId } from './auth-service'
 import { uploadDraftData, putDrafts } from './services/api/drafts'
 import { getPendingQueueSubmissions } from './services/pending-queue'
 import {
@@ -78,15 +78,14 @@ async function upsertDraftByKey(
 
 export async function addDraft(
   newDraft /* : NewFormsAppDraft */,
-  draftSubmission /* : DraftSubmission */,
-  accessKey /* : ?string */
+  draftSubmission /* : DraftSubmission */
 ) /* : Promise<void> */ {
   const draft /* : FormsAppDraft */ = {
     ...newDraft,
     updatedAt: new Date().toISOString(),
     draftId: uuidv4(),
   }
-  draftSubmission.keyId = getIssuerFromJWT(accessKey)
+  draftSubmission.keyId = getFormsKeyId()
   if (draftSubmission.keyId) {
     await upsertDraftByKey(draft, draftSubmission)
     return
@@ -125,10 +124,9 @@ export async function addDraft(
 
 export async function updateDraft(
   draft /* : FormsAppDraft */,
-  draftSubmission /* : DraftSubmission */,
-  accessKey /* : ?string */
+  draftSubmission /* : DraftSubmission */
 ) /* : Promise<void> */ {
-  draftSubmission.keyId = getIssuerFromJWT(accessKey)
+  draftSubmission.keyId = getFormsKeyId()
   if (draftSubmission.keyId) {
     await upsertDraftByKey(draft, draftSubmission)
     return

@@ -78,23 +78,20 @@ const data = {
   },
   definition: OneBlinkForm,
 }
-const faasToken = 'a valid token using a OneBlink Developer Key'
 await draftService.addDraft(
   draft,
   data,
-  faasToken
 )
 ```
 
 #### Parameters
 
-| Property          | Type                 | Description                                           |
-| ----------------- | -------------------- | ----------------------------------------------------- |
-| `newDraft`        | [Draft](#draft)      | The draft                                             |
-| `data`            | `object`             | The draft data                                        |
-| `data.submission` | `object`             | The form data                                         |
-| `data.definition` | `object`             | The form definition when the draft was saved          |
-| `faasToken`       | `string | undefined` | Optionally pass the FaaS token used to save the draft |
+| Property          | Type            | Description                                  |
+| ----------------- | --------------- | -------------------------------------------- |
+| `newDraft`        | [Draft](#draft) | The draft                                    |
+| `data`            | `object`        | The draft data                               |
+| `data.submission` | `object`        | The form data                                |
+| `data.definition` | `object`        | The form definition when the draft was saved |
 
 ### `updateDraft()`
 
@@ -116,11 +113,9 @@ const data = {
   },
   definition: OneBlinkForm,
 }
-const faasToken = 'a valid token using a OneBlink Developer Key'
 await draftService.updateDraft(
   draft,
   data,
-  faasToken
 )
 ```
 

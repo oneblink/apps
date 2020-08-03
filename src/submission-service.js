@@ -2,7 +2,7 @@
 'use strict'
 
 import { isOffline } from './offline-service'
-import { getIssuerFromJWT, isLoggedIn } from './auth-service'
+import { getFormsKeyId, isLoggedIn } from './auth-service'
 import {
   registerPendingQueueListener,
   addSubmissionToPendingQueue,
@@ -105,17 +105,15 @@ async function processPendingQueue() /* : Promise<void>  */ {
 async function submit(
   {
     formSubmission,
-    accessKey,
     paymentReceiptUrl,
     submissionId,
   } /* : {
   formSubmission: FormSubmission,
-  accessKey?: string,
   paymentReceiptUrl?: string,
   submissionId?: string,
 }*/
 ) /* : Promise<FormSubmissionResult> */ {
-  formSubmission.keyId = getIssuerFromJWT(accessKey)
+  formSubmission.keyId = getFormsKeyId()
   const submissionEvents = formSubmission.definition.submissionEvents || []
   const paymentSubmissionEvent = submissionEvents.reduce(
     (p, submissionEvent) => {

@@ -1,15 +1,17 @@
 // @flow
 'use strict'
 
-import jwtDecode from 'jwt-decode'
-
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
+import {
+  getIdToken,
+  getFormsKeyId,
+  setFormsKeyToken,
+} from './services/forms-key'
 import {
   init as initCognito,
   isLoggedIn,
   login,
   handleAuthentication,
-  getIdToken,
   logout,
   getUserProfile,
 } from './services/cognito'
@@ -23,6 +25,8 @@ export {
   getIdToken,
   getUserProfile,
   logout,
+  getFormsKeyId,
+  setFormsKeyToken,
 }
 
 export function init(
@@ -62,23 +66,13 @@ export function getUserFriendlyName() /* : string | null */ {
   return profile.username
 }
 
-export function getIssuerFromJWT(
-  jwtToken /* : ?string */
-) /* : string | void */ {
-  if (jwtToken) {
-    console.log('Attempting to decode JWT')
-    try {
-      const tokenPayload = jwtDecode(jwtToken)
-      return tokenPayload.iss
-    } catch (error) {
-      console.warn('Could not decode JWT', error)
-    }
-  }
-}
-
 export async function isAuthorised(
   formsAppId /* : number */
 ) /* : Promise<boolean> */ {
+  if (getFormsKeyId()) {
+    return true
+  }
+
   const userProfile = getUserProfile()
 
   if (!userProfile) {

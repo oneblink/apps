@@ -28,7 +28,8 @@ const testAuthService = async () => {
 
   if (!!userName) {
     const stringUserName: string = userName
-    const iss = authService.getIssuerFromJWT(stringUserName)
+    authService.setFormsKeyToken(stringUserName)
+    const keyId = authService.getFormsKeyId()
   }
   const isAuthorised: boolean = await authService.isAuthorised(formsAppId)
   await authService.requestAccess(formsAppId)
@@ -163,8 +164,7 @@ const testDraftService = async () => {
   )
   cancelListener()
 
-  const accessKey = 'accessKey'
-  await draftService.addDraft(newFormsAppDraft, formSubmissionResult, accessKey)
+  await draftService.addDraft(newFormsAppDraft, formSubmissionResult)
 
   await draftService.updateDraft(
     {
@@ -173,8 +173,7 @@ const testDraftService = async () => {
       draftDataId: 'id2',
       updatedAt: 'date',
     },
-    formSubmissionResult,
-    accessKey
+    formSubmissionResult
   )
 
   const drafts = await draftService.getDrafts()
@@ -423,7 +422,6 @@ const testSubmissionService = async () => {
   )
 
   const formSubResult = await submissionService.submit({
-    accessKey: 'sasds',
     paymentReceiptUrl: 'my-url.com',
     submissionId: 'subId',
     formSubmission: {

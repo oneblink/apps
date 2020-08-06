@@ -188,17 +188,6 @@ declare namespace formService {
     formElementLookupId: number
   ): Promise<(FormTypes.FormElementLookup & { url: string }) | void>
 
-  function getFormElementOptionsSets(
-    organisationId: string,
-    formsAppEnvironmentId: number
-  ): Promise<Array<FormTypes.FormElementDynamicOptionSet & { url: string }>>
-
-  function getFormElementOptionsSetById(
-    organisationId: string,
-    formsAppEnvironmentId: number,
-    dynamicOptionsSetId: number
-  ): Promise<(FormTypes.FormElementDynamicOptionSet & { url: string }) | void>
-
   function getFormElementDynamicOptions(
     form: FormTypes.Form | FormTypes.Form[]
   ): Promise<

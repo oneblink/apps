@@ -12,8 +12,6 @@ import { formService } from '@oneblink/apps'
 - [`getForm()`](#getform)
 - [`getFormElementLookups()`](#getformelementlookups)
 - [`getFormElementLookupById()`](#getformelementlookupbyid)
-- [`getFormElementOptionsSets()`](#getformelementoptionssets)
-- [`getFormElementOptionsSetById()`](#getformelementoptionssetbyid)
 - [`getFormElementDynamicOptions()`](#getformelementdynamicoptions)
 - [`forEachFormElement()`](#foreachformelement)
 - [`findFormElement()`](#findformelement)
@@ -68,48 +66,23 @@ if (formElementLookup) {
 }
 ```
 
-### `getFormElementOptionsSets()`
-
-Get an array of OneBlink Form Element Options Sets.
-
-```js
-const organisationId = 1
-const formsAppEnvironmentId = 1
-const formElementOptionsSets = await formService.getFormElementOptionsSets(
-  organisationId,
-  formsAppEnvironmentId
-)
-```
-
-### `getFormElementOptionsSetById()`
-
-Get a OneBlink Form Element Options Set.
-
-```js
-const organisationId = 1
-const formsAppEnvironmentId = 1
-const formElementOptionsSetId = 1
-const formElementOptionsSet = await formService.getFormElementOptionsSetById(
-  organisationId,
-  formsAppEnvironmentId,
-  formElementOptionsSetId
-)
-if (formElementOptionsSet) {
-  // Use options set
-}
-```
-
 ### `getFormElementDynamicOptions()`
 
-Get a the options for a form element that is using a OneBlink Form Element Options Set.
+Get a the options for a single Form or an array of Forms for Form Elements that are using a OneBlink Form Element Options Set.
 
 ```js
-const options = await formService.getFormElementOptionsSetById(
-  form,
-  formElement
-)
-if (options) {
-  // Set options on element
+const optionsForElementId = await formService.getFormElementDynamicOptions(form)
+
+// Set all the options for the required elements
+for (const { elementId, options } of optionsForElementId) {
+  // BEWARE
+  // this example does not accommodate for
+  // nested elements in pages and repeatable sets
+  for (const formElement of form.elements) {
+    if (formElement.id === elementId) {
+      formElement.options = options
+    }
+  }
 }
 ```
 

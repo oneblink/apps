@@ -188,21 +188,11 @@ declare namespace formService {
     formElementLookupId: number
   ): Promise<(FormTypes.FormElementLookup & { url: string }) | void>
 
-  function getFormElementOptionsSets(
-    organisationId: string,
-    formsAppEnvironmentId: number
-  ): Promise<Array<FormTypes.FormElementDynamicOptionSet & { url: string }>>
-
-  function getFormElementOptionsSetById(
-    organisationId: string,
-    formsAppEnvironmentId: number,
-    dynamicOptionsSetId: number
-  ): Promise<(FormTypes.FormElementDynamicOptionSet & { url: string }) | void>
-
   function getFormElementDynamicOptions(
-    form: FormTypes.Form,
-    element: FormTypes.FormElement
-  ): Promise<FormTypes.ChoiceElementOption[] | void>
+    form: FormTypes.Form | FormTypes.Form[]
+  ): Promise<
+    Array<{ options: FormTypes.ChoiceElementOption[]; elementId: string }>
+  >
 
   function forEachFormElement(
     elements: FormTypes.FormElement[],
@@ -222,7 +212,6 @@ declare namespace formService {
   ): FormTypes.FormElement | void
 }
 
-declare type localForageInstance = ReturnType<typeof createInstance>
 export {
   offlineService,
   authService,
@@ -239,5 +228,4 @@ export {
   SubmissionEventTypes,
   useTenantCivicPlus,
   useTenantOneBlink,
-  localForageInstance,
 }

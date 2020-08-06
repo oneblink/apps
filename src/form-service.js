@@ -205,85 +205,171 @@ export async function getFormElementLookupById(
   )
 }
 
-export async function getFormElementOptionsSets(
-  organisationId /* : string  */,
-  formsAppEnvironmentId /* : number */
-) /* : Promise<Array<FormElementDynamicOptionSet & { url: string }>> */ {
-  return searchRequest(
+async function getFormElementOptionsSets(
+  organisationId /* : string  */
+) /* : Promise<Array<FormElementDynamicOptionSet>> */ {
+  const { formElementDynamicOptionSets } = await searchRequest(
     `${tenants.current.apiOrigin}/form-element-options/dynamic`,
     {
       organisationId,
     }
   )
-    .then((data) =>
-      data.formElementDynamicOptionSets.map((formElementDynamicOptionSet) => ({
-        ...formElementDynamicOptionSet,
-        url: formElementDynamicOptionSet.environments.reduce(
-          (url, formElementDynamicOptionSetEnvironment) => {
-            if (
-              !url &&
-              formElementDynamicOptionSetEnvironment.formsAppEnvironmentId ===
-                formsAppEnvironmentId
-            ) {
-              return formElementDynamicOptionSetEnvironment.url
-            }
-            return url
-          },
-          null
-        ),
-      }))
-    )
-    .catch((error) => {
-      console.warn(
-        `Error retrieving dynamic options sets for organisationId ${organisationId}`,
-        error
-      )
-      throw error
-    })
-}
-
-export async function getFormElementOptionsSetById(
-  organisationId /* : string  */,
-  formsAppEnvironmentId /* : number */,
-  dynamicOptionsSetId /* : number */
-) /* : Promise<FormElementDynamicOptionSet & { url: string } | void> */ {
-  return getFormElementOptionsSets(
-    organisationId,
-    formsAppEnvironmentId
-  ).then((dynamicOptionsSets) =>
-    dynamicOptionsSets.find(
-      (dynamicOptionsSet) => dynamicOptionsSet.id === dynamicOptionsSetId
-    )
-  )
+  return formElementDynamicOptionSets
 }
 
 export async function getFormElementDynamicOptions(
-  form /* : Form */,
-  element /* : FormElement */
-) /* : Promise<ChoiceElementOption[] | void> */ {
-  // $FlowFixMe
-  if (!element.optionsType || element.optionsType === 'CUSTOM') {
-    return
+  input /* : Form | Form[] */
+) /* : Promise<Array<{ elementId: string, options: ChoiceElementOption[] }>> */ {
+  const forms = Array.isArray(input) ? input : [input]
+  if (!forms.length) {
+    return []
   }
 
-  if (element.optionsType !== 'DYNAMIC' || !element.dynamicOptionSetId) {
-    return
+  // Get the options sets id for each element
+  const formElementOptionsSetIds = forms.reduce((ids, form) => {
+    forEachFormElementWithOptions(form.elements, (el) => {
+      if (
+        // Ignore elements that have options as we don't need to fetch these again
+        !Array.isArray(el.options) &&
+        el.optionsType === 'DYNAMIC' &&
+        typeof el.dynamicOptionSetId === 'number'
+      ) {
+        ids.push(el.dynamicOptionSetId)
+      }
+    })
+    return ids
+  }, [])
+
+  if (!formElementOptionsSetIds.length) {
+    return []
   }
 
-  const dynamicOptionSetId = element.dynamicOptionSetId
-
-  const dynamicOptionsSet = await getFormElementOptionsSetById(
-    form.organisationId,
-    form.formsAppEnvironmentId,
-    dynamicOptionSetId
+  // Get the options sets for all the ids
+  const allFormElementOptionsSets = await getFormElementOptionsSets(
+    forms[0].organisationId
   )
-  if (!dynamicOptionsSet) {
-    throw new Error(
-      'Could not find Dynamic Options Set for Id: ' + dynamicOptionSetId
-    )
+  const formElementOptionsSets = allFormElementOptionsSets.filter(({ id }) =>
+    formElementOptionsSetIds.includes(id)
+  )
+  if (!formElementOptionsSetIds.length) {
+    return []
   }
 
-  return getRequest(dynamicOptionsSet.url).then((res) => res.data)
+  // Get the options for all the options sets
+  const results = await Promise.all(
+    formElementOptionsSets.map(async (formElementOptionsSet) => {
+      const url = formElementOptionsSet.environments.reduce(
+        (url, formElementDynamicOptionSetEnvironment) => {
+          if (
+            !url &&
+            formElementDynamicOptionSetEnvironment.formsAppEnvironmentId ===
+              forms[0].formsAppEnvironmentId
+          ) {
+            return formElementDynamicOptionSetEnvironment.url
+          }
+          return url
+        },
+        null
+      )
+      if (!url) {
+        return
+      }
+      try {
+        const options = await getRequest(url)
+        return {
+          formElementOptionsSetId: formElementOptionsSet.id,
+          options,
+        }
+      } catch (error) {
+        console.warn('Error getting dynamic options from ' + url, error)
+      }
+    })
+  )
+
+  return forms.reduce((optionsForElementId, form) => {
+    forEachFormElementWithOptions(form.elements, (element) => {
+      const result = results.find(
+        (result) =>
+          // It wants us to check for element types with an dynamicOptionSetId property.
+          // This will be undefined if not an element with options, and we don't
+          // want to have to come back here and add types when adding more types
+          // $FlowFixMe
+          result &&
+          !Array.isArray(element.options) &&
+          element.dynamicOptionSetId === result.formElementOptionsSetId
+      )
+      if (!result || !Array.isArray(result.options)) {
+        return
+      }
+
+      try {
+        const options = result.options.map((option, index) => {
+          option = option || {}
+          const optionsMap = (option.attributes || []).reduce(
+            (memo, { label, value }) => {
+              if (
+                !element.attributesMapping ||
+                !Array.isArray(element.attributesMapping)
+              ) {
+                return memo
+              }
+              const attribute = element.attributesMapping.find(
+                (map) => map.attribute === label
+              )
+              if (!attribute) return memo
+
+              const elementId = attribute.elementId
+              const predicateElement = findFormElement(
+                form.elements,
+                (el) => el.id === elementId
+              )
+              if (
+                !predicateElement ||
+                (predicateElement.type !== 'select' &&
+                  predicateElement.type !== 'autocomplete' &&
+                  predicateElement.type !== 'checkboxes' &&
+                  predicateElement.type !== 'radio')
+              ) {
+                return memo
+              }
+
+              const predicateOption = (predicateElement.options || []).find(
+                (option) => option.value === value
+              )
+              if (elementId && predicateOption) {
+                memo[elementId] = memo[elementId] || {
+                  elementId,
+                  optionIds: [],
+                }
+                memo[elementId].optionIds.push(predicateOption.id)
+                element.conditionallyShowOptionsElementIds =
+                  element.conditionallyShowOptionsElementIds || []
+                element.conditionallyShowOptionsElementIds.push(elementId)
+              }
+              return memo
+            },
+            {}
+          )
+
+          return {
+            id: option.value || index,
+            value: option.value || index,
+            label: option.label || index,
+            colour: option.colour || undefined,
+            attributes: Object.keys(optionsMap).map((key) => optionsMap[key]),
+          }
+        })
+        optionsForElementId.push({
+          options,
+          elementId: element.id,
+        })
+      } catch (error) {
+        console.warn('Could not validate dynamic options', result, error)
+      }
+    })
+
+    return optionsForElementId
+  }, [])
 }
 
 export function forEachFormElement(
@@ -292,6 +378,23 @@ export function forEachFormElement(
 ) /* : void */ {
   findFormElement(elements, (formElement, parentElements) => {
     forEach(formElement, parentElements)
+    return false
+  })
+}
+
+function forEachFormElementWithOptions(
+  elements /* : FormElement[] */,
+  forEach /* : (FormElementWithOptions, FormElement[]) => void */
+) /* : void */ {
+  findFormElement(elements, (formElement, parentElements) => {
+    if (
+      formElement.type === 'select' ||
+      formElement.type === 'autocomplete' ||
+      formElement.type === 'checkboxes' ||
+      formElement.type === 'radio'
+    ) {
+      forEach(formElement, parentElements)
+    }
     return false
   })
 }

@@ -333,7 +333,22 @@ export async function getFormElementDynamicOptions(
                 return memo
               }
 
-              const predicateOption = (predicateElement.options || []).find(
+              let predicateElementOptions = predicateElement.options
+              if (!predicateElementOptions) {
+                const predicateElementResult = results.find(
+                  (result) =>
+                    result &&
+                    predicateElement.dynamicOptionSetId ===
+                      result.formElementOptionsSetId
+                )
+                if (predicateElementResult) {
+                  predicateElementOptions = predicateElementResult.options
+                } else {
+                  predicateElementOptions = []
+                }
+              }
+
+              const predicateOption = predicateElementOptions.find(
                 (option) => option.value === value
               )
               if (elementId && predicateOption) {
@@ -341,7 +356,9 @@ export async function getFormElementDynamicOptions(
                   elementId,
                   optionIds: [],
                 }
-                memo[elementId].optionIds.push(predicateOption.id)
+                memo[elementId].optionIds.push(
+                  predicateOption.id || predicateOption.value
+                )
                 element.conditionallyShowOptionsElementIds =
                   element.conditionallyShowOptionsElementIds || []
                 element.conditionallyShowOptionsElementIds.push(elementId)

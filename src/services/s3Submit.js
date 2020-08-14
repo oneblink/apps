@@ -130,7 +130,7 @@ const uploadFormSubmission = (
   s3Configuration /* : S3UploadCredentials */,
   formJson /* : {
     definition: Form,
-    submission: { [key: string]: mixed },
+    submission: $PropertyType<FormSubmission, 'submission'>,
     submissionTimestamp: string,
     keyId?: string,
     formsAppId: number,

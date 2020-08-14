@@ -207,7 +207,7 @@ export async function getDraftAndData(
   draftId /* : ?string */
 ) /* : Promise<{
   draft: FormsAppDraft,
-  draftData: { [key: string]: mixed },
+  draftData: $PropertyType<FormSubmission, 'submission'>,
 } | null> */ {
   if (!draftId) {
     return null

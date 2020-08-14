@@ -427,7 +427,10 @@ export function findFormElement(
     }
 
     if (
-      (element.type === 'repeatableSet' || element.type === 'page') &&
+      (element.type === 'repeatableSet' ||
+        element.type === 'page' ||
+        element.type === 'form' ||
+        element.type === 'infoPage') &&
       Array.isArray(element.elements)
     ) {
       const nestedElement = findFormElement(element.elements, predicate, [

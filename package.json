@@ -22,15 +22,15 @@
   },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.10.4",
-    "@oneblink/flow-types": "github:oneblink/flow-types#master",
+    "@oneblink/flow-types": "github:oneblink/flow-types",
     "eslint": "^7.5.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-prettier": "^3.1.4",
     "fixpack": "^3.0.6",
     "flow-bin": "^0.130.0",
-    "typescript": "^3.9.7",
     "jest": "^26.1.0",
-    "prettier": "^2.0.5"
+    "prettier": "^2.0.5",
+    "typescript": "^3.9.7"
   },
   "directories": {
     "doc": "docs"
@@ -62,8 +62,8 @@
     "fixpack": "fixpack",
     "flow_check": "flow check",
     "jest": "jest",
-    "tsc": "tsc",
     "pretest": "npm run eslint && npm run flow_check && npm run tsc && npm run fixpack",
-    "test": "npm run jest"
+    "test": "npm run jest",
+    "tsc": "tsc"
   }
 }

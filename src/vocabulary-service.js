@@ -8,6 +8,24 @@ class VocabularyService {
     return tenants.locale
   }
 
+  get flatpickrDateFormat() {
+    switch (this.locale) {
+      case 'en-US':
+        return 'm/d/Y'
+      case 'en-AU':
+      default:
+        return 'd/m/Y'
+    }
+  }
+
+  get flatpickrTimeFormat() {
+    return 'h:i K'
+  }
+
+  get flatpickrDatetimeFormat() {
+    return `${this.flatpickrDateFormat} ${this.flatpickrTimeFormat}`
+  }
+
   formatDate(value /* : Date */) /* : string */ {
     return tenants.current.intlFormats.date.format(value)
   }

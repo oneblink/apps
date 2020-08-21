@@ -24,6 +24,8 @@ test.skip('it should format currency, date and times correctly', () => {
   expect(vocabularyService.formatCurrency(amount3)).toBe('$9.91')
   expect(vocabularyService.formatCurrency(amount4)).toBe('$10.00')
 
+  expect(vocabularyService.flatpickrDateFormat).toBe('d/m/Y')
+
   expect(vocabularyService.formatDate(date1)).toBe('21/12/2020')
   expect(vocabularyService.formatDate(date2)).toBe('02/01/2020')
 
@@ -41,6 +43,8 @@ test.skip('it should format currency, date and times correctly', () => {
   expect(vocabularyService.formatCurrency(amount2)).toBe('$0.12')
   expect(vocabularyService.formatCurrency(amount3)).toBe('$9.91')
   expect(vocabularyService.formatCurrency(amount4)).toBe('$10.00')
+
+  expect(vocabularyService.flatpickrDateFormat).toBe('m/d/Y')
 
   expect(vocabularyService.formatDate(date1)).toBe('12/21/2020')
   expect(vocabularyService.formatDate(date2)).toBe('01/02/2020')

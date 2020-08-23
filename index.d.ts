@@ -211,7 +211,7 @@ declare namespace formService {
   ): FormTypes.FormElement | void
 }
 
-declare namespace vocabularyService {
+declare namespace localisationService {
   function formatDate(value: Date): string
 
   function formatTime(value: Date): string
@@ -232,7 +232,7 @@ export {
   autoSaveService,
   notificationService,
   formService,
-  vocabularyService,
+  localisationService,
   OneBlinkAppsError,
   FormTypes,
   SubmissionEventTypes,

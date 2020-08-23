@@ -3,7 +3,7 @@
 
 import tenants from './tenants'
 
-class VocabularyService {
+class LocalisationService {
   get locale() {
     return tenants.locale
   }
@@ -43,4 +43,4 @@ class VocabularyService {
   }
 }
 
-export default new VocabularyService()
+export default new LocalisationService()

@@ -11,7 +11,7 @@ import * as submissionService from './src/submission-service'
 import * as autoSaveService from './src/auto-save-service'
 import * as notificationService from './src/notification-service'
 import * as formService from './src/form-service'
-import vocabularyService from './src/vocabulary-service'
+import localisationService from './src/localisation-service'
 import OneBlinkAppsError from './src/services/errors/oneBlinkAppsError'
 import tenants from './src/tenants'
 
@@ -30,5 +30,5 @@ export {
   autoSaveService,
   notificationService,
   formService,
-  vocabularyService,
+  localisationService,
 }

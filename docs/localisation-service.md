@@ -1,11 +1,11 @@
 # OneBlink Apps | Usage
 
-## Vocabulary Service
+## Localisation Service
 
-Helper functions for handling vocabulary.
+Helper functions for handling all things locale.
 
 ```js
-import { vocabularyService } from '@oneblink/apps'
+import { localisationService } from '@oneblink/apps'
 ```
 
 - [`locale`](#locale)
@@ -19,7 +19,7 @@ import { vocabularyService } from '@oneblink/apps'
 Get the locale (e.g. `en-AU`) for the [current tenant](./README#tenants).
 
 ```js
-const locale = vocabularyService.locale
+const locale = localisationService.locale
 ```
 
 ### `formatDate()`
@@ -28,7 +28,7 @@ Format a `Date` as a `string` that just contains the date portion
 
 ```js
 const date = new Date()
-const text = vocabularyService.formatDate(date)
+const text = localisationService.formatDate(date)
 // Display text
 ```
 
@@ -38,7 +38,7 @@ Format a `Date` as a `string` that just contains the time portion
 
 ```js
 const date = new Date()
-const text = vocabularyService.formatTime(date)
+const text = localisationService.formatTime(date)
 // Display text
 ```
 
@@ -48,7 +48,7 @@ Format a `Date` as a `string` that contains the date and time portions
 
 ```js
 const date = new Date()
-const text = vocabularyService.formatDatetime(date)
+const text = localisationService.formatDatetime(date)
 // Display text
 ```
 
@@ -58,6 +58,6 @@ Format a `number` as a `string` represented as a currency
 
 ```js
 const amount = 123.321
-const text = vocabularyService.formatCurrency(amount)
+const text = localisationService.formatCurrency(amount)
 // Display text
 ```

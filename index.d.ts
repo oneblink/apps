@@ -12,7 +12,6 @@ import type {
 } from './typescript/types/misc'
 import * as FormTypes from './typescript/types/forms'
 import * as SubmissionEventTypes from './typescript/types/submissionEvents'
-import { createInstance } from 'localforage'
 
 declare namespace offlineService {
   function isOffline(): boolean
@@ -212,6 +211,16 @@ declare namespace formService {
   ): FormTypes.FormElement | void
 }
 
+declare namespace localisationService {
+  function formatDate(value: Date): string
+
+  function formatTime(value: Date): string
+
+  function formatDatetime(value: Date): string
+
+  function formatCurrency(value: number): string
+}
+
 export {
   offlineService,
   authService,
@@ -223,6 +232,7 @@ export {
   autoSaveService,
   notificationService,
   formService,
+  localisationService,
   OneBlinkAppsError,
   FormTypes,
   SubmissionEventTypes,

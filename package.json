@@ -27,7 +27,7 @@
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-prettier": "^3.1.4",
     "fixpack": "^3.0.6",
-    "flow-bin": "^0.130.0",
+    "flow-bin": "^0.132.0",
     "jest": "^26.1.0",
     "prettier": "^2.0.5",
     "typescript": "^3.9.7"

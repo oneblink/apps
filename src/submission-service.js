@@ -137,37 +137,36 @@ async function submit(
       console.log(
         'Offline - form has a payment submission event and payment has not been processed yet, return offline'
       )
-      return {
-        ...formSubmission,
+      return Object.assign({}, formSubmission, {
         isOffline: true,
         isInPendingQueue: false,
         submissionTimestamp: null,
         submissionId: null,
         payment: null,
-      }
+      })
     }
 
     console.log('Offline - saving submission to pending queue..')
-    return addSubmissionToPendingQueue({
-      ...formSubmission,
-      pendingTimestamp: new Date().toISOString(),
-    }).then(() => ({
-      ...formSubmission,
+    await addSubmissionToPendingQueue(
+      Object.assign({}, formSubmission, {
+        pendingTimestamp: new Date().toISOString(),
+      })
+    )
+    return Object.assign({}, formSubmission, {
       isOffline: true,
       isInPendingQueue: true,
       submissionTimestamp: null,
       submissionId: null,
       payment: null,
-    }))
+    })
   }
 
   if (paymentSubmissionEvent && paymentReceiptUrl) {
     const paymentSubmissionResult = await handlePaymentSubmissionEvent(
-      {
-        ...formSubmission,
+      Object.assign({}, formSubmission, {
         isOffline: false,
         isInPendingQueue: false,
-      },
+      }),
       paymentSubmissionEvent,
       paymentReceiptUrl
     )
@@ -201,14 +200,13 @@ async function submit(
   if (formSubmission.jobId) {
     await recentlySubmittedJobsService.add(formSubmission.jobId)
   }
-  const submissionResult = {
-    ...formSubmission,
+  const submissionResult = Object.assign({}, formSubmission, {
     payment: null,
     isOffline: false,
     isInPendingQueue: false,
     submissionTimestamp: data.submissionTimestamp,
     submissionId: data.submissionId,
-  }
+  })
 
   return submissionResult
 }

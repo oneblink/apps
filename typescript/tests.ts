@@ -96,7 +96,7 @@ const testOneBlinkAppsError = () => {
 }
 
 // DRAFT SERVICE
-const form = {
+const form: FormTypes.Form = {
   description: 'desc',
   elements: [],
   formsAppEnvironmentId: 4,
@@ -119,11 +119,14 @@ const newFormsAppDraft = {
   externalId: null,
   jobId: undefined,
 }
-const formSubmissionResult = {
+const formSubmissionResult: FormTypes.FormSubmissionResult = {
   draftId: '4',
   externalId: 's',
   formsAppId: 3,
   jobId: 'sd',
+  captchaTokens: [],
+  isInPendingQueue: false,
+  isOffline: false,
   payment: {
     hostedFormUrl: 'sasds',
     submissionEvent: {

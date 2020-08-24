@@ -220,8 +220,7 @@ export async function handlePaymentSubmissionEvent(
     }
   )
   console.log('Created Payment configuration to start transaction')
-  const submissionResult = {
-    ...formSubmission,
+  const submissionResult = Object.assign({}, formSubmission, {
     submissionTimestamp: null,
     submissionId,
     payment: {
@@ -230,7 +229,7 @@ export async function handlePaymentSubmissionEvent(
     },
     isInPendingQueue: false,
     isOffline: false,
-  }
+  })
   await utilsService.setLocalForageItem(KEY, submissionResult)
 
   return submissionResult

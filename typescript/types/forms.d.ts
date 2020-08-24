@@ -569,45 +569,39 @@ export type FormElementsCalculationPath = FormElementCalculationPath[]
 
 //////////// NEW
 
-declare interface DraftSubmission {
+declare interface NewDraftSubmission {
   submission: {
     [key: string]: unknown
   }
   definition: Form
-  formsAppId: number
-  draftId: string | null
-  jobId: string | null
-  externalId: string | null
-  preFillFormDataId: string | null
-  keyId?: string
 }
 
-declare type FormSubmission = DraftSubmission & {
+declare type NewFormSubmission = NewDraftSubmission & {
   captchaTokens: string[]
 }
 
-export interface FormSubmissionResult {
-  submission: {
-    [key: string]: unknown
-  }
-  definition: Form
+declare type DraftSubmission = NewDraftSubmission & {
   formsAppId: number
+  keyId?: string
+}
+
+declare type FormSubmission = DraftSubmission &
+  NewFormSubmission & {
+    draftId: string | null
+    jobId: string | null
+    externalId: string | null
+    preFillFormDataId: string | null
+  }
+
+declare type FormSubmissionResult = FormSubmission & {
   submissionId: string | null
   submissionTimestamp: string | null
-  payment:
-    | NoU
-    | {
-        hostedFormUrl: string
-        submissionEvent: PaymentSubmissionEvent
-      }
-  keyId?: string
-  captchaTokens?: string[]
-  draftId: NoU | string
-  jobId: NoU | string
-  externalId: NoU | string
-  preFillFormDataId: NoU | string
-  isInPendingQueue?: boolean
-  isOffline?: boolean
+  payment: {
+    hostedFormUrl: string
+    submissionEvent: PaymentSubmissionEvent
+  } | null
+  isInPendingQueue: boolean
+  isOffline: boolean
 }
 
 export type PendingFormSubmissionResult = FormSubmissionResult & {

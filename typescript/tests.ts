@@ -22,7 +22,6 @@ const testAuthService = async () => {
   const formsAppId = 4
   authService.init({
     oAuthClientId: 'oAuthId',
-    useSAML: true,
   })
   const userName = authService.getUserFriendlyName()
 

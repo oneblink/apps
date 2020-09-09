@@ -24,8 +24,15 @@ declare namespace authService {
   function setFormsKeyToken(formsKeyToken: string): void
   function isAuthorised(formsAppId: number): Promise<boolean>
   function requestAccess(formsAppId: number): Promise<void>
-  function login(): Promise<string>
+  function loginHostedUI(identityProvider: string | void): Promise<string>
   function handleAuthentication(): Promise<string>
+  function loginUsernamePassword(): Promise<
+    ((newPassword: string) => Promise<void>) | void
+  >
+  function changePassword(): Promise<void>
+  function forgotPassword(): Promise<
+    (code: string, newPassword: string) => Promise<void>
+  >
   function isLoggedIn(): boolean
   function getIdToken(): Promise<string | undefined>
   function getUserProfile(): UserProfile | null

@@ -33,7 +33,7 @@ const testAuthService = async () => {
   }
   const isAuthorised: boolean = await authService.isAuthorised(formsAppId)
   await authService.requestAccess(formsAppId)
-  const route: string = await authService.login()
+  const route: string = await authService.loginHostedUI()
   const otherRoute: string = await authService.handleAuthentication()
 
   const amILoggedIn: boolean = authService.isLoggedIn()

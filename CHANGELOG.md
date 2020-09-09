@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Added
+
+- [`authService.loginHostedUI()`](./docs/auth-service.md#loginhostedui)
+- [`authService.loginUsernamePassword()`](./docs/auth-service.md#loginusernamepassword)
+- [`authService.changePassword()`](./docs/auth-service.md#changepassword)
+- [`authService.forgotPassword()`](./docs/auth-service.md#forgotpassword)
+
+### Removed
+
+- `authService.login`. This has been replaced by [`authService.loginHostedUI()`](./docs/auth-service.md#loginhostedui)
+
 ### Fixed
 
 - types for submissions

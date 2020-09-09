@@ -12,8 +12,11 @@ import { authService } from '@oneblink/apps'
 
 - [`init()`](#init)
 - [`isLoggedIn()`](#isloggedin)
-- [`login()`](#login) - requires `init()` to be called first
+- [`loginHostedUI()`](#loginhostedui) - requires `init()` to be called first
 - [`handleAuthentication()`](#handleauthentication) - requires `init()` to be called first
+- [`loginUsernamePassword()`](#loginusernamepassword) - requires `init()` to be called first
+- [`changePassword()`](#changepassword) - requires `init()` to be called first
+- [`forgotPassword()`](#forgotPassword) - requires `init()` to be called first
 - [`getIdToken()`](#getidtoken)
 - [`getUserProfile()`](#getuserprofile)
 - [`getUserFriendlyName()`](#getuserfriendlyname)
@@ -30,7 +33,6 @@ Initialize the service with required configuration. **This must be done before u
 ```js
 authService.init({
   oAuthClientId: 'YOUR_OAUTH_CLIENT_ID',
-  useSAML: false,
 })
 ```
 
@@ -43,12 +45,14 @@ const isLoggedIn = authService.isLoggedIn()
 // handle user being logged in or not
 ```
 
-### `login()`
+### `loginHostedUI()`
 
-Redirect the user to the login screen. If the use is already logged in, a new session will be created and a promise will resolve.
+Redirect the user to the login screen. Passing an `identityProvider` is optionally, it will allow users to skip the login page and be directed straight to that providers login page
 
 ```js
-await authService.login()
+// OPtionally pass a
+const identityProvider = 'Google'
+await authService.loginHostedUI(identityProvider)
 // User will be redirected to login page or promise will resolve
 ```
 
@@ -64,6 +68,53 @@ try {
 } catch (error) {
   // handle failed login attempts here.
 }
+```
+
+### `loginUsernamePassword()`
+
+Create a session for a user by entering a username and password. If the user requires a password reset, a function will be returned. This function should be called with the new password once entered by the user.
+
+```js
+const username = 'user@email.io'
+const password = 'P@$5w0rd'
+const resetPassword = await authService.loginUsernamePassword(
+  username,
+  password
+)
+// "resetPassword" will be undefined if the login was successful
+if (resetPassword) {
+  // Prompt the user to enter a new password
+  const newPassword = prompt(
+    'The password you entered was only temporary, and must be reset for security purposes. Please enter your new password below to continue.'
+  )
+  await resetPassword(newPassword)
+}
+```
+
+### `changePassword()`
+
+Allow the currently logged in user to change their password by passing their existing password and a new password.
+
+```js
+const currentPassword = 'P@$5w0rd'
+const newPassword = 'P@$5w0rD'
+await authService.changePassword(currentPassword, newPassword)
+```
+
+### `forgotPassword()`
+
+Allow a user to start the forgot password process. The user will be emailed a temporary code that must be passed with a new password to the function returned.
+
+```js
+const username = 'user@email.io'
+const finishForgotPassword = await authService.forgotPassword(username)
+
+// Prompt the user to enter the code and a new password
+const code = prompt(
+  'You have been emailed a verification code, please enter it here.'
+)
+const newPassword = prompt('Please enter a new password to continue.')
+await finishForgotPassword(code, newPassword)
 ```
 
 ### `getIdToken()`

@@ -3,6 +3,7 @@
 
 /* ::
 type OneBlinkAppsTenant = {|
+  awsRegion: string,
   loginDomain: string,
   apiOrigin: string,
   vapidPublicKey: string,
@@ -44,6 +45,7 @@ const generateFormatters = (locale) => {
 const tenants = {
   test: {
     oneblink: {
+      awsRegion: 'ap-southeast-2',
       loginDomain: 'login-test.oneblink.io',
       apiOrigin: 'https://auth-api-test.blinkm.io',
       vapidPublicKey:
@@ -51,6 +53,7 @@ const tenants = {
       intlFormats: generateFormatters('en-AU'),
     },
     civicplus: {
+      awsRegion: 'us-east-2',
       loginDomain: 'login-test.transform.civicplus.com',
       apiOrigin: 'https://auth-api-test.transform.civicplus.com',
       vapidPublicKey:
@@ -60,6 +63,7 @@ const tenants = {
   },
   prod: {
     oneblink: {
+      awsRegion: 'ap-southeast-2',
       loginDomain: 'login.oneblink.io',
       apiOrigin: 'https://auth-api.blinkm.io',
       vapidPublicKey:
@@ -67,6 +71,7 @@ const tenants = {
       intlFormats: generateFormatters('en-AU'),
     },
     civicplus: {
+      awsRegion: 'us-east-2',
       loginDomain: 'login.transform.civicplus.com',
       apiOrigin: 'https://auth-api.transform.civicplus.com',
       vapidPublicKey:

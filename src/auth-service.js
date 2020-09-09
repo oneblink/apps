@@ -10,7 +10,10 @@ import {
 import {
   init as initCognito,
   isLoggedIn,
-  login,
+  loginHostedUI,
+  loginUsernamePassword,
+  changePassword,
+  forgotPassword,
   handleAuthentication,
   logout,
   getUserProfile,
@@ -19,8 +22,11 @@ import { getRequest, postRequest } from './services/fetch'
 import tenants from './tenants'
 
 export {
-  login,
+  loginHostedUI,
+  loginUsernamePassword,
   handleAuthentication,
+  changePassword,
+  forgotPassword,
   isLoggedIn,
   getIdToken,
   getUserProfile,
@@ -29,19 +35,12 @@ export {
   setFormsKeyToken,
 }
 
-export function init(
-  {
-    oAuthClientId,
-    useSAML,
-  } /* : {
-  oAuthClientId: string,
-  useSAML: boolean,
-} */
-) {
+export function init({ oAuthClientId } /* : { oAuthClientId: string } */) {
   initCognito({
+    region: tenants.current.awsRegion,
     loginDomain: tenants.current.loginDomain,
     oAuthClientId,
-    samlIdentityProviderName: useSAML ? oAuthClientId : null,
+    redirectUri: window.location.origin + '/callback',
   })
 }
 

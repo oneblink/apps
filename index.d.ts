@@ -18,14 +18,25 @@ declare namespace offlineService {
 }
 
 declare namespace authService {
-  function init(options: { oAuthClientId: string; useSAML: boolean }): void
+  function init(options: { oAuthClientId: string }): void
   function getUserFriendlyName(): string | null
   function getFormsKeyId(): string | void
   function setFormsKeyToken(formsKeyToken: string): void
   function isAuthorised(formsAppId: number): Promise<boolean>
   function requestAccess(formsAppId: number): Promise<void>
-  function login(): Promise<string>
+  function loginHostedUI(identityProvider?: string): Promise<string>
   function handleAuthentication(): Promise<string>
+  function loginUsernamePassword(
+    username: string,
+    password: string
+  ): Promise<((newPassword: string) => Promise<void>) | void>
+  function changePassword(
+    currentPassword: string,
+    newPassword: string
+  ): Promise<void>
+  function forgotPassword(
+    username: string
+  ): Promise<(code: string, newPassword: string) => Promise<void>>
   function isLoggedIn(): boolean
   function getIdToken(): Promise<string | undefined>
   function getUserProfile(): UserProfile | null

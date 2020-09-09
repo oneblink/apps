@@ -22,7 +22,6 @@ const testAuthService = async () => {
   const formsAppId = 4
   authService.init({
     oAuthClientId: 'oAuthId',
-    useSAML: true,
   })
   const userName = authService.getUserFriendlyName()
 
@@ -33,7 +32,7 @@ const testAuthService = async () => {
   }
   const isAuthorised: boolean = await authService.isAuthorised(formsAppId)
   await authService.requestAccess(formsAppId)
-  const route: string = await authService.login()
+  const route: string = await authService.loginHostedUI()
   const otherRoute: string = await authService.handleAuthentication()
 
   const amILoggedIn: boolean = authService.isLoggedIn()

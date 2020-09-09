@@ -30,5 +30,11 @@ export async function getIdToken() {
     return formsKeyToken
   }
 
-  return getCognitoIdToken()
+  try {
+    return await getCognitoIdToken()
+  } catch (error) {
+    if (!error.requiresLogin) {
+      throw error
+    }
+  }
 }

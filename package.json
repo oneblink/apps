@@ -7,11 +7,11 @@
     "url": "https://github.com/oneblink/apps/issues"
   },
   "dependencies": {
-    "aws-sdk": "^2.721.0",
+    "aws-sdk": "^2.748.0",
     "big-json": "^3.1.0",
     "jwt-decode": "^2.2.0",
     "local-storage": "^2.0.0",
-    "localforage": "^1.8.1",
+    "localforage": "^1.9.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.differenceby": "^4.8.0",
     "lodash.orderby": "^4.6.0",
@@ -22,13 +22,13 @@
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.10.4",
     "@oneblink/flow-types": "github:oneblink/flow-types",
-    "eslint": "^7.5.0",
+    "eslint": "^7.8.1",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-prettier": "^3.1.4",
     "fixpack": "^3.0.6",
-    "flow-bin": "^0.132.0",
-    "jest": "^26.1.0",
-    "prettier": "^2.0.5",
+    "flow-bin": "^0.133.0",
+    "jest": "^26.4.2",
+    "prettier": "^2.1.1",
     "typescript": "^3.9.7"
   },
   "directories": {

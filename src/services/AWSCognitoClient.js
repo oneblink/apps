@@ -119,11 +119,10 @@ export default class AWSCognitoClient {
 
   _isSessionValid() /* : boolean */ {
     const expiresAt = localStorage.getItem(this.EXPIRES_AT)
-    const expiresAtInMilliseconds = parseInt(expiresAt, 10)
-    return (
-      Number.isNaN(expiresAtInMilliseconds) &&
-      expiresAtInMilliseconds > Date.now()
-    )
+    if (!expiresAt) {
+      return false
+    }
+    return parseInt(expiresAt, 10) > Date.now()
   }
 
   async _refreshSession() /* : Promise<void> */ {
@@ -149,7 +148,6 @@ export default class AWSCognitoClient {
       this._storeAuthenticationResult(result.AuthenticationResult)
     } catch (error) {
       console.warn('Error while attempting to refresh session', error)
-      await this.logout()
       throw new OneBlinkAppsError('Unable to refresh session', {
         originalError: error,
         requiresLogin: true,

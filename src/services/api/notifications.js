@@ -20,7 +20,7 @@ const subscriptionErrorHandler = (error) => {
   switch (error.status) {
     case 401: {
       throw new OneBlinkAppsError(
-        'Please login again to subscribe to notifications.',
+        'You cannot subscribe to notifications until you logged in. Please login and try again.',
         {
           originalError: error,
           httpStatusCode: error.status,

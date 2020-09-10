@@ -9,6 +9,7 @@ import {
 } from './services/forms-key'
 import {
   init as initCognito,
+  registerAuthListener,
   isLoggedIn,
   loginHostedUI,
   loginUsernamePassword,
@@ -22,6 +23,7 @@ import { getRequest, postRequest } from './services/fetch'
 import tenants from './tenants'
 
 export {
+  registerAuthListener,
   loginHostedUI,
   loginUsernamePassword,
   handleAuthentication,

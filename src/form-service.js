@@ -28,7 +28,7 @@ export async function getForms(
       switch (error.status) {
         case 401: {
           throw new OneBlinkAppsError(
-            'The application you are attempting to view requires authentication. Please contact your administrator to gain credentials for access.',
+            'The application you are attempting to view requires authentication. Please login and try again.',
             {
               originalError: error,
               requiresLogin: true,
@@ -109,7 +109,7 @@ export async function getForm(
         switch (error.status) {
           case 401: {
             throw new OneBlinkAppsError(
-              'The form you are attempting to complete requires authentication. Please contact your administrator to gain credentials for access.',
+              'The form you are attempting to complete requires authentication. Please login and try again.',
               {
                 originalError: error,
                 requiresLogin: true,

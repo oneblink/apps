@@ -31,6 +31,15 @@ function init(cognitoServiceData /* : CognitoServiceData  */) {
   })
 }
 
+function registerAuthListener(listener /* : () => mixed */) /* : () => void */ {
+  if (!awsCognitoClient) {
+    throw new Error(
+      '"authService" has not been initiated. You must call the init() function before attempting to register a listener.'
+    )
+  }
+  return awsCognitoClient.registerListener(listener)
+}
+
 async function loginUsernamePassword(
   username /* : string */,
   password /* : string */
@@ -94,7 +103,7 @@ async function changePassword(
 async function forgotPassword(username /* : string */) {
   if (!awsCognitoClient) {
     throw new Error(
-      '"authService" has not been initiated. You must call the init() function before starting the flow password process.'
+      '"authService" has not been initiated. You must call the init() function before starting the forgot password process.'
     )
   }
 
@@ -209,6 +218,7 @@ export function getUsername() /* : string | null */ {
 
 export {
   init,
+  registerAuthListener,
   loginUsernamePassword,
   loginHostedUI,
   handleAuthentication,

@@ -33,7 +33,7 @@ export const generateSubmissionCredentials = async (
       }
       case 401: {
         throw new OneBlinkAppsError(
-          'The form you are attempting to complete requires authentication. Please contact your administrator to gain credentials for access.',
+          'The form you are attempting to complete requires authentication. Please login and try again.',
           {
             requiresLogin: true,
             originalError: error,

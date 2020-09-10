@@ -90,7 +90,7 @@ export async function getJobs(
       switch (error.status) {
         case 401: {
           throw new OneBlinkAppsError(
-            `You need to log in to see your ${jobsLabel}. Please contact your administrator to gain credentials for access.`,
+            `You need to log in to see your ${jobsLabel}. Please login and try again.`,
             {
               originalError: error,
               requiresLogin: true,

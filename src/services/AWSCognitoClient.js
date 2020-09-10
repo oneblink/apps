@@ -3,8 +3,6 @@
 import { EventListeners } from 'aws-sdk'
 import CognitoIdentityServiceProvider from 'aws-sdk/clients/cognitoidentityserviceprovider'
 
-import OneBlinkAppsError from './errors/oneBlinkAppsError'
-
 /* ::
 type AWSAuthenticationResult = {
   AccessToken: string,
@@ -40,6 +38,7 @@ export default class AWSCognitoClient {
   cognitoIdentityServiceProvider: typeof CognitoIdentityServiceProvider
   loginDomain: string | void
   redirectUri: string | void
+  listeners: Array<() => mixed>
   */
   constructor(
     {
@@ -61,6 +60,7 @@ export default class AWSCognitoClient {
       throw new TypeError('"region" is required in constructor')
     }
 
+    this.listeners = []
     this.redirectUri = redirectUri
     this.loginDomain = loginDomain
     this.clientId = clientId
@@ -89,6 +89,17 @@ export default class AWSCognitoClient {
     return `COGNITO_${this.clientId}_PKCE_CODE_VERIFIER`
   }
 
+  _executeListeners() {
+    for (const listener of this.listeners) {
+      try {
+        listener()
+      } catch (error) {
+        // Ignore error from listeners
+        console.warn('AWSCognitoClient listener error', error)
+      }
+    }
+  }
+
   _storeAuthenticationResult(
     authenticationResult /* : AWSAuthenticationResult */
   ) {
@@ -103,6 +114,17 @@ export default class AWSCognitoClient {
         authenticationResult.RefreshToken
       )
     }
+
+    this._executeListeners()
+  }
+
+  _removeAuthenticationResult() {
+    localStorage.removeItem(this.EXPIRES_AT)
+    localStorage.removeItem(this.ACCESS_TOKEN)
+    localStorage.removeItem(this.ID_TOKEN)
+    localStorage.removeItem(this.REFRESH_TOKEN)
+
+    this._executeListeners()
   }
 
   _getAccessToken() /* : string | void */ {
@@ -148,10 +170,19 @@ export default class AWSCognitoClient {
       this._storeAuthenticationResult(result.AuthenticationResult)
     } catch (error) {
       console.warn('Error while attempting to refresh session', error)
-      throw new OneBlinkAppsError('Unable to refresh session', {
-        originalError: error,
-        requiresLogin: true,
-      })
+      this._removeAuthenticationResult()
+      throw error
+    }
+  }
+
+  registerListener(listener /* : () => mixed */) /* : () => void */ {
+    this.listeners.push(listener)
+
+    return () => {
+      const index = this.listeners.indexOf(listener)
+      if (index !== -1) {
+        this.listeners.splice(index, 1)
+      }
     }
   }
 
@@ -365,12 +396,9 @@ export default class AWSCognitoClient {
       if (!error.requiresLogin) {
         throw error
       }
+    } finally {
+      this._removeAuthenticationResult()
     }
-
-    localStorage.removeItem(this.EXPIRES_AT)
-    localStorage.removeItem(this.ACCESS_TOKEN)
-    localStorage.removeItem(this.ID_TOKEN)
-    localStorage.removeItem(this.REFRESH_TOKEN)
   }
 
   async getIdToken() /* : Promise<string | void> */ {

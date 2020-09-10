@@ -11,6 +11,7 @@ import { authService } from '@oneblink/apps'
 ```
 
 - [`init()`](#init)
+- [`registerAuthListener()`](#registerauthlistener)
 - [`isLoggedIn()`](#isloggedin)
 - [`loginHostedUI()`](#loginhostedui) - requires `init()` to be called first
 - [`handleAuthentication()`](#handleauthentication) - requires `init()` to be called first
@@ -34,6 +35,21 @@ Initialize the service with required configuration. **This must be done before u
 authService.init({
   oAuthClientId: 'YOUR_OAUTH_CLIENT_ID',
 })
+```
+
+### `registerAuthListener()`
+
+Register a lister function that will be call when authentication tokens are updated or removed.
+
+```js
+const listener = async () => {
+  // Check if the user is logged in still
+  const isLoggedIn = authService.isLoggedIn()
+}
+const deregister = await authService.registerAuthListener(listener)
+
+// When no longer needed, remember to deregister the listener
+deregister()
 ```
 
 ### `isLoggedIn()`
@@ -147,23 +163,23 @@ if (profile) {
 
 #### Profile
 
-| Property                    | Type                            | Description                                                 |
-| --------------------------- | ------------------------------- | ----------------------------------------------------------- |
-| `isSAMLUser`                | `boolean`                       | `true` if the user logged in using a SAML provider          |
-| `providerType`              | `'Cognito' | 'SAML' | 'Google'` | Which provider was used to login                            |
-| `providerUserId`            | `string`                        | The id of the user from the login provider                  |
-| `userId`                    | `string`                        | The id of the user from OneBlink                            |
-| `username`                  | `string`                        | The username used to login                                  |
-| `email`                     | `string | undefined`            | The user's email address                                    |
-| `firstName`                 | `string | undefined`            | The user's first name                                       |
-| `lastName`                  | `string | undefined`            | The user's last name                                        |
-| `fullName`                  | `string | undefined`            | The user's full name                                        |
-| `picture`                   | `string | undefined`            | A URL to a picture of the user                              |
-| `role`                      | `string | undefined`            | The user's role from a SAML configuration                   |
-| `supervisor`                | `object | undefined`            | The user's supervisor information from a SAML configuration |
-| `supervisor.fullName`       | `string | undefined`            | The user's supervisor's full name                           |
-| `supervisor.email`          | `string | undefined`            | The user's supervisor's full email address                  |
-| `supervisor.providerUserId` | `string | undefined`            | The user's supervisor's user id from the login provider     |
+| Property                    | Type                                          | Description                                                 |
+| --------------------------- | --------------------------------------------- | ----------------------------------------------------------- |
+| `isSAMLUser`                | `boolean`                                     | `true` if the user logged in using a SAML provider          |
+| `providerType`              | `"Cognito"` &#124; `"SAML"` &#124; `"Google"` | Which provider was used to login                            |
+| `providerUserId`            | `string`                                      | The id of the user from the login provider                  |
+| `userId`                    | `string`                                      | The id of the user from OneBlink                            |
+| `username`                  | `string`                                      | The username used to login                                  |
+| `email`                     | `string` &#124; `undefined`                   | The user's email address                                    |
+| `firstName`                 | `string` &#124; `undefined`                   | The user's first name                                       |
+| `lastName`                  | `string` &#124; `undefined`                   | The user's last name                                        |
+| `fullName`                  | `string` &#124; `undefined`                   | The user's full name                                        |
+| `picture`                   | `string` &#124; `undefined`                   | A URL to a picture of the user                              |
+| `role`                      | `string` &#124; `undefined`                   | The user's role from a SAML configuration                   |
+| `supervisor`                | `object` &#124; `undefined`                   | The user's supervisor information from a SAML configuration |
+| `supervisor.fullName`       | `string` &#124; `undefined`                   | The user's supervisor's full name                           |
+| `supervisor.email`          | `string` &#124; `undefined`                   | The user's supervisor's full email address                  |
+| `supervisor.providerUserId` | `string` &#124; `undefined`                   | The user's supervisor's user id from the login provider     |
 
 ### `getUserFriendlyName()`
 

@@ -7,10 +7,8 @@ import { getCognitoIdToken } from './cognito'
 
 let formsKeyToken = null
 
-export function setFormsKeyToken(
-  jwtToken /* : string */
-) /* : string | void */ {
-  formsKeyToken = jwtToken
+export function setFormsKeyToken(jwtToken /* : ?string */) /* : void */ {
+  formsKeyToken = jwtToken || null
 }
 
 export function getFormsKeyId() /* : string | void */ {

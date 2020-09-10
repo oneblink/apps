@@ -41,6 +41,7 @@ declare namespace authService {
   function getIdToken(): Promise<string | undefined>
   function getUserProfile(): UserProfile | null
   function logout(): Promise<void>
+  function registerAuthListener(listener: () => unknown): () => void
 }
 
 declare class OneBlinkAppsError extends Error {

@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [`authService.changePassword()`](./docs/auth-service.md#changepassword)
 - [`authService.forgotPassword()`](./docs/auth-service.md#forgotpassword)
 - [`authService.registerAuthListener()`](./docs/auth-service.md#registerauthlistener)
+- `preferred_username` attribute for SAML Users now stored with submission
 
 ### Removed
 

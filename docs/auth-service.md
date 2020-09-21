@@ -170,6 +170,7 @@ if (profile) {
 | `providerUserId`            | `string`                                      | The id of the user from the login provider                  |
 | `userId`                    | `string`                                      | The id of the user from OneBlink                            |
 | `username`                  | `string`                                      | The username used to login                                  |
+| `preferred_username`        | `string` &#124; `undefined`                   | The username provided by a SAML provider                    |
 | `email`                     | `string` &#124; `undefined`                   | The user's email address                                    |
 | `firstName`                 | `string` &#124; `undefined`                   | The user's first name                                       |
 | `lastName`                  | `string` &#124; `undefined`                   | The user's last name                                        |

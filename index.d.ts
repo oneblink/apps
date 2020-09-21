@@ -21,7 +21,7 @@ declare namespace authService {
   function init(options: { oAuthClientId: string }): void
   function getUserFriendlyName(): string | null
   function getFormsKeyId(): string | void
-  function setFormsKeyToken(formsKeyToken: string): void
+  function setFormsKeyToken(formsKeyToken?: string): void
   function isAuthorised(formsAppId: number): Promise<boolean>
   function requestAccess(formsAppId: number): Promise<void>
   function loginHostedUI(identityProvider?: string): Promise<string>

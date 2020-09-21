@@ -156,7 +156,7 @@ function getUserProfile() /* : {
     fullName: ?string,
     email: ?string,
     providerUserId: ?string,
-  },
+  }
 } | null */ {
   if (!awsCognitoClient) {
     return null
@@ -200,7 +200,7 @@ function getUserProfile() /* : {
     user.providerUserId = userProfile.identities[0].userId
     user.isSAMLUser = user.providerType === 'SAML'
     if (user.isSAMLUser) {
-      user.username = user.providerUserId
+      user.username = userProfile.preferred_username || user.providerUserId
     }
   }
 

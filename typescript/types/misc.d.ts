@@ -12,7 +12,6 @@ export interface UserProfile {
   fullName: string | NoU
   picture: string | NoU
   role: string | NoU
-  preferred_username: string | NoU
   supervisor:
     | {
         fullName: string | NoU

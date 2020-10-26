@@ -10,8 +10,10 @@ import { localisationService } from '@oneblink/apps'
 
 - [`locale`](#locale)
 - [`formatDate()`](#formatdate)
+- [`formatDateLong()`](#formatdatelong)
 - [`formatTime()`](#formattime)
 - [`formatDatetime()`](#formatdatetime)
+- [`formatDatetimeLong()`](#formatdatetimelong)
 - [`formatCurrency()`](#formatcurrency)
 
 ### `locale`
@@ -24,7 +26,7 @@ const locale = localisationService.locale
 
 ### `formatDate()`
 
-Format a `Date` as a `string` that just contains the date portion
+Format a `Date` as a `string` that just contains the date portion e.g. _31/01/2020_
 
 ```js
 const date = new Date()
@@ -32,9 +34,19 @@ const text = localisationService.formatDate(date)
 // Display text
 ```
 
+### `formatDateLong()`
+
+Format a `Date` as a `string` that just contains the date portion in a long format e.g. _Thursday, 2 January 2020_
+
+```js
+const date = new Date()
+const text = localisationService.formatDateLong(date)
+// Display text
+```
+
 ### `formatTime()`
 
-Format a `Date` as a `string` that just contains the time portion
+Format a `Date` as a `string` that just contains the time portion e.g. _5:31 pm_
 
 ```js
 const date = new Date()
@@ -44,7 +56,17 @@ const text = localisationService.formatTime(date)
 
 ### `formatDatetime()`
 
-Format a `Date` as a `string` that contains the date and time portions
+Format a `Date` as a `string` that contains the date and time portions e.g. _31/01/2020 5:31 pm_
+
+```js
+const date = new Date()
+const text = localisationService.formatDatetime(date)
+// Display text
+```
+
+### `formatDatetimeLong()`
+
+Format a `Date` as a `string` that contains the date and time portions in a long format e.g. _Thursday, 2 January 2020 5:31 pm_
 
 ```js
 const date = new Date()
@@ -54,7 +76,7 @@ const text = localisationService.formatDatetime(date)
 
 ### `formatCurrency()`
 
-Format a `number` as a `string` represented as a currency
+Format a `number` as a `string` represented as a currency e.g. _\$123.31_
 
 ```js
 const amount = 123.321

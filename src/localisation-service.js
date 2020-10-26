@@ -30,12 +30,20 @@ class LocalisationService {
     return tenants.current.intlFormats.date.format(value)
   }
 
+  formatDateLong(value /* : Date */) /* : string */ {
+    return tenants.current.intlFormats.dateLong.format(value)
+  }
+
   formatTime(value /* : Date */) /* : string */ {
     return tenants.current.intlFormats.time.format(value)
   }
 
   formatDatetime(value /* : Date */) {
     return `${this.formatDate(value)} ${this.formatTime(value)}`
+  }
+
+  formatDatetimeLong(value /* : Date */) {
+    return `${this.formatDateLong(value)} ${this.formatTime(value)}`
   }
 
   formatCurrency(value /* : number */) /* : string */ {

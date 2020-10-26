@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Added
+
+- [`localisationService.formatDateLong()`](./docs/localisation-service.md#formatdatelong)
+- [`localisationService.formatDatetimeLong()`](./docs/localisation-service.md#formatdatetimelong)
+
 ### 0.2.0 (2020-10-15)
 
 ### Added

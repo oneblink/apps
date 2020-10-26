@@ -29,11 +29,25 @@ test.skip('it should format currency, date and times correctly', () => {
   expect(localisationService.formatDate(date1)).toBe('21/12/2020')
   expect(localisationService.formatDate(date2)).toBe('02/01/2020')
 
+  expect(localisationService.formatDateLong(date1)).toBe(
+    'Monday, 21 December 2020'
+  )
+  expect(localisationService.formatDateLong(date2)).toBe(
+    'Thursday, 2 January 2020'
+  )
+
   expect(localisationService.formatTime(date1)).toBe('5:56 pm')
   expect(localisationService.formatTime(date2)).toBe('12:56 am')
 
   expect(localisationService.formatDatetime(date1)).toBe('21/12/2020 5:56 pm')
   expect(localisationService.formatDatetime(date2)).toBe('02/01/2020 12:56 am')
+
+  expect(localisationService.formatDatetimeLong(date1)).toBe(
+    'Monday, 21 December 2020 5:56 pm'
+  )
+  expect(localisationService.formatDatetimeLong(date2)).toBe(
+    'Thursday, 2 January 2020 12:56 am'
+  )
 
   // CivicPlus Tenant
   tenants.useCivicPlus()
@@ -49,9 +63,23 @@ test.skip('it should format currency, date and times correctly', () => {
   expect(localisationService.formatDate(date1)).toBe('12/21/2020')
   expect(localisationService.formatDate(date2)).toBe('01/02/2020')
 
+  expect(localisationService.formatDateLong(date1)).toBe(
+    'Monday, December 21, 2020'
+  )
+  expect(localisationService.formatDateLong(date2)).toBe(
+    'Thursday, January 2, 2020'
+  )
+
   expect(localisationService.formatTime(date1)).toBe('5:56 PM')
   expect(localisationService.formatTime(date2)).toBe('12:56 AM')
 
   expect(localisationService.formatDatetime(date1)).toBe('12/21/2020 5:56 PM')
   expect(localisationService.formatDatetime(date2)).toBe('01/02/2020 12:56 AM')
+
+  expect(localisationService.formatDatetimeLong(date1)).toBe(
+    'Monday, December 21, 2020 5:56 PM'
+  )
+  expect(localisationService.formatDatetimeLong(date2)).toBe(
+    'Thursday, January 2, 2020 12:56 AM'
+  )
 })

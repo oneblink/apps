@@ -225,11 +225,10 @@ declare namespace formService {
 
 declare namespace localisationService {
   function formatDate(value: Date): string
-
+  function formatDateLong(value: Date): string
   function formatTime(value: Date): string
-
   function formatDatetime(value: Date): string
-
+  function formatDatetimeLong(value: Date): string
   function formatCurrency(value: number): string
 }
 

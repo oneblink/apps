@@ -10,6 +10,7 @@ type OneBlinkAppsTenant = {|
   intlFormats: {
     currency: Intl$NumberFormat,
     date: Intl$DateTimeFormat,
+    dateLong: Intl$DateTimeFormat,
     time: Intl$DateTimeFormat,
   },
 |}
@@ -35,6 +36,9 @@ const generateFormatters = (locale) => {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
+    }),
+    dateLong: new Intl.DateTimeFormat(locale, {
+      dateStyle: 'full',
     }),
     time: new Intl.DateTimeFormat(locale, {
       timeStyle: 'short',

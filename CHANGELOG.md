@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [`localisationService.formatDateLong()`](./docs/localisation-service.md#formatdatelong)
 - [`localisationService.formatDatetimeLong()`](./docs/localisation-service.md#formatdatetimelong)
 
+### Fixed
+
+- hard coded `formsAppId` on draft submissions
+
 ### 0.2.0 (2020-10-15)
 
 ### Added

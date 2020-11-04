@@ -157,9 +157,17 @@ export function handlePaymentQuerystring(
 }
 
 export async function handlePaymentSubmissionEvent(
-  formSubmission /* : FormSubmission */,
-  paymentSubmissionEvent /* : PaymentSubmissionEvent */,
-  paymentReceiptUrl /* : string */
+  {
+    formSubmission,
+    paymentSubmissionEvent,
+    paymentReceiptUrl,
+    submissionId,
+  } /* : {
+  formSubmission: FormSubmission,
+  paymentSubmissionEvent: PaymentSubmissionEvent,
+  paymentReceiptUrl: string,
+  submissionId?: string,
+} */
 ) /* : Promise<FormSubmissionResult | void> */ {
   console.log('Attempting to handle submission with payment submission event')
   const { definition: form, submission } = formSubmission
@@ -196,36 +204,22 @@ export async function handlePaymentSubmissionEvent(
     )
   }
 
-  let path
-  switch (paymentSubmissionEvent.type) {
-    case 'CP_PAY': {
-      path = `/forms/${form.id}/cp-pay-payment`
-      break
-    }
-    case 'BPOINT': {
-      path = `/forms/${form.id}/bpoint-payment`
-      break
-    }
-    default: {
-      throw new OneBlinkAppsError(
-        'It looks like you are attempting to make a payment using an unsupported payment method.'
-      )
-    }
-  }
-  const { hostedFormUrl, submissionId } = await generatePaymentConfiguration(
-    path,
+  const paymentConfiguration = await generatePaymentConfiguration(
+    form,
+    paymentSubmissionEvent,
     {
       amount,
       redirectUrl: paymentReceiptUrl,
+      submissionId,
     }
   )
   console.log('Created Payment configuration to start transaction')
   const submissionResult = Object.assign({}, formSubmission, {
     submissionTimestamp: null,
-    submissionId,
+    submissionId: paymentConfiguration.submissionId,
     payment: {
       submissionEvent: paymentSubmissionEvent,
-      hostedFormUrl,
+      hostedFormUrl: paymentConfiguration.hostedFormUrl,
     },
     isInPendingQueue: false,
     isOffline: false,

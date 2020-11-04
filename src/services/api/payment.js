@@ -6,9 +6,30 @@ import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 
 const generatePaymentConfiguration = (
-  path /* : string */,
-  payload /* : mixed */
+  form /* : Form */,
+  paymentSubmissionEvent /*: PaymentSubmissionEvent */,
+  payload /* : {
+    amount: number,
+    redirectUrl: string,
+    submissionId?: string,
+  } */
 ) /* : Promise<{ hostedFormUrl: string, submissionId: string }> */ => {
+  let path
+  switch (paymentSubmissionEvent.type) {
+    case 'CP_PAY': {
+      path = `/forms/${form.id}/cp-pay-payment`
+      break
+    }
+    case 'BPOINT': {
+      path = `/forms/${form.id}/bpoint-payment`
+      break
+    }
+    default: {
+      throw new OneBlinkAppsError(
+        'It looks like you are attempting to make a payment using an unsupported payment method.'
+      )
+    }
+  }
   const url = `${tenants.current.apiOrigin}${path}`
   console.log('Attempting to generate payment configuration', url)
   return postRequest(url, payload).catch((error) => {

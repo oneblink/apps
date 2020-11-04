@@ -162,14 +162,14 @@ async function submit(
   }
 
   if (paymentSubmissionEvent && paymentReceiptUrl) {
-    const paymentSubmissionResult = await handlePaymentSubmissionEvent(
-      Object.assign({}, formSubmission, {
+    const paymentSubmissionResult = await handlePaymentSubmissionEvent({
+      formSubmission: Object.assign({}, formSubmission, {
         isOffline: false,
         isInPendingQueue: false,
       }),
       paymentSubmissionEvent,
-      paymentReceiptUrl
-    )
+      paymentReceiptUrl,
+    })
     if (paymentSubmissionResult) {
       return paymentSubmissionResult
     }

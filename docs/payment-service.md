@@ -15,13 +15,13 @@ import { paymentService } from '@oneblink/apps'
 
 #### Transaction
 
-| Property         | Type            | Description                                            |
-| ---------------- | --------------- | ------------------------------------------------------ |
-| `isSuccess`      | `boolean`       | `true` if the transaction was successful               |
-| `errorMessage`   | `string | null` | The error message to display if `isSuccess` is `false` |
-| `id`             | `string | null` | The id the transaction                                 |
-| `creditCardMask` | `string | null` | A mask of the credit card used e.g. _1234....7890_     |
-| `amount`         | `number | null` | The total amount charged                               |
+| Property         | Type               | Description                                            |
+| ---------------- | ------------------ | ------------------------------------------------------ |
+| `isSuccess`      | `boolean`          | `true` if the transaction was successful               |
+| `errorMessage`   | `string` \| `null` | The error message to display if `isSuccess` is `false` |
+| `id`             | `string` \| `null` | The id the transaction                                 |
+| `creditCardMask` | `string` \| `null` | A mask of the credit card used e.g. _1234....7890_     |
+| `amount`         | `number` \| `null` | The total amount charged                               |
 
 ### `handlePaymentSubmissionEvent()`
 
@@ -46,11 +46,14 @@ const paymentSubmissionEvent = {
   },
 }
 const paymentReceiptUrl = `${window.location.origin}/payment-receipt`
-const paymentSubmissionResult = await paymentService.handlePaymentSubmissionEvent(
+// Pass submissionId as a UUID if retrying a failed transaction for the same submission data
+const submissionId = undefined
+const paymentSubmissionResult = await paymentService.handlePaymentSubmissionEvent({
   formSubmission,
   paymentSubmissionEvent,
-  paymentReceiptUrl
-)
+  paymentReceiptUrl,
+  submissionId
+})
 if (paymentSubmissionResult) {
   window.location.href = paymentSubmissionResult.payment.hostedFormUrl
 }

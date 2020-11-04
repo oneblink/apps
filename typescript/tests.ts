@@ -253,20 +253,21 @@ const testPaymentService = async () => {
     str = errorMessage
   }
 
-  const result = await paymentService.handlePaymentSubmissionEvent(
-    {
+  const result = await paymentService.handlePaymentSubmissionEvent({
+    paymentReceiptUrl: 'https://domain.com/path',
+    formSubmission: {
       ...formSubmissionResult,
       captchaTokens: ['sasds'],
     },
-    {
+    paymentSubmissionEvent: {
       isDraft: false,
       type: 'CP_PAY',
       configuration: {
         elementId: 'elementid',
         gatewayId: 'sasds',
       },
-    }
-  )
+    },
+  })
   if (result) {
     const {
       draftId,

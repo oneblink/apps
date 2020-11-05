@@ -1,17 +1,11 @@
-// Type definitions for @oneblink/apps 0.1
-// Project: https://github.com/baz/oneblink/apps
-// Definitions by: OneBlink Developers <https://github.com/oneblink>
-// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
-// TypeScript Version: 3.9
-
 import type {
   NoU,
   GenericObject,
   UserProfile,
   QueryParameters,
-} from './typescript/types/misc'
-import * as FormTypes from './typescript/types/forms'
-import * as SubmissionEventTypes from './typescript/types/submissionEvents'
+} from './types/misc'
+import * as FormTypes from './types/forms'
+import * as SubmissionEventTypes from './types/submissionEvents'
 
 declare namespace offlineService {
   function isOffline(): boolean

@@ -1,16 +1,14 @@
 {
   "compilerOptions": {
+    "target": "es5",
     "module": "commonjs",
     "lib": ["es6", "webworker"],
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "strictFunctionTypes": true,
-    "strictNullChecks": true,
-    "baseUrl": "../",
-    "typeRoots": ["../"],
-    "types": [],
-    "noEmit": true,
+    "allowJs": true,
+    "declaration": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
     "forceConsistentCasingInFileNames": true
   },
-  "files": ["index.d.ts", "./typescript/tests.ts"]
+  "include": ["./src"]
 }

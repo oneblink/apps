@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.10.4",
-    "@oneblink/flow-types": "github:oneblink/flow-types",
+    "@oneblink/types": "github:oneblink/types",
     "eslint": "^7.8.1",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-prettier": "^3.1.4",
@@ -39,10 +39,7 @@
     "npm": ">=6"
   },
   "files": [
-    "src",
-    "index.js",
-    "index.d.ts",
-    "typescript/types"
+    "dist"
   ],
   "homepage": "https://github.com/oneblink/apps",
   "keywords": [],

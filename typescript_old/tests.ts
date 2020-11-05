@@ -12,7 +12,7 @@ import {
   FormTypes,
   useTenantCivicPlus,
   useTenantOneBlink,
-} from '../index'
+} from './index'
 
 // OFFLINE SERVICE
 const isOffline: boolean = offlineService.isOffline()

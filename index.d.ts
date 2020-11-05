@@ -103,10 +103,12 @@ declare namespace paymentService {
     }
     submissionResult: FormTypes.FormSubmissionResult
   }>
-  function handlePaymentSubmissionEvent(
-    formSubmission: FormTypes.FormSubmission,
+  function handlePaymentSubmissionEvent(options: {
+    formSubmission: FormTypes.FormSubmission
     paymentSubmissionEvent: SubmissionEventTypes.PaymentSubmissionEvent
-  ): Promise<FormTypes.FormSubmissionResult | void>
+    paymentReceiptUrl: string
+    submissionId?: string
+  }): Promise<FormTypes.FormSubmissionResult | void>
 }
 
 declare namespace prefillService {

@@ -2,12 +2,14 @@
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
-    "lib": ["es6", "webworker"],
-    "allowJs": true,
+    "lib": ["es6", "webworker", "dom"],
+    //"allowJs": true,
     "declaration": true,
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
     "forceConsistentCasingInFileNames": true
   },
   "include": ["./src"]

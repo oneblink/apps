@@ -1,15 +1,11 @@
-// @flow
-
 import { EventListeners } from 'aws-sdk'
-import CognitoIdentityServiceProvider from 'aws-sdk/clients/cognitoidentityserviceprovider'
-
-/* ::
-type AWSAuthenticationResult = {
-  AccessToken: string,
-  ExpiresIn: number,
-  IdToken: string,
-  TokenType: string,
-  RefreshToken?: string,
+import { CognitoIdentityServiceProvider } from 'aws-sdk'
+interface AWSAuthenticationResult {
+  AccessToken: string
+  ExpiresIn: number
+  IdToken: string
+  TokenType: string
+  RefreshToken?: string
 }
 
 export type AWSCognitoAuthChallenge = {
@@ -19,40 +15,37 @@ export type AWSCognitoAuthChallenge = {
     | 'CUSTOM_CHALLENGE'
     | 'DEVICE_SRP_AUTH'
     | 'DEVICE_PASSWORD_VERIFIER'
-    | 'NEW_PASSWORD_REQUIRED',
-  Session: string,
-  ChallengeParameters: { [key: string]: string },
-  AuthenticationResult: ?AWSAuthenticationResult,
+    | 'NEW_PASSWORD_REQUIRED'
+  Session: string
+  ChallengeParameters: { [key: string]: string }
+  AuthenticationResult?: AWSAuthenticationResult
 }
-*/
 
 const unsignedAWSRequest = async (request) => {
   request.removeListener('validate', EventListeners.Core.VALIDATE_CREDENTIALS)
+  // @ts-expect-error
   request.removeListener('sign', EventListeners.Core.SIGN)
   return request.promise()
 }
 
 export default class AWSCognitoClient {
-  /* ::
   clientId: string
-  cognitoIdentityServiceProvider: typeof CognitoIdentityServiceProvider
+  cognitoIdentityServiceProvider: CognitoIdentityServiceProvider
   loginDomain: string | void
   redirectUri: string | void
-  listeners: Array<() => mixed>
-  */
-  constructor(
-    {
-      clientId,
-      region,
-      loginDomain,
-      redirectUri,
-    } /* : {
-      clientId: string,
-      region: string,
-      redirectUri?: string,
-      loginDomain?: string,
-    } */
-  ) {
+  listeners: Array<() => unknown>
+
+  constructor({
+    clientId,
+    region,
+    loginDomain,
+    redirectUri,
+  }: {
+    clientId: string
+    region: string
+    redirectUri?: string
+    loginDomain?: string
+  }) {
     if (!clientId) {
       throw new TypeError('"clientId" is required in constructor')
     }
@@ -100,9 +93,7 @@ export default class AWSCognitoClient {
     }
   }
 
-  _storeAuthenticationResult(
-    authenticationResult /* : AWSAuthenticationResult */
-  ) {
+  _storeAuthenticationResult(authenticationResult: AWSAuthenticationResult) {
     // Take off 5 seconds to ensure a request does not become unauthenticated mid request
     const expiresAt = authenticationResult.ExpiresIn * 1000 + Date.now() - 5000
     localStorage.setItem(this.EXPIRES_AT, expiresAt.toString())
@@ -127,19 +118,19 @@ export default class AWSCognitoClient {
     this._executeListeners()
   }
 
-  _getAccessToken() /* : string | void */ {
+  _getAccessToken(): string | void {
     return localStorage.getItem(this.ACCESS_TOKEN) || undefined
   }
 
-  _getIdToken() /* : string | void */ {
+  _getIdToken(): string | void {
     return localStorage.getItem(this.ID_TOKEN) || undefined
   }
 
-  _getRefreshToken() /* : string | void */ {
+  _getRefreshToken(): string | void {
     return localStorage.getItem(this.REFRESH_TOKEN) || undefined
   }
 
-  _isSessionValid() /* : boolean */ {
+  _isSessionValid(): boolean {
     const expiresAt = localStorage.getItem(this.EXPIRES_AT)
     if (!expiresAt) {
       return false
@@ -147,7 +138,7 @@ export default class AWSCognitoClient {
     return parseInt(expiresAt, 10) > Date.now()
   }
 
-  async _refreshSession() /* : Promise<void> */ {
+  async _refreshSession(): Promise<void> {
     if (this._isSessionValid()) {
       return
     }
@@ -175,7 +166,7 @@ export default class AWSCognitoClient {
     }
   }
 
-  registerListener(listener /* : () => mixed */) /* : () => void */ {
+  registerListener(listener: () => unknown): () => void {
     this.listeners.push(listener)
 
     return () => {
@@ -187,9 +178,9 @@ export default class AWSCognitoClient {
   }
 
   async loginUsernamePassword(
-    username /* : string */,
-    password /* : string */
-  ) /* : Promise<((newPassword: string) => Promise<void>) | void> */ {
+    username: string,
+    password: string
+  ): Promise<((newPassword: string) => Promise<void>) | void> {
     const loginResult = await unsignedAWSRequest(
       this.cognitoIdentityServiceProvider.initiateAuth({
         AuthFlow: 'USER_PASSWORD_AUTH',
@@ -229,9 +220,7 @@ export default class AWSCognitoClient {
     throw new Error('Could not authenticate user.')
   }
 
-  async loginHostedUI(
-    identityProviderName /* : string | void */
-  ) /* : Promise<void> */ {
+  async loginHostedUI(identityProviderName: string | void): Promise<void> {
     const loginDomain = this.loginDomain
     const redirectUri = this.redirectUri
     if (!loginDomain || !redirectUri) {
@@ -270,7 +259,7 @@ export default class AWSCognitoClient {
         : '')
   }
 
-  async handleAuthentication() /* : Promise<void> */ {
+  async handleAuthentication(): Promise<void> {
     const loginDomain = this.loginDomain
     const redirectUri = this.redirectUri
     if (!loginDomain || !redirectUri) {
@@ -341,9 +330,9 @@ export default class AWSCognitoClient {
   }
 
   async changePassword(
-    existingPassword /* : string */,
-    newPassword /* : string */
-  ) /* : Promise<void> */ {
+    existingPassword: string,
+    newPassword: string
+  ): Promise<void> {
     const accessToken = this.getAccessToken()
     await unsignedAWSRequest(
       this.cognitoIdentityServiceProvider.changePassword({
@@ -355,8 +344,8 @@ export default class AWSCognitoClient {
   }
 
   async forgotPassword(
-    username /* : string */
-  ) /* : Promise<(code: string, password: string) => Promise<void>> */ {
+    username: string
+  ): Promise<(code: string, password: string) => Promise<void>> {
     await unsignedAWSRequest(
       this.cognitoIdentityServiceProvider.forgotPassword({
         ClientId: this.clientId,
@@ -376,7 +365,7 @@ export default class AWSCognitoClient {
     }
   }
 
-  async logout() /* : Promise<void> */ {
+  async logout(): Promise<void> {
     try {
       const refreshToken = this._getRefreshToken()
       // Refresh session to allow access token to perform sign out
@@ -401,13 +390,13 @@ export default class AWSCognitoClient {
     }
   }
 
-  async getIdToken() /* : Promise<string | void> */ {
+  async getIdToken(): Promise<string | void> {
     await this._refreshSession()
 
     return this._getIdToken()
   }
 
-  async getAccessToken() /* : Promise<string | void> */ {
+  async getAccessToken(): Promise<string | void> {
     await this._refreshSession()
 
     return this._getAccessToken()
@@ -418,18 +407,23 @@ export default class AWSCognitoClient {
 // GENERAL HELPER FUNCTIONS
 
 // Parse a query string into an object
-function parseQueryString(string) {
+function parseQueryString(string: string) {
   if (string == '') {
     return {}
   }
-  var segments = string.split('&').map((s) => s.split('='))
-  var queryString = {}
+  const segments = string.split('&').map((s) => s.split('='))
+  const queryString: UnknownObject = {}
   segments.forEach((s) => (queryString[s[0]] = s[1]))
   return queryString
 }
 
 // Make a POST request and parse the response as JSON
-function sendPostRequest(url, params, success, error) {
+function sendPostRequest(
+  url: string,
+  params: any,
+  success: (value?: unknown) => void,
+  error: string
+) {
   const request = new XMLHttpRequest()
   request.open('POST', url, true)
   request.setRequestHeader(

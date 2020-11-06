@@ -1,4 +1,4 @@
-import { FormTypes, SubmissionTypes } from '@oneblink/types'
+import { SubmissionTypes } from '@oneblink/types'
 import { postRequest, putRequest } from '../fetch'
 import { isLoggedIn } from '../../auth-service'
 import { uploadFormSubmission, downloadPreFillData } from '../s3Submit'
@@ -13,10 +13,9 @@ const uploadDraftData = async (
   console.log('Attempting to get Credentials to upload draft data', url)
 
   try {
-    const data = await postRequest<{
-      draftDataId: string
-      submissionTimestamp: string
-    }>(url)
+    const data = await postRequest<SubmissionTypes.S3DraftUploadCredentials>(
+      url,
+    )
     console.log('Attempting to upload draft data:', data)
     await uploadFormSubmission(
       data,
@@ -166,7 +165,7 @@ async function downloadDraftData<T>(
   const url = `${tenants.current.apiOrigin}/forms/${formId}/download-draft-data-credentials/${draftDataId}`
   console.log('Attempting to get Credentials to download draft data', url)
 
-  const data = await postRequest<FormTypes.S3UploadCredentials>(url, null)
+  const data = await postRequest<SubmissionTypes.S3UploadCredentials>(url, null)
   console.log('Attempting to download draft form data:', data)
   return downloadPreFillData(data)
 }

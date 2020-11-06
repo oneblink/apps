@@ -22,13 +22,13 @@ function verifyCPPayPayment(query, submissionResult) {
       const { transactionToken, orderNumber: submissionId } = query
       if (!transactionToken || !submissionId) {
         throw new OneBlinkAppsError(
-          'Transactions can not be verified unless navigating here directly after a payment.'
+          'Transactions can not be verified unless navigating here directly after a payment.',
         )
       }
 
       if (submissionResult.submissionId !== submissionId) {
         throw new OneBlinkAppsError(
-          'It looks like you are attempting to view a receipt for the incorrect payment.'
+          'It looks like you are attempting to view a receipt for the incorrect payment.',
         )
       }
 
@@ -36,7 +36,7 @@ function verifyCPPayPayment(query, submissionResult) {
         `/forms/${submissionResult.definition.id}/cp-pay-verification`,
         {
           transactionToken,
-        }
+        },
       )
     })
     .then((transaction) => {
@@ -46,7 +46,7 @@ function verifyCPPayPayment(query, submissionResult) {
       }).catch((error) => {
         console.warn(
           'Error while attempting to acknowledge CP Pay transaction',
-          error
+          error,
         )
       })
 
@@ -71,7 +71,7 @@ function verifyBpointPayment(query, submissionResult) {
       const { ResultKey: transactionToken } = query
       if (!transactionToken) {
         throw new OneBlinkAppsError(
-          'Transactions can not be verified unless navigating here directly after a payment.'
+          'Transactions can not be verified unless navigating here directly after a payment.',
         )
       }
 
@@ -79,13 +79,13 @@ function verifyBpointPayment(query, submissionResult) {
         `/forms/${submissionResult.definition.id}/bpoint-verification`,
         {
           transactionToken,
-        }
+        },
       )
     })
     .then((transaction) => {
       if (submissionResult.submissionId !== transaction.Crn1) {
         throw new OneBlinkAppsError(
-          'It looks like you are attempting to view a receipt for the incorrect payment.'
+          'It looks like you are attempting to view a receipt for the incorrect payment.',
         )
       }
 
@@ -106,7 +106,7 @@ function verifyBpointPayment(query, submissionResult) {
 }
 
 export function handlePaymentQuerystring(
-  query /* : QueryParameters */
+  query /* : QueryParameters */,
 ) /*: Promise<{
   transaction: {
     isSuccess: boolean,
@@ -125,7 +125,7 @@ export function handlePaymentQuerystring(
       // they are looking for the wrong transaction receipt.
       if (!submissionResult) {
         throw new OneBlinkAppsError(
-          'It looks like you are attempting to view a receipt for an unknown payment.'
+          'It looks like you are attempting to view a receipt for an unknown payment.',
         )
       }
       if (
@@ -133,7 +133,7 @@ export function handlePaymentQuerystring(
         !submissionResult.payment.submissionEvent
       ) {
         throw new OneBlinkAppsError(
-          'It looks like you are attempting to view a receipt for a misconfigured payment.'
+          'It looks like you are attempting to view a receipt for a misconfigured payment.',
         )
       }
 
@@ -146,13 +146,13 @@ export function handlePaymentQuerystring(
         }
         default: {
           throw new OneBlinkAppsError(
-            'It looks like you are attempting to view a receipt for an unsupported payment.'
+            'It looks like you are attempting to view a receipt for an unsupported payment.',
           )
         }
       }
     })
     .then((result) =>
-      utilsService.removeLocalForageItem(KEY).then(() => result)
+      utilsService.removeLocalForageItem(KEY).then(() => result),
     )
 }
 
@@ -167,21 +167,21 @@ export async function handlePaymentSubmissionEvent(
   paymentSubmissionEvent: PaymentSubmissionEvent,
   paymentReceiptUrl: string,
   submissionId?: string,
-} */
+} */,
 ) /* : Promise<FormSubmissionResult | void> */ {
   console.log('Attempting to handle submission with payment submission event')
   const { definition: form, submission } = formSubmission
 
   const amountElement = findFormElement(
     form.elements,
-    (element) => element.id === paymentSubmissionEvent.configuration.elementId
+    (element) => element.id === paymentSubmissionEvent.configuration.elementId,
   )
   if (!amountElement || amountElement.type === 'page') {
     console.log(
-      'Form has a payment submission event but the amount element does not exist, throwing error'
+      'Form has a payment submission event but the amount element does not exist, throwing error',
     )
     throw new OneBlinkAppsError(
-      'We could not find the configuration required to make a payment. Please contact your administrator to ensure your application configuration has been completed successfully.'
+      'We could not find the configuration required to make a payment. Please contact your administrator to ensure your application configuration has been completed successfully.',
     )
   }
 
@@ -190,17 +190,17 @@ export async function handlePaymentSubmissionEvent(
   const amount = submission[amountElement.name]
   if (!amount) {
     console.log(
-      'Form has a payment submission event but the amount has been entered as 0 or not at all, finishing as normal submission'
+      'Form has a payment submission event but the amount has been entered as 0 or not at all, finishing as normal submission',
     )
     return
   }
 
   if (typeof amount !== 'number') {
     console.log(
-      'Form has a payment submission event but the amount is not a number, throwing error'
+      'Form has a payment submission event but the amount is not a number, throwing error',
     )
     throw new OneBlinkAppsError(
-      'The configuration required to make a payment is incorrect. Please contact your administrator to ensure your application configuration has been completed successfully.'
+      'The configuration required to make a payment is incorrect. Please contact your administrator to ensure your application configuration has been completed successfully.',
     )
   }
 
@@ -211,7 +211,7 @@ export async function handlePaymentSubmissionEvent(
       amount,
       redirectUrl: paymentReceiptUrl,
       submissionId,
-    }
+    },
   )
   console.log('Created Payment configuration to start transaction')
   const submissionResult = Object.assign({}, formSubmission, {

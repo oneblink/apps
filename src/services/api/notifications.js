@@ -14,7 +14,7 @@ const subscriptionErrorHandler = (error) => {
       {
         originalError: error,
         isOffline: true,
-      }
+      },
     )
   }
   switch (error.status) {
@@ -25,7 +25,7 @@ const subscriptionErrorHandler = (error) => {
           originalError: error,
           httpStatusCode: error.status,
           requiresLogin: true,
-        }
+        },
       )
     }
     case 403: {
@@ -35,7 +35,7 @@ const subscriptionErrorHandler = (error) => {
           originalError: error,
           httpStatusCode: error.status,
           requiresAccessRequest: true,
-        }
+        },
       )
     }
     case 400:
@@ -45,7 +45,7 @@ const subscriptionErrorHandler = (error) => {
         {
           originalError: error,
           httpStatusCode: error.status,
-        }
+        },
       )
     }
     default: {
@@ -53,7 +53,7 @@ const subscriptionErrorHandler = (error) => {
         'An unknown error has occurred. Please contact support if the problem persists.',
         {
           originalError: error,
-        }
+        },
       )
     }
   }
@@ -61,7 +61,7 @@ const subscriptionErrorHandler = (error) => {
 
 async function createNotificationsSubscription(
   formsAppId /* : number */,
-  subscription /* : PushSubscription */
+  subscription /* : PushSubscription */,
 ) /* : Promise<void> */ {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/notifications/subscribe`
   console.log('Attempting to create notifications subscription', url)
@@ -72,7 +72,7 @@ async function createNotificationsSubscription(
 
 async function deleteNotificationsSubscription(
   formsAppId /* : number */,
-  subscription /* : PushSubscription */
+  subscription /* : PushSubscription */,
 ) /* : Promise<void> */ {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/notifications/unsubscribe`
   console.log('Attempting to delete notifications subscription', url)

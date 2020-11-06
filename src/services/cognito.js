@@ -34,7 +34,7 @@ function init(cognitoServiceData /* : CognitoServiceData  */) {
 function registerAuthListener(listener /* : () => mixed */) /* : () => void */ {
   if (!awsCognitoClient) {
     throw new Error(
-      '"authService" has not been initiated. You must call the init() function before attempting to register a listener.'
+      '"authService" has not been initiated. You must call the init() function before attempting to register a listener.',
     )
   }
   return awsCognitoClient.registerListener(listener)
@@ -42,11 +42,11 @@ function registerAuthListener(listener /* : () => mixed */) /* : () => void */ {
 
 async function loginUsernamePassword(
   username /* : string */,
-  password /* : string */
+  password /* : string */,
 ) {
   if (!awsCognitoClient) {
     throw new Error(
-      '"authService" has not been initiated. You must call the init() function before attempting to login.'
+      '"authService" has not been initiated. You must call the init() function before attempting to login.',
     )
   }
   console.log('Attempting sign using username', username)
@@ -54,11 +54,11 @@ async function loginUsernamePassword(
 }
 
 async function loginHostedUI(
-  identityProviderName /* : string */
+  identityProviderName /* : string */,
 ) /* : Promise<void> */ {
   if (!awsCognitoClient) {
     throw new Error(
-      '"authService" has not been initiated. You must call the init() function before attempting to login.'
+      '"authService" has not been initiated. You must call the init() function before attempting to login.',
     )
   }
   const continueTo = `${window.location.pathname}${window.location.search}`
@@ -70,7 +70,7 @@ async function loginHostedUI(
 async function handleAuthentication() /* : Promise<string> */ {
   if (!awsCognitoClient) {
     throw new Error(
-      '"authService" has not been initiated. You must call the init() function before attempting to handle authentication in URL.'
+      '"authService" has not been initiated. You must call the init() function before attempting to handle authentication in URL.',
     )
   }
 
@@ -89,11 +89,11 @@ async function handleAuthentication() /* : Promise<string> */ {
 
 async function changePassword(
   existingPassword /* : string */,
-  newPassword /* : string */
+  newPassword /* : string */,
 ) {
   if (!awsCognitoClient) {
     throw new Error(
-      '"authService" has not been initiated. You must call the init() function before attempting to change passwords.'
+      '"authService" has not been initiated. You must call the init() function before attempting to change passwords.',
     )
   }
 
@@ -103,7 +103,7 @@ async function changePassword(
 async function forgotPassword(username /* : string */) {
   if (!awsCognitoClient) {
     throw new Error(
-      '"authService" has not been initiated. You must call the init() function before starting the forgot password process.'
+      '"authService" has not been initiated. You must call the init() function before starting the forgot password process.',
     )
   }
 

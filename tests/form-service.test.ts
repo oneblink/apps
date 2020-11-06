@@ -1,6 +1,3 @@
-// @flow
-'use strict'
-
 import { findFormElement } from '../src/form-service'
 
 describe('findFormElement()', () => {
@@ -46,7 +43,7 @@ describe('findFormElement()', () => {
           ],
         },
       ],
-      (element) => elementId === element.id
+      (element) => elementId === element.id,
     )
     expect(element).toBeTruthy()
   })

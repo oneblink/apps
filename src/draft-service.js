@@ -26,7 +26,7 @@ function errorHandler(error) {
   console.error('Local Forage Error', error)
   if (/The serialized value is too large/.test(error.message)) {
     throw new OneBlinkAppsError(
-      'It seems you have run out of space. Please delete some of your drafts to allow new drafts to be created or existing drafts to be updated.'
+      'It seems you have run out of space. Please delete some of your drafts to allow new drafts to be created or existing drafts to be updated.',
     )
   }
 
@@ -36,7 +36,7 @@ function errorHandler(error) {
 const draftsListeners = []
 
 export function registerDraftsListener(
-  listener /* : (FormsAppDraft[]) => mixed */
+  listener /* : (FormsAppDraft[]) => mixed */,
 ) /* : () => void */ {
   draftsListeners.push(listener)
 
@@ -57,7 +57,7 @@ function executeDraftsListeners(draftsData) {
 
 async function upsertDraftByKey(
   draft /* : FormsAppDraft */,
-  draftSubmission /* : DraftSubmission */
+  draftSubmission /* : DraftSubmission */,
 ) /* : Promise<string> */ {
   if (!draftSubmission.keyId) {
     throw new Error('Could not create draft for key without a keyId')
@@ -78,7 +78,7 @@ async function upsertDraftByKey(
 
 export async function addDraft(
   newDraft /* : NewFormsAppDraft */,
-  draftSubmission /* : DraftSubmission */
+  draftSubmission /* : DraftSubmission */,
 ) /* : Promise<void> */ {
   const draft /* : FormsAppDraft */ = {
     ...newDraft,
@@ -117,14 +117,14 @@ export async function addDraft(
       syncDrafts({
         throwError: false,
         formsAppId: draftSubmission.formsAppId,
-      })
+      }),
     )
     .catch(errorHandler)
 }
 
 export async function updateDraft(
   draft /* : FormsAppDraft */,
-  draftSubmission /* : DraftSubmission */
+  draftSubmission /* : DraftSubmission */,
 ) /* : Promise<void> */ {
   draftSubmission.keyId = getFormsKeyId()
   if (draftSubmission.keyId) {
@@ -141,7 +141,7 @@ export async function updateDraft(
   return getDraftsData()
     .then((draftsData) => {
       const existingDraft = draftsData.drafts.find(
-        (d) => d.draftId === draft.draftId
+        (d) => d.draftId === draft.draftId,
       )
       if (!existingDraft) {
         console.log('Could not find existing draft to update in drafts', {
@@ -154,7 +154,7 @@ export async function updateDraft(
       return removeDraftData(existingDraft.draftDataId)
         .then(() =>
           // draftId will be set as draftDataId if data cannot be uploaded
-          saveDraftData(draft, draftSubmission, draft.draftId)
+          saveDraftData(draft, draftSubmission, draft.draftId),
         )
         .then((draftDataId) => {
           existingDraft.draftDataId = draftDataId
@@ -169,7 +169,7 @@ export async function updateDraft(
       syncDrafts({
         throwError: false,
         formsAppId: draftSubmission.formsAppId,
-      })
+      }),
     )
     .catch(errorHandler)
 }
@@ -199,12 +199,12 @@ export async function getDrafts() /* : Promise<FormsAppDraft[]> */ {
   ])
   // Remove drafts that are in the pending queue
   return draftsData.drafts.filter(
-    (draft) => !pendingSubmissions.some((sub) => sub.draftId === draft.draftId)
+    (draft) => !pendingSubmissions.some((sub) => sub.draftId === draft.draftId),
   )
 }
 
 export async function getDraftAndData(
-  draftId /* : ?string */
+  draftId /* : ?string */,
 ) /* : Promise<{
   draft: FormsAppDraft,
   draftData: $PropertyType<FormSubmission, 'submission'>,
@@ -214,7 +214,7 @@ export async function getDraftAndData(
   }
 
   const draft = await getDrafts().then((drafts) =>
-    drafts.find((draft) => draft.draftId === draftId)
+    drafts.find((draft) => draft.draftId === draftId),
   )
   if (!draft || !draft.formId || !draft.draftDataId) {
     return null
@@ -230,7 +230,7 @@ export async function getDraftAndData(
 
 export async function deleteDraft(
   draftId /* : string */,
-  formsAppId /* : number */
+  formsAppId /* : number */,
 ) /* : Promise<void> */ {
   const username = getUsername()
   if (!username) {
@@ -249,18 +249,18 @@ export async function deleteDraft(
         return
       }
       draftsData.drafts = draftsData.drafts.filter(
-        (draft) => draft.draftId !== draftId
+        (draft) => draft.draftId !== draftId,
       )
       return removeDraftData(draft.draftDataId)
         .then(() =>
-          utilsService.localForage.setItem(`DRAFTS_${username}`, draftsData)
+          utilsService.localForage.setItem(`DRAFTS_${username}`, draftsData),
         )
         .then(() => executeDraftsListeners(draftsData))
         .then(() =>
           syncDrafts({
             throwError: false,
             formsAppId,
-          })
+          }),
         )
     })
     .catch(errorHandler)
@@ -280,7 +280,10 @@ async function setDrafts(draftsData) /* : Promise<void> */ {
 let _isSyncingDrafts = false
 
 export async function syncDrafts(
-  { formsAppId, throwError } /* : { formsAppId: number, throwError?:boolean } */
+  {
+    formsAppId,
+    throwError,
+  } /* : { formsAppId: number, throwError?:boolean } */,
 ) /* : Promise<void> */ {
   if (!isDraftsEnabled) {
     return
@@ -302,7 +305,7 @@ export async function syncDrafts(
     .then((localDraftsData) => {
       console.log(
         `Found ${localDraftsData.drafts.length} local drafts(s).`,
-        localDraftsData
+        localDraftsData,
       )
       return ensureDraftsDataIsUploaded(localDraftsData)
         .then((draftsData) => putDrafts(draftsData, formsAppId))
@@ -312,27 +315,27 @@ export async function syncDrafts(
         .then((syncDraftsData) => {
           console.log(
             'Ensuring all draft data is available for offline use for synced drafts',
-            syncDraftsData
+            syncDraftsData,
           )
           return ensureDraftsDataExists(
             syncDraftsData.drafts.filter(
-              (draft) => draft.draftId !== draft.draftDataId
-            )
+              (draft) => draft.draftId !== draft.draftDataId,
+            ),
           ).then(() => {
             // Attempt to get drafts that have been deleted and
             // remove draft data from local storage
             const deletedLocalDrafts = _differenceBy(
               localDraftsData.drafts,
               syncDraftsData.drafts,
-              'draftId'
+              'draftId',
             )
             console.log(
               'Removing local draft data for delete drafts',
-              deletedLocalDrafts
+              deletedLocalDrafts,
             )
             return Promise.all([
               deletedLocalDrafts.map(({ draftDataId }) =>
-                removeDraftData(draftDataId)
+                removeDraftData(draftDataId),
               ),
             ])
           })
@@ -346,7 +349,7 @@ export async function syncDrafts(
       _isSyncingDrafts = false
       console.warn(
         'Error while attempting to sync and update local drafts',
-        error
+        error,
       )
       if (throwError) {
         throw error

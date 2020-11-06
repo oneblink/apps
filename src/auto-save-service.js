@@ -11,7 +11,7 @@ function getAutoSaveKey(formId, autoSaveKey) {
 
 export async function getAutoSaveData /* :: <T> */(
   formId /* : number */,
-  autoSaveKey /* : ?string */
+  autoSaveKey /* : ?string */,
 ) /* : Promise<T | null> */ {
   const key = getAutoSaveKey(formId, autoSaveKey)
   return utilsService.getLocalForageItem(key)
@@ -20,7 +20,7 @@ export async function getAutoSaveData /* :: <T> */(
 export async function upsertAutoSaveData /* :: <T: {}> */(
   formId /* : number */,
   autoSaveKey /* : ?string */,
-  model /* : T */
+  model /* : T */,
 ) /* : Promise<T> */ {
   const key = getAutoSaveKey(formId, autoSaveKey)
   return utilsService.setLocalForageItem(key, model)
@@ -28,7 +28,7 @@ export async function upsertAutoSaveData /* :: <T: {}> */(
 
 export async function deleteAutoSaveData /* :: <T> */(
   formId /* : number */,
-  autoSaveKey /* : ?string */
+  autoSaveKey /* : ?string */,
 ) /* : Promise<void> */ {
   const key = getAutoSaveKey(formId, autoSaveKey)
   return utilsService.removeLocalForageItem(key)

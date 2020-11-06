@@ -10,7 +10,7 @@ export function getPrefillKey(prefillFormDataId /* : string */) {
 }
 
 function get /* :: <T> */(
-  prefillFormDataId /*: string */
+  prefillFormDataId /*: string */,
 ) /* : Promise<T | null> */ {
   const key = getPrefillKey(prefillFormDataId)
   return utilsService.getLocalForageItem(key)
@@ -18,7 +18,7 @@ function get /* :: <T> */(
 
 function set /* :: <T: {}> */(
   prefillFormDataId /*: string */,
-  model /* : T */
+  model /* : T */,
 ) /* : Promise<T> */ {
   const key = getPrefillKey(prefillFormDataId)
   return utilsService.setLocalForageItem(key, model)
@@ -26,7 +26,7 @@ function set /* :: <T: {}> */(
 
 export async function getPrefillFormData /* :: <T: {}> */(
   formId /* : number */,
-  prefillFormDataId /* : ?string */
+  prefillFormDataId /* : ?string */,
 ) /* : Promise<T | null> */ {
   if (!prefillFormDataId) {
     return null
@@ -38,28 +38,28 @@ export async function getPrefillFormData /* :: <T: {}> */(
 
       return downloadPreFillFormData(
         formId,
-        prefillFormDataId
+        prefillFormDataId,
       ).then((downloadedPrefillData) =>
-        set(prefillFormDataId, downloadedPrefillData)
+        set(prefillFormDataId, downloadedPrefillData),
       )
     })
     .catch((error) => {
       console.warn(
         'An error occurred attempting to retrieve prefill data',
-        error
+        error,
       )
       throw new OneBlinkAppsError(
         'The prefill data associated to this form is no longer available.',
         {
           originalError: error,
           title: 'Prefill Data Unavailable',
-        }
+        },
       )
     })
 }
 
 export async function ensurePrefillFormDataExists(
-  jobs /* : FormsAppJob[] */
+  jobs /* : FormsAppJob[] */,
 ) /* : Promise<void> */ {
   if (!jobs.length) {
     return
@@ -74,7 +74,7 @@ export async function ensurePrefillFormDataExists(
       continue
     }
     await getPrefillFormData(formId, preFillFormDataId).catch((error) =>
-      console.warn('Suppressing error retrieving prefill data for jobs', error)
+      console.warn('Suppressing error retrieving prefill data for jobs', error),
     )
   }
 }

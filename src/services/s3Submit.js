@@ -52,7 +52,7 @@ const getDeviceInformation = () => {
 const uploadToS3 = /*:: <T> */ (
   { credentials, s3: s3Meta },
   json /* : T */,
-  tags /* : {} | void */
+  tags /* : {} | void */,
 ) /* : Promise<void> */ => {
   if (!credentials) {
     return Promise.reject(new Error('Credentials are required'))
@@ -73,7 +73,7 @@ const uploadToS3 = /*:: <T> */ (
       accessKeyId: credentials.AccessKeyId,
       secretAccessKey: credentials.SecretAccessKey,
       sessionToken: credentials.SessionToken,
-    })
+    }),
   )
   const readStream = bigJSON.createStringifyStream({
     body: json,
@@ -115,7 +115,7 @@ const uploadToS3 = /*:: <T> */ (
     if (/Network Failure/.test(err.message)) {
       console.warn('Network error uploading to S3:', err)
       const error = new Error(
-        'There was an error saving your form. Please try again. If the problem persists, contact your administrator'
+        'There was an error saving your form. Please try again. If the problem persists, contact your administrator',
       )
       // $FlowFixMe
       error.title = 'Connectivity Issues'
@@ -135,7 +135,7 @@ const uploadFormSubmission = (
     keyId?: string,
     formsAppId: number,
   } */,
-  tags /* : {} */
+  tags /* : {} */,
 ) => {
   console.log('Uploading submission')
   return uploadToS3(
@@ -145,12 +145,12 @@ const uploadFormSubmission = (
       user: getUserProfile(),
       device: getDeviceInformation(),
     },
-    tags
+    tags,
   )
 }
 
 const downloadPreFillData = (
-  { credentials, s3: s3Meta } /* : S3UploadCredentials */
+  { credentials, s3: s3Meta } /* : S3UploadCredentials */,
 ) => {
   if (!credentials) {
     return Promise.reject(new Error('Credentials are required'))
@@ -191,7 +191,7 @@ const downloadPreFillData = (
               } else {
                 resolve(preFillData)
               }
-            }
+            },
           )
         }
 
@@ -214,7 +214,7 @@ const downloadPreFillData = (
           {
             originalError: error,
             httpStatusCode: error.status,
-          }
+          },
         )
       }
       throw error

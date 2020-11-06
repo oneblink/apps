@@ -1,6 +1,3 @@
-// @flow
-'use strict'
-
 import tenants from '../src/tenants'
 import localisationService from '../src/localisation-service'
 
@@ -30,10 +27,10 @@ test.skip('it should format currency, date and times correctly', () => {
   expect(localisationService.formatDate(date2)).toBe('02/01/2020')
 
   expect(localisationService.formatDateLong(date1)).toBe(
-    'Monday, 21 December 2020'
+    'Monday, 21 December 2020',
   )
   expect(localisationService.formatDateLong(date2)).toBe(
-    'Thursday, 2 January 2020'
+    'Thursday, 2 January 2020',
   )
 
   expect(localisationService.formatTime(date1)).toBe('5:56 pm')
@@ -43,10 +40,10 @@ test.skip('it should format currency, date and times correctly', () => {
   expect(localisationService.formatDatetime(date2)).toBe('02/01/2020 12:56 am')
 
   expect(localisationService.formatDatetimeLong(date1)).toBe(
-    'Monday, 21 December 2020 5:56 pm'
+    'Monday, 21 December 2020 5:56 pm',
   )
   expect(localisationService.formatDatetimeLong(date2)).toBe(
-    'Thursday, 2 January 2020 12:56 am'
+    'Thursday, 2 January 2020 12:56 am',
   )
 
   // CivicPlus Tenant
@@ -64,10 +61,10 @@ test.skip('it should format currency, date and times correctly', () => {
   expect(localisationService.formatDate(date2)).toBe('01/02/2020')
 
   expect(localisationService.formatDateLong(date1)).toBe(
-    'Monday, December 21, 2020'
+    'Monday, December 21, 2020',
   )
   expect(localisationService.formatDateLong(date2)).toBe(
-    'Thursday, January 2, 2020'
+    'Thursday, January 2, 2020',
   )
 
   expect(localisationService.formatTime(date1)).toBe('5:56 PM')
@@ -77,9 +74,9 @@ test.skip('it should format currency, date and times correctly', () => {
   expect(localisationService.formatDatetime(date2)).toBe('01/02/2020 12:56 AM')
 
   expect(localisationService.formatDatetimeLong(date1)).toBe(
-    'Monday, December 21, 2020 5:56 PM'
+    'Monday, December 21, 2020 5:56 PM',
   )
   expect(localisationService.formatDatetimeLong(date2)).toBe(
-    'Thursday, January 2, 2020 12:56 AM'
+    'Thursday, January 2, 2020 12:56 AM',
   )
 })

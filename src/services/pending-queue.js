@@ -8,7 +8,7 @@ function errorHandler(error) {
   console.error('Local Forage Error', error)
   if (/The serialized value is too large/.test(error.message)) {
     throw new OneBlinkAppsError(
-      'It seems you have run out of space. To free up space, please connect to the internet to process pending submissions.'
+      'It seems you have run out of space. To free up space, please connect to the internet to process pending submissions.',
     )
   }
 
@@ -18,7 +18,7 @@ function errorHandler(error) {
 const pendingQueueListeners = []
 
 export function registerPendingQueueListener(
-  listener /* : (PendingFormSubmissionResult[]) => mixed */
+  listener /* : (PendingFormSubmissionResult[]) => mixed */,
 ) /* : () => void */ {
   pendingQueueListeners.push(listener)
 
@@ -38,12 +38,12 @@ function executePendingQueueListeners(newSubmissions) {
 }
 
 export async function addSubmissionToPendingQueue(
-  formSubmissionResult /* : PendingFormSubmissionResult */
+  formSubmissionResult /* : PendingFormSubmissionResult */,
 ) {
   try {
     await utilsService.setLocalForageItem(
       `SUBMISSION_${formSubmissionResult.pendingTimestamp}`,
-      formSubmissionResult
+      formSubmissionResult,
     )
     const submissions /* : Object[] */ = await getPendingQueueSubmissions()
     submissions.push({
@@ -59,7 +59,7 @@ export async function addSubmissionToPendingQueue(
 
 export async function updatePendingQueueSubmission(
   pendingTimestamp /* : string */,
-  newSubmission /* : PendingFormSubmissionResult */
+  newSubmission /* : PendingFormSubmissionResult */,
 ) {
   try {
     const submissions = await getPendingQueueSubmissions()
@@ -83,20 +83,20 @@ export function getPendingQueueSubmissions() /* : Promise<PendingFormSubmissionR
 }
 
 export function getPendingQueueSubmission(
-  pendingTimestamp /* : string */
+  pendingTimestamp /* : string */,
 ) /* : Promise<PendingFormSubmissionResult | null> */ {
   return utilsService.getLocalForageItem(`SUBMISSION_${pendingTimestamp}`)
 }
 
 export async function deletePendingQueueSubmission(
-  pendingTimestamp /* : string */
+  pendingTimestamp /* : string */,
 ) {
   try {
     await utilsService.removeLocalForageItem(`SUBMISSION_${pendingTimestamp}`)
     const submissions = await getPendingQueueSubmissions()
     const newSubmissions = submissions.filter(
       (submission /* : PendingFormSubmissionResult */) =>
-        submission.pendingTimestamp !== pendingTimestamp
+        submission.pendingTimestamp !== pendingTimestamp,
     )
     await utilsService.localForage.setItem('submissions', newSubmissions)
     executePendingQueueListeners(newSubmissions)

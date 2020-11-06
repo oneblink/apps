@@ -50,7 +50,7 @@ async function fetchJSON(url, options) {
 
 export async function searchRequest /* :: <T> */(
   url /* : string */,
-  searchParameters /* : { [key: string]: any } */
+  searchParameters /* : { [key: string]: any } */,
 ) /* : Promise<T> */ {
   const queryStringParams = queryString.stringify(searchParameters || {})
   const body = await getRequest(`${url}?${queryStringParams}`)
@@ -58,7 +58,7 @@ export async function searchRequest /* :: <T> */(
 }
 
 export async function getRequest /* :: <T> */(
-  url /* : string */
+  url /* : string */,
 ) /* : Promise<T> */ {
   const options = {
     method: 'GET',
@@ -71,7 +71,7 @@ export async function getRequest /* :: <T> */(
 
 export async function postRequest /* :: <T, OutT> */(
   url /* : string */,
-  resource /* : T */
+  resource /* : T */,
 ) /* : Promise<OutT> */ {
   const opts = {
     method: 'POST',
@@ -85,7 +85,7 @@ export async function postRequest /* :: <T, OutT> */(
 
 export async function putRequest /* :: <T, OutT> */(
   url /* : string */,
-  resource /* : T */
+  resource /* : T */,
 ) /* : Promise<OutT> */ {
   const opts = {
     method: 'PUT',

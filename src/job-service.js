@@ -17,7 +17,7 @@ async function removePendingSubmissions(jobList) {
   // Get list of pending submissions, remove jobs that are in the pending queue
   return getPendingQueueSubmissions().then((submissions) => {
     const unprocessedJobs = jobList.filter(
-      (job) => !submissions.some((sub) => sub.jobId === job.id)
+      (job) => !submissions.some((sub) => sub.jobId === job.id),
     )
     return unprocessedJobs
   })
@@ -28,13 +28,13 @@ async function tagDrafts(jobList) {
     jobList.map((job) => {
       job.draft = drafts.find((draft) => draft.jobId === job.id)
       return job
-    })
+    }),
   )
 }
 
 export async function getJobs(
   formsAppId /* : number */,
-  jobsLabel /* : string */
+  jobsLabel /* : string */,
 ) /* : Promise<FormsAppJob[]> */ {
   if (!isLoggedIn()) {
     return []
@@ -44,7 +44,7 @@ export async function getJobs(
     `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/jobs`,
     {
       isSubmitted: false,
-    }
+    },
   )
     .then((data) => {
       const recentlySubmittedJobIds = recentlySubmittedJobsService.get()
@@ -52,7 +52,7 @@ export async function getJobs(
       const updateJobIds = recentlySubmittedJobIds.filter(
         (recentlySubmittedJobId) => {
           return data.jobs.some((job) => job.id === recentlySubmittedJobId)
-        }
+        },
       )
       if (updateJobIds.length !== recentlySubmittedJobIds) {
         recentlySubmittedJobsService.set(updateJobIds)
@@ -61,7 +61,7 @@ export async function getJobs(
       // from the server. This will happen if the S3 Submission Events have not finished yet.
       return data.jobs.filter((job) => {
         return !recentlySubmittedJobIds.some(
-          (recentlySubmittedJobId) => recentlySubmittedJobId === job.id
+          (recentlySubmittedJobId) => recentlySubmittedJobId === job.id,
         )
       })
     })
@@ -71,8 +71,8 @@ export async function getJobs(
       _orderBy(
         jobList,
         ['details.priority', (job) => Date.parse(job.createdAt)],
-        ['asc', 'asc']
-      )
+        ['asc', 'asc'],
+      ),
     )
     .catch((error) => {
       console.warn('Error retrieving Jobs for forms app', error)
@@ -83,7 +83,7 @@ export async function getJobs(
           {
             originalError: error,
             isOffline: true,
-          }
+          },
         )
       }
 
@@ -95,7 +95,7 @@ export async function getJobs(
               originalError: error,
               requiresLogin: true,
               httpStatusCode: error.status,
-            }
+            },
           )
         }
         case 403: {
@@ -105,7 +105,7 @@ export async function getJobs(
               originalError: error,
               requiresAccessRequest: true,
               httpStatusCode: error.status,
-            }
+            },
           )
         }
         case 400:
@@ -116,7 +116,7 @@ export async function getJobs(
               originalError: error,
               title: 'Unknown Application',
               httpStatusCode: error.status,
-            }
+            },
           )
         }
         default: {
@@ -124,7 +124,7 @@ export async function getJobs(
             'An unknown error has occurred. Please contact support if the problem persists.',
             {
               originalError: error,
-            }
+            },
           )
         }
       }

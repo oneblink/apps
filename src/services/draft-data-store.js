@@ -11,7 +11,7 @@ function getDraftDataKey(draftDataId) {
 }
 
 async function getLocalDraftData(
-  draftDataId /*: ?string */
+  draftDataId /*: ?string */,
 ) /* : Promise<DraftSubmission | null> */ {
   if (!draftDataId) {
     return null
@@ -22,14 +22,14 @@ async function getLocalDraftData(
 
 async function setLocalDraftData(
   draftDataId /* : string */,
-  model /* : DraftSubmission */
+  model /* : DraftSubmission */,
 ) /* : Promise<DraftSubmission> */ {
   const key = getDraftDataKey(draftDataId)
   return utilsService.setLocalForageItem(key, model)
 }
 
 export async function removeDraftData(
-  draftDataId /* : ?string */
+  draftDataId /* : ?string */,
 ) /* : Promise<void> */ {
   if (!draftDataId) {
     return
@@ -41,7 +41,7 @@ export async function removeDraftData(
 export function saveDraftData(
   draft /* : FormsAppDraft */,
   draftSubmission /* : DraftSubmission */,
-  defaultDraftDataId /* : string */
+  defaultDraftDataId /* : string */,
 ) /* : Promise<string> */ {
   return uploadDraftData(draft, draftSubmission)
     .catch((error) => {
@@ -51,13 +51,13 @@ export function saveDraftData(
       return defaultDraftDataId
     })
     .then((draftDataId) =>
-      setLocalDraftData(draftDataId, draftSubmission).then(() => draftDataId)
+      setLocalDraftData(draftDataId, draftSubmission).then(() => draftDataId),
     )
 }
 
 export async function getDraftData(
   formId /* : number */,
-  draftDataId /* : string */
+  draftDataId /* : string */,
 ) /* : Promise<DraftSubmission> */ {
   return getLocalDraftData(draftDataId)
     .then((draftData) => {
@@ -65,9 +65,9 @@ export async function getDraftData(
 
       return downloadDraftData(
         formId,
-        draftDataId
+        draftDataId,
       ).then((downloadedDraftData) =>
-        setLocalDraftData(draftDataId, downloadedDraftData)
+        setLocalDraftData(draftDataId, downloadedDraftData),
       )
     })
     .then((formSubmissionResult) => {
@@ -83,7 +83,7 @@ export async function getDraftData(
         {
           title: 'Draft Data Unavailable',
           originalError: error,
-        }
+        },
       )
     })
 }
@@ -110,7 +110,7 @@ export async function ensureDraftsDataExists(drafts /* : FormsAppDraft[] */) {
 }
 
 export async function ensureDraftsDataIsUploaded(
-  draftsData /* : FormsAppDrafts */
+  draftsData /* : FormsAppDrafts */,
 ) {
   const newDrafts = []
   for (const draft of draftsData.drafts) {
@@ -129,12 +129,12 @@ export async function ensureDraftsDataIsUploaded(
     const newDraftDataId = await saveDraftData(
       draft,
       draftSubmission,
-      draft.draftId
+      draft.draftId,
     )
     newDrafts.push(
       Object.assign({}, draft, {
         draftDataId: newDraftDataId,
-      })
+      }),
     )
   }
   return {

@@ -36,7 +36,7 @@ function setValuesOnData(items, data) {
 }
 
 async function getLocalForageItem /* ::<T>*/(
-  key /* : string */
+  key /* : string */,
 ) /* : Promise<T | null> */ {
   const localForageKeys = await getLocalForageKeys(key)
 
@@ -72,7 +72,7 @@ function generateKeyValuesReducer(key, data, initialKeyValues) {
 
 async function setLocalForageItem /*:: <T: {}> */(
   key /* : string */,
-  originalData /* : T */
+  originalData /* : T */,
 ) /* : Promise<T> */ {
   const data /* : T */ = _cloneDeep(originalData)
   await removeLocalForageItem(key)

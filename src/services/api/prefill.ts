@@ -1,21 +1,19 @@
-// @flow
-'use strict'
-
+import { FormTypes } from '@oneblink/types'
 import { postRequest } from '../fetch'
 import { downloadPreFillData } from '../s3Submit'
 import tenants from '../../tenants'
 
-export async function downloadPreFillFormData /* :: <T> */(
-  formId /* : number */,
-  preFillFormDataId /* : string */,
-) /* : Promise<T> */ {
+export async function downloadPreFillFormData<T>(
+  formId: number,
+  preFillFormDataId: string,
+): Promise<T> {
   const url = `${tenants.current.apiOrigin}/forms/${formId}/pre-fill-retrieval-credentials/${preFillFormDataId}`
   console.log(
     'Attempting to get Credentials to download pre fill form data',
     url,
   )
 
-  const data = await postRequest(url)
+  const data = await postRequest<FormTypes.S3UploadCredentials>(url)
   console.log('Attempting to download pre fill form data:', data)
   return downloadPreFillData(data)
 }

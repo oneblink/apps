@@ -1,19 +1,17 @@
-// @flow
-'use strict'
-
+import { FormTypes, SubmissionEventTypes } from '@oneblink/types'
 import { postRequest } from '../fetch'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 
 const generatePaymentConfiguration = (
-  form /* : Form */,
-  paymentSubmissionEvent /*: PaymentSubmissionEvent */,
-  payload /* : {
-    amount: number,
-    redirectUrl: string,
-    submissionId?: string,
-  } */,
-) /* : Promise<{ hostedFormUrl: string, submissionId: string }> */ => {
+  form: FormTypes.Form,
+  paymentSubmissionEvent: SubmissionEventTypes.PaymentSubmissionEvent,
+  payload: {
+    amount: number
+    redirectUrl: string
+    submissionId?: string
+  },
+): Promise<{ hostedFormUrl: string; submissionId: string }> => {
   let path
   switch (paymentSubmissionEvent.type) {
     case 'CP_PAY': {
@@ -32,7 +30,10 @@ const generatePaymentConfiguration = (
   }
   const url = `${tenants.current.apiOrigin}${path}`
   console.log('Attempting to generate payment configuration', url)
-  return postRequest(url, payload).catch((error) => {
+  return postRequest<{ hostedFormUrl: string; submissionId: string }>(
+    url,
+    payload,
+  ).catch((error) => {
     console.warn(
       'Error occurred while attempting to generate configuration for payment',
       error,
@@ -80,13 +81,13 @@ const generatePaymentConfiguration = (
   })
 }
 
-const verifyPaymentTransaction = /* :: <T> */ (
-  path /* : string */,
-  payload /* : mixed */,
-) /* : Promise<T> */ => {
+const verifyPaymentTransaction = <T>(
+  path: string,
+  payload: unknown,
+): Promise<T> => {
   const url = `${tenants.current.apiOrigin}${path}`
   console.log('Attempting to verify payment transaction', url)
-  return postRequest(url, payload).catch((error) => {
+  return postRequest<T>(url, payload).catch((error) => {
     console.warn(
       'Error occurred while attempting to verify a transaction',
       error,
@@ -134,13 +135,13 @@ const verifyPaymentTransaction = /* :: <T> */ (
   })
 }
 
-const acknowledgeCPPayTransaction = (
-  formId /* : number */,
-  payload /* : mixed */,
-) /* : Promise<void> */ => {
+const acknowledgeCPPayTransaction = async (
+  formId: number,
+  payload: unknown,
+): Promise<void> => {
   const url = `${tenants.current.apiOrigin}/forms/${formId}/cp-pay-acknowledge`
   console.log('Attempting to acknowledge CP Pay transaction', url)
-  return postRequest(url, payload).catch((error) => {
+  await postRequest(url, payload).catch((error) => {
     console.warn(
       'Error occurred while attempting to acknowledge a CP Pay transaction',
       error,

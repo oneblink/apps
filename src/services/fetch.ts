@@ -1,6 +1,4 @@
-// @flow
-
-import queryString from 'query-string'
+import * as queryString from 'query-string'
 
 import { getIdToken } from './forms-key'
 
@@ -23,20 +21,19 @@ async function generateHeaders() {
 }
 
 export class HTTPError extends Error {
-  /* ::
   status: number
-  */
 
-  constructor(statusCode /* : number */, message /* : string */) {
+  constructor(statusCode: number, message: string) {
     super(message)
     this.status = statusCode
   }
 }
 
-async function fetchJSON(url, options) {
+async function fetchJSON<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(url, options)
 
   if (response.status === 204) {
+    // @ts-expect-error
     return
   }
 
@@ -48,56 +45,51 @@ async function fetchJSON(url, options) {
   throw new HTTPError(response.status, body.message)
 }
 
-export async function searchRequest /* :: <T> */(
-  url /* : string */,
-  searchParameters /* : { [key: string]: any } */,
-) /* : Promise<T> */ {
+export async function searchRequest<T>(
+  url: string,
+  searchParameters?: queryString.StringifiableRecord,
+): Promise<T> {
   const queryStringParams = queryString.stringify(searchParameters || {})
-  const body = await getRequest(`${url}?${queryStringParams}`)
+  const body = await getRequest<T>(`${url}?${queryStringParams}`)
   return body
 }
 
-export async function getRequest /* :: <T> */(
-  url /* : string */,
-) /* : Promise<T> */ {
+export async function getRequest<T>(url: string): Promise<T> {
   const options = {
     method: 'GET',
     headers: await generateHeaders(),
   }
 
-  // $FlowFixMe
   return fetchJSON(url, options)
 }
 
-export async function postRequest /* :: <T, OutT> */(
-  url /* : string */,
-  resource /* : T */,
-) /* : Promise<OutT> */ {
+export async function postRequest<OutT>(
+  url: string,
+  resource?: unknown,
+): Promise<OutT> {
   const opts = {
     method: 'POST',
     headers: await generateHeaders(),
     body: JSON.stringify(resource),
   }
 
-  // $FlowFixMe
   return fetchJSON(url, opts)
 }
 
-export async function putRequest /* :: <T, OutT> */(
-  url /* : string */,
-  resource /* : T */,
-) /* : Promise<OutT> */ {
+export async function putRequest<OutT>(
+  url: string,
+  resource: unknown,
+): Promise<OutT> {
   const opts = {
     method: 'PUT',
     headers: await generateHeaders(),
     body: JSON.stringify(resource),
   }
 
-  // $FlowFixMe
   return fetchJSON(url, opts)
 }
 
-export async function deleteRequest(url /* : string */) /* : Promise<void> */ {
+export async function deleteRequest(url: string): Promise<void> {
   const opts = {
     method: 'DELETE',
     headers: await generateHeaders(),

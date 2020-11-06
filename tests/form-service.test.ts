@@ -1,4 +1,4 @@
-import { findFormElement } from '../src/form-service'
+import { findFormElement } from '../dist/form-service'
 
 describe('findFormElement()', () => {
   test('should find an element in a nested form', () => {

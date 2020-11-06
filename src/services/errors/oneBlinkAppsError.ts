@@ -1,24 +1,21 @@
-// @flow
-'use strict'
-
 export default class OneBlinkAppsError extends Error {
-  /* :: title: string */
-  /* :: isOffline: boolean */
-  /* :: requiresAccessRequest: boolean */
-  /* :: requiresLogin: boolean */
-  /* :: httpStatusCode: number | void */
-  /* :: originalError: Error | void */
+  title: string
+  isOffline: boolean
+  requiresAccessRequest: boolean
+  requiresLogin: boolean
+  httpStatusCode?: number
+  originalError?: Error
 
   constructor(
-    message /* : string */,
-    options /* :  {
-      title?: string,
-      isOffline?: boolean,
-      requiresAccessRequest?: boolean,
-      requiresLogin?: boolean,
-      httpStatusCode?: number,
-      originalError?: Error,
-    } */ = {},
+    message: string,
+    options: {
+      title?: string
+      isOffline?: boolean
+      requiresAccessRequest?: boolean
+      requiresLogin?: boolean
+      httpStatusCode?: number
+      originalError?: Error
+    } = {},
   ) {
     super(message)
 

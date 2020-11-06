@@ -1,4 +1,4 @@
-import replaceElementValues from '../src/services/replace-custom-values'
+import replaceElementValues from '../dist/services/replace-custom-values'
 
 const definition = {
   id: 1,

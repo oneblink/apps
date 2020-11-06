@@ -68,7 +68,7 @@ export function getUserFriendlyName() /* : string | null */ {
 }
 
 export async function isAuthorised(
-  formsAppId /* : number */
+  formsAppId /* : number */,
 ) /* : Promise<boolean> */ {
   if (getFormsKeyId()) {
     return true
@@ -93,7 +93,7 @@ export async function isAuthorised(
       } else {
         console.log(
           'Could not determine if the current user has access to this forms app',
-          error
+          error,
         )
         return false
       }
@@ -101,14 +101,14 @@ export async function isAuthorised(
 }
 
 export async function requestAccess(
-  formsAppId /* : number */
+  formsAppId /* : number */,
 ) /* : Promise<void> */ {
   if (!isLoggedIn()) {
     throw new OneBlinkAppsError(
       'You must login before requesting access to this application',
       {
         requiresLogin: true,
-      }
+      },
     )
   }
 
@@ -123,7 +123,7 @@ export async function requestAccess(
         originalError: error,
         title: 'Error Requesting Access',
         httpStatusCode: error.status,
-      }
+      },
     )
   }
 }

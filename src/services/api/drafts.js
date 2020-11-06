@@ -9,7 +9,7 @@ import tenants from '../../tenants'
 
 const uploadDraftData = async (
   draft /* : FormsAppDraft */,
-  draftSubmission /* : DraftSubmission */
+  draftSubmission /* : DraftSubmission */,
 ) /* : Promise<string>*/ => {
   const url = `${tenants.current.apiOrigin}/forms/${draft.formId}/upload-draft-data-credentials`
   console.log('Attempting to get Credentials to upload draft data', url)
@@ -29,7 +29,7 @@ const uploadDraftData = async (
       {
         externalId: draft.externalId,
         jobId: draft.jobId,
-      }
+      },
     )
     return data.draftDataId
   } catch (error) {
@@ -42,7 +42,7 @@ const uploadDraftData = async (
             originalError: error,
             requiresLogin: true,
             httpStatusCode: error.status,
-          }
+          },
         )
       }
       case 403: {
@@ -52,7 +52,7 @@ const uploadDraftData = async (
             originalError: error,
             requiresAccessRequest: true,
             httpStatusCode: error.status,
-          }
+          },
         )
       }
       case 400:
@@ -63,7 +63,7 @@ const uploadDraftData = async (
             originalError: error,
             title: 'Unknown Application',
             httpStatusCode: error.status,
-          }
+          },
         )
       }
       default: {
@@ -71,7 +71,7 @@ const uploadDraftData = async (
           'An unknown error has occurred. Please contact support if the problem persists.',
           {
             originalError: error,
-          }
+          },
         )
       }
     }
@@ -80,19 +80,19 @@ const uploadDraftData = async (
 
 const putDrafts = async (
   draftsData /* : FormsAppDrafts */,
-  formsAppId /* : number */
+  formsAppId /* : number */,
 ) /* : Promise<FormsAppDrafts>*/ => {
   if (!isLoggedIn()) {
     console.log(
-      'Could not sync drafts with API as the current user is not logged in.'
+      'Could not sync drafts with API as the current user is not logged in.',
     )
     return draftsData
   }
   const draftsWithDataInS3 = draftsData.drafts.filter(
-    (draft) => draft.draftDataId && draft.draftId !== draft.draftDataId
+    (draft) => draft.draftDataId && draft.draftId !== draft.draftDataId,
   )
   const draftsWithoutDataInS3 = draftsData.drafts.filter(
-    (draft) => !draft.draftDataId || draft.draftId === draft.draftDataId
+    (draft) => !draft.draftDataId || draft.draftId === draft.draftDataId,
   )
 
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/drafts`
@@ -111,7 +111,7 @@ const putDrafts = async (
   } catch (error) {
     console.warn(
       'Error occurred while attempting to sync drafts with API',
-      error
+      error,
     )
     switch (error.status) {
       case 401: {
@@ -121,7 +121,7 @@ const putDrafts = async (
             originalError: error,
             httpStatusCode: error.status,
             requiresLogin: true,
-          }
+          },
         )
       }
       case 403: {
@@ -131,7 +131,7 @@ const putDrafts = async (
             originalError: error,
             httpStatusCode: error.status,
             requiresAccessRequest: true,
-          }
+          },
         )
       }
       case 400:
@@ -142,7 +142,7 @@ const putDrafts = async (
             originalError: error,
             title: 'Error Syncing Drafts',
             httpStatusCode: error.status,
-          }
+          },
         )
       }
       default: {
@@ -150,7 +150,7 @@ const putDrafts = async (
           'An unknown error has occurred. Please contact support if the problem persists.',
           {
             originalError: error,
-          }
+          },
         )
       }
     }
@@ -159,7 +159,7 @@ const putDrafts = async (
 
 async function downloadDraftData /* :: <T> */(
   formId /* : number */,
-  draftDataId /* : string */
+  draftDataId /* : string */,
 ) /* : Promise<T> */ {
   const url = `${tenants.current.apiOrigin}/forms/${formId}/download-draft-data-credentials/${draftDataId}`
   console.log('Attempting to get Credentials to download draft data', url)

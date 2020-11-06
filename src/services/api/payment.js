@@ -12,7 +12,7 @@ const generatePaymentConfiguration = (
     amount: number,
     redirectUrl: string,
     submissionId?: string,
-  } */
+  } */,
 ) /* : Promise<{ hostedFormUrl: string, submissionId: string }> */ => {
   let path
   switch (paymentSubmissionEvent.type) {
@@ -26,7 +26,7 @@ const generatePaymentConfiguration = (
     }
     default: {
       throw new OneBlinkAppsError(
-        'It looks like you are attempting to make a payment using an unsupported payment method.'
+        'It looks like you are attempting to make a payment using an unsupported payment method.',
       )
     }
   }
@@ -35,7 +35,7 @@ const generatePaymentConfiguration = (
   return postRequest(url, payload).catch((error) => {
     console.warn(
       'Error occurred while attempting to generate configuration for payment',
-      error
+      error,
     )
     switch (error.status) {
       case 401: {
@@ -45,7 +45,7 @@ const generatePaymentConfiguration = (
             originalError: error,
             httpStatusCode: error.status,
             requiresLogin: true,
-          }
+          },
         )
       }
       case 403: {
@@ -55,7 +55,7 @@ const generatePaymentConfiguration = (
             originalError: error,
             httpStatusCode: error.status,
             requiresAccessRequest: true,
-          }
+          },
         )
       }
       case 400:
@@ -65,7 +65,7 @@ const generatePaymentConfiguration = (
           {
             originalError: error,
             httpStatusCode: error.status,
-          }
+          },
         )
       }
       default: {
@@ -73,7 +73,7 @@ const generatePaymentConfiguration = (
           'An unknown error has occurred. Please contact support if the problem persists.',
           {
             originalError: error,
-          }
+          },
         )
       }
     }
@@ -82,14 +82,14 @@ const generatePaymentConfiguration = (
 
 const verifyPaymentTransaction = /* :: <T> */ (
   path /* : string */,
-  payload /* : mixed */
+  payload /* : mixed */,
 ) /* : Promise<T> */ => {
   const url = `${tenants.current.apiOrigin}${path}`
   console.log('Attempting to verify payment transaction', url)
   return postRequest(url, payload).catch((error) => {
     console.warn(
       'Error occurred while attempting to verify a transaction',
-      error
+      error,
     )
     switch (error.status) {
       case 401: {
@@ -99,7 +99,7 @@ const verifyPaymentTransaction = /* :: <T> */ (
             originalError: error,
             httpStatusCode: error.status,
             requiresLogin: true,
-          }
+          },
         )
       }
       case 403: {
@@ -109,7 +109,7 @@ const verifyPaymentTransaction = /* :: <T> */ (
             originalError: error,
             httpStatusCode: error.status,
             requiresAccessRequest: true,
-          }
+          },
         )
       }
       case 400:
@@ -119,7 +119,7 @@ const verifyPaymentTransaction = /* :: <T> */ (
           {
             originalError: error,
             httpStatusCode: error.status,
-          }
+          },
         )
       }
       default: {
@@ -127,7 +127,7 @@ const verifyPaymentTransaction = /* :: <T> */ (
           'An unknown error has occurred. Please contact support if the problem persists.',
           {
             originalError: error,
-          }
+          },
         )
       }
     }
@@ -136,14 +136,14 @@ const verifyPaymentTransaction = /* :: <T> */ (
 
 const acknowledgeCPPayTransaction = (
   formId /* : number */,
-  payload /* : mixed */
+  payload /* : mixed */,
 ) /* : Promise<void> */ => {
   const url = `${tenants.current.apiOrigin}/forms/${formId}/cp-pay-acknowledge`
   console.log('Attempting to acknowledge CP Pay transaction', url)
   return postRequest(url, payload).catch((error) => {
     console.warn(
       'Error occurred while attempting to acknowledge a CP Pay transaction',
-      error
+      error,
     )
     switch (error.status) {
       case 401: {
@@ -153,7 +153,7 @@ const acknowledgeCPPayTransaction = (
             originalError: error,
             httpStatusCode: error.status,
             requiresLogin: true,
-          }
+          },
         )
       }
       case 403: {
@@ -163,7 +163,7 @@ const acknowledgeCPPayTransaction = (
             originalError: error,
             httpStatusCode: error.status,
             requiresAccessRequest: true,
-          }
+          },
         )
       }
       case 400:
@@ -173,7 +173,7 @@ const acknowledgeCPPayTransaction = (
           {
             originalError: error,
             httpStatusCode: error.status,
-          }
+          },
         )
       }
       default: {
@@ -181,7 +181,7 @@ const acknowledgeCPPayTransaction = (
           'An unknown error has occurred. Please contact support if the problem persists.',
           {
             originalError: error,
-          }
+          },
         )
       }
     }

@@ -18,7 +18,7 @@ export default class OneBlinkAppsError extends Error {
       requiresLogin?: boolean,
       httpStatusCode?: number,
       originalError?: Error,
-    } */ = {}
+    } */ = {},
   ) {
     super(message)
 

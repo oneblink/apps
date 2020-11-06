@@ -35,7 +35,7 @@ async function processPendingQueue() /* : Promise<void>  */ {
     if (isOffline()) {
       console.log(
         'Application is offline, leaving submission in the pending queue:',
-        submission
+        submission,
       )
       continue
     }
@@ -43,7 +43,7 @@ async function processPendingQueue() /* : Promise<void>  */ {
     if (submission.definition.isAuthenticated && !isLoggedIn()) {
       console.log(
         'Authentication is required for this form but the user does not have a valid token, leaving submission in the pending queue:',
-        submission
+        submission,
       )
       continue
     }
@@ -51,16 +51,16 @@ async function processPendingQueue() /* : Promise<void>  */ {
     try {
       console.log(
         'Attempting to process submission from pending queue:',
-        submission
+        submission,
       )
       // Get Submission again to get ensure we are submitting all the data
       const existingSubmission = await getPendingQueueSubmission(
-        submission.pendingTimestamp
+        submission.pendingTimestamp,
       )
       if (!existingSubmission) {
         console.log(
           'Skipping submission as it has already been processed',
-          submission
+          submission,
         )
         continue
       }
@@ -69,7 +69,7 @@ async function processPendingQueue() /* : Promise<void>  */ {
       submission.error = undefined
       await updatePendingQueueSubmission(
         submission.pendingTimestamp,
-        submission
+        submission,
       )
 
       await submit({ formSubmission: existingSubmission })
@@ -78,7 +78,7 @@ async function processPendingQueue() /* : Promise<void>  */ {
 
       console.log(
         'Successfully processed submission from the pending queue',
-        submission
+        submission,
       )
     } catch (error) {
       console.error('Error processing submission from the pending queue', error)
@@ -91,13 +91,13 @@ async function processPendingQueue() /* : Promise<void>  */ {
       }
       await updatePendingQueueSubmission(
         submission.pendingTimestamp,
-        submission
+        submission,
       )
     }
   }
 
   console.log(
-    'Finished attempting to processing submissions in the pending queue.'
+    'Finished attempting to processing submissions in the pending queue.',
   )
   _isProcessingPendingQueue = false
 }
@@ -111,7 +111,7 @@ async function submit(
   formSubmission: FormSubmission,
   paymentReceiptUrl?: string,
   submissionId?: string,
-}*/
+}*/,
 ) /* : Promise<FormSubmissionResult> */ {
   formSubmission.keyId = getFormsKeyId()
   const submissionEvents = formSubmission.definition.submissionEvents || []
@@ -125,7 +125,7 @@ async function submit(
       }
       return p
     },
-    null
+    null,
   )
 
   if (paymentSubmissionEvent) {
@@ -135,7 +135,7 @@ async function submit(
   if (isOffline()) {
     if (paymentSubmissionEvent) {
       console.log(
-        'Offline - form has a payment submission event and payment has not been processed yet, return offline'
+        'Offline - form has a payment submission event and payment has not been processed yet, return offline',
       )
       return Object.assign({}, formSubmission, {
         isOffline: true,
@@ -150,7 +150,7 @@ async function submit(
     await addSubmissionToPendingQueue(
       Object.assign({}, formSubmission, {
         pendingTimestamp: new Date().toISOString(),
-      })
+      }),
     )
     return Object.assign({}, formSubmission, {
       isOffline: true,
@@ -189,7 +189,7 @@ async function submit(
     {
       externalId: formSubmission.externalId,
       jobId: formSubmission.jobId,
-    }
+    },
   )
   if (formSubmission.draftId) {
     await deleteDraft(formSubmission.draftId, formSubmission.formsAppId)
@@ -226,8 +226,8 @@ async function closeWindow() /* : Promise<void> */ {
       console.log('Could not close as window was not opened using JavaScript')
       reject(
         new Error(
-          'We were unable to close your browser, could you please close it manually for us?'
-        )
+          'We were unable to close your browser, could you please close it manually for us?',
+        ),
       )
     }, 500)
   })
@@ -243,7 +243,7 @@ async function cancelForm() /* : Promise<void> */ {
 
 async function executePostSubmissionAction(
   submissionResult /* : FormSubmissionResult */,
-  push /* : (url: string) => void */
+  push /* : (url: string) => void */,
 ) /* : Promise<void> */ {
   console.log('Attempting to run post submission action')
   let postSubmissionAction = submissionResult.definition.postSubmissionAction

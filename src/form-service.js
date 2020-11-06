@@ -8,7 +8,7 @@ import { getRequest, searchRequest } from './services/fetch'
 import tenants from './tenants'
 
 export async function getForms(
-  formsAppId /* : number */
+  formsAppId /* : number */,
 ) /* : Promise<Form[]> */ {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms`
   return getRequest(url)
@@ -22,7 +22,7 @@ export async function getForms(
           {
             originalError: error,
             isOffline: true,
-          }
+          },
         )
       }
       switch (error.status) {
@@ -33,7 +33,7 @@ export async function getForms(
               originalError: error,
               requiresLogin: true,
               httpStatusCode: error.status,
-            }
+            },
           )
         }
         case 403: {
@@ -43,7 +43,7 @@ export async function getForms(
               originalError: error,
               requiresAccessRequest: true,
               httpStatusCode: error.status,
-            }
+            },
           )
         }
         case 400:
@@ -55,7 +55,7 @@ export async function getForms(
               title: 'Unknown Application',
               requiresAccessRequest: true,
               httpStatusCode: error.status,
-            }
+            },
           )
         }
         default: {
@@ -63,7 +63,7 @@ export async function getForms(
             'An unknown error has occurred. Please contact support if the problem persists.',
             {
               originalError: error,
-            }
+            },
           )
         }
       }
@@ -72,7 +72,7 @@ export async function getForms(
 
 export async function getForm(
   formsAppId /* : number */,
-  formId /* : number */
+  formId /* : number */,
 ) /* : Promise<Form> */ {
   return (
     searchRequest(`${tenants.current.apiOrigin}/forms/${formId}`, {
@@ -102,7 +102,7 @@ export async function getForm(
             {
               originalError: error,
               isOffline: true,
-            }
+            },
           )
         }
 
@@ -114,7 +114,7 @@ export async function getForm(
                 originalError: error,
                 requiresLogin: true,
                 httpStatusCode: error.status,
-              }
+              },
             )
           }
           case 403: {
@@ -124,7 +124,7 @@ export async function getForm(
                 originalError: error,
                 requiresAccessRequest: true,
                 httpStatusCode: error.status,
-              }
+              },
             )
           }
           case 400:
@@ -148,7 +148,7 @@ export async function getForm(
               'An unknown error has occurred. Please contact support if the problem persists.',
               {
                 originalError: error,
-              }
+              },
             )
           }
         }
@@ -158,7 +158,7 @@ export async function getForm(
 
 export async function getFormElementLookups(
   organisationId /* : string  */,
-  formsAppEnvironmentId /* : number */
+  formsAppEnvironmentId /* : number */,
 ) /* : Promise<Array<FormElementLookup & { url: string }>> */ {
   return searchRequest(`${tenants.current.apiOrigin}/form-element-lookups`, {
     organisationId,
@@ -177,14 +177,14 @@ export async function getFormElementLookups(
             }
             return url
           },
-          null
+          null,
         ),
-      }))
+      })),
     )
     .catch((error) => {
       console.warn(
         `Error retrieving form element lookups for organisationId ${organisationId}`,
-        error
+        error,
       )
       throw error
     })
@@ -193,32 +193,32 @@ export async function getFormElementLookups(
 export async function getFormElementLookupById(
   organisationId /* : string  */,
   formsAppEnvironmentId /* : number */,
-  formElementLookupId /* : number */
+  formElementLookupId /* : number */,
 ) /* : Promise<FormElementLookup & { url: string } | void> */ {
   return getFormElementLookups(
     organisationId,
-    formsAppEnvironmentId
+    formsAppEnvironmentId,
   ).then((formElementLookups) =>
     formElementLookups.find(
-      (formElementLookup) => formElementLookup.id === formElementLookupId
-    )
+      (formElementLookup) => formElementLookup.id === formElementLookupId,
+    ),
   )
 }
 
 async function getFormElementOptionsSets(
-  organisationId /* : string  */
+  organisationId /* : string  */,
 ) /* : Promise<Array<FormElementDynamicOptionSet>> */ {
   const { formElementDynamicOptionSets } = await searchRequest(
     `${tenants.current.apiOrigin}/form-element-options/dynamic`,
     {
       organisationId,
-    }
+    },
   )
   return formElementDynamicOptionSets
 }
 
 export async function getFormElementDynamicOptions(
-  input /* : Form | Form[] */
+  input /* : Form | Form[] */,
 ) /* : Promise<Array<{ elementId: string, options: ChoiceElementOption[] }>> */ {
   const forms = Array.isArray(input) ? input : [input]
   if (!forms.length) {
@@ -246,10 +246,10 @@ export async function getFormElementDynamicOptions(
 
   // Get the options sets for all the ids
   const allFormElementOptionsSets = await getFormElementOptionsSets(
-    forms[0].organisationId
+    forms[0].organisationId,
   )
   const formElementOptionsSets = allFormElementOptionsSets.filter(({ id }) =>
-    formElementOptionsSetIds.includes(id)
+    formElementOptionsSetIds.includes(id),
   )
   if (!formElementOptionsSetIds.length) {
     return []
@@ -269,7 +269,7 @@ export async function getFormElementDynamicOptions(
           }
           return url
         },
-        null
+        null,
       )
       if (!url) {
         return
@@ -283,7 +283,7 @@ export async function getFormElementDynamicOptions(
       } catch (error) {
         console.warn('Error getting dynamic options from ' + url, error)
       }
-    })
+    }),
   )
 
   return forms.reduce((optionsForElementId, form) => {
@@ -296,7 +296,7 @@ export async function getFormElementDynamicOptions(
           // $FlowFixMe
           result &&
           !Array.isArray(element.options) &&
-          element.dynamicOptionSetId === result.formElementOptionsSetId
+          element.dynamicOptionSetId === result.formElementOptionsSetId,
       )
       if (!result || !Array.isArray(result.options)) {
         return
@@ -314,14 +314,14 @@ export async function getFormElementDynamicOptions(
                 return memo
               }
               const attribute = element.attributesMapping.find(
-                (map) => map.attribute === label
+                (map) => map.attribute === label,
               )
               if (!attribute) return memo
 
               const elementId = attribute.elementId
               const predicateElement = findFormElement(
                 form.elements,
-                (el) => el.id === elementId
+                (el) => el.id === elementId,
               )
               if (
                 !predicateElement ||
@@ -339,7 +339,7 @@ export async function getFormElementDynamicOptions(
                   (result) =>
                     result &&
                     predicateElement.dynamicOptionSetId ===
-                      result.formElementOptionsSetId
+                      result.formElementOptionsSetId,
                 )
                 if (predicateElementResult) {
                   predicateElementOptions = predicateElementResult.options
@@ -349,7 +349,7 @@ export async function getFormElementDynamicOptions(
               }
 
               const predicateOption = predicateElementOptions.find(
-                (option) => option.value === value
+                (option) => option.value === value,
               )
               if (elementId && predicateOption) {
                 memo[elementId] = memo[elementId] || {
@@ -357,7 +357,7 @@ export async function getFormElementDynamicOptions(
                   optionIds: [],
                 }
                 memo[elementId].optionIds.push(
-                  predicateOption.id || predicateOption.value
+                  predicateOption.id || predicateOption.value,
                 )
                 element.conditionallyShowOptionsElementIds =
                   element.conditionallyShowOptionsElementIds || []
@@ -365,7 +365,7 @@ export async function getFormElementDynamicOptions(
               }
               return memo
             },
-            {}
+            {},
           )
 
           return {
@@ -391,7 +391,7 @@ export async function getFormElementDynamicOptions(
 
 export function forEachFormElement(
   elements /* : FormElement[] */,
-  forEach /* : (FormElement, FormElement[]) => void */
+  forEach /* : (FormElement, FormElement[]) => void */,
 ) /* : void */ {
   findFormElement(elements, (formElement, parentElements) => {
     forEach(formElement, parentElements)
@@ -401,7 +401,7 @@ export function forEachFormElement(
 
 function forEachFormElementWithOptions(
   elements /* : FormElement[] */,
-  forEach /* : (FormElementWithOptions, FormElement[]) => void */
+  forEach /* : (FormElementWithOptions, FormElement[]) => void */,
 ) /* : void */ {
   findFormElement(elements, (formElement, parentElements) => {
     if (
@@ -419,7 +419,7 @@ function forEachFormElementWithOptions(
 export function findFormElement(
   elements /* : FormElement[] */,
   predicate /* : (FormElement, FormElement[]) => boolean */,
-  parentElements /* : FormElement[] */ = []
+  parentElements /* : FormElement[] */ = [],
 ) /* : FormElement | void */ {
   for (const element of elements) {
     if (predicate(element, parentElements)) {

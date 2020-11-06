@@ -66,7 +66,7 @@ async function subscribe(formsAppId /* : number */) /* : Promise<boolean> */ {
         'You are currently offline, please connect to the internet and try again.',
         {
           isOffline: true,
-        }
+        },
       )
     }
 
@@ -74,7 +74,7 @@ async function subscribe(formsAppId /* : number */) /* : Promise<boolean> */ {
 
     if (!key) {
       throw new Error(
-        'Notifications have not been configured for your application.'
+        'Notifications have not been configured for your application.',
       )
     }
 
@@ -92,7 +92,7 @@ async function subscribe(formsAppId /* : number */) /* : Promise<boolean> */ {
         'Sorry, push notifications are not support for your device.',
         {
           title: 'Unsupported Device',
-        }
+        },
       )
     }
 
@@ -127,7 +127,7 @@ async function subscribe(formsAppId /* : number */) /* : Promise<boolean> */ {
         {
           title: 'Permission Required',
           originalError: error,
-        }
+        },
       )
     }
 
@@ -140,7 +140,7 @@ async function subscribe(formsAppId /* : number */) /* : Promise<boolean> */ {
       {
         title: 'Permission Required',
         originalError: error,
-      }
+      },
     )
   }
 }
@@ -151,7 +151,7 @@ async function unsubscribe(formsAppId /* : number */) /* : Promise<void> */ {
       'You are currently offline, please connect to the internet and try again.',
       {
         isOffline: true,
-      }
+      },
     )
   }
 
@@ -171,7 +171,7 @@ async function unsubscribe(formsAppId /* : number */) /* : Promise<void> */ {
     await subscription.unsubscribe()
     console.log(
       'Unsubscribed from Service Worker Push subscription',
-      subscription
+      subscription,
     )
 
     await deleteNotificationsSubscription(formsAppId, subscription).catch(
@@ -179,7 +179,7 @@ async function unsubscribe(formsAppId /* : number */) /* : Promise<void> */ {
         // Ignore this error as the server should remove
         // this subscription the next time it tries to use it.
         console.warn('Could not delete subscription on server', error)
-      }
+      },
     )
   } catch (error) {
     console.warn('Failed to unsubscribe the user:', error)
@@ -187,7 +187,7 @@ async function unsubscribe(formsAppId /* : number */) /* : Promise<void> */ {
       'We were unable to unsubscribe you from push notifications, please try again and contact support if the problem persists.',
       {
         originalError: error,
-      }
+      },
     )
   }
 }

@@ -5,7 +5,7 @@ import utilsService from './services/utils'
 import { getPrefillKey, getPrefillFormData } from './services/job-prefill'
 
 export async function removePrefillFormData(
-  prefillFormDataId /* : string */
+  prefillFormDataId /* : string */,
 ) /* : Promise<void> */ {
   const key = getPrefillKey(prefillFormDataId)
   return utilsService.removeLocalForageItem(key)

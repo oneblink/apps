@@ -7,7 +7,7 @@ import tenants from '../../tenants'
 
 export const generateSubmissionCredentials = async (
   submissionData /* : FormSubmission */,
-  submissionId /* : ?string */
+  submissionId /* : ?string */,
 ) /* : Promise<S3UploadCredentials> */ => {
   return postRequest(
     `${tenants.current.apiOrigin}/forms/${submissionData.definition.id}/submission-credentials`,
@@ -16,7 +16,7 @@ export const generateSubmissionCredentials = async (
       recaptchas: (submissionData.captchaTokens || []).map((token) => ({
         token,
       })),
-    }
+    },
   ).catch((error) => {
     // handle only credential errors here
     console.error('Error with getting credentials for submit:', error)
@@ -28,7 +28,7 @@ export const generateSubmissionCredentials = async (
             title: 'Invalid Submission',
             originalError: error,
             httpStatusCode: error.status,
-          }
+          },
         )
       }
       case 401: {
@@ -38,7 +38,7 @@ export const generateSubmissionCredentials = async (
             requiresLogin: true,
             originalError: error,
             httpStatusCode: error.status,
-          }
+          },
         )
       }
       case 403: {
@@ -48,7 +48,7 @@ export const generateSubmissionCredentials = async (
             requiresAccessRequest: true,
             originalError: error,
             httpStatusCode: error.status,
-          }
+          },
         )
       }
       case 404: {
@@ -58,7 +58,7 @@ export const generateSubmissionCredentials = async (
             title: 'Unknown Form',
             originalError: error,
             httpStatusCode: error.status,
-          }
+          },
         )
       }
       default: {
@@ -67,7 +67,7 @@ export const generateSubmissionCredentials = async (
           {
             originalError: error,
             httpStatusCode: error.status,
-          }
+          },
         )
       }
     }

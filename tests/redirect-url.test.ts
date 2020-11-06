@@ -1,10 +1,6 @@
-// @flow
-'use strict'
-
 import replaceElementValues from '../src/services/replace-custom-values'
 
-// $FlowFixMe
-const definition /* : Form */ = {
+const definition = {
   id: 1,
 }
 const baseSubmissionResult = {
@@ -52,7 +48,7 @@ describe('Form redirect URL', () => {
     const result = replaceElementValues(url, submissionResult)
 
     expect(result).toEqual(
-      'https://some-url.com?name=blinkybill&koala=blinkybill'
+      'https://some-url.com?name=blinkybill&koala=blinkybill',
     )
   })
 

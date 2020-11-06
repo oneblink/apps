@@ -102,7 +102,7 @@ export default class AWSCognitoClient {
     if (authenticationResult.RefreshToken) {
       localStorage.setItem(
         this.REFRESH_TOKEN,
-        authenticationResult.RefreshToken
+        authenticationResult.RefreshToken,
       )
     }
 
@@ -156,7 +156,7 @@ export default class AWSCognitoClient {
           AuthParameters: {
             REFRESH_TOKEN: refreshToken,
           },
-        })
+        }),
       )
       this._storeAuthenticationResult(result.AuthenticationResult)
     } catch (error) {
@@ -179,7 +179,7 @@ export default class AWSCognitoClient {
 
   async loginUsernamePassword(
     username: string,
-    password: string
+    password: string,
   ): Promise<((newPassword: string) => Promise<void>) | void> {
     const loginResult = await unsignedAWSRequest(
       this.cognitoIdentityServiceProvider.initiateAuth({
@@ -189,7 +189,7 @@ export default class AWSCognitoClient {
           USERNAME: username,
           PASSWORD: password,
         },
-      })
+      }),
     )
 
     if (loginResult.AuthenticationResult) {
@@ -208,11 +208,11 @@ export default class AWSCognitoClient {
               USERNAME: username,
               NEW_PASSWORD: newPassword,
             },
-          })
+          }),
         )
 
         this._storeAuthenticationResult(
-          resetPasswordResult.AuthenticationResult
+          resetPasswordResult.AuthenticationResult,
         )
       }
     }
@@ -225,7 +225,7 @@ export default class AWSCognitoClient {
     const redirectUri = this.redirectUri
     if (!loginDomain || !redirectUri) {
       throw new TypeError(
-        '"loginDomain" or "redirectUri" was not passed to constructor. Both are required before attempting to login.'
+        '"loginDomain" or "redirectUri" was not passed to constructor. Both are required before attempting to login.',
       )
     }
 
@@ -264,7 +264,7 @@ export default class AWSCognitoClient {
     const redirectUri = this.redirectUri
     if (!loginDomain || !redirectUri) {
       throw new TypeError(
-        '"loginDomain" or "redirectUri" was not passed to constructor. Both are required before attempting to handle a login.'
+        '"loginDomain" or "redirectUri" was not passed to constructor. Both are required before attempting to handle a login.',
       )
     }
 
@@ -277,7 +277,7 @@ export default class AWSCognitoClient {
           typeof query.error_description === 'string'
             ? query.error_description
             : 'An unknown error has occurred.'
-        }`
+        }`,
       )
     }
 
@@ -313,10 +313,10 @@ export default class AWSCognitoClient {
             new Error(
               error.error_description ||
                 error.message ||
-                'An unknown error has occurred while processing authentication code'
-            )
+                'An unknown error has occurred while processing authentication code',
+            ),
           )
-        }
+        },
       )
     })
 
@@ -331,7 +331,7 @@ export default class AWSCognitoClient {
 
   async changePassword(
     existingPassword: string,
-    newPassword: string
+    newPassword: string,
   ): Promise<void> {
     const accessToken = this.getAccessToken()
     await unsignedAWSRequest(
@@ -339,18 +339,18 @@ export default class AWSCognitoClient {
         AccessToken: accessToken,
         PreviousPassword: existingPassword,
         ProposedPassword: newPassword,
-      })
+      }),
     )
   }
 
   async forgotPassword(
-    username: string
+    username: string,
   ): Promise<(code: string, password: string) => Promise<void>> {
     await unsignedAWSRequest(
       this.cognitoIdentityServiceProvider.forgotPassword({
         ClientId: this.clientId,
         Username: username,
-      })
+      }),
     )
 
     return async (code, password) => {
@@ -360,7 +360,7 @@ export default class AWSCognitoClient {
           ConfirmationCode: code,
           Password: password,
           Username: username,
-        })
+        }),
       )
     }
   }
@@ -378,7 +378,7 @@ export default class AWSCognitoClient {
         await unsignedAWSRequest(
           this.cognitoIdentityServiceProvider.globalSignOut({
             AccessToken: accessToken,
-          })
+          }),
         )
       }
     } catch (error) {
@@ -422,13 +422,13 @@ function sendPostRequest(
   url: string,
   params: any,
   success: (value?: unknown) => void,
-  error: string
+  error: string,
 ) {
   const request = new XMLHttpRequest()
   request.open('POST', url, true)
   request.setRequestHeader(
     'Content-Type',
-    'application/x-www-form-urlencoded; charset=UTF-8'
+    'application/x-www-form-urlencoded; charset=UTF-8',
   )
   request.onload = function () {
     let body = {}
@@ -466,7 +466,7 @@ function generateRandomString() {
   const array = new Uint32Array(28)
   window.crypto.getRandomValues(array)
   return Array.from(array, (dec) => ('0' + dec.toString(16)).substr(-2)).join(
-    ''
+    '',
   )
 }
 

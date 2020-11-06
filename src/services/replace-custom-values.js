@@ -43,7 +43,7 @@ const CUSTOM_VALUES = [
 
 export default function replaceCustomValues(
   string /* : string */,
-  submissionResult /* : FormSubmissionResult */
+  submissionResult /* : FormSubmissionResult */,
 ) /* : string */ {
   const matches = string.match(/({ELEMENT:)([^}]+)(})/g)
   if (matches) {
@@ -51,11 +51,11 @@ export default function replaceCustomValues(
     string = matches.reduce((newString, match) => {
       const propertyName = match.substring(
         match.indexOf(':') + 1,
-        match.lastIndexOf('}')
+        match.lastIndexOf('}'),
       )
       return newString.replace(
         match,
-        submissionResult.submission[propertyName] || ''
+        submissionResult.submission[propertyName] || '',
       )
     }, string)
   }
@@ -63,7 +63,7 @@ export default function replaceCustomValues(
   return CUSTOM_VALUES.reduce((newString, customValue) => {
     return newString.replace(
       customValue.string,
-      customValue.value(submissionResult)
+      customValue.value(submissionResult),
     )
   }, string)
 }

@@ -22,6 +22,8 @@
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.10.4",
     "@oneblink/types": "github:oneblink/types",
+    "@typescript-eslint/eslint-plugin": "^4.6.1",
+    "@typescript-eslint/parser": "^4.6.1",
     "eslint": "^7.8.1",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-prettier": "^3.1.4",
@@ -29,6 +31,7 @@
     "flow-bin": "^0.133.0",
     "jest": "^26.4.2",
     "prettier": "^2.1.1",
+    "ts-jest": "^26.4.3",
     "typescript": "^3.9.7"
   },
   "directories": {

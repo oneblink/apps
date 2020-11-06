@@ -1,6 +1,3 @@
-// @flow
-'use strict'
-
 import S3 from 'aws-sdk/clients/s3'
 import bigJSON from 'big-json'
 import s3UploadStream from 's3-upload-stream'
@@ -8,6 +5,23 @@ import queryString from 'query-string'
 
 import { getUserProfile } from '../auth-service'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
+import { FormTypes, SubmissionTypes } from '@oneblink/types'
+
+declare global {
+  interface Window {
+    cordova: unknown
+    device: {
+      cordova: boolean
+      model: string
+      platform: string
+      uuid: string
+      version: string
+      manufacturer: string
+      isVirtual: boolean
+      serial: string
+    }
+  }
+}
 
 const getDeviceInformation = () => {
   if (window.cordova) {
@@ -49,11 +63,11 @@ const getDeviceInformation = () => {
   }
 }
 
-const uploadToS3 = /*:: <T> */ (
-  { credentials, s3: s3Meta },
-  json /* : T */,
-  tags /* : {} | void */,
-) /* : Promise<void> */ => {
+const uploadToS3 = <T>(
+  { credentials, s3: s3Meta }: SubmissionTypes.S3UploadCredentials,
+  json: T,
+  tags: Record<string, string> | void,
+): Promise<unknown> => {
   if (!credentials) {
     return Promise.reject(new Error('Credentials are required'))
   }
@@ -117,7 +131,7 @@ const uploadToS3 = /*:: <T> */ (
       const error = new Error(
         'There was an error saving your form. Please try again. If the problem persists, contact your administrator',
       )
-      // $FlowFixMe
+      // @ts-expect-error
       error.title = 'Connectivity Issues'
       throw error
     }
@@ -127,15 +141,15 @@ const uploadToS3 = /*:: <T> */ (
 }
 
 const uploadFormSubmission = (
-  s3Configuration /* : S3UploadCredentials */,
-  formJson /* : {
-    definition: Form,
-    submission: $PropertyType<FormSubmission, 'submission'>,
-    submissionTimestamp: string,
-    keyId?: string,
-    formsAppId: number,
-  } */,
-  tags /* : {} */,
+  s3Configuration: SubmissionTypes.S3UploadCredentials,
+  formJson: {
+    definition: FormTypes.Form
+    submission: FormTypes.FormSubmission['submission']
+    submissionTimestamp: string
+    keyId?: string
+    formsAppId: number
+  },
+  tags: Record<string, string>,
 ) => {
   console.log('Uploading submission')
   return uploadToS3(
@@ -149,9 +163,10 @@ const uploadFormSubmission = (
   )
 }
 
-const downloadPreFillData = (
-  { credentials, s3: s3Meta } /* : S3UploadCredentials */,
-) => {
+const downloadPreFillData = ({
+  credentials,
+  s3: s3Meta,
+}: SubmissionTypes.S3UploadCredentials) => {
   if (!credentials) {
     return Promise.reject(new Error('Credentials are required'))
   }
@@ -176,16 +191,17 @@ const downloadPreFillData = (
     .getObject(params)
     .promise()
     .then((s3Data) => {
+      // @ts-expect-error
       const blob = new Blob([s3Data.Body])
       const fileReader = new FileReader()
       return new Promise((resolve, reject) => {
         fileReader.onload = function (event) {
           bigJSON.parse(
             {
-              // $FlowFixMe
+              // @ts-expect-error
               body: event.target.result,
             },
-            (error, preFillData) => {
+            (error: Error, preFillData: unknown) => {
               if (error) {
                 reject(error)
               } else {

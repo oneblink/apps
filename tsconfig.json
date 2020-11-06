@@ -1,15 +1,17 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "lib": ["es6", "webworker", "dom"],
-    //"allowJs": true,
+    "target": "ES2020",
+    "module": "ES6",
+    "moduleResolution": "Node",
+    "lib": ["ES6", "webworker", "dom"],
+    "allowJs": true,
     "declaration": true,
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
     "noImplicitAny": true,
     "noUnusedLocals": true,
+    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true
   },
   "include": ["./src"]

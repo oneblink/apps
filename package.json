@@ -9,7 +9,7 @@
   "dependencies": {
     "aws-sdk": "^2.786.0",
     "big-json": "^3.1.0",
-    "jwt-decode": "^2.2.0",
+    "jwt-decode": "^3.1.1",
     "local-storage": "^2.0.0",
     "localforage": "^1.9.0",
     "lodash.clonedeep": "^4.5.0",
@@ -22,6 +22,8 @@
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.12.1",
     "@oneblink/types": "github:oneblink/types",
+    "@types/lodash.clonedeep": "^4.5.6",
+    "@types/s3-upload-stream": "^1.0.2",
     "@typescript-eslint/eslint-plugin": "^4.6.1",
     "@typescript-eslint/parser": "^4.6.1",
     "eslint": "^7.12.1",
@@ -29,9 +31,9 @@
     "eslint-plugin-prettier": "^3.1.4",
     "fixpack": "^3.0.6",
     "jest": "^26.6.3",
-    "npm-watch": "^0.7.0",
     "prettier": "^2.1.2",
     "ts-jest": "^26.4.3",
+    "tsc-watch": "^4.2.9",
     "typescript": "^4.0.5"
   },
   "directories": {
@@ -57,13 +59,13 @@
     "url": "git+https://github.com/oneblink/apps.git"
   },
   "scripts": {
-    "build": "tsc --build",
+    "build": "tsc",
     "eslint": "eslint --fix --cache .",
     "fixpack": "fixpack",
     "jest": "jest",
     "prepublish": "npm run build",
     "pretest": "npm run fixpack && npm run eslint && npm run build",
-    "start": "npm-watch",
+    "start": "tsc-watch",
     "test": "npm run jest"
   }
 }

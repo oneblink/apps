@@ -1,10 +1,15 @@
-// @flow
-'use strict'
-
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import utilsService from './utils'
+import { SubmissionTypes } from '@oneblink/types'
 
-function errorHandler(error) {
+type PendingFormSubmissionResultWithOptionalSubmission = Pick<
+  SubmissionTypes.PendingFormSubmissionResult,
+  Exclude<keyof SubmissionTypes.PendingFormSubmissionResult, 'submission'>
+> & {
+  submission?: SubmissionTypes.PendingFormSubmissionResult['submission']
+}
+
+function errorHandler(error: Error) {
   console.error('Local Forage Error', error)
   if (/The serialized value is too large/.test(error.message)) {
     throw new OneBlinkAppsError(
@@ -15,11 +20,15 @@ function errorHandler(error) {
   throw error
 }
 
-const pendingQueueListeners = []
+const pendingQueueListeners: Array<(
+  results: PendingFormSubmissionResultWithOptionalSubmission[],
+) => unknown> = []
 
 export function registerPendingQueueListener(
-  listener /* : (PendingFormSubmissionResult[]) => mixed */,
-) /* : () => void */ {
+  listener: (
+    results: PendingFormSubmissionResultWithOptionalSubmission[],
+  ) => unknown,
+): () => void {
   pendingQueueListeners.push(listener)
 
   return () => {
@@ -30,7 +39,9 @@ export function registerPendingQueueListener(
   }
 }
 
-function executePendingQueueListeners(newSubmissions) {
+function executePendingQueueListeners(
+  newSubmissions: PendingFormSubmissionResultWithOptionalSubmission[],
+) {
   console.log('Pending Queue submissions have been updated', newSubmissions)
   for (const pendingQueueListener of pendingQueueListeners) {
     pendingQueueListener(newSubmissions)
@@ -38,14 +49,14 @@ function executePendingQueueListeners(newSubmissions) {
 }
 
 export async function addSubmissionToPendingQueue(
-  formSubmissionResult /* : PendingFormSubmissionResult */,
+  formSubmissionResult: SubmissionTypes.PendingFormSubmissionResult,
 ) {
   try {
     await utilsService.setLocalForageItem(
       `SUBMISSION_${formSubmissionResult.pendingTimestamp}`,
       formSubmissionResult,
     )
-    const submissions /* : Object[] */ = await getPendingQueueSubmissions()
+    const submissions: PendingFormSubmissionResultWithOptionalSubmission[] = await getPendingQueueSubmissions()
     submissions.push({
       ...formSubmissionResult,
       submission: undefined,
@@ -58,8 +69,8 @@ export async function addSubmissionToPendingQueue(
 }
 
 export async function updatePendingQueueSubmission(
-  pendingTimestamp /* : string */,
-  newSubmission /* : PendingFormSubmissionResult */,
+  pendingTimestamp: string,
+  newSubmission: SubmissionTypes.PendingFormSubmissionResult,
 ) {
   try {
     const submissions = await getPendingQueueSubmissions()
@@ -76,26 +87,26 @@ export async function updatePendingQueueSubmission(
   }
 }
 
-export function getPendingQueueSubmissions() /* : Promise<PendingFormSubmissionResult[]> */ {
+export function getPendingQueueSubmissions(): Promise<
+  SubmissionTypes.PendingFormSubmissionResult[]
+> {
   return utilsService.localForage
     .getItem('submissions')
     .then((submissions) => (Array.isArray(submissions) ? submissions : []))
 }
 
 export function getPendingQueueSubmission(
-  pendingTimestamp /* : string */,
-) /* : Promise<PendingFormSubmissionResult | null> */ {
+  pendingTimestamp: string,
+): Promise<SubmissionTypes.PendingFormSubmissionResult | null> {
   return utilsService.getLocalForageItem(`SUBMISSION_${pendingTimestamp}`)
 }
 
-export async function deletePendingQueueSubmission(
-  pendingTimestamp /* : string */,
-) {
+export async function deletePendingQueueSubmission(pendingTimestamp: string) {
   try {
     await utilsService.removeLocalForageItem(`SUBMISSION_${pendingTimestamp}`)
     const submissions = await getPendingQueueSubmissions()
     const newSubmissions = submissions.filter(
-      (submission /* : PendingFormSubmissionResult */) =>
+      (submission: SubmissionTypes.PendingFormSubmissionResult) =>
         submission.pendingTimestamp !== pendingTimestamp,
     )
     await utilsService.localForage.setItem('submissions', newSubmissions)

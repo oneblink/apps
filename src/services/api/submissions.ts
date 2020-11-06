@@ -1,19 +1,17 @@
-// @flow
-'use strict'
-
+import { SubmissionTypes } from '@oneblink/types'
 import { postRequest } from '../fetch'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 
 export const generateSubmissionCredentials = async (
-  submissionData /* : FormSubmission */,
-  submissionId /* : ?string */,
-) /* : Promise<S3UploadCredentials> */ => {
-  return postRequest(
+  submissionData: SubmissionTypes.FormSubmission,
+  submissionId?: string,
+): Promise<SubmissionTypes.S3UploadCredentials> => {
+  return postRequest<SubmissionTypes.S3UploadCredentials>(
     `${tenants.current.apiOrigin}/forms/${submissionData.definition.id}/submission-credentials`,
     {
-      submissionId: submissionId || undefined,
-      recaptchas: (submissionData.captchaTokens || []).map((token) => ({
+      submissionId,
+      recaptchas: (submissionData.captchaTokens || []).map((token: string) => ({
         token,
       })),
     },

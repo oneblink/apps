@@ -1,6 +1,4 @@
-// @flow
-'use strict'
-
+import { FormTypes, SubmissionTypes } from '@oneblink/types'
 import { postRequest, putRequest } from '../fetch'
 import { isLoggedIn } from '../../auth-service'
 import { uploadFormSubmission, downloadPreFillData } from '../s3Submit'
@@ -8,14 +6,17 @@ import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 
 const uploadDraftData = async (
-  draft /* : FormsAppDraft */,
-  draftSubmission /* : DraftSubmission */,
-) /* : Promise<string>*/ => {
+  draft: SubmissionTypes.FormsAppDraft,
+  draftSubmission: SubmissionTypes.DraftSubmission,
+): Promise<string> => {
   const url = `${tenants.current.apiOrigin}/forms/${draft.formId}/upload-draft-data-credentials`
   console.log('Attempting to get Credentials to upload draft data', url)
 
   try {
-    const data = await postRequest(url)
+    const data = await postRequest<{
+      draftDataId: string
+      submissionTimestamp: string
+    }>(url)
     console.log('Attempting to upload draft data:', data)
     await uploadFormSubmission(
       data,
@@ -79,9 +80,9 @@ const uploadDraftData = async (
 }
 
 const putDrafts = async (
-  draftsData /* : FormsAppDrafts */,
-  formsAppId /* : number */,
-) /* : Promise<FormsAppDrafts>*/ => {
+  draftsData: SubmissionTypes.FormsAppDrafts,
+  formsAppId: number,
+): Promise<SubmissionTypes.FormsAppDrafts> => {
   if (!isLoggedIn()) {
     console.log(
       'Could not sync drafts with API as the current user is not logged in.',
@@ -99,11 +100,12 @@ const putDrafts = async (
   console.log('Attempting to sync drafts with API', draftsData)
 
   try {
-    const data = await putRequest(url, {
+    const putPayload = {
       drafts: draftsWithDataInS3,
       createdAt: draftsData.createdAt,
       updatedAt: draftsData.updatedAt,
-    })
+    }
+    const data = await putRequest<typeof putPayload>(url, putPayload)
     draftsWithoutDataInS3.forEach((draft) => {
       data.drafts.push(draft)
     })
@@ -157,14 +159,14 @@ const putDrafts = async (
   }
 }
 
-async function downloadDraftData /* :: <T> */(
-  formId /* : number */,
-  draftDataId /* : string */,
-) /* : Promise<T> */ {
+async function downloadDraftData<T>(
+  formId: number,
+  draftDataId: string,
+): Promise<T> {
   const url = `${tenants.current.apiOrigin}/forms/${formId}/download-draft-data-credentials/${draftDataId}`
   console.log('Attempting to get Credentials to download draft data', url)
 
-  const data = await postRequest(url)
+  const data = await postRequest<FormTypes.S3UploadCredentials>(url, null)
   console.log('Attempting to download draft form data:', data)
   return downloadPreFillData(data)
 }

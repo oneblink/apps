@@ -4,7 +4,7 @@ export default class OneBlinkAppsError extends Error {
   requiresAccessRequest: boolean
   requiresLogin: boolean
   httpStatusCode?: number
-  originalError: Error | void
+  originalError?: Error
 
   constructor(
     message: string,

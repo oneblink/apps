@@ -1,46 +1,44 @@
-// @flow
-'use strict'
-
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import utilsService from './utils'
 import { downloadPreFillFormData } from './api/prefill'
+import { FormTypes, MiscTypes } from '@oneblink/types'
 
-export function getPrefillKey(prefillFormDataId /* : string */) {
+export function getPrefillKey(prefillFormDataId: string) {
   return `V2_PREFILL_${prefillFormDataId}`
 }
 
-function get /* :: <T> */(
-  prefillFormDataId /*: string */,
-) /* : Promise<T | null> */ {
+function get<T>(prefillFormDataId: string): Promise<T | null> {
   const key = getPrefillKey(prefillFormDataId)
   return utilsService.getLocalForageItem(key)
 }
 
-function set /* :: <T: {}> */(
-  prefillFormDataId /*: string */,
-  model /* : T */,
-) /* : Promise<T> */ {
+// eslint-disable-next-line
+function set<T extends object>(
+  prefillFormDataId: string,
+  model: T,
+): Promise<T> {
   const key = getPrefillKey(prefillFormDataId)
   return utilsService.setLocalForageItem(key, model)
 }
 
-export async function getPrefillFormData /* :: <T: {}> */(
-  formId /* : number */,
-  prefillFormDataId /* : ?string */,
-) /* : Promise<T | null> */ {
+// eslint-disable-next-line
+export async function getPrefillFormData<T extends object>(
+  formId: number,
+  prefillFormDataId: string | MiscTypes.NoU,
+): Promise<T | null> {
   if (!prefillFormDataId) {
     return null
   }
 
-  return get(prefillFormDataId)
+  return get<T>(prefillFormDataId)
     .then((prefillData) => {
       if (prefillData) return prefillData
 
-      return downloadPreFillFormData(
+      return downloadPreFillFormData<T>(
         formId,
         prefillFormDataId,
       ).then((downloadedPrefillData) =>
-        set(prefillFormDataId, downloadedPrefillData),
+        set<T>(prefillFormDataId, downloadedPrefillData),
       )
     })
     .catch((error) => {
@@ -59,8 +57,8 @@ export async function getPrefillFormData /* :: <T: {}> */(
 }
 
 export async function ensurePrefillFormDataExists(
-  jobs /* : FormsAppJob[] */,
-) /* : Promise<void> */ {
+  jobs: FormTypes.FormsAppJob[],
+): Promise<void> {
   if (!jobs.length) {
     return
   }

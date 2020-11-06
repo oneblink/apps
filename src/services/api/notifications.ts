@@ -1,12 +1,9 @@
-// @flow
-'use strict'
-
-import { postRequest } from '../fetch'
+import { HTTPError, postRequest } from '../fetch'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 import { isOffline } from '../../offline-service'
 
-const subscriptionErrorHandler = (error) => {
+const subscriptionErrorHandler = (error: HTTPError) => {
   console.warn('Error POSTing notifications subscription', error)
   if (isOffline()) {
     throw new OneBlinkAppsError(
@@ -60,23 +57,23 @@ const subscriptionErrorHandler = (error) => {
 }
 
 async function createNotificationsSubscription(
-  formsAppId /* : number */,
-  subscription /* : PushSubscription */,
-) /* : Promise<void> */ {
+  formsAppId: number,
+  subscription: PushSubscription,
+): Promise<void> {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/notifications/subscribe`
   console.log('Attempting to create notifications subscription', url)
-  return postRequest(url, {
+  await postRequest(url, {
     subscription,
   }).catch(subscriptionErrorHandler)
 }
 
 async function deleteNotificationsSubscription(
-  formsAppId /* : number */,
-  subscription /* : PushSubscription */,
-) /* : Promise<void> */ {
+  formsAppId: number,
+  subscription: PushSubscription,
+): Promise<void> {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/notifications/unsubscribe`
   console.log('Attempting to delete notifications subscription', url)
-  return postRequest(url, {
+  await postRequest(url, {
     subscription,
   }).catch(subscriptionErrorHandler)
 }

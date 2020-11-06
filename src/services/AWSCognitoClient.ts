@@ -1,5 +1,5 @@
-import { EventListeners } from 'aws-sdk'
-import { CognitoIdentityServiceProvider } from 'aws-sdk'
+import { EventListeners, CognitoIdentityServiceProvider } from 'aws-sdk'
+
 interface AWSAuthenticationResult {
   AccessToken: string
   ExpiresIn: number
@@ -21,10 +21,12 @@ export type AWSCognitoAuthChallenge = {
   AuthenticationResult?: AWSAuthenticationResult
 }
 
+// @ts-expect-error
 const unsignedAWSRequest = async (request) => {
   request.removeListener('validate', EventListeners.Core.VALIDATE_CREDENTIALS)
   // @ts-expect-error
   request.removeListener('sign', EventListeners.Core.SIGN)
+
   return request.promise()
 }
 
@@ -118,15 +120,15 @@ export default class AWSCognitoClient {
     this._executeListeners()
   }
 
-  _getAccessToken(): string | void {
+  _getAccessToken(): string | undefined {
     return localStorage.getItem(this.ACCESS_TOKEN) || undefined
   }
 
-  _getIdToken(): string | void {
+  _getIdToken(): string | undefined {
     return localStorage.getItem(this.ID_TOKEN) || undefined
   }
 
-  _getRefreshToken(): string | void {
+  _getRefreshToken(): string | undefined {
     return localStorage.getItem(this.REFRESH_TOKEN) || undefined
   }
 
@@ -297,7 +299,7 @@ export default class AWSCognitoClient {
     localStorage.removeItem(this.PKCE_CODE_VERIFIER)
 
     // Exchange the authorization code for an access token
-    const result = await new Promise((resolve, reject) => {
+    const result: UnknownObject = await new Promise((resolve, reject) => {
       sendPostRequest(
         `https://${loginDomain}/oauth2/token`,
         {
@@ -321,11 +323,11 @@ export default class AWSCognitoClient {
     })
 
     this._storeAuthenticationResult({
-      AccessToken: result.access_token,
-      ExpiresIn: result.expires_in,
-      IdToken: result.id_token,
-      TokenType: result.token_type,
-      RefreshToken: result.refresh_token,
+      AccessToken: result.access_token as string,
+      ExpiresIn: result.expires_in as number,
+      IdToken: result.id_token as string,
+      TokenType: result.token_type as string,
+      RefreshToken: result.refresh_token as string,
     })
   }
 
@@ -333,10 +335,10 @@ export default class AWSCognitoClient {
     existingPassword: string,
     newPassword: string,
   ): Promise<void> {
-    const accessToken = this.getAccessToken()
+    const accessToken = await this.getAccessToken()
     await unsignedAWSRequest(
       this.cognitoIdentityServiceProvider.changePassword({
-        AccessToken: accessToken,
+        AccessToken: accessToken ?? '',
         PreviousPassword: existingPassword,
         ProposedPassword: newPassword,
       }),
@@ -390,13 +392,13 @@ export default class AWSCognitoClient {
     }
   }
 
-  async getIdToken(): Promise<string | void> {
+  async getIdToken(): Promise<string | undefined> {
     await this._refreshSession()
 
     return this._getIdToken()
   }
 
-  async getAccessToken(): Promise<string | void> {
+  async getAccessToken(): Promise<string | undefined> {
     await this._refreshSession()
 
     return this._getAccessToken()
@@ -420,9 +422,9 @@ function parseQueryString(string: string) {
 // Make a POST request and parse the response as JSON
 function sendPostRequest(
   url: string,
-  params: any,
-  success: (value?: unknown) => void,
-  error: string,
+  params: UnknownObject,
+  success: (value?: UnknownObject) => void,
+  error: (err: { message?: string; error_description?: string }) => void,
 ) {
   const request = new XMLHttpRequest()
   request.open('POST', url, true)
@@ -448,7 +450,7 @@ function sendPostRequest(
     error({})
   }
   const body = Object.keys(params)
-    .reduce((keys, key) => {
+    .reduce((keys: string[], key) => {
       if (params[key]) {
         keys.push(key + '=' + params[key])
       }
@@ -457,6 +459,7 @@ function sendPostRequest(
     .join('&')
   request.send(body)
 }
+;('prop=propVal')
 
 //////////////////////////////////////////////////////////////////////
 // PKCE HELPER FUNCTIONS
@@ -472,18 +475,19 @@ function generateRandomString() {
 
 // Calculate the SHA256 hash of the input text.
 // Returns a promise that resolves to an ArrayBuffer
-function sha256(plain) {
+function sha256(plain: string) {
   const encoder = new TextEncoder()
   const data = encoder.encode(plain)
   return window.crypto.subtle.digest('SHA-256', data)
 }
 
 // Base64-urlencodes the input string
-function base64urlencode(str) {
+function base64urlencode(str: ArrayBuffer) {
   // Convert the ArrayBuffer to string using Uint8 array to conver to what btoa accepts.
   // btoa accepts chars only within ascii 0-255 and base64 encodes them.
   // Then convert the base64 encoded to base64url encoded
   //   (replace + with -, replace / with _, trim trailing =)
+  // @ts-expect-error
   return btoa(String.fromCharCode.apply(null, new Uint8Array(str)))
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
@@ -491,7 +495,7 @@ function base64urlencode(str) {
 }
 
 // Return the base64-urlencoded sha256 hash for the PKCE challenge
-async function pkceChallengeFromVerifier(v) {
+async function pkceChallengeFromVerifier(v: string) {
   const hashed = await sha256(v)
   return base64urlencode(hashed)
 }

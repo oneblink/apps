@@ -20,6 +20,7 @@
     "uuid": "^8.3.1"
   },
   "devDependencies": {
+    "@babel/plugin-transform-modules-commonjs": "^7.12.1",
     "@oneblink/types": "github:oneblink/types",
     "@typescript-eslint/eslint-plugin": "^4.6.1",
     "@typescript-eslint/parser": "^4.6.1",

@@ -3,13 +3,17 @@
     "target": "ES2020",
     "module": "ES6",
     "moduleResolution": "Node",
-    "lib": ["ES6", "webworker"],
+    "lib": ["ES6", "webworker", "dom"],
     "allowJs": true,
     "declaration": true,
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
-    "forceConsistentCasingInFileNames": true
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
   },
   "include": ["./src"]
 }

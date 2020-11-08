@@ -1,21 +1,19 @@
-// @flow
-'use strict'
-
 import jwtDecode from 'jwt-decode'
 
 import { getCognitoIdToken } from './cognito'
 
-let formsKeyToken = null
+import { MiscTypes } from '@oneblink/types'
+let formsKeyToken: string | MiscTypes.NoU = null
 
-export function setFormsKeyToken(jwtToken /* : ?string */) /* : void */ {
+export function setFormsKeyToken(jwtToken: string | MiscTypes.NoU): void {
   formsKeyToken = jwtToken || null
 }
 
-export function getFormsKeyId() /* : string | void */ {
+export function getFormsKeyId(): string | void {
   if (formsKeyToken) {
     console.log('Attempting to decode JWT')
     try {
-      const tokenPayload = jwtDecode(formsKeyToken)
+      const tokenPayload = jwtDecode(formsKeyToken) as { iss: string }
       return tokenPayload.iss
     } catch (error) {
       console.warn('Could not decode JWT', error)

@@ -1,26 +1,22 @@
-// @flow
-
 import jwtDecode from 'jwt-decode'
 
 import AWSCognitoClient from './AWSCognitoClient'
 
 import utilsService from './utils'
 import * as offlineService from '../offline-service'
-
-/* ::
-type CognitoServiceData = {
-  oAuthClientId: string,
-  loginDomain: string,
-  region: string,
-  redirectUri: string,
+import { MiscTypes } from '@oneblink/types'
+interface CognitoServiceData {
+  oAuthClientId: string
+  loginDomain: string
+  region: string
+  redirectUri: string
 }
-*/
 
 const CONTINUE_TO = 'continueTo'
 
-let awsCognitoClient = null
+let awsCognitoClient: null | AWSCognitoClient = null
 
-function init(cognitoServiceData /* : CognitoServiceData  */) {
+function init(cognitoServiceData: CognitoServiceData) {
   console.log('Initiating CognitoIdentityServiceProvider', cognitoServiceData)
 
   awsCognitoClient = new AWSCognitoClient({
@@ -31,7 +27,7 @@ function init(cognitoServiceData /* : CognitoServiceData  */) {
   })
 }
 
-function registerAuthListener(listener /* : () => mixed */) /* : () => void */ {
+function registerAuthListener(listener: () => unknown): () => void {
   if (!awsCognitoClient) {
     throw new Error(
       '"authService" has not been initiated. You must call the init() function before attempting to register a listener.',
@@ -40,10 +36,7 @@ function registerAuthListener(listener /* : () => mixed */) /* : () => void */ {
   return awsCognitoClient.registerListener(listener)
 }
 
-async function loginUsernamePassword(
-  username /* : string */,
-  password /* : string */,
-) {
+async function loginUsernamePassword(username: string, password: string) {
   if (!awsCognitoClient) {
     throw new Error(
       '"authService" has not been initiated. You must call the init() function before attempting to login.',
@@ -53,9 +46,7 @@ async function loginUsernamePassword(
   return awsCognitoClient.loginUsernamePassword(username, password)
 }
 
-async function loginHostedUI(
-  identityProviderName /* : string */,
-) /* : Promise<void> */ {
+async function loginHostedUI(identityProviderName: string): Promise<void> {
   if (!awsCognitoClient) {
     throw new Error(
       '"authService" has not been initiated. You must call the init() function before attempting to login.',
@@ -67,7 +58,7 @@ async function loginHostedUI(
   return awsCognitoClient.loginHostedUI(identityProviderName)
 }
 
-async function handleAuthentication() /* : Promise<string> */ {
+async function handleAuthentication(): Promise<string> {
   if (!awsCognitoClient) {
     throw new Error(
       '"authService" has not been initiated. You must call the init() function before attempting to handle authentication in URL.',
@@ -87,10 +78,7 @@ async function handleAuthentication() /* : Promise<string> */ {
   return continueTo
 }
 
-async function changePassword(
-  existingPassword /* : string */,
-  newPassword /* : string */,
-) {
+async function changePassword(existingPassword: string, newPassword: string) {
   if (!awsCognitoClient) {
     throw new Error(
       '"authService" has not been initiated. You must call the init() function before attempting to change passwords.',
@@ -100,7 +88,7 @@ async function changePassword(
   return await awsCognitoClient.changePassword(existingPassword, newPassword)
 }
 
-async function forgotPassword(username /* : string */) {
+async function forgotPassword(username: string) {
   if (!awsCognitoClient) {
     throw new Error(
       '"authService" has not been initiated. You must call the init() function before starting the forgot password process.',
@@ -124,11 +112,11 @@ async function logout() {
   }
 }
 
-function isLoggedIn() /* : boolean */ {
+function isLoggedIn(): boolean {
   return !!(awsCognitoClient && awsCognitoClient._getRefreshToken())
 }
 
-async function getCognitoIdToken() /* : Promise<string | void> */ {
+async function getCognitoIdToken(): Promise<string | void> {
   if (!awsCognitoClient) {
     return
   }
@@ -140,24 +128,7 @@ async function getCognitoIdToken() /* : Promise<string | void> */ {
   return await awsCognitoClient.getIdToken()
 }
 
-function getUserProfile() /* : {
-  isSAMLUser: boolean,
-  providerType: string,
-  providerUserId: string,
-  userId: string,
-  username: string,
-  email: ?string,
-  firstName: ?string,
-  lastName: ?string,
-  fullName: ?string,
-  picture: ?string,
-  role: ?string,
-  supervisor: ?{
-    fullName: ?string,
-    email: ?string,
-    providerUserId: ?string,
-  }
-} | null */ {
+function getUserProfile(): MiscTypes.UserProfile | null {
   if (!awsCognitoClient) {
     return null
   }
@@ -166,9 +137,27 @@ function getUserProfile() /* : {
     return null
   }
 
-  const userProfile = jwtDecode(idToken)
+  const userProfile = jwtDecode(idToken) as {
+    sub: string
+    email: string
+    given_name: string | MiscTypes.NoU
+    family_name: string | MiscTypes.NoU
+    name: string | MiscTypes.NoU
+    preferred_username: string | MiscTypes.NoU
+    picture: string | MiscTypes.NoU
+    'custom:role': string | MiscTypes.NoU
+    'custom:supervisor_name': string | MiscTypes.NoU
+    'custom:supervisor_email': string | MiscTypes.NoU
+    'custom:supervisor_user_id': string | MiscTypes.NoU
+    identities:
+      | MiscTypes.NoU
+      | Array<{
+          providerType: string
+          userId: string
+        }>
+  }
 
-  const user = {
+  const user: MiscTypes.UserProfile = {
     isSAMLUser: false,
     providerType: 'Cognito',
     providerUserId: userProfile.sub,
@@ -207,7 +196,7 @@ function getUserProfile() /* : {
   return user
 }
 
-export function getUsername() /* : string | null */ {
+export function getUsername(): string | null {
   const profile = getUserProfile()
   if (!profile) {
     return null

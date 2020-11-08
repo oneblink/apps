@@ -1,18 +1,15 @@
-// @flow
-'use strict'
-
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import utilsService from './utils'
 
 import { uploadDraftData, downloadDraftData } from './api/drafts'
-
-function getDraftDataKey(draftDataId) {
+import { MiscTypes, SubmissionTypes } from '@oneblink/types'
+function getDraftDataKey(draftDataId: string) {
   return `DRAFT_DATA_${draftDataId}`
 }
 
 async function getLocalDraftData(
-  draftDataId /*: ?string */,
-) /* : Promise<DraftSubmission | null> */ {
+  draftDataId: MiscTypes.NoU | string,
+): Promise<SubmissionTypes.DraftSubmission | null> {
   if (!draftDataId) {
     return null
   }
@@ -21,16 +18,16 @@ async function getLocalDraftData(
 }
 
 async function setLocalDraftData(
-  draftDataId /* : string */,
-  model /* : DraftSubmission */,
-) /* : Promise<DraftSubmission> */ {
+  draftDataId: string,
+  model: SubmissionTypes.DraftSubmission,
+): Promise<SubmissionTypes.DraftSubmission> {
   const key = getDraftDataKey(draftDataId)
   return utilsService.setLocalForageItem(key, model)
 }
 
 export async function removeDraftData(
-  draftDataId /* : ?string */,
-) /* : Promise<void> */ {
+  draftDataId: MiscTypes.NoU | string,
+): Promise<void> {
   if (!draftDataId) {
     return
   }
@@ -39,12 +36,12 @@ export async function removeDraftData(
 }
 
 export function saveDraftData(
-  draft /* : FormsAppDraft */,
-  draftSubmission /* : DraftSubmission */,
-  defaultDraftDataId /* : string */,
-) /* : Promise<string> */ {
+  draft: SubmissionTypes.FormsAppDraft,
+  draftSubmission: SubmissionTypes.DraftSubmission,
+  defaultDraftDataId: string,
+): Promise<string> {
   return uploadDraftData(draft, draftSubmission)
-    .catch((error) => {
+    .catch((error: Error) => {
       // Ignoring all errors here as we don't want draft submission data
       // being saved to the cloud to prevent drafts from being saved on the device
       console.warn('Could not upload Draft Data as JSON', error)
@@ -56,14 +53,14 @@ export function saveDraftData(
 }
 
 export async function getDraftData(
-  formId /* : number */,
-  draftDataId /* : string */,
-) /* : Promise<DraftSubmission> */ {
+  formId: number,
+  draftDataId: string,
+): Promise<SubmissionTypes.DraftSubmission> {
   return getLocalDraftData(draftDataId)
     .then((draftData) => {
       if (draftData) return draftData
 
-      return downloadDraftData(
+      return downloadDraftData<SubmissionTypes.DraftSubmission>(
         formId,
         draftDataId,
       ).then((downloadedDraftData) =>
@@ -88,7 +85,9 @@ export async function getDraftData(
     })
 }
 
-export async function ensureDraftsDataExists(drafts /* : FormsAppDraft[] */) {
+export async function ensureDraftsDataExists(
+  drafts: SubmissionTypes.FormsAppDraft[],
+) {
   if (!Array.isArray(drafts)) {
     return
   }
@@ -110,7 +109,7 @@ export async function ensureDraftsDataExists(drafts /* : FormsAppDraft[] */) {
 }
 
 export async function ensureDraftsDataIsUploaded(
-  draftsData /* : FormsAppDrafts */,
+  draftsData: SubmissionTypes.FormsAppDrafts,
 ) {
   const newDrafts = []
   for (const draft of draftsData.drafts) {

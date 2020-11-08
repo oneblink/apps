@@ -60,7 +60,7 @@ export default function replaceCustomValues(
       )
       return newString.replace(
         match,
-        (submissionResult.submission[propertyName] as string | undefined) ?? '',
+        (submissionResult.submission[propertyName] as string | undefined) || '',
       )
     }, string)
   }

@@ -338,7 +338,7 @@ export default class AWSCognitoClient {
     const accessToken = await this.getAccessToken()
     await unsignedAWSRequest(
       this.cognitoIdentityServiceProvider.changePassword({
-        AccessToken: accessToken ?? '',
+        AccessToken: accessToken || '',
         PreviousPassword: existingPassword,
         ProposedPassword: newPassword,
       }),
@@ -459,7 +459,6 @@ function sendPostRequest(
     .join('&')
   request.send(body)
 }
-;('prop=propVal')
 
 //////////////////////////////////////////////////////////////////////
 // PKCE HELPER FUNCTIONS

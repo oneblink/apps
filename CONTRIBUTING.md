@@ -20,7 +20,7 @@ window.ONEBLINK_APPS_ENVIRONMENT = 'test'
 
 ### Running Locally
 
-This code base is written in [TypeScript](https://www.typescriptlang.org/) so it cannot be included locally in an application without a build step. Luckly, we have provided one :)
+This code base is written in [TypeScript](https://www.typescriptlang.org/) so it cannot be included locally in an application without a build step. Luckily, we have provided one :)
 
 1. Allow NPM package to be linked
 

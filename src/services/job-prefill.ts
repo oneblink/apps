@@ -1,7 +1,7 @@
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import utilsService from './utils'
 import { downloadPreFillFormData } from './api/prefill'
-import { FormTypes, MiscTypes } from '@oneblink/types'
+import { MiscTypes, SubmissionTypes } from '@oneblink/types'
 
 export function getPrefillKey(prefillFormDataId: string) {
   return `V2_PREFILL_${prefillFormDataId}`
@@ -57,7 +57,7 @@ export async function getPrefillFormData<T extends object>(
 }
 
 export async function ensurePrefillFormDataExists(
-  jobs: FormTypes.FormsAppJob[],
+  jobs: SubmissionTypes.FormsAppJob[],
 ): Promise<void> {
   if (!jobs.length) {
     return

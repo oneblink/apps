@@ -1,3 +1,1 @@
-declare interface UnknownObject {
-  [property: string]: unknown
-}
+declare type UnknownObject = Record<string, unknown>

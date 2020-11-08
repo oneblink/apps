@@ -167,7 +167,7 @@ async function downloadDraftData<T>(
 
   const data = await postRequest<SubmissionTypes.S3UploadCredentials>(url, null)
   console.log('Attempting to download draft form data:', data)
-  return downloadPreFillData(data)
+  return downloadPreFillData<T>(data)
 }
 
 export { uploadDraftData, putDrafts, downloadDraftData }

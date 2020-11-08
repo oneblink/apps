@@ -64,9 +64,15 @@ const getDeviceInformation = () => {
 }
 
 const uploadToS3 = <T>(
-  { credentials, s3: s3Meta }: SubmissionTypes.S3UploadCredentials,
+  {
+    credentials,
+    s3: s3Meta,
+  }: {
+    credentials: SubmissionTypes.S3UploadCredentials['credentials']
+    s3: SubmissionTypes.S3UploadCredentials['s3']
+  },
   json: T,
-  tags: Record<string, string> | void,
+  tags?: UnknownObject,
 ): Promise<unknown> => {
   if (!credentials) {
     return Promise.reject(new Error('Credentials are required'))
@@ -100,6 +106,7 @@ const uploadToS3 = <T>(
     CacheControl: 'max-age=31536000', // Max 1 year(365 days)
     Bucket: s3Meta.bucket,
     Key: s3Meta.key,
+    // @ts-expect-error
     Tagging: tags ? queryString.stringify(tags) : undefined,
   }
 
@@ -141,15 +148,18 @@ const uploadToS3 = <T>(
 }
 
 const uploadFormSubmission = (
-  s3Configuration: SubmissionTypes.S3UploadCredentials,
+  s3Configuration: {
+    credentials: SubmissionTypes.S3UploadCredentials['credentials']
+    s3: SubmissionTypes.S3UploadCredentials['s3']
+  },
   formJson: {
     definition: FormTypes.Form
-    submission: FormTypes.FormSubmission['submission']
+    submission: SubmissionTypes.FormSubmission['submission']
     submissionTimestamp: string
     keyId?: string
     formsAppId: number
   },
-  tags: Record<string, string>,
+  tags: UnknownObject,
 ) => {
   console.log('Uploading submission')
   return uploadToS3(
@@ -163,10 +173,10 @@ const uploadFormSubmission = (
   )
 }
 
-const downloadPreFillData = ({
+const downloadPreFillData = <T>({
   credentials,
   s3: s3Meta,
-}: SubmissionTypes.S3UploadCredentials) => {
+}: SubmissionTypes.S3UploadCredentials): Promise<T> => {
   if (!credentials) {
     return Promise.reject(new Error('Credentials are required'))
   }
@@ -194,14 +204,14 @@ const downloadPreFillData = ({
       // @ts-expect-error
       const blob = new Blob([s3Data.Body])
       const fileReader = new FileReader()
-      return new Promise((resolve, reject) => {
+      return new Promise<T>((resolve, reject) => {
         fileReader.onload = function (event) {
           bigJSON.parse(
             {
               // @ts-expect-error
               body: event.target.result,
             },
-            (error: Error, preFillData: unknown) => {
+            (error: Error, preFillData: T) => {
               if (error) {
                 reject(error)
               } else {

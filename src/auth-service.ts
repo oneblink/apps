@@ -1,6 +1,3 @@
-// @flow
-'use strict'
-
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import {
   getIdToken,
@@ -37,7 +34,7 @@ export {
   setFormsKeyToken,
 }
 
-export function init({ oAuthClientId } /* : { oAuthClientId: string } */) {
+export function init({ oAuthClientId }: { oAuthClientId: string }) {
   initCognito({
     region: tenants.current.awsRegion,
     loginDomain: tenants.current.loginDomain,
@@ -46,7 +43,7 @@ export function init({ oAuthClientId } /* : { oAuthClientId: string } */) {
   })
 }
 
-export function getUserFriendlyName() /* : string | null */ {
+export function getUserFriendlyName(): string | null {
   const profile = getUserProfile()
   if (!profile) {
     return null
@@ -67,9 +64,7 @@ export function getUserFriendlyName() /* : string | null */ {
   return profile.username
 }
 
-export async function isAuthorised(
-  formsAppId /* : number */,
-) /* : Promise<boolean> */ {
+export async function isAuthorised(formsAppId: number): Promise<boolean> {
   if (getFormsKeyId()) {
     return true
   }
@@ -100,9 +95,7 @@ export async function isAuthorised(
     })
 }
 
-export async function requestAccess(
-  formsAppId /* : number */,
-) /* : Promise<void> */ {
+export async function requestAccess(formsAppId: number): Promise<void> {
   if (!isLoggedIn()) {
     throw new OneBlinkAppsError(
       'You must login before requesting access to this application',

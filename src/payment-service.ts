@@ -1,6 +1,3 @@
-// @flow
-'use strict'
-
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import {
   acknowledgeCPPayTransaction,
@@ -10,13 +7,18 @@ import {
 import { findFormElement } from './form-service'
 import utilsService from './services/utils'
 
-/* ::
-import { type QueryParameters } from 'query-string'
-*/
+import {
+  SubmissionTypes,
+  SubmissionEventTypes,
+  MiscTypes,
+} from '@oneblink/types'
 
 const KEY = 'PAYMENT_SUBMISSION_RESULT'
 
-function verifyCPPayPayment(query, submissionResult) {
+function verifyCPPayPayment(
+  query: UnknownObject,
+  submissionResult: SubmissionTypes.FormSubmissionResult,
+) {
   return Promise.resolve()
     .then(() => {
       const { transactionToken, orderNumber: submissionId } = query
@@ -32,12 +34,15 @@ function verifyCPPayPayment(query, submissionResult) {
         )
       }
 
-      return verifyPaymentTransaction(
-        `/forms/${submissionResult.definition.id}/cp-pay-verification`,
-        {
-          transactionToken,
-        },
-      )
+      return verifyPaymentTransaction<{
+        resultCode: number
+        errorMessage: string
+        transactionId: string
+        lastFour: string
+        amount: number
+      }>(`/forms/${submissionResult.definition.id}/cp-pay-verification`, {
+        transactionToken,
+      })
     })
     .then((transaction) => {
       // Asynchronously acknowledge receipt
@@ -65,7 +70,10 @@ function verifyCPPayPayment(query, submissionResult) {
     })
 }
 
-function verifyBpointPayment(query, submissionResult) {
+function verifyBpointPayment(
+  query: UnknownObject,
+  submissionResult: SubmissionTypes.FormSubmissionResult,
+) {
   return Promise.resolve()
     .then(() => {
       const { ResultKey: transactionToken } = query
@@ -75,12 +83,18 @@ function verifyBpointPayment(query, submissionResult) {
         )
       }
 
-      return verifyPaymentTransaction(
-        `/forms/${submissionResult.definition.id}/bpoint-verification`,
-        {
-          transactionToken,
-        },
-      )
+      return verifyPaymentTransaction<{
+        ResponseCode: string
+        ResponseText: string
+        ReceiptNumber: string
+        CardDetails?: {
+          MaskedCardNumber?: string
+        }
+        Amount: number
+        Crn1: string | null
+      }>(`/forms/${submissionResult.definition.id}/bpoint-verification`, {
+        transactionToken,
+      })
     })
     .then((transaction) => {
       if (submissionResult.submissionId !== transaction.Crn1) {
@@ -94,10 +108,7 @@ function verifyBpointPayment(query, submissionResult) {
           isSuccess: transaction.ResponseCode === '0',
           errorMessage: transaction.ResponseText,
           id: transaction.ReceiptNumber,
-          creditCardMask:
-            (transaction.CardDetails &&
-              transaction.CardDetails.MaskedCardNumber) ||
-            null,
+          creditCardMask: transaction.CardDetails?.MaskedCardNumber || null,
           amount: transaction.Amount / 100,
         },
         submissionResult,
@@ -105,21 +116,21 @@ function verifyBpointPayment(query, submissionResult) {
     })
 }
 
-export function handlePaymentQuerystring(
-  query /* : QueryParameters */,
-) /*: Promise<{
+export async function handlePaymentQuerystring(
+  query: UnknownObject,
+): Promise<{
   transaction: {
-    isSuccess: boolean,
-    errorMessage: ?string,
-    id: ?string,
-    creditCardMask: ?string,
-    amount: ?number,
-  },
-  submissionResult: FormSubmissionResult,
-}> */ {
+    isSuccess: boolean
+    errorMessage: string | MiscTypes.NoU
+    id: string | MiscTypes.NoU
+    creditCardMask: string | MiscTypes.NoU
+    amount: number | MiscTypes.NoU
+  }
+  submissionResult: SubmissionTypes.FormSubmissionResult
+}> {
   return utilsService
-    .getLocalForageItem(KEY)
-    .then((submissionResult /* : FormSubmissionResult | null */) => {
+    .getLocalForageItem<SubmissionTypes.FormSubmissionResult | null>(KEY)
+    .then((submissionResult) => {
       // If the current transaction does not match the submission
       // we will display message to user indicating
       // they are looking for the wrong transaction receipt.
@@ -156,19 +167,17 @@ export function handlePaymentQuerystring(
     )
 }
 
-export async function handlePaymentSubmissionEvent(
-  {
-    formSubmission,
-    paymentSubmissionEvent,
-    paymentReceiptUrl,
-    submissionId,
-  } /* : {
-  formSubmission: FormSubmission,
-  paymentSubmissionEvent: PaymentSubmissionEvent,
-  paymentReceiptUrl: string,
-  submissionId?: string,
-} */,
-) /* : Promise<FormSubmissionResult | void> */ {
+export async function handlePaymentSubmissionEvent({
+  formSubmission,
+  paymentSubmissionEvent,
+  paymentReceiptUrl,
+  submissionId,
+}: {
+  formSubmission: SubmissionTypes.FormSubmission
+  paymentSubmissionEvent: SubmissionEventTypes.PaymentSubmissionEvent
+  paymentReceiptUrl: string
+  submissionId?: string
+}): Promise<SubmissionTypes.FormSubmissionResult | void> {
   console.log('Attempting to handle submission with payment submission event')
   const { definition: form, submission } = formSubmission
 

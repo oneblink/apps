@@ -1,6 +1,3 @@
-// @flow
-'use strict'
-
 import tenants from './tenants'
 
 class LocalisationService {
@@ -26,27 +23,27 @@ class LocalisationService {
     return `${this.flatpickrDateFormat} ${this.flatpickrTimeFormat}`
   }
 
-  formatDate(value /* : Date */) /* : string */ {
+  formatDate(value: Date): string {
     return tenants.current.intlFormats.date.format(value)
   }
 
-  formatDateLong(value /* : Date */) /* : string */ {
+  formatDateLong(value: Date): string {
     return tenants.current.intlFormats.dateLong.format(value)
   }
 
-  formatTime(value /* : Date */) /* : string */ {
+  formatTime(value: Date): string {
     return tenants.current.intlFormats.time.format(value)
   }
 
-  formatDatetime(value /* : Date */) {
+  formatDatetime(value: Date) {
     return `${this.formatDate(value)} ${this.formatTime(value)}`
   }
 
-  formatDatetimeLong(value /* : Date */) {
+  formatDatetimeLong(value: Date) {
     return `${this.formatDateLong(value)} ${this.formatTime(value)}`
   }
 
-  formatCurrency(value /* : number */) /* : string */ {
+  formatCurrency(value: number): string {
     return tenants.current.intlFormats.currency.format(value)
   }
 }

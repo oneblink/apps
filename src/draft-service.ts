@@ -1,6 +1,3 @@
-// @flow
-'use strict'
-
 import _differenceBy from 'lodash.differenceby'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -18,11 +15,19 @@ import {
   ensureDraftsDataExists,
   ensureDraftsDataIsUploaded,
 } from './services/draft-data-store'
+import { MiscTypes, SubmissionTypes } from '@oneblink/types'
 
+interface DraftsData {
+  createdAt?: string
+  updatedAt?: string
+  drafts: SubmissionTypes.FormsAppDraft[]
+}
+
+// @ts-expect-error
 const formsHostnameConfiguration = window.formsHostnameConfiguration || {}
 const isDraftsEnabled = !!formsHostnameConfiguration.isDraftsEnabled
 
-function errorHandler(error) {
+function errorHandler(error: Error): Error {
   console.error('Local Forage Error', error)
   if (/The serialized value is too large/.test(error.message)) {
     throw new OneBlinkAppsError(
@@ -33,11 +38,13 @@ function errorHandler(error) {
   throw error
 }
 
-const draftsListeners = []
+const draftsListeners: Array<(
+  draft: SubmissionTypes.FormsAppDraft[],
+) => unknown> = []
 
 export function registerDraftsListener(
-  listener /* : (FormsAppDraft[]) => mixed */,
-) /* : () => void */ {
+  listener: (draft: SubmissionTypes.FormsAppDraft[]) => unknown,
+): () => void {
   draftsListeners.push(listener)
 
   return () => {
@@ -48,7 +55,7 @@ export function registerDraftsListener(
   }
 }
 
-function executeDraftsListeners(draftsData) {
+function executeDraftsListeners(draftsData: DraftsData) {
   console.log('Drafts have been updated', draftsData)
   for (const draftsListener of draftsListeners) {
     draftsListener(draftsData.drafts)
@@ -56,9 +63,9 @@ function executeDraftsListeners(draftsData) {
 }
 
 async function upsertDraftByKey(
-  draft /* : FormsAppDraft */,
-  draftSubmission /* : DraftSubmission */,
-) /* : Promise<string> */ {
+  draft: SubmissionTypes.FormsAppDraft,
+  draftSubmission: SubmissionTypes.DraftSubmission,
+): Promise<string> {
   if (!draftSubmission.keyId) {
     throw new Error('Could not create draft for key without a keyId')
   }
@@ -77,15 +84,15 @@ async function upsertDraftByKey(
 }
 
 export async function addDraft(
-  newDraft /* : NewFormsAppDraft */,
-  draftSubmission /* : DraftSubmission */,
-) /* : Promise<void> */ {
-  const draft /* : FormsAppDraft */ = {
+  newDraft: SubmissionTypes.NewFormsAppDraft,
+  draftSubmission: SubmissionTypes.DraftSubmission,
+): Promise<void> {
+  const draft: SubmissionTypes.FormsAppDraft = {
     ...newDraft,
     updatedAt: new Date().toISOString(),
     draftId: uuidv4(),
   }
-  draftSubmission.keyId = getFormsKeyId()
+  draftSubmission.keyId = getFormsKeyId() || undefined
   if (draftSubmission.keyId) {
     await upsertDraftByKey(draft, draftSubmission)
     return
@@ -119,14 +126,16 @@ export async function addDraft(
         formsAppId: draftSubmission.formsAppId,
       }),
     )
-    .catch(errorHandler)
+    .catch((err) => {
+      throw errorHandler(err)
+    })
 }
 
 export async function updateDraft(
-  draft /* : FormsAppDraft */,
-  draftSubmission /* : DraftSubmission */,
-) /* : Promise<void> */ {
-  draftSubmission.keyId = getFormsKeyId()
+  draft: SubmissionTypes.FormsAppDraft,
+  draftSubmission: SubmissionTypes.DraftSubmission,
+): Promise<void> {
+  draftSubmission.keyId = getFormsKeyId() || undefined
   if (draftSubmission.keyId) {
     await upsertDraftByKey(draft, draftSubmission)
     return
@@ -171,14 +180,12 @@ export async function updateDraft(
         formsAppId: draftSubmission.formsAppId,
       }),
     )
-    .catch(errorHandler)
+    .catch((err) => {
+      throw errorHandler(err)
+    })
 }
 
-async function getDraftsData() /* : Promise<{
-  createdAt?: string,
-  updatedAt?: string,
-  drafts: FormsAppDraft[],
-}> */ {
+async function getDraftsData(): Promise<DraftsData> {
   const username = getUsername()
   if (!username) {
     return {
@@ -187,11 +194,13 @@ async function getDraftsData() /* : Promise<{
   }
   return utilsService.localForage
     .getItem(`DRAFTS_${username}`)
-    .then((data) => data || { drafts: [] })
-    .catch(errorHandler)
+    .then((data) => (data as DraftsData) || { drafts: [] })
+    .catch((err) => {
+      throw errorHandler(err)
+    })
 }
 
-export async function getDrafts() /* : Promise<FormsAppDraft[]> */ {
+export async function getDrafts(): Promise<SubmissionTypes.FormsAppDraft[]> {
   // Get list of pending submissions
   const [draftsData, pendingSubmissions] = await Promise.all([
     getDraftsData(),
@@ -204,11 +213,11 @@ export async function getDrafts() /* : Promise<FormsAppDraft[]> */ {
 }
 
 export async function getDraftAndData(
-  draftId /* : ?string */,
-) /* : Promise<{
-  draft: FormsAppDraft,
-  draftData: $PropertyType<FormSubmission, 'submission'>,
-} | null> */ {
+  draftId: string | MiscTypes.NoU,
+): Promise<{
+  draft: SubmissionTypes.FormsAppDraft
+  draftData: SubmissionTypes.FormSubmission['submission']
+} | null> {
   if (!draftId) {
     return null
   }
@@ -229,9 +238,9 @@ export async function getDraftAndData(
 }
 
 export async function deleteDraft(
-  draftId /* : string */,
-  formsAppId /* : number */,
-) /* : Promise<void> */ {
+  draftId: string,
+  formsAppId: number,
+): Promise<void> {
   const username = getUsername()
   if (!username) {
     throw new OneBlinkAppsError('Must be logged in to manage drafts', {
@@ -263,10 +272,14 @@ export async function deleteDraft(
           }),
         )
     })
-    .catch(errorHandler)
+    .catch((err) => {
+      throw errorHandler(err)
+    })
 }
 
-async function setDrafts(draftsData) /* : Promise<void> */ {
+async function setDrafts(
+  draftsData: SubmissionTypes.FormsAppDrafts,
+): Promise<void> {
   const username = getUsername()
   if (!username) {
     throw new OneBlinkAppsError('Must be logged in to manage drafts', {
@@ -279,12 +292,13 @@ async function setDrafts(draftsData) /* : Promise<void> */ {
 
 let _isSyncingDrafts = false
 
-export async function syncDrafts(
-  {
-    formsAppId,
-    throwError,
-  } /* : { formsAppId: number, throwError?:boolean } */,
-) /* : Promise<void> */ {
+export async function syncDrafts({
+  formsAppId,
+  throwError,
+}: {
+  formsAppId: number
+  throwError?: boolean
+}): Promise<void> {
   if (!isDraftsEnabled) {
     return
   }

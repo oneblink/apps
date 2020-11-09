@@ -1,6 +1,3 @@
-// @flow
-'use strict'
-
 import * as offlineService from './offline-service'
 import * as authService from './auth-service'
 import * as draftService from './draft-service'

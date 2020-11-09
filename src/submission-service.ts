@@ -1,6 +1,3 @@
-// @flow
-'use strict'
-
 import { isOffline } from './offline-service'
 import { getFormsKeyId, isLoggedIn } from './auth-service'
 import {
@@ -18,10 +15,11 @@ import { deleteDraft } from './draft-service'
 import { removePrefillFormData } from './prefill-service'
 import replaceCustomValues from './services/replace-custom-values'
 import recentlySubmittedJobsService from './services/recently-submitted-jobs'
+import { SubmissionEventTypes, SubmissionTypes } from '@oneblink/types'
 
 let _isProcessingPendingQueue = false
 
-async function processPendingQueue() /* : Promise<void>  */ {
+async function processPendingQueue(): Promise<void> {
   if (_isProcessingPendingQueue) {
     return
   }
@@ -102,21 +100,22 @@ async function processPendingQueue() /* : Promise<void>  */ {
   _isProcessingPendingQueue = false
 }
 
-async function submit(
-  {
-    formSubmission,
-    paymentReceiptUrl,
-    submissionId,
-  } /* : {
-  formSubmission: FormSubmission,
-  paymentReceiptUrl?: string,
-  submissionId?: string,
-}*/,
-) /* : Promise<FormSubmissionResult> */ {
-  formSubmission.keyId = getFormsKeyId()
+async function submit({
+  formSubmission,
+  paymentReceiptUrl,
+  submissionId,
+}: {
+  formSubmission: SubmissionTypes.FormSubmission
+  paymentReceiptUrl?: string
+  submissionId?: string
+}): Promise<SubmissionTypes.FormSubmissionResult> {
+  formSubmission.keyId = getFormsKeyId() || undefined
   const submissionEvents = formSubmission.definition.submissionEvents || []
   const paymentSubmissionEvent = submissionEvents.reduce(
-    (p, submissionEvent) => {
+    (
+      p: SubmissionEventTypes.PaymentSubmissionEvent | null,
+      submissionEvent,
+    ) => {
       if (
         submissionEvent.type === 'CP_PAY' ||
         submissionEvent.type === 'BPOINT'
@@ -211,8 +210,10 @@ async function submit(
   return submissionResult
 }
 
-async function closeWindow() /* : Promise<void> */ {
+async function closeWindow(): Promise<void> {
+  // @ts-expect-error
   if (window.cordova && window.cordova.plugins.exit) {
+    // @ts-expect-error
     window.cordova.plugins.exit()
     return
   }
@@ -233,7 +234,7 @@ async function closeWindow() /* : Promise<void> */ {
   })
 }
 
-async function cancelForm() /* : Promise<void> */ {
+async function cancelForm(): Promise<void> {
   if (window.history.length <= 1) {
     return closeWindow()
   } else {
@@ -242,9 +243,9 @@ async function cancelForm() /* : Promise<void> */ {
 }
 
 async function executePostSubmissionAction(
-  submissionResult /* : FormSubmissionResult */,
-  push /* : (url: string) => void */,
-) /* : Promise<void> */ {
+  submissionResult: SubmissionTypes.FormSubmissionResult,
+  push: (url: string) => void,
+): Promise<void> {
   console.log('Attempting to run post submission action')
   let postSubmissionAction = submissionResult.definition.postSubmissionAction
   let redirectUrl = submissionResult.definition.redirectUrl

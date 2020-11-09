@@ -1,6 +1,3 @@
-// @flow
-'use strict'
-
 import _orderBy from 'lodash.orderby'
 
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
@@ -12,8 +9,11 @@ import { isOffline } from './offline-service'
 import { isLoggedIn } from './auth-service'
 import { getDrafts } from './draft-service'
 import tenants from './tenants'
+import { SubmissionTypes } from '@oneblink/types'
 
-async function removePendingSubmissions(jobList) {
+async function removePendingSubmissions(
+  jobList: SubmissionTypes.FormsAppJob[],
+) {
   // Get list of pending submissions, remove jobs that are in the pending queue
   return getPendingQueueSubmissions().then((submissions) => {
     const unprocessedJobs = jobList.filter(
@@ -23,7 +23,7 @@ async function removePendingSubmissions(jobList) {
   })
 }
 
-async function tagDrafts(jobList) {
+async function tagDrafts(jobList: SubmissionTypes.FormsAppJob[]) {
   return getDrafts().then((drafts) =>
     jobList.map((job) => {
       job.draft = drafts.find((draft) => draft.jobId === job.id)
@@ -33,14 +33,14 @@ async function tagDrafts(jobList) {
 }
 
 export async function getJobs(
-  formsAppId /* : number */,
-  jobsLabel /* : string */,
-) /* : Promise<FormsAppJob[]> */ {
+  formsAppId: number,
+  jobsLabel: string,
+): Promise<SubmissionTypes.FormsAppJob[]> {
   if (!isLoggedIn()) {
     return []
   }
 
-  return searchRequest(
+  return searchRequest<{ jobs: Array<SubmissionTypes.FormsAppJob> }>(
     `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/jobs`,
     {
       isSubmitted: false,
@@ -54,6 +54,7 @@ export async function getJobs(
           return data.jobs.some((job) => job.id === recentlySubmittedJobId)
         },
       )
+      // @ts-expect-error
       if (updateJobIds.length !== recentlySubmittedJobIds) {
         recentlySubmittedJobsService.set(updateJobIds)
       }

@@ -1,22 +1,18 @@
-// @flow
-'use strict'
-
-/* ::
-type OneBlinkAppsTenant = {|
-  awsRegion: string,
-  loginDomain: string,
-  apiOrigin: string,
-  vapidPublicKey: string,
+interface OneBlinkAppsTenant {
+  awsRegion: string
+  loginDomain: string
+  apiOrigin: string
+  vapidPublicKey: string
   intlFormats: {
-    currency: Intl$NumberFormat,
-    date: Intl$DateTimeFormat,
-    dateLong: Intl$DateTimeFormat,
-    time: Intl$DateTimeFormat,
-  },
-|}
-*/
+    currency: Intl.NumberFormat
+    date: Intl.DateTimeFormat
+    dateLong: Intl.DateTimeFormat
+    time: Intl.DateTimeFormat
+  }
+}
+type Locale = 'en-AU' | 'en-US'
 
-const getCurrency = (locale) => {
+const getCurrency = (locale: Locale) => {
   switch (locale) {
     case 'en-US':
       return 'USD'
@@ -26,7 +22,7 @@ const getCurrency = (locale) => {
   }
 }
 
-const generateFormatters = (locale) => {
+const generateFormatters = (locale: Locale) => {
   return {
     currency: new Intl.NumberFormat(locale, {
       style: 'currency',
@@ -38,9 +34,12 @@ const generateFormatters = (locale) => {
       day: '2-digit',
     }),
     dateLong: new Intl.DateTimeFormat(locale, {
+      // These properties are missing in the type for some reason..
+      // @ts-expect-error
       dateStyle: 'full',
     }),
     time: new Intl.DateTimeFormat(locale, {
+      // @ts-expect-error
       timeStyle: 'short',
     }),
   }
@@ -86,20 +85,18 @@ const tenants = {
 }
 
 class Tenants {
-  /* ::
   tenant: 'oneblink' | 'civicplus'
-  currencyFormat: Intl$NumberFormat
-  dateFormat: Intl$DateTimeFormat
-  */
+
   constructor() {
     this.tenant = 'oneblink'
   }
 
   get isTestEnvironment() {
+    // @ts-expect-error
     return window.ONEBLINK_APPS_ENVIRONMENT === 'test'
   }
 
-  get current() /* : OneBlinkAppsTenant */ {
+  get current(): OneBlinkAppsTenant {
     switch (this.tenant) {
       case 'civicplus':
         return this.isTestEnvironment

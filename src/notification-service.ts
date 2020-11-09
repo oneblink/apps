@@ -1,6 +1,3 @@
-// @flow
-'use strict'
-
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import {
   createNotificationsSubscription,
@@ -9,7 +6,7 @@ import {
 import { isOffline } from './offline-service'
 import tenants from './tenants'
 
-function urlB64ToUint8Array(base64String) {
+function urlB64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
   const base64 = (base64String + padding)
     // eslint-disable-next-line no-useless-escape
@@ -25,11 +22,11 @@ function urlB64ToUint8Array(base64String) {
   return outputArray
 }
 
-let applicationServerKey = null
+let applicationServerKey: null | Uint8Array = null
 let _isInitialised = false
-let _swRegistration = null
+let _swRegistration: null | ServiceWorkerRegistration = null
 
-async function getServiceWorkerRegistration() /* : Promise<ServiceWorkerRegistration | null> */ {
+async function getServiceWorkerRegistration(): Promise<ServiceWorkerRegistration | null> {
   if (_isInitialised) {
     return _swRegistration
   }
@@ -49,7 +46,7 @@ async function getServiceWorkerRegistration() /* : Promise<ServiceWorkerRegistra
   return _swRegistration
 }
 
-async function isSubscribed() /* : Promise<boolean> */ {
+async function isSubscribed(): Promise<boolean> {
   const swRegistration = await getServiceWorkerRegistration()
   if (!swRegistration) {
     return false
@@ -59,7 +56,7 @@ async function isSubscribed() /* : Promise<boolean> */ {
   return !!subscription
 }
 
-async function subscribe(formsAppId /* : number */) /* : Promise<boolean> */ {
+async function subscribe(formsAppId: number): Promise<boolean> {
   try {
     if (isOffline()) {
       throw new OneBlinkAppsError(
@@ -145,7 +142,7 @@ async function subscribe(formsAppId /* : number */) /* : Promise<boolean> */ {
   }
 }
 
-async function unsubscribe(formsAppId /* : number */) /* : Promise<void> */ {
+async function unsubscribe(formsAppId: number): Promise<void> {
   if (isOffline()) {
     throw new OneBlinkAppsError(
       'You are currently offline, please connect to the internet and try again.',

@@ -1,17 +1,13 @@
-// @flow
-'use strict'
-
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { isOffline } from './offline-service'
 import { isLoggedIn } from './services/cognito'
 import { getRequest, searchRequest } from './services/fetch'
 import tenants from './tenants'
+import { FormTypes } from '@oneblink/types'
 
-export async function getForms(
-  formsAppId /* : number */,
-) /* : Promise<Form[]> */ {
+export async function getForms(formsAppId: number): Promise<FormTypes.Form[]> {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms`
-  return getRequest(url)
+  return getRequest<{ forms: FormTypes.Form[] }>(url)
     .then(({ forms }) => forms)
     .catch((error) => {
       console.error('Error retrieving forms', error)
@@ -71,13 +67,16 @@ export async function getForms(
 }
 
 export async function getForm(
-  formsAppId /* : number */,
-  formId /* : number */,
-) /* : Promise<Form> */ {
+  formsAppId: number,
+  formId: number,
+): Promise<FormTypes.Form> {
   return (
-    searchRequest(`${tenants.current.apiOrigin}/forms/${formId}`, {
-      injectForms: true,
-    })
+    searchRequest<FormTypes.Form>(
+      `${tenants.current.apiOrigin}/forms/${formId}`,
+      {
+        injectForms: true,
+      },
+    )
       // If we could not find a form by Id for any reason,
       // we will try and get it from cache from the all forms endpoint
       .catch((error) => {
@@ -157,17 +156,20 @@ export async function getForm(
 }
 
 export async function getFormElementLookups(
-  organisationId /* : string  */,
-  formsAppEnvironmentId /* : number */,
-) /* : Promise<Array<FormElementLookup & { url: string }>> */ {
-  return searchRequest(`${tenants.current.apiOrigin}/form-element-lookups`, {
-    organisationId,
-  })
+  organisationId: string,
+  formsAppEnvironmentId: number,
+): Promise<Array<FormTypes.FormElementLookup & { url: string | null }>> {
+  return searchRequest<{ formElementLookups: FormTypes.FormElementLookup[] }>(
+    `${tenants.current.apiOrigin}/form-element-lookups`,
+    {
+      organisationId,
+    },
+  )
     .then((data) =>
       data.formElementLookups.map((formElementLookup) => ({
         ...formElementLookup,
         url: formElementLookup.environments.reduce(
-          (url, formElementLookupEnvironment) => {
+          (url: null | string, formElementLookupEnvironment) => {
             if (
               !url &&
               formElementLookupEnvironment.formsAppEnvironmentId ===
@@ -191,10 +193,10 @@ export async function getFormElementLookups(
 }
 
 export async function getFormElementLookupById(
-  organisationId /* : string  */,
-  formsAppEnvironmentId /* : number */,
-  formElementLookupId /* : number */,
-) /* : Promise<FormElementLookup & { url: string } | void> */ {
+  organisationId: string,
+  formsAppEnvironmentId: number,
+  formElementLookupId: number,
+): Promise<(FormTypes.FormElementLookup & { url: string | null }) | void> {
   return getFormElementLookups(
     organisationId,
     formsAppEnvironmentId,
@@ -206,8 +208,8 @@ export async function getFormElementLookupById(
 }
 
 async function getFormElementOptionsSets(
-  organisationId /* : string  */,
-) /* : Promise<Array<FormElementDynamicOptionSet>> */ {
+  organisationId: string,
+): Promise<Array<FormTypes.FormElementDynamicOptionSet>> {
   const { formElementDynamicOptionSets } = await searchRequest(
     `${tenants.current.apiOrigin}/form-element-options/dynamic`,
     {
@@ -218,15 +220,17 @@ async function getFormElementOptionsSets(
 }
 
 export async function getFormElementDynamicOptions(
-  input /* : Form | Form[] */,
-) /* : Promise<Array<{ elementId: string, options: ChoiceElementOption[] }>> */ {
+  input: FormTypes.Form | FormTypes.Form[],
+): Promise<
+  Array<{ elementId: string; options: FormTypes.ChoiceElementOption[] }>
+> {
   const forms = Array.isArray(input) ? input : [input]
   if (!forms.length) {
     return []
   }
 
   // Get the options sets id for each element
-  const formElementOptionsSetIds = forms.reduce((ids, form) => {
+  const formElementOptionsSetIds = forms.reduce((ids: number[], form) => {
     forEachFormElementWithOptions(form.elements, (el) => {
       if (
         // Ignore elements that have options as we don't need to fetch these again
@@ -249,7 +253,7 @@ export async function getFormElementDynamicOptions(
     forms[0].organisationId,
   )
   const formElementOptionsSets = allFormElementOptionsSets.filter(({ id }) =>
-    formElementOptionsSetIds.includes(id),
+    formElementOptionsSetIds.includes(id || 0),
   )
   if (!formElementOptionsSetIds.length) {
     return []
@@ -259,7 +263,7 @@ export async function getFormElementDynamicOptions(
   const results = await Promise.all(
     formElementOptionsSets.map(async (formElementOptionsSet) => {
       const url = formElementOptionsSet.environments.reduce(
-        (url, formElementDynamicOptionSetEnvironment) => {
+        (url: string | null, formElementDynamicOptionSetEnvironment) => {
           if (
             !url &&
             formElementDynamicOptionSetEnvironment.formsAppEnvironmentId ===
@@ -286,113 +290,126 @@ export async function getFormElementDynamicOptions(
     }),
   )
 
-  return forms.reduce((optionsForElementId, form) => {
-    forEachFormElementWithOptions(form.elements, (element) => {
-      const result = results.find(
-        (result) =>
-          // It wants us to check for element types with an dynamicOptionSetId property.
-          // This will be undefined if not an element with options, and we don't
-          // want to have to come back here and add types when adding more types
-          // $FlowFixMe
-          result &&
-          !Array.isArray(element.options) &&
-          element.dynamicOptionSetId === result.formElementOptionsSetId,
-      )
-      if (!result || !Array.isArray(result.options)) {
-        return
-      }
+  return forms.reduce(
+    (
+      optionsForElementId: Array<{
+        elementId: string
+        options: FormTypes.ChoiceElementOption[]
+      }>,
+      form,
+    ) => {
+      forEachFormElementWithOptions(form.elements, (element) => {
+        const result = results.find(
+          (result) =>
+            // It wants us to check for element types with an dynamicOptionSetId property.
+            // This will be undefined if not an element with options, and we don't
+            // want to have to come back here and add types when adding more types
+            result &&
+            !Array.isArray(element.options) &&
+            element.dynamicOptionSetId === result.formElementOptionsSetId,
+        )
+        if (!result || !Array.isArray(result.options)) {
+          return
+        }
 
-      try {
-        const options = result.options.map((option, index) => {
-          option = option || {}
-          const optionsMap = (option.attributes || []).reduce(
-            (memo, { label, value }) => {
-              if (
-                !element.attributesMapping ||
-                !Array.isArray(element.attributesMapping)
-              ) {
-                return memo
-              }
-              const attribute = element.attributesMapping.find(
-                (map) => map.attribute === label,
-              )
-              if (!attribute) return memo
-
-              const elementId = attribute.elementId
-              const predicateElement = findFormElement(
-                form.elements,
-                (el) => el.id === elementId,
-              )
-              if (
-                !predicateElement ||
-                (predicateElement.type !== 'select' &&
-                  predicateElement.type !== 'autocomplete' &&
-                  predicateElement.type !== 'checkboxes' &&
-                  predicateElement.type !== 'radio')
-              ) {
-                return memo
-              }
-
-              let predicateElementOptions = predicateElement.options
-              if (!predicateElementOptions) {
-                const predicateElementResult = results.find(
-                  (result) =>
-                    result &&
-                    predicateElement.dynamicOptionSetId ===
-                      result.formElementOptionsSetId,
-                )
-                if (predicateElementResult) {
-                  predicateElementOptions = predicateElementResult.options
-                } else {
-                  predicateElementOptions = []
+        try {
+          const options = result.options.map((option, index) => {
+            option = option || {}
+            const optionsMap = (option.attributes || []).reduce(
+              // @ts-expect-error
+              (memo, { label, value }) => {
+                if (
+                  !element.attributesMapping ||
+                  !Array.isArray(element.attributesMapping)
+                ) {
+                  return memo
                 }
-              }
-
-              const predicateOption = predicateElementOptions.find(
-                (option) => option.value === value,
-              )
-              if (elementId && predicateOption) {
-                memo[elementId] = memo[elementId] || {
-                  elementId,
-                  optionIds: [],
-                }
-                memo[elementId].optionIds.push(
-                  predicateOption.id || predicateOption.value,
+                const attribute = element.attributesMapping.find(
+                  (map) => map.attribute === label,
                 )
-                element.conditionallyShowOptionsElementIds =
-                  element.conditionallyShowOptionsElementIds || []
-                element.conditionallyShowOptionsElementIds.push(elementId)
-              }
-              return memo
-            },
-            {},
-          )
+                if (!attribute) return memo
 
-          return {
-            id: option.value || index,
-            value: option.value || index,
-            label: option.label || index,
-            colour: option.colour || undefined,
-            attributes: Object.keys(optionsMap).map((key) => optionsMap[key]),
-          }
-        })
-        optionsForElementId.push({
-          options,
-          elementId: element.id,
-        })
-      } catch (error) {
-        console.warn('Could not validate dynamic options', result, error)
-      }
-    })
+                const elementId = attribute.elementId
+                const predicateElement = findFormElement(
+                  form.elements,
+                  (el) => el.id === elementId,
+                )
+                if (
+                  !predicateElement ||
+                  (predicateElement.type !== 'select' &&
+                    predicateElement.type !== 'autocomplete' &&
+                    predicateElement.type !== 'checkboxes' &&
+                    predicateElement.type !== 'radio')
+                ) {
+                  return memo
+                }
 
-    return optionsForElementId
-  }, [])
+                let predicateElementOptions = predicateElement.options
+                if (!predicateElementOptions) {
+                  const predicateElementResult = results.find(
+                    (result) =>
+                      result &&
+                      predicateElement.dynamicOptionSetId ===
+                        result.formElementOptionsSetId,
+                  )
+                  if (predicateElementResult) {
+                    // @ts-expect-error
+                    predicateElementOptions = predicateElementResult.options
+                  } else {
+                    predicateElementOptions = []
+                  }
+                }
+
+                const predicateOption = predicateElementOptions.find(
+                  (option) => option.value === value,
+                )
+                if (elementId && predicateOption) {
+                  memo[elementId] = memo[elementId] || {
+                    elementId,
+                    optionIds: [],
+                  }
+                  memo[elementId].optionIds.push(
+                    predicateOption.id || predicateOption.value,
+                  )
+                  element.conditionallyShowOptionsElementIds =
+                    element.conditionallyShowOptionsElementIds || []
+                  element.conditionallyShowOptionsElementIds.push(elementId)
+                }
+                return memo
+              },
+              {},
+            )
+
+            return {
+              id: option.value || index,
+              value: option.value || index,
+              label: option.label || index,
+              colour: option.colour || undefined,
+              attributes: Object.keys(optionsMap).map((key) => optionsMap[key]),
+            }
+          })
+          optionsForElementId.push({
+            options,
+            elementId: element.id,
+          })
+        } catch (error) {
+          console.warn('Could not validate dynamic options', result, error)
+        }
+      })
+
+      return optionsForElementId
+    },
+    [],
+  )
 }
 
 export function forEachFormElement(
-  elements /* : FormElement[] */,
-  forEach /* : (FormElement, FormElement[]) => void */,
-) /* : void */ {
+  elements: FormTypes.FormElement[],
+  forEach: (
+    element: FormTypes.FormElement,
+    elements: FormTypes.FormElement[],
+  ) => void,
+): void {
   findFormElement(elements, (formElement, parentElements) => {
     forEach(formElement, parentElements)
     return false
@@ -400,9 +417,12 @@ export function forEachFormElement(
 }
 
 function forEachFormElementWithOptions(
-  elements /* : FormElement[] */,
-  forEach /* : (FormElementWithOptions, FormElement[]) => void */,
-) /* : void */ {
+  elements: FormTypes.FormElement[],
+  forEach: (
+    elementWithOptions: FormTypes.FormElementWithOptions,
+    elements: FormTypes.FormElement[],
+  ) => void,
+): void {
   findFormElement(elements, (formElement, parentElements) => {
     if (
       formElement.type === 'select' ||
@@ -417,10 +437,13 @@ function forEachFormElementWithOptions(
 }
 
 export function findFormElement(
-  elements /* : FormElement[] */,
-  predicate /* : (FormElement, FormElement[]) => boolean */,
-  parentElements /* : FormElement[] */ = [],
-) /* : FormElement | void */ {
+  elements: FormTypes.FormElement[],
+  predicate: (
+    element: FormTypes.FormElement,
+    elements: FormTypes.FormElement[],
+  ) => boolean,
+  parentElements: FormTypes.FormElement[] = [],
+): FormTypes.FormElement | void {
   for (const element of elements) {
     if (predicate(element, parentElements)) {
       return element

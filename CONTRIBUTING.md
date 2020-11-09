@@ -60,7 +60,11 @@ This code base is written in [TypeScript](https://www.typescriptlang.org/) so it
    git push && git push --tags
    ```
 
-1. Publishes to `npm` are automated via CI on tag creation
+1. Publish to `npm`
+
+   ```
+   npm publish --tag beta
+   ```
 
 ## Production Release Process
 
@@ -94,4 +98,8 @@ This code base is written in [TypeScript](https://www.typescriptlang.org/) so it
    git push && git push --tags
    ```
 
-1. Publishes to `npm` are automated via CI on tag creation
+1. Publish to `npm`
+
+   ```
+   npm publish
+   ```

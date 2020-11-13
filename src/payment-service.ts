@@ -168,18 +168,16 @@ export async function handlePaymentQuerystring(
 }
 
 export async function handlePaymentSubmissionEvent({
-  formSubmission,
+  formSubmissionResult,
   paymentSubmissionEvent,
   paymentReceiptUrl,
-  submissionId,
 }: {
-  formSubmission: SubmissionTypes.FormSubmission
+  formSubmissionResult: SubmissionTypes.FormSubmissionResult
   paymentSubmissionEvent: SubmissionEventTypes.PaymentSubmissionEvent
   paymentReceiptUrl: string
-  submissionId?: string
-}): Promise<SubmissionTypes.FormSubmissionResult | void> {
+}): Promise<SubmissionTypes.FormSubmissionResult | undefined> {
   console.log('Attempting to handle submission with payment submission event')
-  const { definition: form, submission } = formSubmission
+  const { definition: form, submission } = formSubmissionResult
 
   const amountElement = findFormElement(
     form.elements,
@@ -219,19 +217,15 @@ export async function handlePaymentSubmissionEvent({
     {
       amount,
       redirectUrl: paymentReceiptUrl,
-      submissionId,
+      submissionId: formSubmissionResult.submissionId,
     },
   )
   console.log('Created Payment configuration to start transaction')
-  const submissionResult = Object.assign({}, formSubmission, {
-    submissionTimestamp: null,
-    submissionId: paymentConfiguration.submissionId,
+  const submissionResult = Object.assign({}, formSubmissionResult, {
     payment: {
       submissionEvent: paymentSubmissionEvent,
       hostedFormUrl: paymentConfiguration.hostedFormUrl,
     },
-    isInPendingQueue: false,
-    isOffline: false,
   })
   await utilsService.setLocalForageItem(KEY, submissionResult)
 

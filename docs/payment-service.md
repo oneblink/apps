@@ -28,7 +28,9 @@ import { paymentService } from '@oneblink/apps'
 Handle a submission result with a payment submission event. Will throw an error if a transaction has already been made using this submission result. Will return `undefined` if the submission does not have an amount. Will return the submission result passed in with a `payment` property if the submission requires processing.
 
 ```js
-const formSubmission = {
+const formSubmissionResult = {
+  submissionId: '89c6e98e-f56f-45fc-84fe-c4fc62331d34',
+  submissionTimestamp: '2020-07-29T01:03:26.573Z'
   formsAppId: 1,
   submission: {
     form: 'data',
@@ -46,13 +48,10 @@ const paymentSubmissionEvent = {
   },
 }
 const paymentReceiptUrl = `${window.location.origin}/payment-receipt`
-// Pass submissionId as a UUID if retrying a failed transaction for the same submission data
-const submissionId = undefined
 const paymentSubmissionResult = await paymentService.handlePaymentSubmissionEvent({
-  formSubmission,
+  formSubmissionResult,
   paymentSubmissionEvent,
   paymentReceiptUrl,
-  submissionId
 })
 if (paymentSubmissionResult) {
   window.location.href = paymentSubmissionResult.payment.hostedFormUrl

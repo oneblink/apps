@@ -9,7 +9,7 @@ const generatePaymentConfiguration = (
   payload: {
     amount: number
     redirectUrl: string
-    submissionId?: string
+    submissionId: string | null
   },
 ): Promise<{ hostedFormUrl: string; submissionId: string }> => {
   let path

@@ -75,15 +75,11 @@ const formSubmission = {
   externalId: 'external-id-set-by-developer',
 }
 
-// Pass submissionId if submitting a form after a payment
-const submissionId = '89c6e98e-f56f-45fc-84fe-c4fc62331d34'
-
 // Pass paymentReceiptUrl if submission may require a payment
 const paymentReceiptUrl = `${window.location.origin}/payment-receipt`
 
 const submissionResult = await submissionService.submit({
-  paymentReceiptUrl,
-  submissionId,
+  formSubmission,
   paymentReceiptUrl,
 })
 
@@ -177,7 +173,7 @@ const listener = async (pendingSubmissions) => {
   // use pending submissions here...
 }
 const deregister = await submissionService.registerPendingQueueListener(
-  listener
+  listener,
 )
 
 // When no longer needed, remember to deregister the listener

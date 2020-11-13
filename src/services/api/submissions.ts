@@ -5,12 +5,10 @@ import tenants from '../../tenants'
 
 export const generateSubmissionCredentials = async (
   submissionData: SubmissionTypes.FormSubmission,
-  submissionId?: string,
 ): Promise<SubmissionTypes.S3UploadCredentials> => {
   return postRequest<SubmissionTypes.S3UploadCredentials>(
     `${tenants.current.apiOrigin}/forms/${submissionData.definition.id}/submission-credentials`,
     {
-      submissionId,
       recaptchas: (submissionData.captchaTokens || []).map((token: string) => ({
         token,
       })),

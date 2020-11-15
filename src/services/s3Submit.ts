@@ -72,7 +72,7 @@ const uploadToS3 = <T>(
     s3: SubmissionTypes.S3UploadCredentials['s3']
   },
   json: T,
-  tags?: UnknownObject,
+  tags?: Record<string, string | undefined>,
 ): Promise<unknown> => {
   if (!credentials) {
     return Promise.reject(new Error('Credentials are required'))
@@ -106,7 +106,6 @@ const uploadToS3 = <T>(
     CacheControl: 'max-age=31536000', // Max 1 year(365 days)
     Bucket: s3Meta.bucket,
     Key: s3Meta.key,
-    // @ts-expect-error
     Tagging: tags ? queryString.stringify(tags) : undefined,
   }
 
@@ -159,7 +158,7 @@ const uploadFormSubmission = (
     keyId?: string
     formsAppId: number
   },
-  tags: UnknownObject,
+  tags: Record<string, string | undefined>,
 ) => {
   console.log('Uploading submission')
   return uploadToS3(

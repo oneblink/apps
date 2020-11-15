@@ -103,11 +103,9 @@ async function processPendingQueue(): Promise<void> {
 async function submit({
   formSubmission,
   paymentReceiptUrl,
-  submissionId,
 }: {
   formSubmission: SubmissionTypes.FormSubmission
   paymentReceiptUrl?: string
-  submissionId?: string
 }): Promise<SubmissionTypes.FormSubmissionResult> {
   formSubmission.keyId = getFormsKeyId() || undefined
   const submissionEvents = formSubmission.definition.submissionEvents || []
@@ -160,21 +158,27 @@ async function submit({
     })
   }
 
+  const data = await generateSubmissionCredentials(formSubmission)
+
+  const formSubmissionResult = {
+    ...formSubmission,
+    payment: null,
+    isOffline: false,
+    isInPendingQueue: false,
+    submissionTimestamp: data.submissionTimestamp,
+    submissionId: data.submissionId,
+  }
+
+  let paymentSubmissionResult:
+    | SubmissionTypes.FormSubmissionResult
+    | undefined = undefined
   if (paymentSubmissionEvent && paymentReceiptUrl) {
-    const paymentSubmissionResult = await handlePaymentSubmissionEvent({
-      formSubmission: Object.assign({}, formSubmission, {
-        isOffline: false,
-        isInPendingQueue: false,
-      }),
+    paymentSubmissionResult = await handlePaymentSubmissionEvent({
+      formSubmissionResult,
       paymentSubmissionEvent,
       paymentReceiptUrl,
     })
-    if (paymentSubmissionResult) {
-      return paymentSubmissionResult
-    }
   }
-
-  const data = await generateSubmissionCredentials(formSubmission, submissionId)
 
   await uploadFormSubmission(
     data,
@@ -186,8 +190,9 @@ async function submit({
       keyId: formSubmission.keyId,
     },
     {
-      externalId: formSubmission.externalId,
-      jobId: formSubmission.jobId,
+      externalId: formSubmission.externalId || undefined,
+      jobId: formSubmission.jobId || undefined,
+      payment: paymentSubmissionResult ? 'PENDING' : undefined,
     },
   )
   if (formSubmission.draftId) {
@@ -199,15 +204,12 @@ async function submit({
   if (formSubmission.jobId) {
     await recentlySubmittedJobsService.add(formSubmission.jobId)
   }
-  const submissionResult = Object.assign({}, formSubmission, {
-    payment: null,
-    isOffline: false,
-    isInPendingQueue: false,
-    submissionTimestamp: data.submissionTimestamp,
-    submissionId: data.submissionId,
-  })
 
-  return submissionResult
+  if (paymentSubmissionResult) {
+    return paymentSubmissionResult
+  }
+
+  return formSubmissionResult
 }
 
 async function closeWindow(): Promise<void> {

@@ -27,8 +27,8 @@ const uploadDraftData = async (
         formsAppId: draftSubmission.formsAppId,
       },
       {
-        externalId: draft.externalId,
-        jobId: draft.jobId,
+        externalId: draft.externalId || undefined,
+        jobId: draft.jobId || undefined,
       },
     )
     return data.draftDataId

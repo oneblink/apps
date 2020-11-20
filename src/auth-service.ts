@@ -18,6 +18,7 @@ import {
 } from './services/cognito'
 import { getRequest, postRequest } from './services/fetch'
 import tenants from './tenants'
+import { getUserToken, setUserToken } from './services/user-token'
 
 export {
   registerAuthListener,
@@ -32,6 +33,8 @@ export {
   logout,
   getFormsKeyId,
   setFormsKeyToken,
+  getUserToken,
+  setUserToken,
 }
 
 export function init({ oAuthClientId }: { oAuthClientId: string }) {

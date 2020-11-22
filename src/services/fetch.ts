@@ -1,6 +1,7 @@
 import * as queryString from 'query-string'
 
 import { getIdToken } from './forms-key'
+import { getUserToken } from './user-token'
 
 async function generateHeaders() {
   const headers = {
@@ -14,6 +15,13 @@ async function generateHeaders() {
     return {
       ...headers,
       Authorization: `Bearer ${idToken}`,
+    }
+  }
+  const userToken = getUserToken()
+  if (userToken) {
+    return {
+      ...headers,
+      'X-OneBlink-User-Token': (userToken as unknown) as string,
     }
   }
 

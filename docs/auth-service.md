@@ -26,6 +26,8 @@ import { authService } from '@oneblink/apps'
 - [`logout()`](#logout)
 - [`setFormsKeyToken()`](#setformskeytoken)
 - [`getFormsKeyId()`](#getformskeyid)
+- [`setUserToken()`](#setusertoken)
+- [`getUserToken()`](#getusertoken)
 
 ### `init()`
 
@@ -238,5 +240,24 @@ Can be used to extract the `keyId` from the Forms Key token passed to [setFormsK
 const keyId = authService.getFormsKeyId()
 if (keyId) {
   // Use keyId here...
+}
+```
+
+### `setUserToken()`
+
+Set the User token being included in requests to the OneBlink API on behalf of the user.
+
+```js
+authService.setUserToken('a value')
+```
+
+### `getUserToken()`
+
+Can be used to retrieve the `userToken` passed to [setUserToken()](#setusertoken). Will be `undefined` if the token has not been set yet.
+
+```js
+const userToken = authService.getUserToken()
+if (userToken) {
+  // Use token here...
 }
 ```

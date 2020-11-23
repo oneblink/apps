@@ -4,6 +4,7 @@ import { isLoggedIn } from '../../auth-service'
 import { uploadFormSubmission, downloadPreFillData } from '../s3Submit'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
+import { getUserToken } from '../user-token'
 
 const uploadDraftData = async (
   draft: SubmissionTypes.FormsAppDraft,
@@ -16,6 +17,7 @@ const uploadDraftData = async (
     const data = await postRequest<SubmissionTypes.S3DraftUploadCredentials>(
       url,
     )
+    const userToken = getUserToken()
     console.log('Attempting to upload draft data:', data)
     await uploadFormSubmission(
       data,
@@ -29,6 +31,8 @@ const uploadDraftData = async (
       {
         externalId: draft.externalId || undefined,
         jobId: draft.jobId || undefined,
+        userToken: userToken || undefined,
+        usernameToken: data.usernameToken,
       },
     )
     return data.draftDataId

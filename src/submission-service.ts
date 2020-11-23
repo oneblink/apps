@@ -16,7 +16,7 @@ import { removePrefillFormData } from './prefill-service'
 import replaceCustomValues from './services/replace-custom-values'
 import recentlySubmittedJobsService from './services/recently-submitted-jobs'
 import { SubmissionEventTypes, SubmissionTypes } from '@oneblink/types'
-import { getUserToken, setUserToken } from './services/user-token'
+import { getUserToken } from './services/user-token'
 
 let _isProcessingPendingQueue = false
 
@@ -160,7 +160,6 @@ async function submit({
   }
 
   const data = await generateSubmissionCredentials(formSubmission)
-  setUserToken(data.userToken)
 
   const formSubmissionResult = {
     ...formSubmission,
@@ -197,6 +196,7 @@ async function submit({
       jobId: formSubmission.jobId || undefined,
       payment: paymentSubmissionResult ? 'PENDING' : undefined,
       userToken: userToken || undefined,
+      usernameToken: data.usernameToken,
     },
   )
   if (formSubmission.draftId) {

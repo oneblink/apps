@@ -4,7 +4,7 @@ import { getIdToken } from './forms-key'
 import { getUserToken } from './user-token'
 
 async function generateHeaders() {
-  const headers = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     Accept: 'application/json',
   }
@@ -12,17 +12,11 @@ async function generateHeaders() {
   // Check auth service for a token if user is logged in
   const idToken = await getIdToken()
   if (idToken) {
-    return {
-      ...headers,
-      Authorization: `Bearer ${idToken}`,
-    }
+    headers.Authorization = `Bearer ${idToken}`
   }
   const userToken = getUserToken()
   if (userToken) {
-    return {
-      ...headers,
-      'X-OneBlink-User-Token': (userToken as unknown) as string,
-    }
+    headers['X-OneBlink-User-Token'] = userToken
   }
 
   return headers

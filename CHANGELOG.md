@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## 0.4.2 (2020-11-25)
+
 ### Fixed
 
 - `X-OneBlink-User-Token` header not being sent if `Authorization` header is sent with requests

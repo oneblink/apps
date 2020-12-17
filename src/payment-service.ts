@@ -6,6 +6,7 @@ import {
 } from './services/api/payment'
 import { findFormElement } from './form-service'
 import utilsService from './services/utils'
+import replaceCustomValues from './services/replace-custom-values'
 
 import {
   SubmissionTypes,
@@ -211,14 +212,33 @@ export async function handlePaymentSubmissionEvent({
     )
   }
 
+  const payload = {
+    amount,
+    redirectUrl: paymentReceiptUrl,
+    submissionId: formSubmissionResult.submissionId,
+    crn2: undefined,
+    crn3: undefined,
+  }
+
+  if (paymentSubmissionEvent.type === 'BPOINT') {
+    if (paymentSubmissionEvent.configuration.crn2) {
+      paymentSubmissionEvent.configuration.crn2 = replaceCustomValues(
+        paymentSubmissionEvent.configuration.crn2,
+        formSubmissionResult,
+      )
+    }
+    if (paymentSubmissionEvent.configuration.crn3) {
+      paymentSubmissionEvent.configuration.crn3 = replaceCustomValues(
+        paymentSubmissionEvent.configuration.crn3,
+        formSubmissionResult,
+      )
+    }
+  }
+
   const paymentConfiguration = await generatePaymentConfiguration(
     form,
     paymentSubmissionEvent,
-    {
-      amount,
-      redirectUrl: paymentReceiptUrl,
-      submissionId: formSubmissionResult.submissionId,
-    },
+    payload,
   )
   console.log('Created Payment configuration to start transaction')
   const submissionResult = Object.assign({}, formSubmissionResult, {

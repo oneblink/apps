@@ -10,6 +10,8 @@ const generatePaymentConfiguration = (
     amount: number
     redirectUrl: string
     submissionId: string | null
+    crn2?: string
+    crn3?: string
   },
 ): Promise<{ hostedFormUrl: string; submissionId: string }> => {
   let path

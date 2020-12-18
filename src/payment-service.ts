@@ -212,7 +212,13 @@ export async function handlePaymentSubmissionEvent({
     )
   }
 
-  const payload = {
+  const payload: {
+    amount: number
+    redirectUrl: string
+    submissionId: string | null
+    crn2?: string
+    crn3?: string
+  } = {
     amount,
     redirectUrl: paymentReceiptUrl,
     submissionId: formSubmissionResult.submissionId,
@@ -222,13 +228,13 @@ export async function handlePaymentSubmissionEvent({
 
   if (paymentSubmissionEvent.type === 'BPOINT') {
     if (paymentSubmissionEvent.configuration.crn2) {
-      paymentSubmissionEvent.configuration.crn2 = replaceCustomValues(
+      payload.crn2 = replaceCustomValues(
         paymentSubmissionEvent.configuration.crn2,
         formSubmissionResult,
       )
     }
     if (paymentSubmissionEvent.configuration.crn3) {
-      paymentSubmissionEvent.configuration.crn3 = replaceCustomValues(
+      payload.crn3 = replaceCustomValues(
         paymentSubmissionEvent.configuration.crn3,
         formSubmissionResult,
       )

@@ -3,7 +3,7 @@ import { isOffline } from './offline-service'
 import { isLoggedIn } from './services/cognito'
 import { getRequest, searchRequest } from './services/fetch'
 import tenants from './tenants'
-import { FormTypes } from '@oneblink/types'
+import { FormTypes, GeoscapeTypes } from '@oneblink/types'
 
 export async function getForms(formsAppId: number): Promise<FormTypes.Form[]> {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms`
@@ -466,4 +466,29 @@ export function findFormElement(
       }
     }
   }
+}
+
+export async function searchGeoscapeAddresses(
+  formId: number,
+  partialAddress: string,
+  abortSignal?: AbortSignal,
+): Promise<GeoscapeTypes.GeoscapeAddressesSearchResult> {
+  return await searchRequest(
+    `/forms/${formId}/geoscape/addresses`,
+    {
+      search: partialAddress,
+    },
+    abortSignal,
+  )
+}
+
+export async function getGeoscapeAddress(
+  formId: number,
+  addressId: string,
+  abortSignal?: AbortSignal,
+): Promise<GeoscapeTypes.GeoscapeAddress> {
+  return await getRequest(
+    `/forms/${formId}/geoscape/addresses/${addressId}`,
+    abortSignal,
+  )
 }

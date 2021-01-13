@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Added
+
+- [`formService.searchGeoscapeAddresses()`](./docs/form-service.md#searchgeoscapeaddresses)
+- [`formService.getGeoscapeAddress()`](./docs/form-service.md#getgeoscapeaddress)
+
 ## 0.4.3 (2020-12-22)
 
 ### Added

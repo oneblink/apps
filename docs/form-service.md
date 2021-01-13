@@ -123,8 +123,11 @@ Search for geoscape addresses based on a partial address.
 
 ```js
 const formId = 1
-const partialAddress = '123 N'
-const result = await formService.searchGeoscapeAddresses(formId, partialAddress)
+const result = await formService.searchGeoscapeAddresses(formId, {
+  query: '123 N',
+  maxNumberOfResults: 10
+  stateTerritory: 'NSW'
+})
 ```
 
 ### `getGeoscapeAddress()`

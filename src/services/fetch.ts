@@ -3,7 +3,7 @@ import * as queryString from 'query-string'
 import { getIdToken } from './forms-key'
 import { getUserToken } from './user-token'
 
-async function generateHeaders() {
+export async function generateHeaders() {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     Accept: 'application/json',
@@ -49,17 +49,22 @@ async function fetchJSON<T>(url: string, options?: RequestInit): Promise<T> {
 
 export async function searchRequest<T>(
   url: string,
-  searchParameters?: queryString.StringifiableRecord,
+  searchParameters: queryString.StringifiableRecord,
+  abortSignal?: AbortSignal,
 ): Promise<T> {
   const queryStringParams = queryString.stringify(searchParameters || {})
-  const body = await getRequest<T>(`${url}?${queryStringParams}`)
+  const body = await getRequest<T>(`${url}?${queryStringParams}`, abortSignal)
   return body
 }
 
-export async function getRequest<T>(url: string): Promise<T> {
+export async function getRequest<T>(
+  url: string,
+  abortSignal?: AbortSignal,
+): Promise<T> {
   const options = {
     method: 'GET',
     headers: await generateHeaders(),
+    signal: abortSignal,
   }
 
   return fetchJSON(url, options)
@@ -68,11 +73,13 @@ export async function getRequest<T>(url: string): Promise<T> {
 export async function postRequest<OutT>(
   url: string,
   resource?: unknown,
+  abortSignal?: AbortSignal,
 ): Promise<OutT> {
   const opts = {
     method: 'POST',
     headers: await generateHeaders(),
     body: JSON.stringify(resource),
+    signal: abortSignal,
   }
 
   return fetchJSON(url, opts)
@@ -81,20 +88,26 @@ export async function postRequest<OutT>(
 export async function putRequest<OutT>(
   url: string,
   resource: unknown,
+  abortSignal?: AbortSignal,
 ): Promise<OutT> {
   const opts = {
     method: 'PUT',
     headers: await generateHeaders(),
     body: JSON.stringify(resource),
+    signal: abortSignal,
   }
 
   return fetchJSON(url, opts)
 }
 
-export async function deleteRequest(url: string): Promise<void> {
+export async function deleteRequest(
+  url: string,
+  abortSignal?: AbortSignal,
+): Promise<void> {
   const opts = {
     method: 'DELETE',
     headers: await generateHeaders(),
+    signal: abortSignal,
   }
 
   const res = await fetch(url, opts)

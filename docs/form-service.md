@@ -15,6 +15,8 @@ import { formService } from '@oneblink/apps'
 - [`getFormElementDynamicOptions()`](#getformelementdynamicoptions)
 - [`forEachFormElement()`](#foreachformelement)
 - [`findFormElement()`](#findformelement)
+- [`searchGeoscapeAddresses()`](#searchgeoscapeaddresses)
+- [`getGeoscapeAddress()`](#getgeoscapeaddress)
 
 ### `getForms()`
 
@@ -44,7 +46,7 @@ const organisationId = '1234567890ABCDEFG'
 const formsAppEnvironmentId = 1
 const formElementLookups = await formService.getFormElementLookups(
   organisationId,
-  formsAppEnvironmentId
+  formsAppEnvironmentId,
 )
 ```
 
@@ -59,7 +61,7 @@ const formElementLookupId = 1
 const formElementLookup = await formService.getFormElementLookupById(
   organisationId,
   formsAppEnvironmentId,
-  formElementLookupId
+  formElementLookupId,
 )
 if (formElementLookup) {
   // Use lookup
@@ -95,7 +97,7 @@ formService.forEachFormElement(
   form.elements,
   (formElement, parentFormElements) => {
     // Do what you need to do to each form element
-  }
+  },
 )
 ```
 
@@ -108,9 +110,29 @@ const formElement = formService.findFormElement(
   form.elements,
   (formElement, parentFormElements) => {
     return formElement.id === 'the id you are looking for'
-  }
+  },
 )
 if (formElement) {
   // Found the one you were looking for
 }
+```
+
+### `searchGeoscapeAddresses()`
+
+Search for geoscape addresses based on a partial address.
+
+```js
+const formId = 1
+const partialAddress = '123 N'
+const result = await formService.searchGeoscapeAddresses(formId, partialAddress)
+```
+
+### `getGeoscapeAddress()`
+
+Get the details for a single geoscape address based on the Id of a geoscape address resource.
+
+```js
+const formId = 1
+const addressId = 'ABC123'
+const result = await formService.getGeoscapeAddress(formId, addressId)
 ```

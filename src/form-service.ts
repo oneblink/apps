@@ -470,15 +470,20 @@ export function findFormElement(
 
 export async function searchGeoscapeAddresses(
   formId: number,
-  partialAddress: string,
+  queryParams: {
+    query: string
+    maxNumberOfResults?: number
+    stateTerritory?: string
+    dataset?: string
+    addressType?: 'physical' | 'mailing' | 'all'
+    excludeAliases?: boolean
+  },
   abortSignal?: AbortSignal,
 ): Promise<GeoscapeTypes.GeoscapeAddressesSearchResult> {
   try {
     return await searchRequest(
       `${tenants.current.apiOrigin}/forms/${formId}/geoscape/addresses`,
-      {
-        search: partialAddress,
-      },
+      queryParams,
       abortSignal,
     )
   } catch (error) {

@@ -474,7 +474,7 @@ export async function searchGeoscapeAddresses(
   abortSignal?: AbortSignal,
 ): Promise<GeoscapeTypes.GeoscapeAddressesSearchResult> {
   return await searchRequest(
-    `/forms/${formId}/geoscape/addresses`,
+    `${tenants.current.apiOrigin}/forms/${formId}/geoscape/addresses`,
     {
       search: partialAddress,
     },
@@ -488,7 +488,7 @@ export async function getGeoscapeAddress(
   abortSignal?: AbortSignal,
 ): Promise<GeoscapeTypes.GeoscapeAddress> {
   return await getRequest(
-    `/forms/${formId}/geoscape/addresses/${addressId}`,
+    `${tenants.current.apiOrigin}/forms/${formId}/geoscape/addresses/${addressId}`,
     abortSignal,
   )
 }

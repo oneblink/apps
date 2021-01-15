@@ -32,9 +32,9 @@ const forms = await formService.getForms(formAppId)
 Get a OneBlink Form.
 
 ```js
-const formsAppId = 1
 const formId = 1
-const form = await formService.getForm(formAppId, formId)
+const formsAppId = 1 // `formsAppId` is optional
+const form = await formService.getForm(formId, formAppId)
 ```
 
 ### `getFormElementLookups()`

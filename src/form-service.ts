@@ -67,8 +67,8 @@ export async function getForms(formsAppId: number): Promise<FormTypes.Form[]> {
 }
 
 export async function getForm(
-  formsAppId: number,
   formId: number,
+  formsAppId?: number,
 ): Promise<FormTypes.Form> {
   return (
     searchRequest<FormTypes.Form>(
@@ -80,6 +80,10 @@ export async function getForm(
       // If we could not find a form by Id for any reason,
       // we will try and get it from cache from the all forms endpoint
       .catch((error) => {
+        if (typeof formsAppId !== 'number' || Number.isNaN(formsAppId)) {
+          throw error
+        }
+
         return getForms(formsAppId)
           .catch(() => {
             // Ignore getForms() error and throw the error from attempt to get form by id

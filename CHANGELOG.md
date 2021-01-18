@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## 0.5.0 (2020-01-18)
+
 ### Changed
 
 - **[BREAKING]** [`formService.getForm()`](./docs/form-service.md#getform) arguments: `formId` is now the first argument and `formsAppId` is the second. `formsAppId` has been changed to optional.

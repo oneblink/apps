@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Fixed
+
+- `null` as POST request payload when generating draft data credentials
+
 ## 0.5.0 (2020-01-18)
 
 ### Changed

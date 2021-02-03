@@ -169,7 +169,7 @@ async function downloadDraftData<T>(
   const url = `${tenants.current.apiOrigin}/forms/${formId}/download-draft-data-credentials/${draftDataId}`
   console.log('Attempting to get Credentials to download draft data', url)
 
-  const data = await postRequest<SubmissionTypes.S3UploadCredentials>(url, null)
+  const data = await postRequest<SubmissionTypes.S3UploadCredentials>(url)
   console.log('Attempting to download draft form data:', data)
   return downloadPreFillData<T>(data)
 }

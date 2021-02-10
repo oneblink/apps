@@ -321,7 +321,7 @@ export async function getFormElementDynamicOptions(
             option = option
               ? {
                   ...option,
-                  id: (option.id || index).toString(),
+                  id: (option.value || index).toString(),
                   value: (option.value || index).toString(),
                   label: (option.label || index).toString(),
                   colour: option.colour?.toString() || undefined,

@@ -318,7 +318,15 @@ export async function getFormElementDynamicOptions(
 
         try {
           const options = result.options.map((option, index) => {
-            option = option || {}
+            option = option
+              ? {
+                  ...option,
+                  id: (option.id || index).toString(),
+                  value: (option.value || index).toString(),
+                  label: (option.label || index).toString(),
+                  colour: option.colour?.toString() || undefined,
+                }
+              : {}
             const optionsMap = (option.attributes || []).reduce(
               // @ts-expect-error
               (memo, { label, value }) => {
@@ -385,10 +393,7 @@ export async function getFormElementDynamicOptions(
             )
 
             return {
-              id: option.value || index,
-              value: option.value || index,
-              label: option.label || index,
-              colour: option.colour || undefined,
+              ...option,
               attributes: Object.keys(optionsMap).map((key) => optionsMap[key]),
             }
           })

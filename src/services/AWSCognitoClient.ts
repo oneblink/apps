@@ -412,7 +412,7 @@ export default class AWSCognitoClient {
 function sendPostRequest(
   url: string,
   params: UnknownObject,
-  success: (value?: UnknownObject) => void,
+  success: (value: UnknownObject) => void,
   error: (err: { message?: string; error_description?: string }) => void,
 ) {
   const request = new XMLHttpRequest()

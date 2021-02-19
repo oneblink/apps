@@ -38,9 +38,9 @@ function errorHandler(error: Error): Error {
   throw error
 }
 
-const draftsListeners: Array<(
-  draft: SubmissionTypes.FormsAppDraft[],
-) => unknown> = []
+const draftsListeners: Array<
+  (draft: SubmissionTypes.FormsAppDraft[]) => unknown
+> = []
 
 export function registerDraftsListener(
   listener: (draft: SubmissionTypes.FormsAppDraft[]) => unknown,

@@ -20,9 +20,9 @@ function errorHandler(error: Error) {
   throw error
 }
 
-const pendingQueueListeners: Array<(
-  results: PendingFormSubmissionResultWithOptionalSubmission[],
-) => unknown> = []
+const pendingQueueListeners: Array<
+  (results: PendingFormSubmissionResultWithOptionalSubmission[]) => unknown
+> = []
 
 export function registerPendingQueueListener(
   listener: (

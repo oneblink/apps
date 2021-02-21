@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Added
+
+- [`approvalsService`](./docs/approvals-service.md)
+
 ## 0.5.2 (2020-02-15)
 
 ### Fixed

@@ -35,6 +35,7 @@ The default tenant is the [OneBlink Console](https://console.oneblink.io) which 
 - [`notificationService`](./notification-service.md)
 - [`formService`](./form-service.md)
 - [`localisationService`](./localisation-service.md)
+- [`approvalsService`](./approvals-service.md)
 
 ## Errors
 

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - [`approvalsService`](./docs/approvals-service.md)
+- `previousFormSubmissionApprovalId` to S3 tags on submission upload
 
 ## 0.5.2 (2020-02-15)
 

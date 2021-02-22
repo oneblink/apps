@@ -10,6 +10,7 @@ import { approvalsService } from '@oneblink/apps'
 
 - [`FormSubmissionApproval`](#formsubmissionapproval)
 - [`getFormSubmissionApprovals()`](#getformsubmissionapprovals)
+- [`getFormSubmissionApproval()`](#getformsubmissionapproval)
 - [`updateFormSubmissionApproval()`](#updateformsubmissionapproval)
 
 ### FormSubmissionApproval
@@ -35,6 +36,17 @@ Get an array of [`FormSubmissionApproval`](#formsubmissionapproval)s assigned to
 const formsAppId = 1
 const formSubmissionApprovals = await approvalsService.getFormSubmissionApprovals(
   formAppId,
+)
+```
+
+### `getFormSubmissionApproval()`
+
+Get a single [`FormSubmissionApproval`](#formsubmissionapproval) belonging to the given id.
+
+```js
+const formSubmissionApprovalId = 1
+const formSubmissionApproval = await approvalsService.getFormSubmissionApproval(
+  formSubmissionApprovalId,
 )
 ```
 

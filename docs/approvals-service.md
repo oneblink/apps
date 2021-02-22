@@ -46,7 +46,7 @@ Get a single [`FormSubmissionApproval`](#formsubmissionapproval) belonging to th
 ```js
 const formSubmissionApprovalId = 1
 const formSubmissionApproval = await approvalsService.getFormSubmissionApproval(
-  formAppId,
+  formSubmissionApprovalId,
 )
 ```
 

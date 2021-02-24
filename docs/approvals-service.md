@@ -21,7 +21,7 @@ import { approvalsService } from '@oneblink/apps'
 | `status`                           | `string`              | `'PENDING' \| 'APPROVED' \| 'CLARIFICATION_REQUIRED' \| 'CLOSED'`          |
 | `submissionId`                     | `string`              | The unique identifier for the submission being approved                    |
 | `formId`                           | `number`              | The unique identifier for the form that was submitted for approval         |
-| `formsAppUserId`                   | `number`              | The unique identifier for the approver assigned the approval               |
+| `username`                         | `string`              | The username of the approver assigned the approval                         |
 | `previousFormSubmissionApprovalId` | `number \| undefined` | The unique identifier for the previous approval that lead to this approval |
 | `notificationEmailAddress`         | `string \| undefined` | The email address of the user to be notified of the response               |
 | `notes`                            | `string \| undefined` | The approvers notes attached the the response                              |
@@ -30,13 +30,19 @@ import { approvalsService } from '@oneblink/apps'
 
 ### `getFormSubmissionApprovals()`
 
-Get an array of [`FormSubmissionApproval`](#formsubmissionapproval)s assigned to the current user.
+Get an Object containing [`FormSubmissionApproval`](#formsubmissionapproval)s assigned to the current user and the Form definitions in those approvals.
 
 ```js
 const formsAppId = 1
 const formSubmissionApprovals = await approvalsService.getFormSubmissionApprovals(
   formAppId,
 )
+
+// formSubmissionApprovals ===
+// {
+//   forms: FormTypes.Form[]
+//   formSubmissionApprovals: SubmissionTypes.FormSubmissionApproval[]
+// }
 ```
 
 ### `getFormSubmissionApproval()`

@@ -4,12 +4,17 @@ import { getRequest, putRequest } from './services/fetch'
 import tenants from './tenants'
 import { FormTypes, SubmissionTypes } from '@oneblink/types'
 
+interface FormSubmissionApprovals {
+  forms: FormTypes.Form[]
+  formSubmissionApprovals: SubmissionTypes.FormSubmissionApproval[]
+}
+
 export async function getFormSubmissionApprovals(
   formsAppId: number,
-): Promise<SubmissionTypes.FormSubmissionApproval[]> {
+): Promise<FormSubmissionApprovals> {
   try {
     const { formSubmissionApprovals } = await getRequest<{
-      formSubmissionApprovals: SubmissionTypes.FormSubmissionApproval[]
+      formSubmissionApprovals: FormSubmissionApprovals
     }>(`${tenants.current.apiOrigin}/forms-apps/${formsAppId}/my-approvals`)
     return formSubmissionApprovals
   } catch (error) {

@@ -111,7 +111,7 @@ export const generateRetrieveApprovalSubmissionCredentials = async (
       }
       case 404: {
         throw new OneBlinkAppsError(
-          'We could not find the form or submission you are looking for. Please contact your administrator to ensure your form configuration has been completed successfully.',
+          'We could not find the approval submission you are looking for. Please contact your administrator to ensure your form configuration has been completed successfully.',
           {
             title: 'Unknown Form or Submission',
             originalError: error,
@@ -121,7 +121,7 @@ export const generateRetrieveApprovalSubmissionCredentials = async (
       }
       default: {
         throw new OneBlinkAppsError(
-          'We could not find the form or submission you are looking for. Please contact your administrator to ensure your form configuration has been completed successfully.',
+          'We could not find the approval submission you are looking for. Please contact your administrator to ensure your form configuration has been completed successfully.',
           {
             originalError: error,
             httpStatusCode: error.status,

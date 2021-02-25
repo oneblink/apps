@@ -12,6 +12,7 @@ import { approvalsService } from '@oneblink/apps'
 - [`getFormSubmissionApprovals()`](#getformsubmissionapprovals)
 - [`getFormSubmissionApproval()`](#getformsubmissionapproval)
 - [`updateFormSubmissionApproval()`](#updateformsubmissionapproval)
+- [`retrieveFormSubmissionApprovalSubmission()`](#retrieveformsubmissionapprovalsubmission)
 
 ### FormSubmissionApproval
 
@@ -37,12 +38,6 @@ const formsAppId = 1
 const formSubmissionApprovals = await approvalsService.getFormSubmissionApprovals(
   formAppId,
 )
-
-// formSubmissionApprovals ===
-// {
-//   forms: FormTypes.Form[]
-//   formSubmissionApprovals: SubmissionTypes.FormSubmissionApproval[]
-// }
 ```
 
 ### `getFormSubmissionApproval()`
@@ -75,5 +70,16 @@ const formSubmissionApproval = {
 }
 const updatedFormSubmissionApproval = await approvalsService.updateFormSubmissionApproval(
   formSubmissionApproval,
+)
+```
+
+### `retrieveFormSubmissionApprovalSubmission()`
+
+Retrieve the submission data associated with a [`FormSubmissionApproval`](#formsubmissionapproval).
+
+```js
+const formSubmissionApprovalId = 1
+const formSubmission = await approvalsService.retreiveApprovalSubmission(
+  formSubmissionApprovalId,
 )
 ```

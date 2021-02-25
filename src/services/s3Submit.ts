@@ -5,7 +5,7 @@ import queryString from 'query-string'
 
 import { getUserProfile } from '../auth-service'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
-import { FormTypes, SubmissionTypes } from '@oneblink/types'
+import { AWSTypes, FormTypes, SubmissionTypes } from '@oneblink/types'
 
 declare global {
   interface Window {
@@ -175,7 +175,7 @@ const uploadFormSubmission = (
 const downloadPreFillData = <T>({
   credentials,
   s3: s3Meta,
-}: SubmissionTypes.S3UploadCredentials): Promise<T> => {
+}: AWSTypes.FormS3Credentials): Promise<T> => {
   if (!credentials) {
     return Promise.reject(new Error('Credentials are required'))
   }

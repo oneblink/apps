@@ -3,7 +3,8 @@ import { isOffline } from './offline-service'
 import { getRequest, putRequest } from './services/fetch'
 import tenants from './tenants'
 import { FormTypes, SubmissionTypes } from '@oneblink/types'
-
+import { generateRetrieveApprovalSubmissionCredentials } from './services/api/submissions'
+import { downloadPreFillData } from './services/s3Submit'
 interface FormSubmissionApprovals {
   forms: FormTypes.Form[]
   formSubmissionApprovals: SubmissionTypes.FormSubmissionApproval[]
@@ -206,4 +207,21 @@ export async function updateFormSubmissionApproval(
       }
     }
   }
+}
+
+export async function retrieveFormSubmissionApprovalSubmission<T>(
+  approvalId: number,
+) {
+  const credentials = await generateRetrieveApprovalSubmissionCredentials(
+    approvalId,
+  )
+  return downloadPreFillData<T>({
+    credentials: credentials.credentials,
+    s3: credentials.s3,
+  }).catch((err) => {
+    throw new OneBlinkAppsError('The submission could not be retrieved.', {
+      originalError: err,
+      title: 'Submission Data Unavailable',
+    })
+  })
 }

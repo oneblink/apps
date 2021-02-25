@@ -13,10 +13,9 @@ export async function getFormSubmissionApprovals(
   formsAppId: number,
 ): Promise<FormSubmissionApprovals> {
   try {
-    const { formSubmissionApprovals } = await getRequest<{
-      formSubmissionApprovals: FormSubmissionApprovals
-    }>(`${tenants.current.apiOrigin}/forms-apps/${formsAppId}/my-approvals`)
-    return formSubmissionApprovals
+    return await getRequest<FormSubmissionApprovals>(
+      `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/my-approvals`,
+    )
   } catch (error) {
     console.error('Error retrieving form submission approvals', error)
 

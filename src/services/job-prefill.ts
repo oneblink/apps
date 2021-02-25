@@ -12,8 +12,7 @@ function get<T>(prefillFormDataId: string): Promise<T | null> {
   return utilsService.getLocalForageItem(key)
 }
 
-// eslint-disable-next-line
-function set<T extends object>(
+function set<T extends Record<string, unknown>>(
   prefillFormDataId: string,
   model: T,
 ): Promise<T> {
@@ -21,8 +20,7 @@ function set<T extends object>(
   return utilsService.setLocalForageItem(key, model)
 }
 
-// eslint-disable-next-line
-export async function getPrefillFormData<T extends object>(
+export async function getPrefillFormData<T extends Record<string, unknown>>(
   formId: number,
   prefillFormDataId: string | MiscTypes.NoU,
 ): Promise<T | null> {

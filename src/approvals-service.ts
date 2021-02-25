@@ -32,7 +32,7 @@ export async function getFormSubmissionApprovals(
     switch (error.status) {
       case 401: {
         throw new OneBlinkAppsError(
-          'The application you are attempting to view requires authentication. Please login and try again.',
+          'You cannot view your pending approvals without first logging in. Please login and try again.',
           {
             originalError: error,
             requiresLogin: true,
@@ -52,15 +52,10 @@ export async function getFormSubmissionApprovals(
       }
       case 400:
       case 404: {
-        throw new OneBlinkAppsError(
-          'We could not find the application you are looking for. Please contact your administrator to ensure the application configuration has been completed successfully.',
-          {
-            originalError: error,
-            title: 'Unknown Application',
-            requiresAccessRequest: true,
-            httpStatusCode: error.status,
-          },
-        )
+        throw new OneBlinkAppsError(error.message, {
+          title: 'Invalid Request',
+          httpStatusCode: error.status,
+        })
       }
       default: {
         throw new OneBlinkAppsError(
@@ -102,7 +97,7 @@ export async function getFormSubmissionApproval(
     switch (error.status) {
       case 401: {
         throw new OneBlinkAppsError(
-          'The application you are attempting to view requires authentication. Please login and try again.',
+          'You cannot action this pending submission without first logging in. Please login and try again.',
           {
             originalError: error,
             requiresLogin: true,
@@ -122,15 +117,10 @@ export async function getFormSubmissionApproval(
       }
       case 400:
       case 404: {
-        throw new OneBlinkAppsError(
-          'We could not find the application you are looking for. Please contact your administrator to ensure the application configuration has been completed successfully.',
-          {
-            originalError: error,
-            title: 'Unknown Application',
-            requiresAccessRequest: true,
-            httpStatusCode: error.status,
-          },
-        )
+        throw new OneBlinkAppsError(error.message, {
+          title: 'Invalid Request',
+          httpStatusCode: error.status,
+        })
       }
       default: {
         throw new OneBlinkAppsError(
@@ -167,7 +157,7 @@ export async function updateFormSubmissionApproval(
     switch (error.status) {
       case 401: {
         throw new OneBlinkAppsError(
-          'The application you are attempting to view requires authentication. Please login and try again.',
+          'You cannot action this pending submission without first logging in. Please login and try again.',
           {
             originalError: error,
             requiresLogin: true,
@@ -187,15 +177,10 @@ export async function updateFormSubmissionApproval(
       }
       case 400:
       case 404: {
-        throw new OneBlinkAppsError(
-          'We could not find the application you are looking for. Please contact your administrator to ensure the application configuration has been completed successfully.',
-          {
-            originalError: error,
-            title: 'Unknown Application',
-            requiresAccessRequest: true,
-            httpStatusCode: error.status,
-          },
-        )
+        throw new OneBlinkAppsError(error.message, {
+          title: 'Invalid Request',
+          httpStatusCode: error.status,
+        })
       }
       default: {
         throw new OneBlinkAppsError(
@@ -219,9 +204,12 @@ export async function retrieveFormSubmissionApprovalSubmission<T>(
     credentials: credentials.credentials,
     s3: credentials.s3,
   }).catch((err) => {
-    throw new OneBlinkAppsError('The submission could not be retrieved.', {
-      originalError: err,
-      title: 'Submission Data Unavailable',
-    })
+    throw new OneBlinkAppsError(
+      'The form submission associated with this pending approval could not be retrieved.',
+      {
+        originalError: err,
+        title: 'Submission Data Unavailable',
+      },
+    )
   })
 }

@@ -20,16 +20,17 @@ import { submissionService } from '@oneblink/apps'
 
 #### FormSubmission
 
-| Property            | Type           | Description                                                        |
-| ------------------- | -------------- | ------------------------------------------------------------------ |
-| `submission`        | `object`       | submission data                                                    |
-| `definition`        | `OneBlinkForm` | The OneBlink Form                                                  |
-| `formsAppId`        | `number`       | The id of the Forms App submitting for                             |
-| `captchaTokens`     | `string[]`     | Captcha tokens gathered by a `captcha` Form Element                |
-| `draftId`           | `string`       | The id of the draft to clean up after successful submission        |
-| `preFillFormDataId` | `string`       | The id of the prefill data to clean up after successful submission |
-| `jobId`             | `string`       | The id of the job to submit                                        |
-| `externalId`        | `string`       | The id of the Forms App submitting for                             |
+| Property                           | Type           | Description                                                                                                                                                                                     |
+| ---------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `submission`                       | `object`       | submission data                                                                                                                                                                                 |
+| `definition`                       | `OneBlinkForm` | The OneBlink Form                                                                                                                                                                               |
+| `formsAppId`                       | `number`       | The id of the Forms App submitting for                                                                                                                                                          |
+| `captchaTokens`                    | `string[]`     | Captcha tokens gathered by a `captcha` Form Element                                                                                                                                             |
+| `draftId`                          | `string`       | The id of the draft to clean up after successful submission                                                                                                                                     |
+| `preFillFormDataId`                | `string`       | The id of the prefill data to clean up after successful submission                                                                                                                              |
+| `jobId`                            | `string`       | The id of the job to submit                                                                                                                                                                     |
+| `externalId`                       | `string`       | The id of the Forms App submitting for                                                                                                                                                          |
+| `previousFormSubmissionApprovalId` | `number`       | The id of the previous form submission approval id. (Only used when the form submission is in response to `CLARIFICATION_REQUIRED` approval. see [`Approvals Service`](./approvals-service.md)) |
 
 #### FormSubmissionResult
 

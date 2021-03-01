@@ -1,6 +1,6 @@
 # OneBlink Apps | Usage
 
-## Form Service
+## Approvals Service
 
 Helper functions for handling form submission approvals
 

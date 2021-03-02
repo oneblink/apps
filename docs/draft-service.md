@@ -27,7 +27,7 @@ import { draftService } from '@oneblink/apps'
 | `title`                            | `string`              | The title input by the user to display the draft                                                                           |
 | `formId`                           | `number`              | The id of the form the draft was saved against                                                                             |
 | `externalId`                       | `string \| undefined` | the external id provided by a developer                                                                                    |
-| `previousFormSubmissionApprovalId` | `string \| undefined` | The previous form submission approval id, if the draft is a response to a clarification request on the submission approval |
+| `previousFormSubmissionApprovalId` | `number \| undefined` | The previous form submission approval id, if the draft is a response to a clarification request on the submission approval |
 | `jobId`                            | `string \| undefined` | The id of the job associated with the draft                                                                                |
 | `updatedAt`                        | `string`              | The date and time (in ISO format) the draft was last updated                                                               |
 

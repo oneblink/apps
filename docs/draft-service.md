@@ -20,15 +20,16 @@ import { draftService } from '@oneblink/apps'
 
 #### Draft
 
-| Property      | Type                 | Description                                                  |
-| ------------- | -------------------- | ------------------------------------------------------------ |
-| `draftId`     | `string`             | The id of the draft                                          |
-| `draftDataId` | `string`             | The id of the draft data stored                              |
-| `title`       | `string`             | The title input by the user to display the draft             |
-| `formId`      | `number`             | The id of the form the draft was saved against               |
-| `externalId`  | `string | undefined` | the external id provided by a developer                      |
-| `jobId`       | `string | undefined` | The id of the job associated with the draft                  |
-| `updatedAt`   | `string`             | The date and time (in ISO format) the draft was last updated |
+| Property                           | Type                  | Description                                                                                                                |
+| ---------------------------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `draftId`                          | `string`              | The id of the draft                                                                                                        |
+| `draftDataId`                      | `string`              | The id of the draft data stored                                                                                            |
+| `title`                            | `string`              | The title input by the user to display the draft                                                                           |
+| `formId`                           | `number`              | The id of the form the draft was saved against                                                                             |
+| `externalId`                       | `string \| undefined` | the external id provided by a developer                                                                                    |
+| `previousFormSubmissionApprovalId` | `number \| undefined` | The previous form submission approval id, if the draft is a response to a clarification request on the submission approval |
+| `jobId`                            | `string \| undefined` | The id of the job associated with the draft                                                                                |
+| `updatedAt`                        | `string`              | The date and time (in ISO format) the draft was last updated                                                               |
 
 ### `getDrafts()`
 
@@ -68,7 +69,8 @@ const draft = {
   title: 'I Will Finish This Later',
   formId: 1,
   externalId: 'external'
-  jobId: '0ac41494-723b-4a5d-90bb-534b8360f31d'
+  jobId: '0ac41494-723b-4a5d-90bb-534b8360f31d',
+  previousFormSubmissionApprovalId: 23,
 }
 const data = {
   formsAppId: 1,
@@ -103,7 +105,8 @@ const draft = {
   title: 'I Will Finish This Later',
   formId: 1,
   externalId: 'external'
-  jobId: '0ac41494-723b-4a5d-90bb-534b8360f31d'
+  jobId: '0ac41494-723b-4a5d-90bb-534b8360f31d',
+  previousFormSubmissionApprovalId: 23,
 }
 const data = {
   formsAppId: 1,

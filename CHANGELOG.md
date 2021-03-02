@@ -7,10 +7,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## 0.5.3 (2020-03-03)
+
 ### Added
 
 - [`approvalsService`](./docs/approvals-service.md)
 - `previousFormSubmissionApprovalId` to S3 tags on submission upload
+
+### Dependencies
+
+- update [aws-sdk](https://www.npmjs.com/package/aws-sdk) to [2.847.0](https://github.com/aws/aws-sdk-js/releases/tag/v2.847.0) (from [2.786.0](https://github.com/aws/aws-sdk-js/releases/tag/v2.786.0))
+
+- update [jwt-decode](https://www.npmjs.com/package/jwt-decode) to [3.1.2](https://github.com/auth0/jwt-decode/blob/master/CHANGELOG.md) (from [3.1.1](https://github.com/auth0/jwt-decode/blob/master/CHANGELOG.md))
+
+- update [query-string](https://www.npmjs.com/package/query-string) to [6.14.0](https://github.com/sindresorhus/query-string/releases/tag/v6.14.0) (from [6.13.7](https://github.com/sindresorhus/query-string/releases/tag/v6.13.7))
+
+- update [uuid](https://www.npmjs.com/package/uuid) to [8.3.2](https://github.com/uuidjs/uuid/blob/master/CHANGELOG.md) (from [8.3.1](https://github.com/uuidjs/uuid/blob/master/CHANGELOG.md))
 
 ## 0.5.2 (2020-02-15)
 

@@ -33,6 +33,7 @@ const uploadDraftData = async (
         jobId: draft.jobId || undefined,
         userToken: userToken || undefined,
         usernameToken: data.usernameToken,
+        previousFormSubmissionApprovalId: draft.previousFormSubmissionApprovalId?.toString(),
       },
     )
     return data.draftDataId

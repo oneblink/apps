@@ -18,11 +18,11 @@ import { approvalsService } from '@oneblink/apps'
 
 ### FormApprovalFlowStep
 
-| Property   | Type       | Description                                                              |
-| ---------- | ---------- | ------------------------------------------------------------------------ |
-| `type`     | `'SINGLE'` | The type of step                                                         |
-| `label`    | `string`   | The unique label for the step                                            |
-| `username` | `string`   | The username of the user that will be assigned an approval for this step |
+| Property   | Type     | Description                                                              |
+| ---------- | -------- | ------------------------------------------------------------------------ |
+| `type`     | `string` | `'SINGLE'`                                                               |
+| `label`    | `string` | The unique label for the step                                            |
+| `username` | `string` | The username of the user that will be assigned an approval for this step |
 
 ### FormApprovalFlowInstance
 

@@ -2,19 +2,20 @@ import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { isOffline } from './offline-service'
 import { getRequest, putRequest } from './services/fetch'
 import tenants from './tenants'
-import { FormTypes, SubmissionTypes } from '@oneblink/types'
+import { FormTypes, ApprovalTypes } from '@oneblink/types'
 import { generateRetrieveApprovalSubmissionCredentials } from './services/api/submissions'
 import { downloadPreFillData } from './services/s3Submit'
-interface FormSubmissionApprovals {
-  forms: FormTypes.Form[]
-  formSubmissionApprovals: SubmissionTypes.FormSubmissionApproval[]
-}
 
+interface FormSubmissionApprovalsResponse {
+  forms: FormTypes.Form[]
+  formSubmissionApprovals: ApprovalTypes.FormSubmissionApproval[]
+  formApprovalFlowInstances: ApprovalTypes.FormApprovalFlowInstance[]
+}
 export async function getFormSubmissionApprovals(
   formsAppId: number,
-): Promise<FormSubmissionApprovals> {
+): Promise<FormSubmissionApprovalsResponse> {
   try {
-    return await getRequest<FormSubmissionApprovals>(
+    return await getRequest<FormSubmissionApprovalsResponse>(
       `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/my-approvals`,
     )
   } catch (error) {
@@ -70,9 +71,11 @@ export async function getFormSubmissionApprovals(
 }
 
 interface FormSubmissionApprovalResponse {
-  formSubmissionApproval: SubmissionTypes.FormSubmissionApproval
+  formSubmissionApproval: ApprovalTypes.FormSubmissionApproval
+  formApprovalFlowInstance: ApprovalTypes.FormApprovalFlowInstance
   form: FormTypes.Form
-  previousFormSubmissionApprovals: SubmissionTypes.FormSubmissionApproval[]
+  previousFormSubmissionApprovals: ApprovalTypes.FormSubmissionApproval[]
+  previousFormApprovalFlowInstances: ApprovalTypes.FormApprovalFlowInstance[]
 }
 export async function getFormSubmissionApproval(
   formSubmissionApprovalId: number,
@@ -135,10 +138,10 @@ export async function getFormSubmissionApproval(
 }
 
 export async function updateFormSubmissionApproval(
-  formSubmissionApproval: SubmissionTypes.FormSubmissionApproval,
-): Promise<SubmissionTypes.FormSubmissionApproval> {
+  formSubmissionApproval: ApprovalTypes.FormSubmissionApproval,
+): Promise<ApprovalTypes.FormSubmissionApproval> {
   try {
-    return await putRequest<SubmissionTypes.FormSubmissionApproval>(
+    return await putRequest<ApprovalTypes.FormSubmissionApproval>(
       `${tenants.current.apiOrigin}/form-submission-approvals/${formSubmissionApproval.id}`,
       formSubmissionApproval,
     )

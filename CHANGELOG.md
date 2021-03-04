@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Changed
+
+- **[BREAKING]** [`approvalsService.getFormSubmissionApprovals()`](./docs/approvals-service.md#getformsubmissionapprovals) result.
+- **[BREAKING]** [`approvalsService.getFormSubmissionApproval()`](./docs/approvals-service.md#getformsubmissionapproval) result.
+- **[BREAKING]** [`approvalsService.updateFormSubmissionApproval()`](./docs/approvals-service.md#updateformsubmissionapproval) argument and result.
+
 ## 0.5.3 (2020-03-03)
 
 ### Added

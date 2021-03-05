@@ -2,7 +2,7 @@ import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { isOffline } from './offline-service'
 import { getRequest, putRequest } from './services/fetch'
 import tenants from './tenants'
-import { FormTypes, ApprovalTypes } from '@oneblink/types'
+import { SubmissionTypes, FormTypes, ApprovalTypes } from '@oneblink/types'
 import { generateRetrieveApprovalSubmissionCredentials } from './services/api/submissions'
 import { downloadPreFillData } from './services/s3Submit'
 
@@ -197,13 +197,13 @@ export async function updateFormSubmissionApproval(
   }
 }
 
-export async function retrieveFormSubmissionApprovalSubmission<T>(
+export async function retrieveFormSubmissionApprovalSubmission(
   approvalId: number,
-) {
+): Promise<SubmissionTypes.S3SubmissionData> {
   const credentials = await generateRetrieveApprovalSubmissionCredentials(
     approvalId,
   )
-  return downloadPreFillData<T>({
+  return downloadPreFillData<SubmissionTypes.S3SubmissionData>({
     credentials: credentials.credentials,
     s3: credentials.s3,
   }).catch((err) => {

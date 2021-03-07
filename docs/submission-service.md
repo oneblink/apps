@@ -18,6 +18,19 @@ import { submissionService } from '@oneblink/apps'
 
 ### Types
 
+#### FormSubmissionMeta
+
+| Property            | Type                                                | Description                                                   |
+| ------------------- | --------------------------------------------------- | ------------------------------------------------------------- |
+| `submissionId`      | `string`                                            | The id of the submission data                                 |
+| `formId`            | `number`                                            | The id of the OneBlink Form                                   |
+| `formsAppId`        | `number`                                            | The id of the Forms App submitting for                        |
+| `dateTimeSubmitted` | `string`                                            | The date and time (in ISO format) the form was submitted      |
+| `user`              | [Profile](./auth-service.md#profile) \| `undefined` | Information about the user that submitted the form            |
+| `key`               | `object` \| `undefined`                             | Information about the key that was used to submitted the form |
+| `key.id`            | `string`                                            | The id of the key                                             |
+| `key.name`          | `string`                                            | The name of the key                                           |
+
 #### FormSubmission
 
 | Property                           | Type           | Description                                                                                                                                                                                     |

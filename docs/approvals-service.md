@@ -72,9 +72,9 @@ const formSubmissionApprovalId = 1
 const {
   formSubmissionApproval,
   formApprovalFlowInstance,
+  formSubmissionMeta,
   form,
-  previousFormSubmissionApprovals,
-  previousFormApprovalFlowInstances,
+  history,
 } = await approvalsService.getFormSubmissionApproval(formSubmissionApprovalId)
 ```
 

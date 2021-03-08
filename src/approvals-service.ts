@@ -6,10 +6,11 @@ import { SubmissionTypes, FormTypes, ApprovalTypes } from '@oneblink/types'
 import { generateRetrieveApprovalSubmissionCredentials } from './services/api/submissions'
 import { downloadPreFillData } from './services/s3Submit'
 
-interface FormSubmissionApprovalsResponse {
+export interface FormSubmissionApprovalsResponse {
   forms: FormTypes.Form[]
   formSubmissionApprovals: ApprovalTypes.FormSubmissionApproval[]
   formApprovalFlowInstances: ApprovalTypes.FormApprovalFlowInstance[]
+  formSubmissionMeta: SubmissionTypes.FormSubmissionMeta[]
 }
 export async function getFormSubmissionApprovals(
   formsAppId: number,

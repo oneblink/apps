@@ -70,12 +70,17 @@ export async function getFormSubmissionApprovals(
   }
 }
 
-interface FormSubmissionApprovalResponse {
-  formSubmissionApproval: ApprovalTypes.FormSubmissionApproval
+export interface FormApprovalFlowInstanceHistory {
   formApprovalFlowInstance: ApprovalTypes.FormApprovalFlowInstance
+  formSubmissionMeta: SubmissionTypes.FormSubmissionMeta
+  formSubmissionApprovals: ApprovalTypes.FormSubmissionApproval[]
+}
+export interface FormSubmissionApprovalResponse {
+  formSubmissionMeta: SubmissionTypes.FormSubmissionMeta
+  formApprovalFlowInstance: ApprovalTypes.FormApprovalFlowInstance
+  formSubmissionApproval: ApprovalTypes.FormSubmissionApproval
   form: FormTypes.Form
-  previousFormSubmissionApprovals: ApprovalTypes.FormSubmissionApproval[]
-  previousFormApprovalFlowInstances: ApprovalTypes.FormApprovalFlowInstance[]
+  history: FormApprovalFlowInstanceHistory[]
 }
 export async function getFormSubmissionApproval(
   formSubmissionApprovalId: number,

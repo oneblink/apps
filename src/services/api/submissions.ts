@@ -71,10 +71,10 @@ export const generateSubmissionCredentials = async (
 }
 
 export const generateRetrieveApprovalSubmissionCredentials = async (
-  approvalId: number,
+  formSubmissionApprovalId: string,
 ) => {
   return postRequest<AWSTypes.FormS3Credentials>(
-    `${tenants.current.apiOrigin}/form-submission-approvals/${approvalId}/retrieval-credentials`,
+    `${tenants.current.apiOrigin}/form-submission-approvals/${formSubmissionApprovalId}/retrieval-credentials`,
   ).catch((error) => {
     // handle only credential errors here
     console.error('Error with getting credentials for retrieval:', error)

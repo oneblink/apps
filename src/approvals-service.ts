@@ -84,7 +84,7 @@ export interface FormSubmissionApprovalResponse {
   history: FormApprovalFlowInstanceHistory[]
 }
 export async function getFormSubmissionApproval(
-  formSubmissionApprovalId: number,
+  formSubmissionApprovalId: string,
 ): Promise<FormSubmissionApprovalResponse> {
   try {
     const result = await getRequest<FormSubmissionApprovalResponse>(
@@ -204,10 +204,10 @@ export async function updateFormSubmissionApproval(
 }
 
 export async function retrieveFormSubmissionApprovalSubmission(
-  approvalId: number,
+  formSubmissionApprovalId: string,
 ): Promise<SubmissionTypes.S3SubmissionData> {
   const credentials = await generateRetrieveApprovalSubmissionCredentials(
-    approvalId,
+    formSubmissionApprovalId,
   )
   return downloadPreFillData<SubmissionTypes.S3SubmissionData>({
     credentials: credentials.credentials,

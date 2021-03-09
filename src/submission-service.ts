@@ -197,7 +197,8 @@ async function submit({
       payment: paymentSubmissionResult ? 'PENDING' : undefined,
       userToken: userToken || undefined,
       usernameToken: data.usernameToken,
-      previousFormSubmissionApprovalId: formSubmissionResult.previousFormSubmissionApprovalId?.toString(),
+      previousFormSubmissionApprovalId:
+        formSubmissionResult.previousFormSubmissionApprovalId,
     },
   )
   if (formSubmission.draftId) {

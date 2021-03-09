@@ -27,7 +27,7 @@ import { draftService } from '@oneblink/apps'
 | `title`                            | `string`              | The title input by the user to display the draft                                                                           |
 | `formId`                           | `number`              | The id of the form the draft was saved against                                                                             |
 | `externalId`                       | `string \| undefined` | the external id provided by a developer                                                                                    |
-| `previousFormSubmissionApprovalId` | `number \| undefined` | The previous form submission approval id, if the draft is a response to a clarification request on the submission approval |
+| `previousFormSubmissionApprovalId` | `string \| undefined` | The previous form submission approval id, if the draft is a response to a clarification request on the submission approval |
 | `jobId`                            | `string \| undefined` | The id of the job associated with the draft                                                                                |
 | `updatedAt`                        | `string`              | The date and time (in ISO format) the draft was last updated                                                               |
 
@@ -70,7 +70,7 @@ const draft = {
   formId: 1,
   externalId: 'external'
   jobId: '0ac41494-723b-4a5d-90bb-534b8360f31d',
-  previousFormSubmissionApprovalId: 23,
+  previousFormSubmissionApprovalId: '7fa79583-ec45-4ffc-8f72-4be80ef2c2b7',
 }
 const data = {
   formsAppId: 1,
@@ -106,7 +106,7 @@ const draft = {
   formId: 1,
   externalId: 'external'
   jobId: '0ac41494-723b-4a5d-90bb-534b8360f31d',
-  previousFormSubmissionApprovalId: 23,
+  previousFormSubmissionApprovalId: '7fa79583-ec45-4ffc-8f72-4be80ef2c2b7',
 }
 const data = {
   formsAppId: 1,

@@ -351,7 +351,8 @@ export async function getFormElementDynamicOptions(
                   (predicateElement.type !== 'select' &&
                     predicateElement.type !== 'autocomplete' &&
                     predicateElement.type !== 'checkboxes' &&
-                    predicateElement.type !== 'radio')
+                    predicateElement.type !== 'radio' &&
+                    predicateElement.type !== 'compliance')
                 ) {
                   return memo
                 }
@@ -437,7 +438,8 @@ function forEachFormElementWithOptions(
       formElement.type === 'select' ||
       formElement.type === 'autocomplete' ||
       formElement.type === 'checkboxes' ||
-      formElement.type === 'radio'
+      formElement.type === 'radio' ||
+      formElement.type === 'compliance'
     ) {
       forEach(formElement, parentElements)
     }

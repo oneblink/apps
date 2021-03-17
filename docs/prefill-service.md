@@ -20,7 +20,7 @@ const formId = 1
 const prefillFormDataId = '24faee0a-dca1-4c88-9100-9da2aae8e0ac'
 const prefillData = await prefillService.getPrefillFormData(
   formId,
-  prefillFormDataId
+  prefillFormDataId,
 )
 if (prefillData) {
   // prefill form with data

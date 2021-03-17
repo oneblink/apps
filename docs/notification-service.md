@@ -28,12 +28,12 @@ self.addEventListener('push', (event) => {
         // Show notification
         return self.registration.showNotification(
           notification.title,
-          notification.options
+          notification.options,
         )
       } else {
         console.log('Application is already open!')
       }
-    })
+    }),
   )
 })
 
@@ -61,7 +61,7 @@ self.addEventListener('notificationclick', (event) => {
           notification.close()
         })
       })
-    })
+    }),
   )
 })
 ```

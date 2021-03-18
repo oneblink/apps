@@ -97,13 +97,13 @@ const username = 'user@email.io'
 const password = 'P@$5w0rd'
 const resetPassword = await authService.loginUsernamePassword(
   username,
-  password
+  password,
 )
 // "resetPassword" will be undefined if the login was successful
 if (resetPassword) {
   // Prompt the user to enter a new password
   const newPassword = prompt(
-    'The password you entered was only temporary, and must be reset for security purposes. Please enter your new password below to continue.'
+    'The password you entered was only temporary, and must be reset for security purposes. Please enter your new password below to continue.',
   )
   await resetPassword(newPassword)
 }
@@ -129,7 +129,7 @@ const finishForgotPassword = await authService.forgotPassword(username)
 
 // Prompt the user to enter the code and a new password
 const code = prompt(
-  'You have been emailed a verification code, please enter it here.'
+  'You have been emailed a verification code, please enter it here.',
 )
 const newPassword = prompt('Please enter a new password to continue.')
 await finishForgotPassword(code, newPassword)

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Dependencies
+
+- update [aws-sdk](https://www.npmjs.com/package/aws-sdk) to [2.866.0](https://github.com/aws/aws-sdk-js/releases/tag/v2.866.0) (from [2.847.0](https://github.com/aws/aws-sdk-js/releases/tag/v2.847.0))
+
+- update [query-string](https://www.npmjs.com/package/query-string) to [6.14.1](https://github.com/sindresorhus/query-string/releases/tag/v6.14.1) (from [6.14.0](https://github.com/sindresorhus/query-string/releases/tag/v6.14.0))
+
 ## 0.6.0 (2020-03-11)
 
 ### Changed

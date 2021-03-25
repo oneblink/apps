@@ -21,7 +21,7 @@ import { approvalsService } from '@oneblink/apps'
 | Property    | Type      | Description                                                              |
 | ----------- | --------- | ------------------------------------------------------------------------ |
 | `label`     | `string`  | The unique label for the step                                            |
-| `group`     | `string`  | The username of the user that will be assigned an approval for this step |
+| `group`     | `string`  | The group that will be assigned an approval for this step |
 | `isSkipped` | `boolean` | Indicates if step has been skipped                                       |
 
 ### FormApprovalFlowInstance

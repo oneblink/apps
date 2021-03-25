@@ -8,7 +8,7 @@ Helper functions for handling form submission approvals
 import { approvalsService } from '@oneblink/apps'
 ```
 
-- [`FormApprovalFlowStep`](#formapprovalflowstep)
+- [`FormApprovalFlowInstanceStep`](#formapprovalflowinstancestep)
 - [`FormApprovalFlowInstance`](#formapprovalflowinstance)
 - [`FormSubmissionApproval`](#formsubmissionapproval)
 - [`getFormSubmissionApprovals()`](#getformsubmissionapprovals)
@@ -16,25 +16,28 @@ import { approvalsService } from '@oneblink/apps'
 - [`updateFormSubmissionApproval()`](#updateformsubmissionapproval)
 - [`retrieveFormSubmissionApprovalSubmission()`](#retrieveformsubmissionapprovalsubmission)
 
-### FormApprovalFlowStep
+### FormApprovalFlowInstanceStep
 
-| Property   | Type     | Description                                                              |
-| ---------- | -------- | ------------------------------------------------------------------------ |
-| `type`     | `string` | `'SINGLE'`                                                               |
-| `label`    | `string` | The unique label for the step                                            |
-| `username` | `string` | The username of the user that will be assigned an approval for this step |
+| Property                           | Type                                  | Description                                                              |
+| ---------------------------------- | ------------------------------------- | ------------------------------------------------------------------------ |
+| `label`                            | `string`                              | The unique label for the step                                            |
+| `group`                            | `string`                              | The username of the user that will be assigned an approval for this step |
+| `isConditional`                    | `boolean \| undefined`                | Indicates if the step is only required if a specfied condition is met    |
+| `requiresAllConditionalPredicates` | `boolean \| undefined`                | Indicates if if all conditions must be met or only one                   |
+| `conditionalPredicates`            | `ConditionalPredicate[] \| undefined` | Array of conditions                                                      |
+| `isSkipped`                        | `boolean \| undefined`                | Indicates if step has been skipped                                       |
 
 ### FormApprovalFlowInstance
 
-| Property                           | Type                                              | Description                                                                                                              |
-| ---------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `id`                               | `number`                                          | The unique identifier for the record                                                                                     |
-| `submissionId`                     | `string`                                          | The unique identifier for the submission being approved                                                                  |
-| `formId`                           | `number`                                          | The unique identifier for the form that was submitted for approval                                                       |
-| `approvalsFormsAppId`              | `number`                                          | The unique identifier for the Approvals Forms App associated with the approval                                           |
-| `previousFormSubmissionApprovalId` | `string \| undefined`                             | The unique identifier for the previous [FormSubmissionApproval](#formsubmissionapproval) that lead to this approval flow |
-| `steps`                            | [FormApprovalFlowStep](#formapprovalflowstep)`[]` | An array of the [FormApprovalFlowStep](#formapprovalflowstep)s                                                           |
-| `createdAt`                        | `string`                                          | The date and time (in ISO format) the approval was created                                                               |
+| Property                           | Type                                                              | Description                                                                                                              |
+| ---------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `id`                               | `number`                                                          | The unique identifier for the record                                                                                     |
+| `submissionId`                     | `string`                                                          | The unique identifier for the submission being approved                                                                  |
+| `formId`                           | `number`                                                          | The unique identifier for the form that was submitted for approval                                                       |
+| `approvalsFormsAppId`              | `number`                                                          | The unique identifier for the Approvals Forms App associated with the approval                                           |
+| `previousFormSubmissionApprovalId` | `string \| undefined`                                             | The unique identifier for the previous [FormSubmissionApproval](#formsubmissionapproval) that lead to this approval flow |
+| `steps`                            | [FormApprovalFlowInstanceStep](#formapprovalflowinstancestep)`[]` | An array of the [FormApprovalFlowInstanceStep](#formapprovalflowinstancestep)s                                           |
+| `createdAt`                        | `string`                                                          | The date and time (in ISO format) the approval was created                                                               |
 
 ### FormSubmissionApproval
 
@@ -49,6 +52,7 @@ import { approvalsService } from '@oneblink/apps'
 | `internalNotes`              | `string \| undefined` | The approvers internal notes                                                                              |
 | `createdAt`                  | `string`              | The date and time (in ISO format) the approval was created                                                |
 | `updatedAt`                  | `string`              | The date and time (in ISO format) the approval was last updated                                           |
+| `updatedBy`                  | `string \| undefined` | The username who last updated the step                                                                    |
 
 ### `getFormSubmissionApprovals()`
 

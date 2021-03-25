@@ -18,14 +18,11 @@ import { approvalsService } from '@oneblink/apps'
 
 ### FormApprovalFlowInstanceStep
 
-| Property                           | Type                                  | Description                                                              |
-| ---------------------------------- | ------------------------------------- | ------------------------------------------------------------------------ |
-| `label`                            | `string`                              | The unique label for the step                                            |
-| `group`                            | `string`                              | The username of the user that will be assigned an approval for this step |
-| `isConditional`                    | `boolean \| undefined`                | Indicates if the step is only required if a specfied condition is met    |
-| `requiresAllConditionalPredicates` | `boolean \| undefined`                | Indicates if if all conditions must be met or only one                   |
-| `conditionalPredicates`            | `ConditionalPredicate[] \| undefined` | Array of conditions                                                      |
-| `isSkipped`                        | `boolean`                | Indicates if step has been skipped                                       |
+| Property    | Type      | Description                                                              |
+| ----------- | --------- | ------------------------------------------------------------------------ |
+| `label`     | `string`  | The unique label for the step                                            |
+| `group`     | `string`  | The username of the user that will be assigned an approval for this step |
+| `isSkipped` | `boolean` | Indicates if step has been skipped                                       |
 
 ### FormApprovalFlowInstance
 

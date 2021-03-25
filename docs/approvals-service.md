@@ -25,7 +25,7 @@ import { approvalsService } from '@oneblink/apps'
 | `isConditional`                    | `boolean \| undefined`                | Indicates if the step is only required if a specfied condition is met    |
 | `requiresAllConditionalPredicates` | `boolean \| undefined`                | Indicates if if all conditions must be met or only one                   |
 | `conditionalPredicates`            | `ConditionalPredicate[] \| undefined` | Array of conditions                                                      |
-| `isSkipped`                        | `boolean \| undefined`                | Indicates if step has been skipped                                       |
+| `isSkipped`                        | `boolean`                | Indicates if step has been skipped                                       |
 
 ### FormApprovalFlowInstance
 

@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
-- Updated approvals-service docs(./docs/approvals-service.md)
+- **[BREAKING]** Updated approvals-service [docs](./docs/approvals-service.md)
 
 ## 0.6.1 (2020-03-23)
 

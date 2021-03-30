@@ -37,5 +37,6 @@ export default class OneBlinkAppsError extends Error {
     this.requiresAccessRequest = options.requiresAccessRequest || false
     this.requiresLogin = options.requiresLogin || false
     this.originalError = options.originalError
+    this.httpStatusCode = options.httpStatusCode
   }
 }

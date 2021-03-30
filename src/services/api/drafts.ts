@@ -77,6 +77,7 @@ const uploadDraftData = async (
           'An unknown error has occurred. Please contact support if the problem persists.',
           {
             originalError: error,
+            httpStatusCode: error.status,
           },
         )
       }

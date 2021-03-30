@@ -8,9 +8,14 @@ jobs:
     name: Github Release
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - uses: docker://antonyurchenko/git-release:v3
         env:
-          GITHUB_TOKEN: ${{ secrets.CREATE_GITHUB_RELEASE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRAFT_RELEASE: 'false'
+          PRE_RELEASE: 'false'
+          CHANGELOG_FILE: 'CHANGELOG.md'
+          ALLOW_EMPTY_CHANGELOG: 'false'
           ALLOW_TAG_PREFIX: 'true'
   publish:
     name: NPM Publish

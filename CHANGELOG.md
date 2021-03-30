@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
-## 0.7.0 (2020-03-30)
+### Fixed
+
+- `OneBlinkAppsError.httpStatusCode` not being set
+
+## [0.7.0] - 2020-03-30
 
 ### Changed
 
@@ -17,7 +21,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - `OneBlinkAppsError.httpStatusCode` not being set
 
-## 0.6.1 (2020-03-23)
+## [0.6.1] - 2020-03-23
 
 ### Dependencies
 
@@ -25,7 +29,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - update [query-string](https://www.npmjs.com/package/query-string) to [6.14.1](https://github.com/sindresorhus/query-string/releases/tag/v6.14.1) (from [6.14.0](https://github.com/sindresorhus/query-string/releases/tag/v6.14.0))
 
-## 0.6.0 (2020-03-11)
+## [0.6.0] - 2020-03-11
 
 ### Changed
 
@@ -33,7 +37,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - **[BREAKING]** [`approvalsService.getFormSubmissionApproval()`](./docs/approvals-service.md#getformsubmissionapproval) result.
 - **[BREAKING]** [`approvalsService.updateFormSubmissionApproval()`](./docs/approvals-service.md#updateformsubmissionapproval) argument and result.
 
-## 0.5.3 (2020-03-03)
+## [0.5.3] - 2020-03-03
 
 ### Added
 
@@ -50,19 +54,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - update [uuid](https://www.npmjs.com/package/uuid) to [8.3.2](https://github.com/uuidjs/uuid/blob/master/CHANGELOG.md) (from [8.3.1](https://github.com/uuidjs/uuid/blob/master/CHANGELOG.md))
 
-## 0.5.2 (2020-02-15)
+## [0.5.2] - 2020-02-15
 
 ### Fixed
 
 - Invalid Option set properties not being converted to strings
 
-## 0.5.1 (2020-02-03)
+## [0.5.1] - 2020-02-03
 
 ### Fixed
 
 - `null` as POST request payload when generating draft data credentials
 
-## 0.5.0 (2020-01-18)
+## [0.5.0] - 2020-01-18
 
 ### Changed
 
@@ -73,32 +77,32 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [`formService.searchGeoscapeAddresses()`](./docs/form-service.md#searchgeoscapeaddresses)
 - [`formService.getGeoscapeAddress()`](./docs/form-service.md#getgeoscapeaddress)
 
-## 0.4.3 (2020-12-22)
+## [0.4.3] - 2020-12-22
 
 ### Added
 
 - `crn2` and `crn3` to BPOINT payment configuration
 
-## 0.4.2 (2020-11-25)
+## [0.4.2] - 2020-11-25
 
 ### Fixed
 
 - `X-OneBlink-User-Token` header not being sent if `Authorization` header is sent with requests
 
-## 0.4.1 (2020-11-24)
+## [0.4.1] - 2020-11-24
 
 ### Added
 
 - Include `X-OneBlink-User-Token` if `userToken` is provided
 
-## 0.4.0 (2020-11-17)
+## [0.4.0] - 2020-11-17
 
 ### Changed
 
 - **[BREAKING]** [`paymentService.handlePaymentSubmissionEvent()`](./docs/payment-service.md#handlepaymentsubmissionevent) argument, `formSubmission` property has changed to a `formSubmissionResult`.
 - **[BREAKING]** [`paymentService.handlePaymentSubmissionEvent()`](./docs/payment-service.md#handlepaymentsubmissionevent) argument, `submissionId` property has been removed
 
-## 0.3.1 (2020-11-12)
+## [0.3.1] - 2020-11-12
 
 ### Changed
 
@@ -114,7 +118,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - update [uuid](https://www.npmjs.com/package/uuid) to [8.3.1](https://github.com/uuidjs/uuid/blob/master/CHANGELOG.md) (from [8.3.0](https://github.com/uuidjs/uuid/blob/master/CHANGELOG.md))
 
-### 0.3.0 (2020-11-30)
+## [0.3.0] - 2020-11-30
 
 ### Changed
 
@@ -129,7 +133,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - hard coded `formsAppId` on draft submissions
 
-### 0.2.0 (2020-10-15)
+## [0.2.0] - 2020-10-15
 
 ### Added
 
@@ -148,6 +152,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - types for submissions
 
-## 0.1.0 (2020-08-24)
+## [0.1.0] - 2020-08-24
 
 Initial release

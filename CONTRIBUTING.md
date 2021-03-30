@@ -60,12 +60,6 @@ This code base is written in [TypeScript](https://www.typescriptlang.org/) so it
    git push && git push --tags
    ```
 
-1. Publish to `npm`
-
-   ```
-   npm publish --tag beta
-   ```
-
 ## Production Release Process
 
 1. Checkout `master` and get the latest code
@@ -96,10 +90,4 @@ This code base is written in [TypeScript](https://www.typescriptlang.org/) so it
 
    ```
    git push && git push --tags
-   ```
-
-1. Publish to `npm`
-
-   ```
-   npm publish
    ```

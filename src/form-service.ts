@@ -59,6 +59,7 @@ export async function getForms(formsAppId: number): Promise<FormTypes.Form[]> {
             'An unknown error has occurred. Please contact support if the problem persists.',
             {
               originalError: error,
+              httpStatusCode: error.status,
             },
           )
         }
@@ -151,6 +152,7 @@ export async function getForm(
               'An unknown error has occurred. Please contact support if the problem persists.',
               {
                 originalError: error,
+                httpStatusCode: error.status,
               },
             )
           }
@@ -541,6 +543,7 @@ export async function searchGeoscapeAddresses(
           'An unknown error has occurred. Please contact support if the problem persists.',
           {
             originalError: error,
+            httpStatusCode: error.status,
           },
         )
       }
@@ -602,6 +605,7 @@ export async function getGeoscapeAddress(
           'An unknown error has occurred. Please contact support if the problem persists.',
           {
             originalError: error,
+            httpStatusCode: error.status,
           },
         )
       }

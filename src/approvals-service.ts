@@ -64,6 +64,7 @@ export async function getFormSubmissionApprovals(
           'An unknown error has occurred. Please contact support if the problem persists.',
           {
             originalError: error,
+            httpStatusCode: error.status,
           },
         )
       }
@@ -136,6 +137,7 @@ export async function getFormSubmissionApproval(
           'An unknown error has occurred. Please contact support if the problem persists.',
           {
             originalError: error,
+            httpStatusCode: error.status,
           },
         )
       }
@@ -185,7 +187,8 @@ export async function updateFormSubmissionApproval(
         )
       }
       case 400:
-      case 404: {
+      case 404:
+      case 409: {
         throw new OneBlinkAppsError(error.message, {
           title: 'Invalid Request',
           httpStatusCode: error.status,
@@ -196,6 +199,7 @@ export async function updateFormSubmissionApproval(
           'An unknown error has occurred. Please contact support if the problem persists.',
           {
             originalError: error,
+            httpStatusCode: error.status,
           },
         )
       }

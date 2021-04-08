@@ -17,6 +17,8 @@ import { formService } from '@oneblink/apps'
 - [`findFormElement()`](#findformelement)
 - [`searchGeoscapeAddresses()`](#searchgeoscapeaddresses)
 - [`getGeoscapeAddress()`](#getgeoscapeaddress)
+- [`searchPointAddresses()`](#searchpointaddresses)
+- [`getPointAddress()`](#getpointaddress)
 
 ### `getForms()`
 
@@ -138,4 +140,27 @@ Get the details for a single geoscape address based on the Id of a geoscape addr
 const formId = 1
 const addressId = 'ABC123'
 const result = await formService.getGeoscapeAddress(formId, addressId)
+```
+
+### `searchPointAddresses()`
+
+Search for Point addresses based on a partial address.
+
+```js
+const formId = 1
+const result = await formService.searchPointAddresses(formId, {
+  address: '123 N',
+  maxNumberOfResults: 10
+  stateTerritory: 'NSW'
+})
+```
+
+### `getPointAddress()`
+
+Get the details for a single Point address based on the Id of a Point address resource.
+
+```js
+const formId = 1
+const addressId = 'ABC123'
+const result = await formService.getPointAddress(formId, addressId)
 ```

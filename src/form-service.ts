@@ -686,7 +686,7 @@ export async function getPointAddress(
   formId: number,
   addressId: string,
   abortSignal?: AbortSignal,
-): Promise<GeoscapeTypes.GeoscapeAddress> {
+): Promise<PointTypes.PointAddress> {
   try {
     return await getRequest(
       `${tenants.current.apiOrigin}/forms/${formId}/point/addresses/${addressId}`,

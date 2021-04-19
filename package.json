@@ -71,9 +71,9 @@
     "jest": "jest",
     "prepare": "npm run build",
     "pretest": "npm run fixpack && npm run eslint && npm run build",
+    "release": "oneblink-release",
     "start": "tsc-watch",
     "test": "npm run jest",
-    "typescript": "tsc --noEmit",
-    "release": "oneblink-release"
+    "typescript": "tsc --noEmit"
   }
 }

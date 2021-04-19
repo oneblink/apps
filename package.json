@@ -7,6 +7,8 @@
     "url": "https://github.com/oneblink/apps/issues"
   },
   "dependencies": {
+    "@sentry/browser": "^6.2.5",
+    "@sentry/tracing": "^6.2.5",
     "aws-sdk": "^2.882.0",
     "big-json": "^3.1.0",
     "jwt-decode": "^3.1.2",
@@ -21,6 +23,7 @@
   },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.13.8",
+    "@oneblink/release-cli": "^1.0.0-beta.1",
     "@oneblink/types": "github:oneblink/types",
     "@types/lodash.clonedeep": "^4.5.6",
     "@types/lodash.differenceby": "^4.8.6",
@@ -68,6 +71,7 @@
     "jest": "jest",
     "prepare": "npm run build",
     "pretest": "npm run fixpack && npm run eslint && npm run build",
+    "release": "oneblink-release",
     "start": "tsc-watch",
     "test": "npm run jest",
     "typescript": "tsc --noEmit"

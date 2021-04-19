@@ -5,6 +5,8 @@ import AWSCognitoClient from './AWSCognitoClient'
 import utilsService from './utils'
 import * as offlineService from '../offline-service'
 import { MiscTypes } from '@oneblink/types'
+import Sentry from '../Sentry'
+
 interface CognitoServiceData {
   oAuthClientId: string
   loginDomain: string
@@ -25,6 +27,12 @@ function init(cognitoServiceData: CognitoServiceData) {
     loginDomain: cognitoServiceData.loginDomain,
     redirectUri: cognitoServiceData.redirectUri,
   })
+
+  const listener = () => {
+    Sentry.setTag('username', getUsername() || undefined)
+  }
+  listener()
+  registerAuthListener(listener)
 }
 
 function registerAuthListener(listener: () => unknown): () => void {

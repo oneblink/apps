@@ -12,6 +12,7 @@ import * as approvalsService from './approvals-service'
 import localisationService from './localisation-service'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import tenants from './tenants'
+import Sentry from './Sentry'
 
 export const useTenantCivicPlus = () => tenants.useCivicPlus()
 export const useTenantOneBlink = () => tenants.useOneBlink()
@@ -30,4 +31,5 @@ export {
   formService,
   localisationService,
   approvalsService,
+  Sentry,
 }

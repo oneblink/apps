@@ -1,6 +1,7 @@
 import jwtDecode from 'jwt-decode'
 
 import { getCognitoIdToken } from './cognito'
+import Sentry from '../Sentry'
 
 import { MiscTypes } from '@oneblink/types'
 let formsKeyToken: string | MiscTypes.NoU = null
@@ -16,6 +17,7 @@ export function getFormsKeyId(): string | void {
       const tokenPayload = jwtDecode(formsKeyToken) as { iss: string }
       return tokenPayload.iss
     } catch (error) {
+      Sentry.captureException(error)
       console.warn('Could not decode JWT', error)
     }
   }
@@ -29,6 +31,7 @@ export async function getIdToken() {
   try {
     return await getCognitoIdToken()
   } catch (error) {
+    Sentry.captureException(error)
     if (!error.requiresLogin) {
       throw error
     }

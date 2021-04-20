@@ -1,5 +1,7 @@
 import { EventListeners, CognitoIdentityServiceProvider } from 'aws-sdk'
 import { parseQueryString } from './query-string'
+import Sentry from '../Sentry'
+
 interface AWSAuthenticationResult {
   AccessToken: string
   ExpiresIn: number
@@ -89,6 +91,7 @@ export default class AWSCognitoClient {
       try {
         listener()
       } catch (error) {
+        Sentry.captureException(error)
         // Ignore error from listeners
         console.warn('AWSCognitoClient listener error', error)
       }
@@ -162,6 +165,7 @@ export default class AWSCognitoClient {
       )
       this._storeAuthenticationResult(result.AuthenticationResult)
     } catch (error) {
+      Sentry.captureException(error)
       console.warn('Error while attempting to refresh session', error)
       this._removeAuthenticationResult()
       throw error
@@ -384,6 +388,7 @@ export default class AWSCognitoClient {
         )
       }
     } catch (error) {
+      Sentry.captureException(error)
       if (!error.requiresLogin) {
         throw error
       }
@@ -426,6 +431,7 @@ function sendPostRequest(
     try {
       body = JSON.parse(request.response)
     } catch (e) {
+      Sentry.captureException(e)
       // Do nothing
     }
 

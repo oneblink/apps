@@ -1,6 +1,7 @@
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import utilsService from './utils'
 import { SubmissionTypes } from '@oneblink/types'
+import Sentry from '../Sentry'
 
 type PendingFormSubmissionResultWithOptionalSubmission = Pick<
   SubmissionTypes.PendingFormSubmissionResult,
@@ -64,6 +65,7 @@ export async function addSubmissionToPendingQueue(
     await utilsService.localForage.setItem('submissions', submissions)
     executePendingQueueListeners(submissions)
   } catch (error) {
+    Sentry.captureException(error)
     errorHandler(error)
   }
 }
@@ -83,6 +85,7 @@ export async function updatePendingQueueSubmission(
     await utilsService.localForage.setItem('submissions', newSubmissions)
     executePendingQueueListeners(newSubmissions)
   } catch (error) {
+    Sentry.captureException(error)
     errorHandler(error)
   }
 }
@@ -112,6 +115,7 @@ export async function deletePendingQueueSubmission(pendingTimestamp: string) {
     await utilsService.localForage.setItem('submissions', newSubmissions)
     executePendingQueueListeners(newSubmissions)
   } catch (error) {
+    Sentry.captureException(error)
     errorHandler(error)
   }
 }

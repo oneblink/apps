@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - `Sentry` to allow for error capturing
+- Captured all caught errors in Sentry
 
 ## [0.7.2] - 2020-04-15
 

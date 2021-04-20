@@ -17,6 +17,7 @@ import replaceCustomValues from './services/replace-custom-values'
 import recentlySubmittedJobsService from './services/recently-submitted-jobs'
 import { SubmissionEventTypes, SubmissionTypes } from '@oneblink/types'
 import { getUserToken } from './services/user-token'
+import Sentry from './Sentry'
 
 let _isProcessingPendingQueue = false
 
@@ -80,6 +81,7 @@ async function processPendingQueue(): Promise<void> {
         submission,
       )
     } catch (error) {
+      Sentry.captureException(error)
       console.error('Error processing submission from the pending queue', error)
       submission.isSubmitting = false
       if (error.message) {

@@ -36,6 +36,7 @@ export {
   getUserToken,
   setUserToken,
 }
+import Sentry from './Sentry'
 
 export function init({ oAuthClientId }: { oAuthClientId: string }) {
   initCognito({
@@ -112,6 +113,7 @@ export async function requestAccess(formsAppId: number): Promise<void> {
     const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/request-access`
     await postRequest(url)
   } catch (error) {
+    Sentry.captureException(error)
     console.warn('Error while requesting access to forms app', error)
     throw new OneBlinkAppsError(
       'Sorry, we could not request access automatically right now, please try again. If the problem persists, please contact your administrator yourself.',

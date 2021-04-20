@@ -4,6 +4,7 @@ import { isLoggedIn } from './services/cognito'
 import { getRequest, searchRequest } from './services/fetch'
 import tenants from './tenants'
 import { FormTypes, GeoscapeTypes, PointTypes } from '@oneblink/types'
+import Sentry from './Sentry'
 
 export async function getForms(formsAppId: number): Promise<FormTypes.Form[]> {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms`
@@ -291,6 +292,7 @@ export async function getFormElementDynamicOptions(
           options,
         }
       } catch (error) {
+        Sentry.captureException(error)
         console.warn('Error getting dynamic options from ' + url, error)
       }
     }),
@@ -405,6 +407,7 @@ export async function getFormElementDynamicOptions(
             elementId: element.id,
           })
         } catch (error) {
+          Sentry.captureException(error)
           console.warn('Could not validate dynamic options', result, error)
         }
       })
@@ -500,6 +503,7 @@ export async function searchGeoscapeAddresses(
       abortSignal,
     )
   } catch (error) {
+    Sentry.captureException(error)
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',
@@ -562,6 +566,7 @@ export async function getGeoscapeAddress(
       abortSignal,
     )
   } catch (error) {
+    Sentry.captureException(error)
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',
@@ -631,6 +636,7 @@ export async function searchPointAddresses(
       abortSignal,
     )
   } catch (error) {
+    Sentry.captureException(error)
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',
@@ -693,6 +699,7 @@ export async function getPointAddress(
       abortSignal,
     )
   } catch (error) {
+    Sentry.captureException(error)
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',

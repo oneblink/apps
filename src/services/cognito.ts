@@ -112,6 +112,7 @@ async function logout() {
   try {
     await utilsService.localForage.clear()
   } catch (error) {
+    Sentry.captureException(error)
     console.warn('Could not clear localForage before logging out', error)
   }
 

@@ -5,6 +5,7 @@ import {
 } from './services/api/notifications'
 import { isOffline } from './offline-service'
 import tenants from './tenants'
+import Sentry from './Sentry'
 
 function urlB64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
@@ -38,6 +39,7 @@ async function getServiceWorkerRegistration(): Promise<ServiceWorkerRegistration
       _swRegistration = await navigator.serviceWorker.ready
       console.log('Service Worker is registered', _swRegistration)
     } catch (error) {
+      Sentry.captureException(error)
       console.error('Notifications Service init error', error)
     }
   }
@@ -109,12 +111,14 @@ async function subscribe(formsAppId: number): Promise<boolean> {
     try {
       await createNotificationsSubscription(formsAppId, subscription)
     } catch (error) {
+      Sentry.captureException(error)
       await subscription.unsubscribe()
       throw error
     }
     console.log('Successfully subscribed to push notifications')
     return true
   } catch (error) {
+    Sentry.captureException(error)
     console.warn('Failed to subscribe the user:', error)
 
     if (Notification.permission === 'denied') {
@@ -179,6 +183,7 @@ async function unsubscribe(formsAppId: number): Promise<void> {
       },
     )
   } catch (error) {
+    Sentry.captureException(error)
     console.warn('Failed to unsubscribe the user:', error)
     throw new OneBlinkAppsError(
       'We were unable to unsubscribe you from push notifications, please try again and contact support if the problem persists.',

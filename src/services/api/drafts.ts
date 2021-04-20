@@ -5,6 +5,7 @@ import { uploadFormSubmission, downloadPreFillData } from '../s3Submit'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 import { getUserToken } from '../user-token'
+import Sentry from '../../Sentry'
 
 const uploadDraftData = async (
   draft: SubmissionTypes.FormsAppDraft,
@@ -39,6 +40,7 @@ const uploadDraftData = async (
     )
     return data.draftDataId
   } catch (error) {
+    Sentry.captureException(error)
     console.warn('Error occurred while attempting to upload draft data', error)
     switch (error.status) {
       case 401: {
@@ -117,6 +119,7 @@ const putDrafts = async (
     })
     return data
   } catch (error) {
+    Sentry.captureException(error)
     console.warn(
       'Error occurred while attempting to sync drafts with API',
       error,

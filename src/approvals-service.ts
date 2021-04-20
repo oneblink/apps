@@ -5,6 +5,7 @@ import tenants from './tenants'
 import { SubmissionTypes, FormTypes, ApprovalTypes } from '@oneblink/types'
 import { generateRetrieveApprovalSubmissionCredentials } from './services/api/submissions'
 import { downloadPreFillData } from './services/s3Submit'
+import Sentry from './Sentry'
 
 export interface FormSubmissionApprovalsResponse {
   forms: FormTypes.Form[]
@@ -20,6 +21,7 @@ export async function getFormSubmissionApprovals(
       `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/my-approvals`,
     )
   } catch (error) {
+    Sentry.captureException(error)
     console.error('Error retrieving form submission approvals', error)
 
     if (isOffline()) {
@@ -93,6 +95,7 @@ export async function getFormSubmissionApproval(
     )
     return result
   } catch (error) {
+    Sentry.captureException(error)
     console.error('Error retrieving form submission approval', error)
 
     if (isOffline()) {
@@ -154,6 +157,7 @@ export async function updateFormSubmissionApproval(
       formSubmissionApproval,
     )
   } catch (error) {
+    Sentry.captureException(error)
     console.error('Error updating form submission approval', error)
 
     if (isOffline()) {
@@ -217,6 +221,7 @@ export async function retrieveFormSubmissionApprovalSubmission(
     credentials: credentials.credentials,
     s3: credentials.s3,
   }).catch((err) => {
+    Sentry.captureException(err)
     throw new OneBlinkAppsError(
       'The form submission associated with this pending approval could not be retrieved.',
       {

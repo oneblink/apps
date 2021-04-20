@@ -8,6 +8,7 @@ export default {
       integrations: [new Integrations.BrowserTracing()],
       ...options,
     })
+    Sentry.setTag('hostname', window.location.hostname)
     Sentry.setTag('tenant', tenants.tenant)
     Sentry.setTag('formsAppId', formsAppId)
   },

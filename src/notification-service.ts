@@ -111,7 +111,6 @@ async function subscribe(formsAppId: number): Promise<boolean> {
     try {
       await createNotificationsSubscription(formsAppId, subscription)
     } catch (error) {
-      Sentry.captureException(error)
       await subscription.unsubscribe()
       throw error
     }
@@ -177,6 +176,7 @@ async function unsubscribe(formsAppId: number): Promise<void> {
 
     await deleteNotificationsSubscription(formsAppId, subscription).catch(
       (error) => {
+        Sentry.captureException(error)
         // Ignore this error as the server should remove
         // this subscription the next time it tries to use it.
         console.warn('Could not delete subscription on server', error)

@@ -6,6 +6,7 @@ import queryString from 'query-string'
 import { getUserProfile } from '../auth-service'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import { AWSTypes, FormTypes, SubmissionTypes } from '@oneblink/types'
+import Sentry from '../Sentry'
 
 declare global {
   interface Window {
@@ -131,6 +132,7 @@ const uploadToS3 = <T>(
   readStream.pipe(upload)
 
   return promise.catch((err) => {
+    Sentry.captureException(err)
     // handle storing in s3 errors here
     if (/Network Failure/.test(err.message)) {
       console.warn('Network error uploading to S3:', err)
@@ -229,6 +231,7 @@ const downloadPreFillData = <T>({
       })
     })
     .catch((error) => {
+      Sentry.captureException(error)
       // AWS will return an "Access Denied" error for objects that have been
       // deleted. As we should only be getting these if objects are not there
       // (because our API should always return valid credentials) we can tell

@@ -16,6 +16,7 @@ import {
   ensureDraftsDataIsUploaded,
 } from './services/draft-data-store'
 import { MiscTypes, SubmissionTypes } from '@oneblink/types'
+import Sentry from './Sentry'
 
 interface DraftsData {
   createdAt?: string
@@ -127,6 +128,7 @@ export async function addDraft(
       }),
     )
     .catch((err) => {
+      Sentry.captureException(err)
       throw errorHandler(err)
     })
 }
@@ -181,6 +183,7 @@ export async function updateDraft(
       }),
     )
     .catch((err) => {
+      Sentry.captureException(err)
       throw errorHandler(err)
     })
 }
@@ -196,6 +199,7 @@ async function getDraftsData(): Promise<DraftsData> {
     .getItem(`DRAFTS_${username}`)
     .then((data) => (data as DraftsData) || { drafts: [] })
     .catch((err) => {
+      Sentry.captureException(err)
       throw errorHandler(err)
     })
 }
@@ -273,6 +277,7 @@ export async function deleteDraft(
         )
     })
     .catch((err) => {
+      Sentry.captureException(err)
       throw errorHandler(err)
     })
 }
@@ -360,6 +365,7 @@ export async function syncDrafts({
       _isSyncingDrafts = false
     })
     .catch((error) => {
+      Sentry.captureException(error)
       _isSyncingDrafts = false
       console.warn(
         'Error while attempting to sync and update local drafts',

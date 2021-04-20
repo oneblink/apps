@@ -10,6 +10,7 @@ import { isLoggedIn } from './auth-service'
 import { getDrafts } from './draft-service'
 import tenants from './tenants'
 import { SubmissionTypes } from '@oneblink/types'
+import Sentry from './Sentry'
 
 async function removePendingSubmissions(
   jobList: SubmissionTypes.FormsAppJob[],
@@ -76,6 +77,7 @@ export async function getJobs(
       ),
     )
     .catch((error) => {
+      Sentry.captureException(error)
       console.warn('Error retrieving Jobs for forms app', error)
 
       if (isOffline()) {

@@ -2,6 +2,7 @@ import { FormTypes, SubmissionEventTypes } from '@oneblink/types'
 import { postRequest } from '../fetch'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
+import Sentry from '../../Sentry'
 
 const generatePaymentConfiguration = (
   form: FormTypes.Form,
@@ -36,6 +37,7 @@ const generatePaymentConfiguration = (
     url,
     payload,
   ).catch((error) => {
+    Sentry.captureException(error)
     console.warn(
       'Error occurred while attempting to generate configuration for payment',
       error,
@@ -91,6 +93,7 @@ const verifyPaymentTransaction = <T>(
   const url = `${tenants.current.apiOrigin}${path}`
   console.log('Attempting to verify payment transaction', url)
   return postRequest<T>(url, payload).catch((error) => {
+    Sentry.captureException(error)
     console.warn(
       'Error occurred while attempting to verify a transaction',
       error,
@@ -146,6 +149,7 @@ const acknowledgeCPPayTransaction = async (
   const url = `${tenants.current.apiOrigin}/forms/${formId}/cp-pay-acknowledge`
   console.log('Attempting to acknowledge CP Pay transaction', url)
   await postRequest(url, payload).catch((error) => {
+    Sentry.captureException(error)
     console.warn(
       'Error occurred while attempting to acknowledge a CP Pay transaction',
       error,

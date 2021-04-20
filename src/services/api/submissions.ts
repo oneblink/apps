@@ -2,6 +2,7 @@ import { SubmissionTypes, AWSTypes } from '@oneblink/types'
 import { postRequest } from '../fetch'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
+import Sentry from '../../Sentry'
 
 export const generateSubmissionCredentials = async (
   submissionData: SubmissionTypes.FormSubmission,
@@ -14,6 +15,7 @@ export const generateSubmissionCredentials = async (
       })),
     },
   ).catch((error) => {
+    Sentry.captureException(error)
     // handle only credential errors here
     console.error('Error with getting credentials for submit:', error)
     switch (error.status) {
@@ -76,6 +78,7 @@ export const generateRetrieveApprovalSubmissionCredentials = async (
   return postRequest<AWSTypes.FormS3Credentials>(
     `${tenants.current.apiOrigin}/form-submission-approvals/${formSubmissionApprovalId}/retrieval-credentials`,
   ).catch((error) => {
+    Sentry.captureException(error)
     // handle only credential errors here
     console.error('Error with getting credentials for retrieval:', error)
     switch (error.status) {

@@ -11,6 +11,7 @@ type PendingFormSubmissionResultWithOptionalSubmission = Pick<
 }
 
 function errorHandler(error: Error) {
+  Sentry.captureException(error)
   console.error('Local Forage Error', error)
   if (/The serialized value is too large/.test(error.message)) {
     throw new OneBlinkAppsError(

@@ -2,8 +2,10 @@ import { HTTPError, postRequest } from '../fetch'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 import { isOffline } from '../../offline-service'
+import Sentry from '../../Sentry'
 
 const subscriptionErrorHandler = (error: HTTPError) => {
+  Sentry.captureException(error)
   console.warn('Error POSTing notifications subscription', error)
   if (isOffline()) {
     throw new OneBlinkAppsError(

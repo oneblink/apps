@@ -11,6 +11,7 @@ export async function getForms(formsAppId: number): Promise<FormTypes.Form[]> {
   return getRequest<{ forms: FormTypes.Form[] }>(url)
     .then(({ forms }) => forms)
     .catch((error) => {
+      Sentry.captureException(error)
       console.error('Error retrieving forms', error)
 
       if (isOffline()) {
@@ -100,6 +101,7 @@ export async function getForm(
           })
       })
       .catch((error) => {
+        Sentry.captureException(error)
         console.warn(`Error retrieving form ${formId} from API`, error)
         if (isOffline()) {
           throw new OneBlinkAppsError(
@@ -191,6 +193,7 @@ export async function getFormElementLookups(
       })),
     )
     .catch((error) => {
+      Sentry.captureException(error)
       console.warn(
         `Error retrieving form element lookups for organisationId ${organisationId}`,
         error,

@@ -3,6 +3,7 @@ import utilsService from './utils'
 
 import { uploadDraftData, downloadDraftData } from './api/drafts'
 import { MiscTypes, SubmissionTypes } from '@oneblink/types'
+import Sentry from '../Sentry'
 function getDraftDataKey(draftDataId: string) {
   return `DRAFT_DATA_${draftDataId}`
 }
@@ -42,6 +43,7 @@ export function saveDraftData(
 ): Promise<string> {
   return uploadDraftData(draft, draftSubmission)
     .catch((error: Error) => {
+      Sentry.captureException(error)
       // Ignoring all errors here as we don't want draft submission data
       // being saved to the cloud to prevent drafts from being saved on the device
       console.warn('Could not upload Draft Data as JSON', error)
@@ -103,6 +105,7 @@ export async function ensureDraftsDataExists(
       return
     }
     await getDraftData(draft.formId, draftDataId).catch((error) => {
+      Sentry.captureException(error)
       console.warn('Could not download Draft Data as JSON', error)
     })
   }

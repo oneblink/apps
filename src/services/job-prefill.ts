@@ -2,6 +2,7 @@ import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import utilsService from './utils'
 import { downloadPreFillFormData } from './api/prefill'
 import { MiscTypes, SubmissionTypes } from '@oneblink/types'
+import Sentry from '../Sentry'
 
 export function getPrefillKey(prefillFormDataId: string) {
   return `V2_PREFILL_${prefillFormDataId}`
@@ -40,6 +41,7 @@ export async function getPrefillFormData<T extends Record<string, unknown>>(
       )
     })
     .catch((error) => {
+      Sentry.captureException(error)
       console.warn(
         'An error occurred attempting to retrieve prefill data',
         error,
@@ -69,8 +71,9 @@ export async function ensurePrefillFormDataExists(
     ) {
       continue
     }
-    await getPrefillFormData(formId, preFillFormDataId).catch((error) =>
-      console.warn('Suppressing error retrieving prefill data for jobs', error),
-    )
+    await getPrefillFormData(formId, preFillFormDataId).catch((error) => {
+      Sentry.captureException(error)
+      console.warn('Suppressing error retrieving prefill data for jobs', error)
+    })
   }
 }

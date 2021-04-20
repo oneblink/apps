@@ -90,6 +90,7 @@ export async function isAuthorised(formsAppId: number): Promise<boolean> {
       if (error.status >= 400 && error.status < 500) {
         return false
       } else {
+        Sentry.captureException(error)
         console.log(
           'Could not determine if the current user has access to this forms app',
           error,

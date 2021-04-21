@@ -14,6 +14,7 @@ import { formService } from '@oneblink/apps'
 - [`getFormElementLookupById()`](#getformelementlookupbyid)
 - [`getFormElementDynamicOptions()`](#getformelementdynamicoptions)
 - [`forEachFormElement()`](#foreachformelement)
+- [`forEachFormElementWithOptions()`](#foreachformelementwithoptions)
 - [`findFormElement()`](#findformelement)
 - [`searchGeoscapeAddresses()`](#searchgeoscapeaddresses)
 - [`getGeoscapeAddress()`](#getgeoscapeaddress)
@@ -98,6 +99,19 @@ Iterate over OneBlink Form Elements. Helpful to recursively check form elements 
 formService.forEachFormElement(
   form.elements,
   (formElement, parentFormElements) => {
+    // Do what you need to do to each form element
+  },
+)
+```
+
+### `forEachFormElementWithOptions()`
+
+Iterate over OneBlink Form Elements that have options e.g. `'select'` type elements. Helpful to recursively check form elements in repeatable sets and pages.
+
+```js
+formService.forEachFormElementWithOptions(
+  form.elements,
+  (formElementWithOptions, parentFormElements) => {
     // Do what you need to do to each form element
   },
 )

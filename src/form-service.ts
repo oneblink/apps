@@ -270,7 +270,13 @@ export async function getFormElementDynamicOptions(
   }
 
   // Get the options for all the options sets
-  const results = await Promise.all(
+  const results: Array<
+    | {
+        formElementOptionsSetId: number
+        options: unknown
+      }
+    | undefined
+  > = await Promise.all(
     formElementOptionsSets.map(async (formElementOptionsSet) => {
       const url = formElementOptionsSet.environments.reduce(
         (url: string | null, formElementDynamicOptionSetEnvironment) => {
@@ -285,13 +291,14 @@ export async function getFormElementDynamicOptions(
         },
         null,
       )
-      if (!url) {
+      if (!url || !formElementOptionsSet.id) {
         return
       }
+      const formElementOptionsSetId = formElementOptionsSet.id
       try {
         const options = await getRequest(url)
         return {
-          formElementOptionsSetId: formElementOptionsSet.id,
+          formElementOptionsSetId,
           options,
         }
       } catch (error) {
@@ -312,9 +319,6 @@ export async function getFormElementDynamicOptions(
       forEachFormElementWithOptions(form.elements, (element) => {
         const result = results.find(
           (result) =>
-            // It wants us to check for element types with an dynamicOptionSetId property.
-            // This will be undefined if not an element with options, and we don't
-            // want to have to come back here and add types when adding more types
             result &&
             !Array.isArray(element.options) &&
             element.dynamicOptionSetId === result.formElementOptionsSetId,
@@ -434,7 +438,7 @@ export function forEachFormElement(
   })
 }
 
-function forEachFormElementWithOptions(
+export function forEachFormElementWithOptions(
   elements: FormTypes.FormElement[],
   forEach: (
     elementWithOptions: FormTypes.FormElementWithOptions,

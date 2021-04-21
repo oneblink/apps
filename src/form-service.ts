@@ -229,6 +229,54 @@ async function getFormElementOptionsSets(
   return formElementDynamicOptionSets
 }
 
+export function parseFormElementOptionsSet(
+  data: unknown,
+): FormTypes.ChoiceElementOption[] {
+  if (!Array.isArray(data)) {
+    return []
+  }
+  return data.reduce(
+    (
+      options: FormTypes.ChoiceElementOption[],
+      record: unknown,
+      index: number,
+    ) => {
+      if (typeof record === 'string') {
+        options.push({
+          id: index.toString(),
+          value: record,
+          label: record,
+        })
+      } else if (typeof record === 'object') {
+        const option = record as Record<string, unknown>
+        const value =
+          typeof option.value === 'string' && option.value
+            ? option.value
+            : index.toString()
+        const id =
+          typeof option.id === 'string' && option.id ? option.id : value
+        const label =
+          typeof option.label === 'string' && option.label
+            ? option.label
+            : value
+        const colour =
+          typeof option.colour === 'string' && option.colour
+            ? option.colour
+            : undefined
+        options.push({
+          ...option,
+          id,
+          value,
+          label,
+          colour,
+        })
+      }
+      return options
+    },
+    [],
+  )
+}
+
 export async function getFormElementDynamicOptions(
   input: FormTypes.Form | FormTypes.Form[],
 ): Promise<
@@ -317,30 +365,37 @@ export async function getFormElementDynamicOptions(
       form,
     ) => {
       forEachFormElementWithOptions(form.elements, (element) => {
+        // Elements with options already can be ignored
+        if (Array.isArray(element.options)) {
+          return
+        }
+
         const result = results.find(
           (result) =>
             result &&
-            !Array.isArray(element.options) &&
+            element.optionsType === 'DYNAMIC' &&
             element.dynamicOptionSetId === result.formElementOptionsSetId,
         )
-        if (!result || !Array.isArray(result.options)) {
+        if (!result) {
           return
         }
 
         try {
-          const options = result.options.map((option, index) => {
-            option = option
-              ? {
-                  ...option,
-                  id: (option.value || index).toString(),
-                  value: (option.value || index).toString(),
-                  label: (option.label || index).toString(),
-                  colour: option.colour?.toString() || undefined,
-                }
-              : {}
+          const choiceElementOptions = parseFormElementOptionsSet(
+            result.options,
+          )
+          const options = choiceElementOptions.map((option) => {
             const optionsMap = (option.attributes || []).reduce(
-              // @ts-expect-error
-              (memo, { label, value }) => {
+              (
+                memo: Record<
+                  string,
+                  {
+                    elementId: string
+                    optionIds: string[]
+                  }
+                >,
+                { label, value },
+              ) => {
                 if (
                   !element.attributesMapping ||
                   !Array.isArray(element.attributesMapping)

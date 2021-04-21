@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+- [`formService.parseFormElementOptionsSet()`](./docs/form-service.md#parseformelementoptionsset)
 - [`formService.forEachFormElementWithOptions()`](./docs/form-service.md#foreachformelementwithoptions)
 - `Sentry` to allow for error capturing
 - Captured all caught errors in Sentry

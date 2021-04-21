@@ -16,6 +16,7 @@ import { formService } from '@oneblink/apps'
 - [`forEachFormElement()`](#foreachformelement)
 - [`forEachFormElementWithOptions()`](#foreachformelementwithoptions)
 - [`findFormElement()`](#findformelement)
+- [`parseFormElementOptionsSet()`](#parseformelementoptionsset)
 - [`searchGeoscapeAddresses()`](#searchgeoscapeaddresses)
 - [`getGeoscapeAddress()`](#getgeoscapeaddress)
 - [`searchPointAddresses()`](#searchpointaddresses)
@@ -131,6 +132,15 @@ const formElement = formService.findFormElement(
 if (formElement) {
   // Found the one you were looking for
 }
+```
+
+### `parseFormElementOptionsSet()`
+
+Parse unknown data as valid options for a forms element. This will always return an Array of valid options.
+
+```js
+const options = formService.parseFormElementOptionsSet(data)
+// "options" are valid for a form element
 ```
 
 ### `searchGeoscapeAddresses()`

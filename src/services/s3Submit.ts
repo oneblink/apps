@@ -1,5 +1,5 @@
 import S3 from 'aws-sdk/clients/s3'
-//import bigJSON from 'big-json'
+import bigJSON from 'big-json'
 import s3UploadStream from 's3-upload-stream'
 import queryString from 'query-string'
 
@@ -96,9 +96,9 @@ const uploadToS3 = <T>(
       sessionToken: credentials.SessionToken,
     }),
   )
-  // const readStream = bigJSON.createStringifyStream({
-  //   body: json,
-  // })
+  const readStream = bigJSON.createStringifyStream({
+    body: json,
+  })
 
   const objectMeta = {
     ContentType: 'application/json',
@@ -129,7 +129,7 @@ const uploadToS3 = <T>(
     })
   })
 
-  // readStream.pipe(upload)
+  readStream.pipe(upload)
 
   return promise.catch((err) => {
     Sentry.captureException(err)
@@ -207,21 +207,19 @@ const downloadPreFillData = <T>({
       const fileReader = new FileReader()
       return new Promise<T>((resolve, reject) => {
         fileReader.onload = function (event) {
-          // bigJSON.parse(
-          //   {
-          //     // @ts-expect-error
-          //     body: event.target.result,
-          //   },
-          //   (error: Error, preFillData: T) => {
-          //     if (error) {
-          //       reject(error)
-          //     } else {
-          //       resolve(preFillData)
-          //     }
-          //   },
-          // )
-          // @ts-expect-error
-          resolve()
+          bigJSON.parse(
+            {
+              // @ts-expect-error
+              body: event.target.result,
+            },
+            (error: Error, preFillData: T) => {
+              if (error) {
+                reject(error)
+              } else {
+                resolve(preFillData)
+              }
+            },
+          )
         }
 
         fileReader.onerror = function () {

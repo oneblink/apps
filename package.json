@@ -10,7 +10,6 @@
     "@sentry/browser": "^6.2.5",
     "@sentry/tracing": "^6.2.5",
     "aws-sdk": "^2.882.0",
-    "big-json": "^3.1.0",
     "jwt-decode": "^3.1.2",
     "local-storage": "^2.0.0",
     "localforage": "^1.9.0",

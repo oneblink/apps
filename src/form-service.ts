@@ -280,107 +280,106 @@ export function parseFormElementOptionsSet(
 export async function getFormElementDynamicOptions(
   input: FormTypes.Form | FormTypes.Form[],
 ): Promise<
-  Array<{ elementId: string; options: FormTypes.ChoiceElementOption[] }>
+  Array<{
+    elementId: string
+    options: FormTypes.ChoiceElementOption[]
+  }>
 > {
-  const forms = Array.isArray(input) ? input : [input]
-  if (!forms.length) {
-    return []
-  }
+  try {
+    const forms = Array.isArray(input) ? input : [input]
+    if (!forms.length) {
+      return []
+    }
 
-  // Get the options sets id for each element
-  const formElementOptionsSetIds = forms.reduce((ids: number[], form) => {
-    forEachFormElementWithOptions(form.elements, (el) => {
-      if (
-        // Ignore elements that have options as we don't need to fetch these again
-        !Array.isArray(el.options) &&
-        el.optionsType === 'DYNAMIC' &&
-        typeof el.dynamicOptionSetId === 'number'
-      ) {
-        ids.push(el.dynamicOptionSetId)
-      }
-    })
-    return ids
-  }, [])
+    // Get the options sets id for each element
+    const formElementOptionsSetIds = forms.reduce((ids: number[], form) => {
+      forEachFormElementWithOptions(form.elements, (el) => {
+        if (
+          // Ignore elements that have options as we don't need to fetch these again
+          !Array.isArray(el.options) &&
+          el.optionsType === 'DYNAMIC' &&
+          typeof el.dynamicOptionSetId === 'number'
+        ) {
+          ids.push(el.dynamicOptionSetId)
+        }
+      })
+      return ids
+    }, [])
 
-  if (!formElementOptionsSetIds.length) {
-    return []
-  }
+    if (!formElementOptionsSetIds.length) {
+      return []
+    }
 
-  // Get the options sets for all the ids
-  const allFormElementOptionsSets = await getFormElementOptionsSets(
-    forms[0].organisationId,
-  )
-  const formElementOptionsSets = allFormElementOptionsSets.filter(({ id }) =>
-    formElementOptionsSetIds.includes(id || 0),
-  )
-  if (!formElementOptionsSetIds.length) {
-    return []
-  }
+    // Get the options sets for all the ids
+    const allFormElementOptionsSets = await getFormElementOptionsSets(
+      forms[0].organisationId,
+    )
 
-  // Get the options for all the options sets
-  const results: Array<
-    | {
-        formElementOptionsSetId: number
-        options: unknown
-      }
-    | undefined
-  > = await Promise.all(
-    formElementOptionsSets.map(async (formElementOptionsSet) => {
-      const url = formElementOptionsSet.environments.reduce(
-        (url: string | null, formElementDynamicOptionSetEnvironment) => {
-          if (
-            !url &&
-            formElementDynamicOptionSetEnvironment.formsAppEnvironmentId ===
-              forms[0].formsAppEnvironmentId
-          ) {
-            return formElementDynamicOptionSetEnvironment.url
-          }
-          return url
-        },
-        null,
-      )
-      if (!url || !formElementOptionsSet.id) {
-        return
-      }
-      const formElementOptionsSetId = formElementOptionsSet.id
-      try {
+    const formElementOptionsSets = allFormElementOptionsSets.filter(({ id }) =>
+      formElementOptionsSetIds.includes(id || 0),
+    )
+    if (!formElementOptionsSetIds.length) {
+      return []
+    }
+
+    // Get the options for all the options sets
+    const results: Array<
+      | {
+          formElementOptionsSetId: number
+          options: unknown
+        }
+      | undefined
+    > = await Promise.all(
+      formElementOptionsSets.map(async (formElementOptionsSet) => {
+        const url = formElementOptionsSet.environments.reduce(
+          (url: string | null, formElementDynamicOptionSetEnvironment) => {
+            if (
+              !url &&
+              formElementDynamicOptionSetEnvironment.formsAppEnvironmentId ===
+                forms[0].formsAppEnvironmentId
+            ) {
+              return formElementDynamicOptionSetEnvironment.url
+            }
+            return url
+          },
+          null,
+        )
+        if (!url || !formElementOptionsSet.id) {
+          return
+        }
+        const formElementOptionsSetId = formElementOptionsSet.id
         const options = await getRequest(url)
         return {
           formElementOptionsSetId,
           options,
         }
-      } catch (error) {
-        Sentry.captureException(error)
-        console.warn('Error getting dynamic options from ' + url, error)
-      }
-    }),
-  )
+      }),
+    )
 
-  return forms.reduce(
-    (
-      optionsForElementId: Array<{
-        elementId: string
-        options: FormTypes.ChoiceElementOption[]
-      }>,
-      form,
-    ) => {
-      forEachFormElementWithOptions(form.elements, (element) => {
-        // Elements with options already can be ignored
-        if (Array.isArray(element.options)) {
-          return
-        }
+    return forms.reduce(
+      (
+        optionsForElementId: Array<{
+          elementId: string
+          options: FormTypes.ChoiceElementOption[]
+        }>,
+        form,
+      ) => {
+        forEachFormElementWithOptions(form.elements, (element) => {
+          // Elements with options already can be ignored
+          if (Array.isArray(element.options)) {
+            return
+          }
 
-        const result = results.find(
-          (result) =>
-            result &&
-            element.optionsType === 'DYNAMIC' &&
-            element.dynamicOptionSetId === result.formElementOptionsSetId,
-        )
-        if (!result) {
-          return
-        }
+          const result = results.find(
+            (result) =>
+              result &&
+              element.optionsType === 'DYNAMIC' &&
+              element.dynamicOptionSetId === result.formElementOptionsSetId,
+          )
+          if (!result) {
+            return
+          }
 
-        try {
           const choiceElementOptions = parseFormElementOptionsSet(
             result.options,
           )
@@ -468,16 +467,16 @@ export async function getFormElementDynamicOptions(
             options,
             elementId: element.id,
           })
-        } catch (error) {
-          Sentry.captureException(error)
-          console.warn('Could not validate dynamic options', result, error)
-        }
-      })
+        })
 
-      return optionsForElementId
-    },
-    [],
-  )
+        return optionsForElementId
+      },
+      [],
+    )
+  } catch (error) {
+    Sentry.captureException(error)
+    throw error
+  }
 }
 
 export function forEachFormElement(

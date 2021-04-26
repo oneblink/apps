@@ -10,16 +10,19 @@ type PendingFormSubmissionResultWithOptionalSubmission = Pick<
   submission?: SubmissionTypes.PendingFormSubmissionResult['submission']
 }
 
-function errorHandler(error: Error) {
+function errorHandler(error: Error): Error {
   Sentry.captureException(error)
   console.error('Local Forage Error', error)
   if (/The serialized value is too large/.test(error.message)) {
-    throw new OneBlinkAppsError(
+    return new OneBlinkAppsError(
       'It seems you have run out of space. To free up space, please connect to the internet to process pending submissions.',
+      {
+        originalError: error,
+      },
     )
   }
 
-  throw error
+  return error
 }
 
 const pendingQueueListeners: Array<
@@ -67,7 +70,7 @@ export async function addSubmissionToPendingQueue(
     executePendingQueueListeners(submissions)
   } catch (error) {
     Sentry.captureException(error)
-    errorHandler(error)
+    throw errorHandler(error)
   }
 }
 
@@ -87,7 +90,7 @@ export async function updatePendingQueueSubmission(
     executePendingQueueListeners(newSubmissions)
   } catch (error) {
     Sentry.captureException(error)
-    errorHandler(error)
+    throw errorHandler(error)
   }
 }
 
@@ -117,6 +120,6 @@ export async function deletePendingQueueSubmission(pendingTimestamp: string) {
     executePendingQueueListeners(newSubmissions)
   } catch (error) {
     Sentry.captureException(error)
-    errorHandler(error)
+    throw errorHandler(error)
   }
 }

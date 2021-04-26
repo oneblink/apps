@@ -136,12 +136,13 @@ const uploadToS3 = <T>(
     // handle storing in s3 errors here
     if (/Network Failure/.test(err.message)) {
       console.warn('Network error uploading to S3:', err)
-      const error = new Error(
+      throw new OneBlinkAppsError(
         'There was an error saving your form. Please try again. If the problem persists, contact your administrator',
+        {
+          title: 'Connectivity Issues',
+          originalError: err,
+        },
       )
-      // @ts-expect-error
-      error.title = 'Connectivity Issues'
-      throw error
     }
 
     throw err

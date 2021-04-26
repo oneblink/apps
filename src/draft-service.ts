@@ -24,19 +24,18 @@ interface DraftsData {
   drafts: SubmissionTypes.FormsAppDraft[]
 }
 
-// @ts-expect-error
-const formsHostnameConfiguration = window.formsHostnameConfiguration || {}
-const isDraftsEnabled = !!formsHostnameConfiguration.isDraftsEnabled
-
 function errorHandler(error: Error): Error {
   console.error('Local Forage Error', error)
   if (/The serialized value is too large/.test(error.message)) {
-    throw new OneBlinkAppsError(
+    return new OneBlinkAppsError(
       'It seems you have run out of space. Please delete some of your drafts to allow new drafts to be created or existing drafts to be updated.',
+      {
+        originalError: error,
+      },
     )
   }
 
-  throw error
+  return error
 }
 
 const draftsListeners: Array<
@@ -304,10 +303,6 @@ export async function syncDrafts({
   formsAppId: number
   throwError?: boolean
 }): Promise<void> {
-  if (!isDraftsEnabled) {
-    return
-  }
-
   if (!isLoggedIn()) {
     console.log('Drafts cannot be synced until user has logged in.')
     return

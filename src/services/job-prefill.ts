@@ -71,9 +71,10 @@ export async function ensurePrefillFormDataExists(
     ) {
       continue
     }
-    await getPrefillFormData(formId, preFillFormDataId).catch((error) => {
-      Sentry.captureException(error)
+    try {
+      await getPrefillFormData(formId, preFillFormDataId)
+    } catch (error) {
       console.warn('Suppressing error retrieving prefill data for jobs', error)
-    })
+    }
   }
 }

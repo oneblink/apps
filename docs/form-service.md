@@ -80,10 +80,13 @@ Get a the options for a single Form or an array of Forms for Form Elements that 
 const optionsForElementId = await formService.getFormElementDynamicOptions(form)
 
 // Set all the options for the required elements
-for (const { elementId, options } of optionsForElementId) {
+for (const { elementId, options } of optionsForElementId.filter(
+  ({ ok }) => ok,
+)) {
   // BEWARE
   // this example does not accommodate for
   // nested elements in pages and repeatable sets
+  // or for options sets that fail to load
   for (const formElement of form.elements) {
     if (formElement.id === elementId) {
       formElement.options = options

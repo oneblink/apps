@@ -1,7 +1,7 @@
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { isOffline } from './offline-service'
 import { isLoggedIn } from './services/cognito'
-import { getRequest, searchRequest } from './services/fetch'
+import { generateHeaders, getRequest, searchRequest } from './services/fetch'
 import tenants from './tenants'
 import { FormTypes, GeoscapeTypes, PointTypes } from '@oneblink/types'
 import Sentry from './Sentry'
@@ -277,206 +277,315 @@ export function parseFormElementOptionsSet(
   )
 }
 
+export type LoadFormElementDynamicOptionsResult =
+  | {
+      ok: true
+      elementId: string
+      options: FormTypes.ChoiceElementOption[]
+    }
+  | {
+      ok: false
+      elementId: string
+      error: OneBlinkAppsError
+    }
+
 export async function getFormElementDynamicOptions(
   input: FormTypes.Form | FormTypes.Form[],
-): Promise<
-  Array<{
-    elementId: string
-    options: FormTypes.ChoiceElementOption[]
-  }>
-> {
-  try {
-    const forms = Array.isArray(input) ? input : [input]
-    if (!forms.length) {
-      return []
-    }
+): Promise<Array<LoadFormElementDynamicOptionsResult>> {
+  const forms = Array.isArray(input) ? input : [input]
+  if (!forms.length) {
+    return []
+  }
 
-    // Get the options sets id for each element
-    const formElementOptionsSetIds = forms.reduce((ids: number[], form) => {
-      forEachFormElementWithOptions(form.elements, (el) => {
-        if (
-          // Ignore elements that have options as we don't need to fetch these again
-          !Array.isArray(el.options) &&
-          el.optionsType === 'DYNAMIC' &&
-          typeof el.dynamicOptionSetId === 'number'
-        ) {
-          ids.push(el.dynamicOptionSetId)
-        }
+  // Get the options sets id for each element
+  const formElementOptionsSetIds = forms.reduce((ids: number[], form) => {
+    forEachFormElementWithOptions(form.elements, (el) => {
+      if (
+        // Ignore elements that have options as we don't need to fetch these again
+        !Array.isArray(el.options) &&
+        el.optionsType === 'DYNAMIC' &&
+        typeof el.dynamicOptionSetId === 'number'
+      ) {
+        ids.push(el.dynamicOptionSetId)
+      }
+    })
+    return ids
+  }, [])
+
+  if (!formElementOptionsSetIds.length) {
+    return []
+  }
+
+  // Get the options sets for all the ids
+  const organisationId = forms[0].organisationId
+  const allFormElementOptionsSets = await getFormElementOptionsSets(
+    organisationId,
+  )
+
+  const formElementOptionsSets = allFormElementOptionsSets.filter(({ id }) =>
+    formElementOptionsSetIds.includes(id || 0),
+  )
+  if (!formElementOptionsSetIds.length) {
+    return []
+  }
+
+  const formsAppEnvironmentId = forms[0].formsAppEnvironmentId
+  const formElementOptionsSetUrls = formElementOptionsSets.reduce<
+    Array<{
+      formElementOptionsSetId: number
+      formElementOptionsSetName: string
+      formElementOptionsSetUrl?: string
+    }>
+  >((memo, formElementOptionsSet) => {
+    const formElementOptionsSetId = formElementOptionsSet.id
+    if (formElementOptionsSetId) {
+      const formElementDynamicOptionSetEnvironment = formElementOptionsSet.environments.find(
+        (environment) =>
+          environment.formsAppEnvironmentId === formsAppEnvironmentId,
+      )
+
+      memo.push({
+        formElementOptionsSetId,
+        formElementOptionsSetName: formElementOptionsSet.name,
+        formElementOptionsSetUrl: formElementDynamicOptionSetEnvironment?.url,
       })
-      return ids
-    }, [])
-
-    if (!formElementOptionsSetIds.length) {
-      return []
     }
 
-    // Get the options sets for all the ids
-    const allFormElementOptionsSets = await getFormElementOptionsSets(
-      forms[0].organisationId,
-    )
+    return memo
+  }, [])
 
-    const formElementOptionsSets = allFormElementOptionsSets.filter(({ id }) =>
-      formElementOptionsSetIds.includes(id || 0),
-    )
-    if (!formElementOptionsSetIds.length) {
-      return []
-    }
-
-    // Get the options for all the options sets
-    const results: Array<
-      | {
-          formElementOptionsSetId: number
-          options: unknown
+  // Get the options for all the options sets
+  const results = await Promise.all(
+    formElementOptionsSetUrls.map<
+      Promise<
+        | {
+            ok: true
+            formElementOptionsSetId: number
+            options: unknown
+          }
+        | {
+            ok: false
+            error: OneBlinkAppsError
+            formElementOptionsSetId: number
+          }
+      >
+    >(
+      async ({
+        formElementOptionsSetId,
+        formElementOptionsSetName,
+        formElementOptionsSetUrl,
+      }) => {
+        if (!formElementOptionsSetUrl) {
+          return {
+            ok: false,
+            formElementOptionsSetId,
+            error: new OneBlinkAppsError(
+              `Options set configuration has not been completed yet. Please contact your administrator to rectify the issue.`,
+              {
+                title: 'Misconfigured Options Set',
+                originalError: new Error(
+                  JSON.stringify(
+                    {
+                      formElementOptionsSetId,
+                      formElementOptionsSetName,
+                      formsAppEnvironmentId,
+                    },
+                    null,
+                    2,
+                  ),
+                ),
+              },
+            ),
+          }
         }
-      | undefined
-    > = await Promise.all(
-      formElementOptionsSets.map(async (formElementOptionsSet) => {
-        const url = formElementOptionsSet.environments.reduce(
-          (url: string | null, formElementDynamicOptionSetEnvironment) => {
-            if (
-              !url &&
-              formElementDynamicOptionSetEnvironment.formsAppEnvironmentId ===
-                forms[0].formsAppEnvironmentId
-            ) {
-              return formElementDynamicOptionSetEnvironment.url
-            }
-            return url
-          },
-          null,
-        )
-        if (!url || !formElementOptionsSet.id) {
+        try {
+          const headers = await generateHeaders()
+          const response = await fetch(formElementOptionsSetUrl, {
+            headers,
+          })
+
+          if (!response.ok) {
+            const text = await response.text()
+            throw new Error(text)
+          }
+
+          const options = await response.json()
+          return {
+            ok: true,
+            formElementOptionsSetId,
+            options,
+          }
+        } catch (error) {
+          Sentry.captureException(error)
+          return {
+            ok: false,
+            formElementOptionsSetId,
+            error: new OneBlinkAppsError(
+              `Options could not be loaded. Please contact your administrator to rectify the issue.`,
+              {
+                title: 'Invalid Options Set Response',
+                httpStatusCode: error.status,
+                originalError: new OneBlinkAppsError(
+                  JSON.stringify(
+                    {
+                      formElementOptionsSetId,
+                      formElementOptionsSetName,
+                      formElementOptionsSetUrl,
+                      formsAppEnvironmentId,
+                    },
+                    null,
+                    2,
+                  ),
+                  {
+                    originalError: error,
+                  },
+                ),
+              },
+            ),
+          }
+        }
+      },
+    ),
+  )
+
+  return forms.reduce<Array<LoadFormElementDynamicOptionsResult>>(
+    (optionsForElementId, form) => {
+      forEachFormElementWithOptions(form.elements, (element) => {
+        // Elements with options already can be ignored
+        if (Array.isArray(element.options)) {
           return
         }
-        const formElementOptionsSetId = formElementOptionsSet.id
-        const options = await getRequest(url)
-        return {
-          formElementOptionsSetId,
-          options,
-        }
-      }),
-    )
 
-    return forms.reduce(
-      (
-        optionsForElementId: Array<{
-          elementId: string
-          options: FormTypes.ChoiceElementOption[]
-        }>,
-        form,
-      ) => {
-        forEachFormElementWithOptions(form.elements, (element) => {
-          // Elements with options already can be ignored
-          if (Array.isArray(element.options)) {
-            return
-          }
-
-          const result = results.find(
-            (result) =>
-              result &&
-              element.optionsType === 'DYNAMIC' &&
-              element.dynamicOptionSetId === result.formElementOptionsSetId,
-          )
-          if (!result) {
-            return
-          }
-
-          const choiceElementOptions = parseFormElementOptionsSet(
-            result.options,
-          )
-          const options = choiceElementOptions.map((option) => {
-            const optionsMap = (option.attributes || []).reduce(
-              (
-                memo: Record<
-                  string,
-                  {
-                    elementId: string
-                    optionIds: string[]
-                  }
-                >,
-                { label, value },
-              ) => {
-                if (
-                  !element.attributesMapping ||
-                  !Array.isArray(element.attributesMapping)
-                ) {
-                  return memo
-                }
-                const attribute = element.attributesMapping.find(
-                  (map) => map.attribute === label,
-                )
-                if (!attribute) return memo
-
-                const elementId = attribute.elementId
-                const predicateElement = findFormElement(
-                  form.elements,
-                  (el) => el.id === elementId,
-                )
-                if (
-                  !predicateElement ||
-                  (predicateElement.type !== 'select' &&
-                    predicateElement.type !== 'autocomplete' &&
-                    predicateElement.type !== 'checkboxes' &&
-                    predicateElement.type !== 'radio' &&
-                    predicateElement.type !== 'compliance')
-                ) {
-                  return memo
-                }
-
-                let predicateElementOptions = predicateElement.options
-                if (!predicateElementOptions) {
-                  const predicateElementResult = results.find(
-                    (result) =>
-                      result &&
-                      predicateElement.dynamicOptionSetId ===
-                        result.formElementOptionsSetId,
-                  )
-                  if (predicateElementResult) {
-                    // @ts-expect-error
-                    predicateElementOptions = predicateElementResult.options
-                  } else {
-                    predicateElementOptions = []
-                  }
-                }
-
-                const predicateOption = predicateElementOptions.find(
-                  (option) => option.value === value,
-                )
-                if (elementId && predicateOption) {
-                  memo[elementId] = memo[elementId] || {
-                    elementId,
-                    optionIds: [],
-                  }
-                  memo[elementId].optionIds.push(
-                    predicateOption.id || predicateOption.value,
-                  )
-                  element.conditionallyShowOptionsElementIds =
-                    element.conditionallyShowOptionsElementIds || []
-                  element.conditionallyShowOptionsElementIds.push(elementId)
-                }
-                return memo
-              },
-              {},
-            )
-
-            return {
-              ...option,
-              attributes: Object.keys(optionsMap).map((key) => optionsMap[key]),
-            }
-          })
+        const result = results.find(
+          (result) =>
+            element.optionsType === 'DYNAMIC' &&
+            element.dynamicOptionSetId === result.formElementOptionsSetId,
+        )
+        if (!result) {
           optionsForElementId.push({
-            options,
+            ok: false,
             elementId: element.id,
+            error: new OneBlinkAppsError(
+              `Options set does not exist. Please contact your administrator to rectify the issue.`,
+              {
+                title: 'Missing Options Set',
+                originalError: new Error(
+                  JSON.stringify(
+                    {
+                      formsAppEnvironmentId,
+                      element,
+                    },
+                    null,
+                    2,
+                  ),
+                ),
+              },
+            ),
           })
-        })
+          return
+        }
 
-        return optionsForElementId
-      },
-      [],
-    )
-  } catch (error) {
-    Sentry.captureException(error)
-    throw error
-  }
+        if (!result.ok) {
+          optionsForElementId.push({
+            ok: false,
+            elementId: element.id,
+            error: result.error,
+          })
+          return
+        }
+
+        const choiceElementOptions = parseFormElementOptionsSet(result.options)
+        const options = choiceElementOptions.map((option) => {
+          const optionsMap = (option.attributes || []).reduce(
+            (
+              memo: Record<
+                string,
+                {
+                  elementId: string
+                  optionIds: string[]
+                }
+              >,
+              { label, value },
+            ) => {
+              if (
+                !element.attributesMapping ||
+                !Array.isArray(element.attributesMapping)
+              ) {
+                return memo
+              }
+              const attribute = element.attributesMapping.find(
+                (map) => map.attribute === label,
+              )
+              if (!attribute) return memo
+
+              const elementId = attribute.elementId
+              const predicateElement = findFormElement(
+                form.elements,
+                (el) => el.id === elementId,
+              )
+              if (
+                !predicateElement ||
+                (predicateElement.type !== 'select' &&
+                  predicateElement.type !== 'autocomplete' &&
+                  predicateElement.type !== 'checkboxes' &&
+                  predicateElement.type !== 'radio' &&
+                  predicateElement.type !== 'compliance')
+              ) {
+                return memo
+              }
+
+              let predicateElementOptions = predicateElement.options
+              if (!predicateElementOptions) {
+                const predicateElementResult = results.find(
+                  (result) =>
+                    result &&
+                    predicateElement.dynamicOptionSetId ===
+                      result.formElementOptionsSetId,
+                )
+                if (predicateElementResult) {
+                  // @ts-expect-error
+                  predicateElementOptions = predicateElementResult.options
+                } else {
+                  predicateElementOptions = []
+                }
+              }
+
+              const predicateOption = predicateElementOptions.find(
+                (option) => option.value === value,
+              )
+              if (elementId && predicateOption) {
+                memo[elementId] = memo[elementId] || {
+                  elementId,
+                  optionIds: [],
+                }
+                memo[elementId].optionIds.push(
+                  predicateOption.id || predicateOption.value,
+                )
+                element.conditionallyShowOptionsElementIds =
+                  element.conditionallyShowOptionsElementIds || []
+                element.conditionallyShowOptionsElementIds.push(elementId)
+              }
+              return memo
+            },
+            {},
+          )
+
+          return {
+            ...option,
+            attributes: Object.keys(optionsMap).map((key) => optionsMap[key]),
+          }
+        })
+        optionsForElementId.push({
+          ok: true,
+          options,
+          elementId: element.id,
+        })
+      })
+
+      return optionsForElementId
+    },
+    [],
+  )
 }
 
 export function forEachFormElement(

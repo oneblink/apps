@@ -18,6 +18,7 @@ export default class OneBlinkAppsError extends Error {
     } = {},
   ) {
     super(message)
+    this.name = 'OneBlinkAppsError'
 
     let title = options.title
     if (!title) {

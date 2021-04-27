@@ -14,6 +14,7 @@ import { localisationService } from '@oneblink/apps'
 - [`formatTime()`](#formattime)
 - [`formatDatetime()`](#formatdatetime)
 - [`formatDatetimeLong()`](#formatdatetimelong)
+- [`formatNumber()`](#formatnumber)
 - [`formatCurrency()`](#formatcurrency)
 
 ### `locale`
@@ -71,6 +72,16 @@ Format a `Date` as a `string` that contains the date and time portions in a long
 ```js
 const date = new Date()
 const text = localisationService.formatDatetime(date)
+// Display text
+```
+
+### `formatNumber()`
+
+Format a `number` as a `string` represented as a readable number e.g. _123,321.123_
+
+```js
+const amount = 1234.4321
+const text = localisationService.formatCurrency(amount)
 // Display text
 ```
 

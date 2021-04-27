@@ -43,6 +43,10 @@ class LocalisationService {
     return `${this.formatDateLong(value)} ${this.formatTime(value)}`
   }
 
+  formatNumber(value: number): string {
+    return tenants.current.intlFormats.number.format(value)
+  }
+
   formatCurrency(value: number): string {
     return tenants.current.intlFormats.currency.format(value)
   }

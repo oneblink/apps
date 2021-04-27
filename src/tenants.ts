@@ -4,6 +4,7 @@ interface OneBlinkAppsTenant {
   apiOrigin: string
   vapidPublicKey: string
   intlFormats: {
+    number: Intl.NumberFormat
     currency: Intl.NumberFormat
     date: Intl.DateTimeFormat
     dateLong: Intl.DateTimeFormat
@@ -24,6 +25,9 @@ const getCurrency = (locale: Locale) => {
 
 const generateFormatters = (locale: Locale) => {
   return {
+    number: new Intl.NumberFormat(locale, {
+      style: 'decimal',
+    }),
     currency: new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: getCurrency(locale),

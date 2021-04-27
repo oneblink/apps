@@ -452,13 +452,15 @@ export async function getFormElementDynamicOptions(
     (optionsForElementId, form) => {
       forEachFormElementWithOptions(form.elements, (element) => {
         // Elements with options already can be ignored
-        if (Array.isArray(element.options)) {
+        if (
+          element.optionsType !== 'DYNAMIC' ||
+          Array.isArray(element.options)
+        ) {
           return
         }
 
         const result = results.find(
           (result) =>
-            element.optionsType === 'DYNAMIC' &&
             element.dynamicOptionSetId === result.formElementOptionsSetId,
         )
         if (!result) {

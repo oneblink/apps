@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - [`localisationService.formatNumber()`](./docs/localisation-service.md#formatnumber)
 
+## [0.8.0] - 2021-04-27
+
 ### Changed
 
 - **[BREAKING]** [`formService.getFormElementDynamicOptions()`](./docs/form-service.md#getformelementdynamicoptions)
@@ -21,6 +23,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [`formService.forEachFormElementWithOptions()`](./docs/form-service.md#foreachformelementwithoptions)
 - `Sentry` to allow for error capturing
 - Captured all caught errors in Sentry
+
+### Dependencies
+
+- depend upon [@sentry/browser](https://www.npmjs.com/package/@sentry/browser) [6.2.5](https://github.com/getsentry/sentry-javascript/releases/tag/6.2.5)
+
+- depend upon [@sentry/tracing](https://www.npmjs.com/package/@sentry/tracing) [6.2.5](https://github.com/getsentry/sentry-javascript/releases/tag/6.2.5)
 
 ## [0.7.2] - 2020-04-15
 

@@ -54,6 +54,26 @@ const getDefaultError = (error: HTTPError) => {
   )
 }
 
+const handleError = (error: HTTPError) => {
+  switch (error.status) {
+    case 400: {
+      return getBadRequestError(error)
+    }
+    case 401: {
+      return getUnauthenticatedError(error)
+    }
+    case 403: {
+      return getUnauthorisedError(error)
+    }
+    case 404: {
+      return getNotFoundError(error)
+    }
+    default: {
+      return getDefaultError(error)
+    }
+  }
+}
+
 export const generateSubmissionCredentials = async (
   submissionData: SubmissionTypes.FormSubmission,
 ): Promise<SubmissionTypes.S3UploadCredentials> => {
@@ -68,23 +88,7 @@ export const generateSubmissionCredentials = async (
     Sentry.captureException(error)
     // handle only credential errors here
     console.error('Error with getting credentials for submit:', error)
-    switch (error.status) {
-      case 400: {
-        throw getBadRequestError(error)
-      }
-      case 401: {
-        throw getUnauthenticatedError(error)
-      }
-      case 403: {
-        throw getUnauthorisedError(error)
-      }
-      case 404: {
-        throw getNotFoundError(error)
-      }
-      default: {
-        throw getDefaultError(error)
-      }
-    }
+    throw handleError(error)
   })
 }
 
@@ -137,22 +141,6 @@ export const generateUploadAttachmentCredentials = async (formId: number) => {
     Sentry.captureException(error)
     // handle only credential errors here
     console.error('Error getting credentials for upload:', error)
-    switch (error.status) {
-      case 400: {
-        throw getBadRequestError(error)
-      }
-      case 401: {
-        throw getUnauthenticatedError(error)
-      }
-      case 403: {
-        throw getUnauthorisedError(error)
-      }
-      case 404: {
-        throw getNotFoundError(error)
-      }
-      default: {
-        throw getDefaultError(error)
-      }
-    }
+    throw handleError(error)
   })
 }

@@ -2,11 +2,24 @@ import S3 from 'aws-sdk/clients/s3'
 import bigJSON from 'big-json'
 import s3UploadStream from 's3-upload-stream'
 import queryString from 'query-string'
-
+import { Readable } from 'stream'
 import { getUserProfile } from '../auth-service'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import { AWSTypes, FormTypes, SubmissionTypes } from '@oneblink/types'
 import Sentry from '../Sentry'
+
+const apiVersion = '2006-03-01'
+
+interface S3Configuration {
+  credentials: SubmissionTypes.S3UploadCredentials['credentials']
+  s3: SubmissionTypes.S3UploadCredentials['s3']
+}
+export interface UploadFileConfiguration {
+  stream: Readable
+  name?: string
+  type: string
+  isPrivate: boolean
+}
 
 declare global {
   interface Window {
@@ -64,17 +77,11 @@ const getDeviceInformation = () => {
   }
 }
 
-const uploadToS3 = <T>(
-  {
-    credentials,
-    s3: s3Meta,
-  }: {
-    credentials: SubmissionTypes.S3UploadCredentials['credentials']
-    s3: SubmissionTypes.S3UploadCredentials['s3']
-  },
-  json: T,
+export const uploadFileStreamToS3 = (
+  { credentials, s3: s3Meta }: S3Configuration,
+  data: UploadFileConfiguration,
   tags?: Record<string, string | undefined>,
-): Promise<unknown> => {
+) => {
   if (!credentials) {
     return Promise.reject(new Error('Credentials are required'))
   }
@@ -83,35 +90,33 @@ const uploadToS3 = <T>(
     return Promise.reject(new Error('s3 object details are required'))
   }
 
-  if (!json) {
-    return Promise.reject(new Error('no form data provided'))
+  if (!data) {
+    return Promise.reject(new Error('no file data provided'))
   }
 
   const s3StreamClient = s3UploadStream(
     new S3({
-      apiVersion: '2006-03-01',
+      apiVersion,
       region: s3Meta.region,
       accessKeyId: credentials.AccessKeyId,
       secretAccessKey: credentials.SecretAccessKey,
       sessionToken: credentials.SessionToken,
     }),
   )
-  const readStream = bigJSON.createStringifyStream({
-    body: json,
-  })
-
-  const objectMeta = {
-    ContentType: 'application/json',
+  const objectMeta: S3.PutObjectRequest = {
     ServerSideEncryption: 'AES256',
     Expires: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // Max 1 year
-    CacheControl: 'max-age=31536000', // Max 1 year(365 days)
+    CacheControl: 'max-age=31536000', // Max 1 year(365 days),
     Bucket: s3Meta.bucket,
     Key: s3Meta.key,
+    ContentDisposition: data.name
+      ? `attachment; filename="${data.name}"`
+      : undefined,
+    ContentType: data.type,
     Tagging: tags ? queryString.stringify(tags) : undefined,
+    ACL: data.isPrivate ? 'private' : 'public-read',
   }
-
   const upload = s3StreamClient.upload(objectMeta)
-
   upload.maxPartSize(5 * 1024 * 1024)
   upload.concurrentParts(10)
 
@@ -128,8 +133,7 @@ const uploadToS3 = <T>(
       resolve(details)
     })
   })
-
-  readStream.pipe(upload)
+  data.stream.pipe(upload)
 
   return promise.catch((err) => {
     Sentry.captureException(err)
@@ -150,10 +154,7 @@ const uploadToS3 = <T>(
 }
 
 const uploadFormSubmission = (
-  s3Configuration: {
-    credentials: SubmissionTypes.S3UploadCredentials['credentials']
-    s3: SubmissionTypes.S3UploadCredentials['s3']
-  },
+  s3Configuration: S3Configuration,
   formJson: {
     definition: FormTypes.Form
     submission: SubmissionTypes.FormSubmission['submission']
@@ -164,12 +165,20 @@ const uploadFormSubmission = (
   tags: Record<string, string | undefined>,
 ) => {
   console.log('Uploading submission')
-  return uploadToS3(
-    s3Configuration,
-    {
+
+  const readStream = bigJSON.createStringifyStream({
+    body: {
       ...formJson,
       user: getUserProfile(),
       device: getDeviceInformation(),
+    },
+  })
+  return uploadFileStreamToS3(
+    s3Configuration,
+    {
+      stream: readStream,
+      type: 'application/json',
+      isPrivate: true,
     },
     tags,
   )
@@ -188,7 +197,7 @@ const downloadPreFillData = <T>({
   }
 
   const s3 = new S3({
-    apiVersion: '2006-03-01',
+    apiVersion,
     region: s3Meta.region,
     accessKeyId: credentials.AccessKeyId,
     secretAccessKey: credentials.SecretAccessKey,

@@ -201,3 +201,24 @@ Force processing the pending queue. This must be called to process the pending q
 ```js
 await submissionService.processPendingQueue()
 ```
+
+### `uploadAttachment()`
+
+Upload a submission attachment. Attachment must be passed as a read stream. Will return the attachments unique identifier.
+
+```js
+import fs from 'fs'
+
+const readStream = fs.createReadStream('../path/to/file.jpg')
+
+const file = {
+  stream: readStream,
+  name: 'file.jpg',
+  type: 'image/jpeg',
+  isPrivate: true, // Whether the attachment will be able to be downloaded by other users
+}
+const attachmentId = await submissionService.uploadAttachment({
+  formId: 1,
+  file: file,
+})
+```

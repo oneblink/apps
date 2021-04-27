@@ -9,7 +9,10 @@ import {
   deletePendingQueueSubmission,
 } from './services/pending-queue'
 import { handlePaymentSubmissionEvent } from './payment-service'
-import { generateSubmissionCredentials } from './services/api/submissions'
+import {
+  generateSubmissionCredentials,
+  generateUploadAttachmentCredentials,
+} from './services/api/submissions'
 import { uploadFormSubmission } from './services/s3Submit'
 import { deleteDraft } from './draft-service'
 import { removePrefillFormData } from './prefill-service'
@@ -18,6 +21,10 @@ import recentlySubmittedJobsService from './services/recently-submitted-jobs'
 import { SubmissionEventTypes, SubmissionTypes } from '@oneblink/types'
 import { getUserToken } from './services/user-token'
 import Sentry from './Sentry'
+import {
+  UploadFileConfiguration,
+  uploadFileStreamToS3,
+} from './services/s3Submit'
 
 let _isProcessingPendingQueue = false
 
@@ -299,6 +306,18 @@ async function executePostSubmissionAction(
   }
 }
 
+async function uploadAttachment({
+  formId,
+  file,
+}: {
+  formId: number
+  file: Required<UploadFileConfiguration>
+}) {
+  const creds = await generateUploadAttachmentCredentials(formId)
+  await uploadFileStreamToS3(creds, file)
+  return creds.attachmentDataId
+}
+
 export {
   submit,
   executePostSubmissionAction,
@@ -307,4 +326,5 @@ export {
   deletePendingQueueSubmission,
   registerPendingQueueListener,
   processPendingQueue,
+  uploadAttachment,
 }

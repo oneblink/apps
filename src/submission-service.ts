@@ -318,7 +318,7 @@ async function uploadAttachment({
   await uploadAttachmentToS3(creds, file)
   return {
     s3: creds.s3,
-    url: `${tenants.current.apiOrigin}/submissions/${formId}/attachments/${creds.attachmentDataId}`,
+    url: `${tenants.current.apiOrigin}/${creds.s3.key}`,
     contentType: file.type,
     fileName: file.name,
     id: creds.attachmentDataId,

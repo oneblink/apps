@@ -9,8 +9,15 @@ import {
   deletePendingQueueSubmission,
 } from './services/pending-queue'
 import { handlePaymentSubmissionEvent } from './payment-service'
-import { generateSubmissionCredentials } from './services/api/submissions'
-import { uploadFormSubmission } from './services/s3Submit'
+import {
+  generateSubmissionCredentials,
+  generateUploadAttachmentCredentials,
+} from './services/api/submissions'
+import {
+  uploadFormSubmission,
+  UploadAttachmentConfiguration,
+  uploadAttachment as uploadAttachmentToS3,
+} from './services/s3Submit'
 import { deleteDraft } from './draft-service'
 import { removePrefillFormData } from './prefill-service'
 import replaceCustomValues from './services/replace-custom-values'
@@ -18,6 +25,7 @@ import recentlySubmittedJobsService from './services/recently-submitted-jobs'
 import { SubmissionEventTypes, SubmissionTypes } from '@oneblink/types'
 import { getUserToken } from './services/user-token'
 import Sentry from './Sentry'
+import tenants from './tenants'
 
 let _isProcessingPendingQueue = false
 
@@ -299,6 +307,25 @@ async function executePostSubmissionAction(
   }
 }
 
+async function uploadAttachment({
+  formId,
+  file,
+}: {
+  formId: number
+  file: UploadAttachmentConfiguration
+}) {
+  const creds = await generateUploadAttachmentCredentials(formId)
+  await uploadAttachmentToS3(creds, file)
+  return {
+    s3: creds.s3,
+    url: `${tenants.current.apiOrigin}/${creds.s3.key}`,
+    contentType: file.type,
+    fileName: file.name,
+    id: creds.attachmentDataId,
+    isPrivate: file.isPrivate,
+  }
+}
+
 export {
   submit,
   executePostSubmissionAction,
@@ -307,4 +334,5 @@ export {
   deletePendingQueueSubmission,
   registerPendingQueueListener,
   processPendingQueue,
+  uploadAttachment,
 }

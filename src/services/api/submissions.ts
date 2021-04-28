@@ -1,8 +1,78 @@
 import { SubmissionTypes, AWSTypes } from '@oneblink/types'
-import { postRequest } from '../fetch'
+import { HTTPError, postRequest } from '../fetch'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 import Sentry from '../../Sentry'
+
+const getBadRequestError = (error: HTTPError) => {
+  return new OneBlinkAppsError(
+    'The data you are attempting to submit could not be validated. Please ensure all validation has passed and try again. If the problem persists, please contact your administrator.',
+    {
+      title: 'Invalid Submission',
+      originalError: error,
+      httpStatusCode: error.status,
+    },
+  )
+}
+const getUnauthenticatedError = (error: HTTPError) => {
+  return new OneBlinkAppsError(
+    'The form you are attempting to complete requires authentication. Please login and try again.',
+    {
+      requiresLogin: true,
+      originalError: error,
+      httpStatusCode: error.status,
+    },
+  )
+}
+const getUnauthorisedError = (error: HTTPError) => {
+  return new OneBlinkAppsError(
+    'You do not have access to complete this form. Please contact your administrator to gain the correct level of access.',
+    {
+      requiresAccessRequest: true,
+      originalError: error,
+      httpStatusCode: error.status,
+    },
+  )
+}
+const getNotFoundError = (error: HTTPError) => {
+  return new OneBlinkAppsError(
+    'We could not find the form you are looking for. Please contact your administrator to ensure your form configuration has been completed successfully.',
+    {
+      title: 'Unknown Form',
+      originalError: error,
+      httpStatusCode: error.status,
+    },
+  )
+}
+const getDefaultError = (error: HTTPError) => {
+  return new OneBlinkAppsError(
+    'We could not find the form you are looking for. Please contact your administrator to ensure your form configuration has been completed successfully.',
+    {
+      originalError: error,
+      httpStatusCode: error.status,
+    },
+  )
+}
+
+const handleError = (error: HTTPError) => {
+  switch (error.status) {
+    case 400: {
+      return getBadRequestError(error)
+    }
+    case 401: {
+      return getUnauthenticatedError(error)
+    }
+    case 403: {
+      return getUnauthorisedError(error)
+    }
+    case 404: {
+      return getNotFoundError(error)
+    }
+    default: {
+      return getDefaultError(error)
+    }
+  }
+}
 
 export const generateSubmissionCredentials = async (
   submissionData: SubmissionTypes.FormSubmission,
@@ -18,57 +88,7 @@ export const generateSubmissionCredentials = async (
     Sentry.captureException(error)
     // handle only credential errors here
     console.error('Error with getting credentials for submit:', error)
-    switch (error.status) {
-      case 400: {
-        throw new OneBlinkAppsError(
-          'The data you are attempting to submit could not be validated. Please ensure all validation has passed and try again. If the problem persists, please contact your administrator.',
-          {
-            title: 'Invalid Submission',
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      case 401: {
-        throw new OneBlinkAppsError(
-          'The form you are attempting to complete requires authentication. Please login and try again.',
-          {
-            requiresLogin: true,
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      case 403: {
-        throw new OneBlinkAppsError(
-          'You do not have access to complete this form. Please contact your administrator to gain the correct level of access.',
-          {
-            requiresAccessRequest: true,
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      case 404: {
-        throw new OneBlinkAppsError(
-          'We could not find the form you are looking for. Please contact your administrator to ensure your form configuration has been completed successfully.',
-          {
-            title: 'Unknown Form',
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      default: {
-        throw new OneBlinkAppsError(
-          'We could not find the form you are looking for. Please contact your administrator to ensure your form configuration has been completed successfully.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-    }
+    throw handleError(error)
   })
 }
 
@@ -83,34 +103,13 @@ export const generateRetrieveApprovalSubmissionCredentials = async (
     console.error('Error with getting credentials for retrieval:', error)
     switch (error.status) {
       case 400: {
-        throw new OneBlinkAppsError(
-          'The data you are attempting to submit could not be validated. Please ensure all validation has passed and try again. If the problem persists, please contact your administrator.',
-          {
-            title: 'Invalid Submission',
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
+        throw getBadRequestError(error)
       }
       case 401: {
-        throw new OneBlinkAppsError(
-          'The form you are attempting to complete requires authentication. Please login and try again.',
-          {
-            requiresLogin: true,
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
+        throw getUnauthenticatedError(error)
       }
       case 403: {
-        throw new OneBlinkAppsError(
-          'You do not have access to complete this form. Please contact your administrator to gain the correct level of access.',
-          {
-            requiresAccessRequest: true,
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
+        throw getUnauthorisedError(error)
       }
       case 404: {
         throw new OneBlinkAppsError(
@@ -132,5 +131,16 @@ export const generateRetrieveApprovalSubmissionCredentials = async (
         )
       }
     }
+  })
+}
+
+export const generateUploadAttachmentCredentials = async (formId: number) => {
+  return postRequest<AWSTypes.FormAttachmentS3Credentials>(
+    `${tenants.current.apiOrigin}/forms/${formId}/upload-attachment-credentials`,
+  ).catch((error) => {
+    Sentry.captureException(error)
+    // handle only credential errors here
+    console.error('Error getting credentials for upload:', error)
+    throw handleError(error)
   })
 }

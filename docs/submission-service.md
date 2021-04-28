@@ -204,7 +204,7 @@ await submissionService.processPendingQueue()
 
 ### `uploadAttachment()`
 
-Upload a submission attachment. Attachment must be passed as a read stream. Will return the attachments unique identifier.
+Upload a submission attachment. Attachment must be passed as a buffer. Will return the attachment's unique identifier.
 
 ```js
 const buffer = Buffer.from('my file data')

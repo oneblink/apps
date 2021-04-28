@@ -207,7 +207,7 @@ const uploadAttachment = async (
   s3Configuration: S3Configuration,
   fileConfiguration: UploadAttachmentConfiguration,
 ) => {
-  await prepareFileAndUploadToS3(
+  return await prepareFileAndUploadToS3(
     s3Configuration,
     fileConfiguration,
     (s3, objectMeta) =>

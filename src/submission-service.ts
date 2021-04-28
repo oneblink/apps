@@ -314,8 +314,14 @@ async function uploadAttachment({
   file: UploadAttachmentConfiguration
 }) {
   const creds = await generateUploadAttachmentCredentials(formId)
-  await uploadAttachmentToS3(creds, file)
-  return creds.attachmentDataId
+  const result = await uploadAttachmentToS3(creds, file)
+  return {
+    s3: creds.s3,
+    url: result.Location,
+    contentType: file.type,
+    fileName: file.name,
+    id: creds.attachmentDataId,
+  }
 }
 
 export {

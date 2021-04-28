@@ -25,6 +25,7 @@ import recentlySubmittedJobsService from './services/recently-submitted-jobs'
 import { SubmissionEventTypes, SubmissionTypes } from '@oneblink/types'
 import { getUserToken } from './services/user-token'
 import Sentry from './Sentry'
+import tenants from './tenants'
 
 let _isProcessingPendingQueue = false
 
@@ -314,13 +315,14 @@ async function uploadAttachment({
   file: UploadAttachmentConfiguration
 }) {
   const creds = await generateUploadAttachmentCredentials(formId)
-  const result = await uploadAttachmentToS3(creds, file)
+  await uploadAttachmentToS3(creds, file)
   return {
     s3: creds.s3,
-    url: result.Location,
+    url: `${tenants.current.apiOrigin}/submissions/${formId}/attachments/${creds.attachmentDataId}`,
     contentType: file.type,
     fileName: file.name,
     id: creds.attachmentDataId,
+    isPrivate: file.isPrivate,
   }
 }
 

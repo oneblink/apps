@@ -204,7 +204,7 @@ await submissionService.processPendingQueue()
 
 ### `uploadAttachment()`
 
-Upload a submission attachment. Attachment must be passed as a buffer. Will return the attachment's unique identifier.
+Upload a submission attachment. Attachment must be passed as a buffer. Will return data required form accessing the attachment.
 
 ```js
 const buffer = Buffer.from('my file data')
@@ -214,7 +214,18 @@ const file = {
   type: 'image/jpeg',
   isPrivate: true, // Whether the attachment will be able to be downloaded by other users
 }
-const attachmentId = await submissionService.uploadAttachment({
+const {
+  s3: {
+    key, // string
+    bucket, // string
+    region, // string
+  },
+  url, // string
+  contentType, // string
+  fileName, // string
+  id, //string
+  isPrivate, // boolean
+} = await submissionService.uploadAttachment({
   formId: 1,
   file: file,
 })

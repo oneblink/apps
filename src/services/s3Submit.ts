@@ -103,7 +103,7 @@ const getObjectMeta = (
   Key: s3Meta.key,
   ContentDisposition: data.name
     ? `attachment; filename="${data.name}"`
-    : undefined,
+    : 'attachment',
   ContentType: data.type,
   Tagging: data.tags ? queryString.stringify(data.tags) : undefined,
   ACL: data.isPrivate ? 'private' : 'public-read',

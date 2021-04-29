@@ -204,12 +204,14 @@ await submissionService.processPendingQueue()
 
 ### `uploadAttachment()`
 
-Upload a submission attachment. Attachment must be passed as a buffer. Will return data required form accessing the attachment.
+Upload a submission attachment. Attachment can be passed as a `Blob`, `Uint8Array` or `string` (base64). Will return data required form accessing the attachment.
 
 ```js
-const buffer = Buffer.from('my file data')
+const blob = new Blob(['a string of data'], {
+  type: 'text/plain',
+})
 const file = {
-  data: buffer,
+  data: blob,
   name: 'file.jpg',
   type: 'image/jpeg',
   isPrivate: true, // Whether the attachment will be able to be downloaded by other users

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - [`localisationService.formatNumber()`](./docs/localisation-service.md#formatnumber)
+- [`submissionService.uploadAttachment()`](./docs/submission-service.md#uploadattachment)
 
 ## [0.8.0] - 2021-04-27
 

@@ -40,7 +40,7 @@ type UploadFileConfigurationWithTags = UploadFileConfiguration & {
 }
 
 export type UploadAttachmentConfiguration = Required<UploadFileConfiguration> & {
-  data: Buffer
+  data: Uint8Array | Blob | string
 }
 
 const getDeviceInformation = () => {

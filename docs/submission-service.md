@@ -15,6 +15,7 @@ import { submissionService } from '@oneblink/apps'
 - [`deletePendingQueueSubmission()`](#deletependingqueuesubmission)
 - [`registerPendingQueueListener()`](#registerpendingqueuelistener)
 - [`processPendingQueue()`](#processpendingqueue)
+- [`uploadAttachment()`](#uploadattachment)
 
 ### Types
 

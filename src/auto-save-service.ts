@@ -15,8 +15,7 @@ export async function getAutoSaveData<T>(
   return utilsService.getLocalForageItem(key)
 }
 
-// eslint-disable-next-line
-export async function upsertAutoSaveData<T extends object>(
+export async function upsertAutoSaveData<T extends Record<string, unknown>>(
   formId: number,
   autoSaveKey: string | MiscTypes.NoU,
   model: T,

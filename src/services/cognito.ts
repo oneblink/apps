@@ -148,22 +148,20 @@ function getUserProfile(): MiscTypes.UserProfile | null {
 
   const userProfile = jwtDecode(idToken) as {
     sub: string
-    email: string
-    given_name: string | MiscTypes.NoU
-    family_name: string | MiscTypes.NoU
-    name: string | MiscTypes.NoU
-    preferred_username: string | MiscTypes.NoU
-    picture: string | MiscTypes.NoU
-    'custom:role': string | MiscTypes.NoU
-    'custom:supervisor_name': string | MiscTypes.NoU
-    'custom:supervisor_email': string | MiscTypes.NoU
-    'custom:supervisor_user_id': string | MiscTypes.NoU
-    identities:
-      | MiscTypes.NoU
-      | Array<{
-          providerType: string
-          userId: string
-        }>
+    email?: string
+    given_name?: string
+    family_name?: string
+    name?: string
+    preferred_username?: string
+    picture?: string
+    'custom:role'?: string
+    'custom:supervisor_name'?: string
+    'custom:supervisor_email'?: string
+    'custom:supervisor_user_id'?: string
+    identities?: Array<{
+      providerType: string
+      userId: string
+    }>
   }
 
   const user: MiscTypes.UserProfile = {
@@ -205,10 +203,10 @@ function getUserProfile(): MiscTypes.UserProfile | null {
   return user
 }
 
-export function getUsername(): string | null {
+export function getUsername(): string | undefined {
   const profile = getUserProfile()
   if (!profile) {
-    return null
+    return undefined
   }
 
   return profile.username

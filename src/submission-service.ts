@@ -9,15 +9,9 @@ import {
   deletePendingQueueSubmission,
 } from './services/pending-queue'
 import { handlePaymentSubmissionEvent } from './payment-service'
-import {
-  generateSubmissionCredentials,
-  generateUploadAttachmentCredentials,
-} from './services/api/submissions'
-import {
-  uploadFormSubmission,
-  UploadAttachmentConfiguration,
-  uploadAttachment as uploadAttachmentToS3,
-} from './services/s3Submit'
+import { generateSubmissionCredentials } from './services/api/submissions'
+import { uploadFormSubmission } from './services/s3Submit'
+import uploadAttachment from './services/uploadAttachment'
 import { deleteDraft } from './draft-service'
 import { removePrefillFormData } from './prefill-service'
 import replaceCustomValues from './services/replace-custom-values'
@@ -25,7 +19,7 @@ import recentlySubmittedJobsService from './services/recently-submitted-jobs'
 import { SubmissionEventTypes, SubmissionTypes } from '@oneblink/types'
 import { getUserToken } from './services/user-token'
 import Sentry from './Sentry'
-import tenants from './tenants'
+import prepareSubmissionData from './services/prepareSubmissionData'
 
 let _isProcessingPendingQueue = false
 
@@ -36,22 +30,24 @@ async function processPendingQueue(): Promise<void> {
   _isProcessingPendingQueue = true
 
   console.log('Checking pending queue for submissions.')
-  const submissions = await getPendingQueueSubmissions()
+  const pendingQueueSubmissions = await getPendingQueueSubmissions()
 
-  console.log(`Found ${submissions.length} submission(s) in the pending queue.`)
-  for (const submission of submissions) {
+  console.log(
+    `Found ${pendingQueueSubmissions.length} submission(s) in the pending queue.`,
+  )
+  for (const pendingQueueSubmission of pendingQueueSubmissions) {
     if (isOffline()) {
       console.log(
         'Application is offline, leaving submission in the pending queue:',
-        submission,
+        pendingQueueSubmission,
       )
       continue
     }
 
-    if (submission.definition.isAuthenticated && !isLoggedIn()) {
+    if (pendingQueueSubmission.definition.isAuthenticated && !isLoggedIn()) {
       console.log(
         'Authentication is required for this form but the user does not have a valid token, leaving submission in the pending queue:',
-        submission,
+        pendingQueueSubmission,
       )
       continue
     }
@@ -59,48 +55,51 @@ async function processPendingQueue(): Promise<void> {
     try {
       console.log(
         'Attempting to process submission from pending queue:',
-        submission,
+        pendingQueueSubmission,
       )
       // Get Submission again to get ensure we are submitting all the data
       const existingSubmission = await getPendingQueueSubmission(
-        submission.pendingTimestamp,
+        pendingQueueSubmission.pendingTimestamp,
       )
       if (!existingSubmission) {
         console.log(
           'Skipping submission as it has already been processed',
-          submission,
+          pendingQueueSubmission,
         )
         continue
       }
 
-      submission.isSubmitting = true
-      submission.error = undefined
+      pendingQueueSubmission.isSubmitting = true
+      pendingQueueSubmission.error = undefined
       await updatePendingQueueSubmission(
-        submission.pendingTimestamp,
-        submission,
+        pendingQueueSubmission.pendingTimestamp,
+        pendingQueueSubmission,
       )
 
-      await submit({ formSubmission: existingSubmission })
+      const submission = await prepareSubmissionData(existingSubmission)
+      await submit({ formSubmission: { ...existingSubmission, submission } })
 
-      await deletePendingQueueSubmission(submission.pendingTimestamp)
+      await deletePendingQueueSubmission(
+        pendingQueueSubmission.pendingTimestamp,
+      )
 
       console.log(
         'Successfully processed submission from the pending queue',
-        submission,
+        pendingQueueSubmission,
       )
     } catch (error) {
       Sentry.captureException(error)
       console.error('Error processing submission from the pending queue', error)
-      submission.isSubmitting = false
+      pendingQueueSubmission.isSubmitting = false
       if (error.message) {
-        submission.error = error.message
+        pendingQueueSubmission.error = error.message
       } else {
-        submission.error =
+        pendingQueueSubmission.error =
           'An unknown error has occurred, which has prevented your Form from submitting. Please try again, or contact your Administrator if the problem persists.'
       }
       await updatePendingQueueSubmission(
-        submission.pendingTimestamp,
-        submission,
+        pendingQueueSubmission.pendingTimestamp,
+        pendingQueueSubmission,
       )
     }
   }
@@ -304,25 +303,6 @@ async function executePostSubmissionAction(
       // if there's no post submission action for some reason, use prev. logic...
       return cancelForm()
     }
-  }
-}
-
-async function uploadAttachment({
-  formId,
-  file,
-}: {
-  formId: number
-  file: UploadAttachmentConfiguration
-}) {
-  const creds = await generateUploadAttachmentCredentials(formId)
-  await uploadAttachmentToS3(creds, file)
-  return {
-    s3: creds.s3,
-    url: `${tenants.current.apiOrigin}/${creds.s3.key}`,
-    contentType: file.type,
-    fileName: file.name,
-    id: creds.attachmentDataId,
-    isPrivate: file.isPrivate,
   }
 }
 

@@ -47,10 +47,10 @@ export function init({ oAuthClientId }: { oAuthClientId: string }) {
   })
 }
 
-export function getUserFriendlyName(): string | null {
+export function getUserFriendlyName(): string | undefined {
   const profile = getUserProfile()
   if (!profile) {
-    return null
+    return
   }
 
   if (profile.fullName) {

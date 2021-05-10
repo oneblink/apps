@@ -6,6 +6,7 @@ import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 import { getUserToken } from '../user-token'
 import Sentry from '../../Sentry'
+import prepareSubmissionData from '../prepareSubmissionData'
 
 const uploadDraftData = async (
   draft: SubmissionTypes.FormsAppDraft,
@@ -15,6 +16,7 @@ const uploadDraftData = async (
   console.log('Attempting to get Credentials to upload draft data', url)
 
   try {
+    const submission = await prepareSubmissionData(draftSubmission)
     const data = await postRequest<SubmissionTypes.S3DraftUploadCredentials>(
       url,
     )
@@ -24,7 +26,7 @@ const uploadDraftData = async (
       data,
       {
         definition: draftSubmission.definition,
-        submission: draftSubmission.submission,
+        submission,
         submissionTimestamp: data.submissionTimestamp,
         keyId: draftSubmission.keyId,
         formsAppId: draftSubmission.formsAppId,

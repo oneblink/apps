@@ -30,8 +30,8 @@ interface S3Configuration {
   s3: SubmissionTypes.S3UploadCredentials['s3']
 }
 interface UploadFileConfiguration {
-  name?: string
-  type: string
+  fileName?: string
+  contentType: string
   isPrivate: boolean
 }
 
@@ -40,7 +40,7 @@ type UploadFileConfigurationWithTags = UploadFileConfiguration & {
 }
 
 export type UploadAttachmentConfiguration = Required<UploadFileConfiguration> & {
-  data: Uint8Array | Blob | string
+  data: S3.PutObjectRequest['Body']
 }
 
 const getDeviceInformation = () => {
@@ -101,50 +101,54 @@ const getObjectMeta = (
   CacheControl: 'max-age=31536000', // Max 1 year(365 days),
   Bucket: s3Meta.bucket,
   Key: s3Meta.key,
-  ContentDisposition: data.name
-    ? `attachment; filename="${data.name}"`
-    : 'attachment',
-  ContentType: data.type,
+  ContentDisposition: data.fileName
+    ? `attachment; filename="${data.fileName}"`
+    : undefined,
+  ContentType: data.contentType,
   Tagging: data.tags ? queryString.stringify(data.tags) : undefined,
   ACL: data.isPrivate ? 'private' : 'public-read',
 })
 
-export const prepareFileAndUploadToS3 = <T>(
+const prepareFileAndUploadToS3 = async (
   { credentials, s3: s3Meta }: S3Configuration,
   fileConfiguration: UploadFileConfigurationWithTags,
-  request: (s3: S3, objectMeta: S3.PutObjectRequest) => Promise<T>,
+  request: (s3: S3, objectMeta: S3.PutObjectRequest) => Promise<void>,
 ) => {
   if (!credentials) {
-    return Promise.reject(new Error('Credentials are required'))
+    throw new Error('Credentials are required')
   }
 
   if (!s3Meta) {
-    return Promise.reject(new Error('s3 object details are required'))
+    throw new Error('s3 object details are required')
   }
 
   if (!fileConfiguration) {
-    return Promise.reject(new Error('no file data provided'))
+    throw new Error('no file data provided')
   }
 
   const s3 = getS3Instance({ credentials, s3: s3Meta })
   const objectMeta = getObjectMeta(s3Meta, fileConfiguration)
 
-  return request(s3, objectMeta).catch((err) => {
-    Sentry.captureException(err)
-    // handle storing in s3 errors here
-    if (/Network Failure/.test(err.message)) {
-      console.warn('Network error uploading to S3:', err)
-      throw new OneBlinkAppsError(
-        'There was an error saving the file. Please try again. If the problem persists, contact your administrator',
-        {
-          title: 'Connectivity Issues',
-          originalError: err,
-        },
-      )
+  try {
+    await request(s3, objectMeta)
+  } catch (err) {
+    if (err.name !== 'RequestAbortedError') {
+      Sentry.captureException(err)
+      // handle storing in s3 errors here
+      if (/Network Failure/.test(err.message)) {
+        console.warn('Network error uploading to S3:', err)
+        throw new OneBlinkAppsError(
+          'There was an error saving the file. Please try again. If the problem persists, contact your administrator',
+          {
+            title: 'Connectivity Issues',
+            originalError: err,
+          },
+        )
+      }
     }
 
     throw err
-  })
+  }
 }
 
 const uploadFormSubmission = (
@@ -160,7 +164,10 @@ const uploadFormSubmission = (
 ) => {
   console.log('Uploading submission')
 
-  const streamSubmissionUpload = (s3: S3, objectMeta: S3.PutObjectRequest) => {
+  const streamSubmissionUpload = async (
+    s3: S3,
+    objectMeta: S3.PutObjectRequest,
+  ) => {
     const json = {
       body: {
         ...formJson,
@@ -189,13 +196,13 @@ const uploadFormSubmission = (
       })
     })
     readStream.pipe(upload)
-    return promise
+    await promise
   }
 
   return prepareFileAndUploadToS3(
     s3Configuration,
     {
-      type: 'application/json',
+      contentType: 'application/json',
       isPrivate: true,
       tags,
     },
@@ -206,12 +213,23 @@ const uploadFormSubmission = (
 const uploadAttachment = async (
   s3Configuration: S3Configuration,
   fileConfiguration: UploadAttachmentConfiguration,
+  abortSignal: AbortSignal | undefined,
 ) => {
   return await prepareFileAndUploadToS3(
     s3Configuration,
     fileConfiguration,
-    (s3, objectMeta) =>
-      s3.upload({ ...objectMeta, Body: fileConfiguration.data }).promise(),
+    async (s3, objectMeta) => {
+      const managedUpload = s3.upload({
+        ...objectMeta,
+        Body: fileConfiguration.data,
+      })
+
+      abortSignal?.addEventListener('abort', () => {
+        managedUpload.abort()
+      })
+
+      await managedUpload.promise()
+    },
   )
 }
 

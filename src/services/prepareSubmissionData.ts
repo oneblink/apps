@@ -26,12 +26,10 @@ async function maybeUploadAttachment(
     )
       return await uploadAttachment({
         formId,
-        file: {
-          name: record.fileName,
-          type: record.data.type,
-          isPrivate: formElement.storageType === 'private',
-          data: record.data,
-        },
+        fileName: record.fileName,
+        contentType: record.data.type,
+        isPrivate: formElement.storageType === 'private',
+        data: record.data,
       })
   }
   return value

@@ -134,10 +134,20 @@ export const generateRetrieveApprovalSubmissionCredentials = async (
   })
 }
 
-export const generateUploadAttachmentCredentials = async (formId: number) => {
+export const generateUploadAttachmentCredentials = async (
+  formId: number,
+  abortSignal: AbortSignal | undefined,
+) => {
   return postRequest<AWSTypes.FormAttachmentS3Credentials>(
     `${tenants.current.apiOrigin}/forms/${formId}/upload-attachment-credentials`,
+    undefined,
+    abortSignal,
   ).catch((error) => {
+    // Cancelling will throw an error.
+    if (error.name === 'AbortError') {
+      throw error
+    }
+
     Sentry.captureException(error)
     // handle only credential errors here
     console.error('Error getting credentials for upload:', error)

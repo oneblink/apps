@@ -5,23 +5,38 @@ import {
 } from './s3Submit'
 import tenants from '../tenants'
 
-export default async function uploadAttachment({
-  formId,
-  file,
-}: {
-  formId: number
-  file: UploadAttachmentConfiguration
-}) {
+export default async function uploadAttachment(
+  {
+    formId,
+    fileName,
+    contentType,
+    isPrivate,
+    data,
+  }: UploadAttachmentConfiguration & {
+    formId: number
+  },
+  abortSignal?: AbortSignal,
+) {
   const formAttachmentS3Credentials = await generateUploadAttachmentCredentials(
     formId,
+    abortSignal,
   )
-  await uploadAttachmentToS3(formAttachmentS3Credentials, file)
+  await uploadAttachmentToS3(
+    formAttachmentS3Credentials,
+    {
+      fileName,
+      contentType,
+      isPrivate,
+      data,
+    },
+    abortSignal,
+  )
   return {
     s3: formAttachmentS3Credentials.s3,
     url: `${tenants.current.apiOrigin}/${formAttachmentS3Credentials.s3.key}`,
-    contentType: file.type,
-    fileName: file.name,
+    contentType,
+    fileName,
     id: formAttachmentS3Credentials.attachmentDataId,
-    isPrivate: file.isPrivate,
+    isPrivate,
   }
 }

@@ -13,7 +13,18 @@ function getLocalForageKeys(keyPrefix: string): Promise<string[]> {
     .then((keys) => keys.filter((key) => key.startsWith(keyPrefix)))
 }
 
-function setValuesOnData<T>(items: Array<UnknownObject | undefined>, data?: T) {
+function setValuesOnData<T>(
+  key: string,
+  items: Array<
+    | {
+        key: string
+        value: unknown
+      }
+    | undefined
+    | null
+  >,
+  data?: T,
+) {
   if (!data) {
     return null
   }
@@ -21,14 +32,15 @@ function setValuesOnData<T>(items: Array<UnknownObject | undefined>, data?: T) {
     // @ts-expect-error
     const value = data[property]
 
-    if (typeof value === 'string') {
+    if (typeof value === 'string' && value.startsWith(key)) {
       const item = items.find((item) => item && item.key === value)
-      if (item) {
-        // @ts-expect-error
-        data[property] = item.value
-      }
+      // If we did not find the item that is suppose to be referenced
+      // by the `key` property, we will remove the data as something has
+      // gone wrong and the data has been lost to the IndexDB gods...
+      // @ts-expect-error
+      data[property] = item?.value
     } else if (value !== null && typeof value === 'object') {
-      setValuesOnData(items, value)
+      setValuesOnData(key, items, value)
     }
   })
   return data
@@ -39,39 +51,46 @@ async function getLocalForageItem<T>(key: string): Promise<T | null> {
 
   const items = []
   for (const localForageKey of localForageKeys) {
-    // @ts-expect-error
-    const item: UnknownObject | undefined = await localForage.getItem(
-      localForageKey,
-    )
+    const item = await localForage.getItem<{
+      key: string
+      value: unknown
+    }>(localForageKey)
     items.push(item)
   }
   const rootItem = items.find((item) => item && item.key === key)
   if (!rootItem || !rootItem.value) {
     return null
   }
-  return setValuesOnData(items, rootItem.value as T)
+  return setValuesOnData(key, items, rootItem.value as T)
 }
 
-function generateKeyValuesReducer<T>(
+function generateKeyValuesReducer(
   key: string,
-  data: T,
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  data: object,
   initialKeyValues: {
     keys: string[]
     items: Array<{
       key: string
-      value: T
+      value: unknown
     }>
   },
 ) {
+  if (data === null) {
+    return
+  }
   Object.keys(data).reduce((keyValues, property) => {
     // @ts-expect-error
     const value = data[property]
-    if (typeof value === 'string' && value.length > 25000) {
+
+    if (
+      (typeof value === 'string' && value.length > 25000) ||
+      value instanceof Blob
+    ) {
       const newKey = `${key}_${property}`
       keyValues.keys.push(newKey)
       keyValues.items.push({
         key: newKey,
-        // @ts-expect-error
         value,
       })
       // @ts-expect-error
@@ -83,7 +102,7 @@ function generateKeyValuesReducer<T>(
   }, initialKeyValues)
 }
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/ban-types
 async function setLocalForageItem<T extends object>(
   key: string,
   originalData: T,

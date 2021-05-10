@@ -303,28 +303,30 @@ export default class AWSCognitoClient {
     localStorage.removeItem(this.PKCE_CODE_VERIFIER)
 
     // Exchange the authorization code for an access token
-    const result: UnknownObject = await new Promise((resolve, reject) => {
-      sendPostRequest(
-        `https://${loginDomain}/oauth2/token`,
-        {
-          grant_type: 'authorization_code',
-          code,
-          client_id: this.clientId,
-          redirect_uri: redirectUri,
-          code_verifier,
-        },
-        resolve,
-        (error) => {
-          reject(
-            new Error(
-              error.error_description ||
-                error.message ||
-                'An unknown error has occurred while processing authentication code',
-            ),
-          )
-        },
-      )
-    })
+    const result: Record<string, unknown> = await new Promise(
+      (resolve, reject) => {
+        sendPostRequest(
+          `https://${loginDomain}/oauth2/token`,
+          {
+            grant_type: 'authorization_code',
+            code,
+            client_id: this.clientId,
+            redirect_uri: redirectUri,
+            code_verifier,
+          },
+          resolve,
+          (error) => {
+            reject(
+              new Error(
+                error.error_description ||
+                  error.message ||
+                  'An unknown error has occurred while processing authentication code',
+              ),
+            )
+          },
+        )
+      },
+    )
 
     this._storeAuthenticationResult({
       AccessToken: result.access_token as string,
@@ -416,8 +418,8 @@ export default class AWSCognitoClient {
 // Make a POST request and parse the response as JSON
 function sendPostRequest(
   url: string,
-  params: UnknownObject,
-  success: (value: UnknownObject) => void,
+  params: Record<string, unknown>,
+  success: (value: Record<string, unknown>) => void,
   error: (err: { message?: string; error_description?: string }) => void,
 ) {
   const request = new XMLHttpRequest()

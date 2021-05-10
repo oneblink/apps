@@ -4,7 +4,7 @@ export function parseQueryString(string: string) {
     return {}
   }
   const segments = string.split('&').map((s) => s.split('='))
-  const queryString: UnknownObject = {}
+  const queryString: Record<string, unknown> = {}
   segments.forEach((s) => (queryString[s[0]] = s[1]))
   return queryString
 }

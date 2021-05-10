@@ -17,7 +17,7 @@ import {
 const KEY = 'PAYMENT_SUBMISSION_RESULT'
 
 function verifyCPPayPayment(
-  query: UnknownObject,
+  query: Record<string, unknown>,
   submissionResult: SubmissionTypes.FormSubmissionResult,
 ) {
   return Promise.resolve()
@@ -72,7 +72,7 @@ function verifyCPPayPayment(
 }
 
 function verifyBpointPayment(
-  query: UnknownObject,
+  query: Record<string, unknown>,
   submissionResult: SubmissionTypes.FormSubmissionResult,
 ) {
   return Promise.resolve()
@@ -118,7 +118,7 @@ function verifyBpointPayment(
 }
 
 export async function handlePaymentQuerystring(
-  query: UnknownObject,
+  query: Record<string, unknown>,
 ): Promise<{
   transaction: {
     isSuccess: boolean

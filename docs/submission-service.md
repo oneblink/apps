@@ -212,11 +212,13 @@ const blob = new Blob(['a string of data'], {
   type: 'text/plain',
 })
 const file = {
+  formId: 1,
   data: blob,
-  name: 'file.jpg',
-  type: 'image/jpeg',
+  fileName: 'file.jpg',
+  contentType: 'image/jpeg',
   isPrivate: true, // Whether the attachment will be able to be downloaded by other users
 }
+const abortController = new AbortController()
 const {
   s3: {
     key, // string
@@ -228,8 +230,5 @@ const {
   fileName, // string
   id, //string
   isPrivate, // boolean
-} = await submissionService.uploadAttachment({
-  formId: 1,
-  file: file,
-})
+} = await submissionService.uploadAttachment(file, abortController.signal)
 ```

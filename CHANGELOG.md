@@ -7,10 +7,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.8.1] - 2021-05-13
+
 ### Added
 
 - [`localisationService.formatNumber()`](./docs/localisation-service.md#formatnumber)
 - [`submissionService.uploadAttachment()`](./docs/submission-service.md#uploadattachment)
+
+### Dependencies
+
+- update [@sentry/browser](https://www.npmjs.com/package/@sentry/browser) to [6.3.5](https://github.com/getsentry/sentry-javascript/releases/tag/6.3.5) (from [6.2.5](https://github.com/getsentry/sentry-javascript/releases/tag/6.2.5))
+
+- update [@sentry/tracing](https://www.npmjs.com/package/@sentry/tracing) to [6.3.5](https://github.com/getsentry/sentry-javascript/releases/tag/6.3.5) (from [6.2.5](https://github.com/getsentry/sentry-javascript/releases/tag/6.2.5))
+
+- update [aws-sdk](https://www.npmjs.com/package/aws-sdk) to [2.903.0](https://github.com/aws/aws-sdk-js/releases/tag/v2.903.0) (from [2.882.0](https://github.com/aws/aws-sdk-js/releases/tag/v2.882.0))
 
 ## [0.8.0] - 2021-04-27
 

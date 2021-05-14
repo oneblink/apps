@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- `formsAppId` not being sent in request to get form submission credentials
+
 ## [0.8.1] - 2021-05-13
 
 ### Added

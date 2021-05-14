@@ -46,7 +46,7 @@ const getNotFoundError = (error: HTTPError) => {
 }
 const getDefaultError = (error: HTTPError) => {
   return new OneBlinkAppsError(
-    'We could not find the form you are looking for. Please contact your administrator to ensure your form configuration has been completed successfully.',
+    'An unknown error has occurred. Please contact support if the problem persists.',
     {
       originalError: error,
       httpStatusCode: error.status,
@@ -80,6 +80,7 @@ export const generateSubmissionCredentials = async (
   return postRequest<SubmissionTypes.S3UploadCredentials>(
     `${tenants.current.apiOrigin}/forms/${submissionData.definition.id}/submission-credentials`,
     {
+      formsAppId: submissionData.formsAppId,
       recaptchas: (submissionData.captchaTokens || []).map((token: string) => ({
         token,
       })),

@@ -18,11 +18,11 @@ import { approvalsService } from '@oneblink/apps'
 
 ### FormApprovalFlowInstanceStep
 
-| Property    | Type      | Description                                                              |
-| ----------- | --------- | ------------------------------------------------------------------------ |
-| `label`     | `string`  | The unique label for the step                                            |
+| Property    | Type      | Description                                               |
+| ----------- | --------- | --------------------------------------------------------- |
+| `label`     | `string`  | The unique label for the step                             |
 | `group`     | `string`  | The group that will be assigned an approval for this step |
-| `isSkipped` | `boolean` | Indicates if step has been skipped                                       |
+| `isSkipped` | `boolean` | Indicates if step has been skipped                        |
 
 ### FormApprovalFlowInstance
 
@@ -96,9 +96,8 @@ const formSubmissionApproval = {
   createdAt: '2021-02-21T22:57:56.257Z',
   updatedAt: '2021-02-21T22:57:56.257Z',
 }
-const updatedFormSubmissionApproval = await approvalsService.updateFormSubmissionApproval(
-  formSubmissionApproval,
-)
+const updatedFormSubmissionApproval =
+  await approvalsService.updateFormSubmissionApproval(formSubmissionApproval)
 ```
 
 ### `retrieveFormSubmissionApprovalSubmission()`
@@ -107,7 +106,8 @@ Retrieve the submission data associated with a [`FormSubmissionApproval`](#forms
 
 ```js
 const formSubmissionApprovalId = 'd27966cc-128d-48a2-b681-6ad52012e113'
-const formSubmission = await approvalsService.retrieveFormSubmissionApprovalSubmission(
-  formSubmissionApprovalId,
-)
+const formSubmission =
+  await approvalsService.retrieveFormSubmissionApprovalSubmission(
+    formSubmissionApprovalId,
+  )
 ```

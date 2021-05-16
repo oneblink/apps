@@ -61,7 +61,8 @@ export async function addSubmissionToPendingQueue(
       `SUBMISSION_${formSubmissionResult.pendingTimestamp}`,
       formSubmissionResult,
     )
-    const submissions: PendingFormSubmissionResultWithOptionalSubmission[] = await getPendingQueueSubmissions()
+    const submissions: PendingFormSubmissionResultWithOptionalSubmission[] =
+      await getPendingQueueSubmissions()
     submissions.push({
       ...formSubmissionResult,
       submission: undefined,

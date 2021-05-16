@@ -33,11 +33,9 @@ export async function getPrefillFormData<T extends Record<string, unknown>>(
     .then((prefillData) => {
       if (prefillData) return prefillData
 
-      return downloadPreFillFormData<T>(
-        formId,
-        prefillFormDataId,
-      ).then((downloadedPrefillData) =>
-        set<T>(prefillFormDataId, downloadedPrefillData),
+      return downloadPreFillFormData<T>(formId, prefillFormDataId).then(
+        (downloadedPrefillData) =>
+          set<T>(prefillFormDataId, downloadedPrefillData),
       )
     })
     .catch((error) => {

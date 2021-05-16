@@ -39,9 +39,10 @@ type UploadFileConfigurationWithTags = UploadFileConfiguration & {
   tags?: Record<string, string | undefined>
 }
 
-export type UploadAttachmentConfiguration = Required<UploadFileConfiguration> & {
-  data: S3.PutObjectRequest['Body']
-}
+export type UploadAttachmentConfiguration =
+  Required<UploadFileConfiguration> & {
+    data: S3.PutObjectRequest['Body']
+  }
 
 const getDeviceInformation = () => {
   if (window.cordova) {
@@ -64,8 +65,9 @@ const getDeviceInformation = () => {
     }
   }
 
-  const isInstalledAsPWA = window.matchMedia('(display-mode: standalone)')
-    .matches
+  const isInstalledAsPWA = window.matchMedia(
+    '(display-mode: standalone)',
+  ).matches
   return {
     type: isInstalledAsPWA ? 'PWA' : 'BROWSER',
     appCodeName: window.navigator.appCodeName,

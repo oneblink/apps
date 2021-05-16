@@ -66,8 +66,6 @@ Pass in query string parameters after a redirect back to your app after a paymen
 import queryString from 'query-string'
 
 const query = queryString.parse(window.location.search)
-const {
-  transaction,
-  submissionResult,
-} = await paymentService.handlePaymentQuerystring(query)
+const { transaction, submissionResult } =
+  await paymentService.handlePaymentQuerystring(query)
 ```

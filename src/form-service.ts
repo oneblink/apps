@@ -207,13 +207,11 @@ export async function getFormElementLookupById(
   formsAppEnvironmentId: number,
   formElementLookupId: number,
 ): Promise<(FormTypes.FormElementLookup & { url: string | null }) | void> {
-  return getFormElementLookups(
-    organisationId,
-    formsAppEnvironmentId,
-  ).then((formElementLookups) =>
-    formElementLookups.find(
-      (formElementLookup) => formElementLookup.id === formElementLookupId,
-    ),
+  return getFormElementLookups(organisationId, formsAppEnvironmentId).then(
+    (formElementLookups) =>
+      formElementLookups.find(
+        (formElementLookup) => formElementLookup.id === formElementLookupId,
+      ),
   )
 }
 
@@ -339,10 +337,11 @@ export async function getFormElementDynamicOptions(
   >((memo, formElementOptionsSet) => {
     const formElementOptionsSetId = formElementOptionsSet.id
     if (formElementOptionsSetId) {
-      const formElementDynamicOptionSetEnvironment = formElementOptionsSet.environments.find(
-        (environment) =>
-          environment.formsAppEnvironmentId === formsAppEnvironmentId,
-      )
+      const formElementDynamicOptionSetEnvironment =
+        formElementOptionsSet.environments.find(
+          (environment) =>
+            environment.formsAppEnvironmentId === formsAppEnvironmentId,
+        )
 
       memo.push({
         formElementOptionsSetId,

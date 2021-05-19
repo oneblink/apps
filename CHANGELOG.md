@@ -7,9 +7,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.8.2] - 2021-05-19
+
 ### Fixed
 
 - `formsAppId` not being sent in request to get form submission credentials
+
+### Dependencies
+
+- update [@sentry/browser](https://www.npmjs.com/package/@sentry/browser) to [6.3.6](https://github.com/getsentry/sentry-javascript/releases/tag/6.3.6) (from [6.3.5](https://github.com/getsentry/sentry-javascript/releases/tag/6.3.5))
+
+- update [@sentry/tracing](https://www.npmjs.com/package/@sentry/tracing) to [6.3.6](https://github.com/getsentry/sentry-javascript/releases/tag/6.3.6) (from [6.3.5](https://github.com/getsentry/sentry-javascript/releases/tag/6.3.5))
+
+- update [aws-sdk](https://www.npmjs.com/package/aws-sdk) to [2.907.0](https://github.com/aws/aws-sdk-js/releases/tag/v2.907.0) (from [2.903.0](https://github.com/aws/aws-sdk-js/releases/tag/v2.903.0))
+
+- update [query-string](https://www.npmjs.com/package/query-string) to [7.0.0](https://github.com/sindresorhus/query-string/releases/tag/v7.0.0) (from [6.14.1](https://github.com/sindresorhus/query-string/releases/tag/v6.14.1))
 
 ## [0.8.1] - 2021-05-13
 

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Removed
+
+- **[BREAKING]** `formService.cancelForm()`
+
+### Added
+
+- [`submissionService.executeCancelAction()`](./docs/submission-service.md#executecancelaction)
+- [`submissionService.goBackOrCloseWindow()`](./docs/submission-service.md#gobackorclosewindow)
+
 ## [0.8.2] - 2021-05-19
 
 ### Fixed

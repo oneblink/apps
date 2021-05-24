@@ -10,7 +10,8 @@ import { submissionService } from '@oneblink/apps'
 
 - [`submit()`](#submit)
 - [`executePostSubmissionAction()`](#executepostsubmissionaction)
-- [`cancelForm()`](#cancelForm)
+- [`executeCancelAction()`](#executecancelaction)
+- [`goBackOrCloseWindow()`](#gobackorclosewindow)
 - [`getPendingQueueSubmissions()`](#getpendingqueuesubmissions)
 - [`deletePendingQueueSubmission()`](#deletependingqueuesubmission)
 - [`registerPendingQueueListener()`](#registerpendingqueuelistener)
@@ -129,7 +130,7 @@ const formSubmissionResult = {
   submissionTimestamp: '2020-07-29T01:03:26.573Z'
   formsAppId: 1,
   submission: {
-    form: 'data',,
+    form: 'data',
     goes: 'here'
   },
   definition: OneBlinkForm,
@@ -145,16 +146,42 @@ const formSubmissionResult = {
 const pushRelativePath = (path) => {
   window.location.href = path
 }
-await submissionService.executePostSubmissionAction(formSubmissionResult, pushRelativePath)
+try {
+  await submissionService.executePostSubmissionAction(formSubmissionResult, pushRelativePath)
+} catch (error) {
+  // Handle error while closing browser tab.
+  // Display message to user to close it manually
+}
 ```
 
-### `cancelForm()`
+### `executeCancelAction()`
 
 Action to cancel completing a form, currently goes back in the browser history or attempts to close the browser tab if there is no history.
 
 ```js
+const options = {
+  definition: OneBlinkForm,
+  externalId: 'external-id-set-by-developer',
+}
+// Only used for relative URLs
+const pushRelativePath = (path) => {
+  window.location.href = path
+}
 try {
-  await submissionService.cancelForm()
+  await submissionService.executeCancelAction(options, pushRelativePath)
+} catch (error) {
+  // Handle error while closing browser tab.
+  // Display message to user to close it manually
+}
+```
+
+### `goBackOrCloseWindow()`
+
+Go back in the browser history or attempts to close the browser tab if there is no history.
+
+```js
+try {
+  await submissionService.goBackOrCloseWindow()
 } catch (error) {
   // Handle error while closing browser tab.
   // Display message to user to close it manually

@@ -16,7 +16,11 @@ import { deleteDraft } from './draft-service'
 import { removePrefillFormData } from './prefill-service'
 import replaceCustomValues from './services/replace-custom-values'
 import recentlySubmittedJobsService from './services/recently-submitted-jobs'
-import { SubmissionEventTypes, SubmissionTypes } from '@oneblink/types'
+import {
+  FormTypes,
+  SubmissionEventTypes,
+  SubmissionTypes,
+} from '@oneblink/types'
 import { getUserToken } from './services/user-token'
 import Sentry from './Sentry'
 import prepareSubmissionData from './services/prepareSubmissionData'
@@ -251,12 +255,43 @@ async function closeWindow(): Promise<void> {
   })
 }
 
-async function cancelForm(): Promise<void> {
+async function goBackOrCloseWindow(): Promise<void> {
   if (window.history.length <= 1) {
     return closeWindow()
   } else {
     window.history.back()
   }
+}
+
+async function executeCancelAction(
+  options: {
+    definition: FormTypes.Form
+    externalId: string | null
+  },
+  push: (url: string) => void,
+): Promise<void> {
+  const formSubmissionResult: SubmissionTypes.FormSubmissionResult = {
+    ...options,
+    formsAppId: NaN,
+    draftId: null,
+    jobId: null,
+    externalId: null,
+    preFillFormDataId: null,
+    captchaTokens: [],
+    submission: {},
+    isInPendingQueue: false,
+    isOffline: false,
+    payment: null,
+    submissionId: null,
+    submissionTimestamp: null,
+  }
+
+  await executeAction(
+    formSubmissionResult,
+    formSubmissionResult.definition.cancelAction,
+    formSubmissionResult.definition.cancelRedirectUrl,
+    push,
+  )
 }
 
 async function executePostSubmissionAction(
@@ -272,7 +307,16 @@ async function executePostSubmissionAction(
     redirectUrl = submissionResult.payment.hostedFormUrl
   }
 
-  switch (postSubmissionAction) {
+  await executeAction(submissionResult, postSubmissionAction, redirectUrl, push)
+}
+
+async function executeAction(
+  submissionResult: SubmissionTypes.FormSubmissionResult,
+  action: FormTypes.FormPostSubmissionAction,
+  redirectUrl: string | undefined,
+  push: (url: string) => void,
+): Promise<void> {
+  switch (action) {
     case 'CLOSE':
       return closeWindow()
     case 'FORMS_LIBRARY':
@@ -299,9 +343,10 @@ async function executePostSubmissionAction(
       }
       break
     }
+    case 'BACK':
     default: {
       // if there's no post submission action for some reason, use prev. logic...
-      return cancelForm()
+      return goBackOrCloseWindow()
     }
   }
 }
@@ -309,7 +354,8 @@ async function executePostSubmissionAction(
 export {
   submit,
   executePostSubmissionAction,
-  cancelForm,
+  executeCancelAction,
+  goBackOrCloseWindow,
   getPendingQueueSubmissions,
   deletePendingQueueSubmission,
   registerPendingQueueListener,

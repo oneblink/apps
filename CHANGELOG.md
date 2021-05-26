@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.9.0] - 2021-05-26
+
 ### Removed
 
 - **[BREAKING]** `formService.cancelForm()`
@@ -15,6 +17,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - [`submissionService.executeCancelAction()`](./docs/submission-service.md#executecancelaction)
 - [`submissionService.goBackOrCloseWindow()`](./docs/submission-service.md#gobackorclosewindow)
+
+### Dependencies
+
+- update [@sentry/browser](https://www.npmjs.com/package/@sentry/browser) to [6.4.1](https://github.com/getsentry/sentry-javascript/releases/tag/6.4.1) (from [6.3.6](https://github.com/getsentry/sentry-javascript/releases/tag/6.3.6))
+
+- update [@sentry/tracing](https://www.npmjs.com/package/@sentry/tracing) to [6.4.1](https://github.com/getsentry/sentry-javascript/releases/tag/6.4.1) (from [6.3.6](https://github.com/getsentry/sentry-javascript/releases/tag/6.3.6))
+
+- update [aws-sdk](https://www.npmjs.com/package/aws-sdk) to [2.912.0](https://github.com/aws/aws-sdk-js/releases/tag/v2.912.0) (from [2.907.0](https://github.com/aws/aws-sdk-js/releases/tag/v2.907.0))
 
 ## [0.8.2] - 2021-05-19
 

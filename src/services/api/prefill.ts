@@ -13,7 +13,7 @@ export async function downloadPreFillFormData<T>(
     url,
   )
 
-  const data = await postRequest<AWSTypes.FormS3Credentials>(url)
+  const data = await postRequest<AWSTypes.S3ObjectCredentials>(url)
   console.log('Attempting to download pre fill form data:', data)
   return downloadPreFillData(data)
 }

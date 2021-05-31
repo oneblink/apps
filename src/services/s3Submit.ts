@@ -1,13 +1,17 @@
-import S3 from 'aws-sdk/clients/s3'
 import bigJSON from 'big-json'
-import s3UploadStream from 's3-upload-stream'
+// import { Upload } from '@aws-sdk/lib-storage'
+import {
+  S3Client,
+  PutObjectCommandInput,
+  GetObjectCommand,
+  PutObjectCommand,
+} from '@aws-sdk/client-s3'
+import { AbortController } from '@aws-sdk/abort-controller'
 import queryString from 'query-string'
 import { getUserProfile } from '../auth-service'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import { AWSTypes, FormTypes, SubmissionTypes } from '@oneblink/types'
 import Sentry from '../Sentry'
-
-const apiVersion = '2006-03-01'
 
 declare global {
   interface Window {
@@ -25,24 +29,12 @@ declare global {
   }
 }
 
-interface S3Configuration {
-  credentials: SubmissionTypes.S3UploadCredentials['credentials']
-  s3: SubmissionTypes.S3UploadCredentials['s3']
-}
-interface UploadFileConfiguration {
-  fileName?: string
+export type UploadAttachmentConfiguration = {
+  fileName: string
   contentType: string
   isPrivate: boolean
+  data: PutObjectCommandInput['Body']
 }
-
-type UploadFileConfigurationWithTags = UploadFileConfiguration & {
-  tags?: Record<string, string | undefined>
-}
-
-export type UploadAttachmentConfiguration =
-  Required<UploadFileConfiguration> & {
-    data: S3.PutObjectRequest['Body']
-  }
 
 const getDeviceInformation = () => {
   if (window.cordova) {
@@ -85,76 +77,77 @@ const getDeviceInformation = () => {
   }
 }
 
-const getS3Instance = ({ credentials, s3: s3Meta }: S3Configuration) => {
-  return new S3({
-    apiVersion,
-    region: s3Meta.region,
-    accessKeyId: credentials.AccessKeyId,
-    secretAccessKey: credentials.SecretAccessKey,
-    sessionToken: credentials.SessionToken,
+const getS3Client = (s3ObjectCredentials: AWSTypes.S3ObjectCredentials) => {
+  return new S3Client({
+    region: s3ObjectCredentials.s3.region,
+    credentials: {
+      accessKeyId: s3ObjectCredentials.credentials.AccessKeyId,
+      secretAccessKey: s3ObjectCredentials.credentials.SecretAccessKey,
+      sessionToken: s3ObjectCredentials.credentials.SessionToken,
+    },
   })
 }
 const getObjectMeta = (
-  s3Meta: SubmissionTypes.S3UploadCredentials['s3'],
-  data: UploadFileConfigurationWithTags,
-): S3.PutObjectRequest => ({
+  s3Meta: AWSTypes.S3ObjectCredentials['s3'],
+): PutObjectCommandInput => ({
   ServerSideEncryption: 'AES256',
   Expires: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // Max 1 year
   CacheControl: 'max-age=31536000', // Max 1 year(365 days),
   Bucket: s3Meta.bucket,
   Key: s3Meta.key,
-  ContentDisposition: data.fileName
-    ? `attachment; filename="${data.fileName}"`
-    : undefined,
-  ContentType: data.contentType,
-  Tagging: data.tags ? queryString.stringify(data.tags) : undefined,
-  ACL: data.isPrivate ? 'private' : 'public-read',
+  ACL: 'private',
 })
 
-const prepareFileAndUploadToS3 = async (
-  { credentials, s3: s3Meta }: S3Configuration,
-  fileConfiguration: UploadFileConfigurationWithTags,
-  request: (s3: S3, objectMeta: S3.PutObjectRequest) => Promise<void>,
-) => {
-  if (!credentials) {
-    throw new Error('Credentials are required')
-  }
-
-  if (!s3Meta) {
-    throw new Error('s3 object details are required')
-  }
-
-  if (!fileConfiguration) {
-    throw new Error('no file data provided')
-  }
-
-  const s3 = getS3Instance({ credentials, s3: s3Meta })
-  const objectMeta = getObjectMeta(s3Meta, fileConfiguration)
-
+async function uploadToS3(
+  s3Configuration: AWSTypes.S3ObjectCredentials,
+  putObjectCommandInput: PutObjectCommandInput,
+  abortSignal?: AbortSignal,
+) {
   try {
-    await request(s3, objectMeta)
-  } catch (err) {
-    if (err.name !== 'RequestAbortedError') {
-      Sentry.captureException(err)
+    const s3Client = getS3Client(s3Configuration)
+
+    // const parallelUpload = new Upload({
+    //   client: s3Client,
+    //   params: putObjectCommandInput,
+    // })
+
+    // parallelUpload.on('httpUploadProgress', (progress) => {
+    //   console.log('Upload to S3 part:', progress)
+    // })
+
+    // await parallelUpload.done()
+
+    const abortController = new AbortController()
+    abortSignal?.addEventListener('abort', () => {
+      // parallelUpload.abort()
+      abortController.abort()
+    })
+
+    await s3Client.send(new PutObjectCommand(putObjectCommandInput), {
+      abortSignal: abortController.signal,
+    })
+  } catch (error) {
+    if (error.name !== 'AbortError') {
+      Sentry.captureException(error)
       // handle storing in s3 errors here
-      if (/Network Failure/.test(err.message)) {
-        console.warn('Network error uploading to S3:', err)
+      if (/Network Failure/.test(error.message)) {
+        console.warn('Network error uploading to S3:', error)
         throw new OneBlinkAppsError(
           'There was an error saving the file. Please try again. If the problem persists, contact your administrator',
           {
             title: 'Connectivity Issues',
-            originalError: err,
+            originalError: error,
           },
         )
       }
     }
 
-    throw err
+    throw error
   }
 }
 
-const uploadFormSubmission = (
-  s3Configuration: S3Configuration,
+async function uploadFormSubmission(
+  s3Configuration: AWSTypes.S3ObjectCredentials,
   formJson: {
     definition: FormTypes.Form
     submission: SubmissionTypes.FormSubmission['submission']
@@ -163,115 +156,79 @@ const uploadFormSubmission = (
     formsAppId: number
   },
   tags: Record<string, string | undefined>,
-) => {
+) {
   console.log('Uploading submission')
 
-  const streamSubmissionUpload = async (
-    s3: S3,
-    objectMeta: S3.PutObjectRequest,
-  ) => {
-    const json = {
-      body: {
-        ...formJson,
-        user: getUserProfile(),
-        device: getDeviceInformation(),
-      },
-    }
-    const readStream = bigJSON.createStringifyStream(json)
-    const s3StreamClient = s3UploadStream(s3)
-
-    const upload = s3StreamClient.upload(objectMeta)
-    upload.maxPartSize(5 * 1024 * 1024)
-    upload.concurrentParts(10)
-
-    const promise = new Promise((resolve, reject) => {
-      upload.on('error', function (error) {
-        reject(error)
-      })
-
-      upload.on('part', function (details) {
-        console.log('Upload to S3 part:', details)
-      })
-
-      upload.on('uploaded', function (details) {
-        resolve(details)
-      })
-    })
-    readStream.pipe(upload)
-    await promise
-  }
-
-  return prepareFileAndUploadToS3(
-    s3Configuration,
-    {
-      contentType: 'application/json',
-      isPrivate: true,
-      tags,
+  const readStream = bigJSON.createStringifyStream({
+    body: {
+      ...formJson,
+      user: getUserProfile(),
+      device: getDeviceInformation(),
     },
-    streamSubmissionUpload,
+  })
+
+  const putObjectCommandInput: PutObjectCommandInput = getObjectMeta(
+    s3Configuration.s3,
   )
+  putObjectCommandInput.Body = readStream
+  putObjectCommandInput.Tagging = queryString.stringify(tags)
+  putObjectCommandInput.ContentType = 'application/json'
+
+  await uploadToS3(s3Configuration, putObjectCommandInput, undefined)
 }
 
 const uploadAttachment = async (
-  s3Configuration: S3Configuration,
+  s3Configuration: AWSTypes.S3ObjectCredentials,
   fileConfiguration: UploadAttachmentConfiguration,
   abortSignal: AbortSignal | undefined,
 ) => {
-  return await prepareFileAndUploadToS3(
-    s3Configuration,
-    fileConfiguration,
-    async (s3, objectMeta) => {
-      const managedUpload = s3.upload({
-        ...objectMeta,
-        Body: fileConfiguration.data,
-      })
-
-      abortSignal?.addEventListener('abort', () => {
-        managedUpload.abort()
-      })
-
-      await managedUpload.promise()
-    },
+  const putObjectCommandInput: PutObjectCommandInput = getObjectMeta(
+    s3Configuration.s3,
   )
+  putObjectCommandInput.Body = fileConfiguration.data
+  putObjectCommandInput.ContentType = fileConfiguration.contentType
+  putObjectCommandInput.ContentDisposition = `attachment; filename="${fileConfiguration.fileName}"`
+  if (!fileConfiguration.isPrivate) {
+    putObjectCommandInput.ACL = 'public-read'
+  }
+
+  await uploadToS3(s3Configuration, putObjectCommandInput, abortSignal)
 }
 
-const downloadPreFillData = <T>({
-  credentials,
-  s3: s3Meta,
-}: AWSTypes.FormS3Credentials): Promise<T> => {
-  if (!credentials) {
-    return Promise.reject(new Error('Credentials are required'))
-  }
+async function downloadPreFillData<T>(
+  s3ObjectCredentials: AWSTypes.S3ObjectCredentials,
+): Promise<T> {
+  try {
+    const s3Client = getS3Client(s3ObjectCredentials)
 
-  if (!s3Meta) {
-    return Promise.reject(new Error('s3 object details are required'))
-  }
+    const s3Data = await s3Client.send(
+      new GetObjectCommand({
+        Bucket: s3ObjectCredentials.s3.bucket,
+        Key: s3ObjectCredentials.s3.key,
+      }),
+    )
 
-  const s3 = new S3({
-    apiVersion,
-    region: s3Meta.region,
-    accessKeyId: credentials.AccessKeyId,
-    secretAccessKey: credentials.SecretAccessKey,
-    sessionToken: credentials.SessionToken,
-  })
+    const body = s3Data.Body
 
-  const params = {
-    Bucket: s3Meta.bucket,
-    Key: s3Meta.key,
-  }
-  return s3
-    .getObject(params)
-    .promise()
-    .then((s3Data) => {
-      // @ts-expect-error
-      const blob = new Blob([s3Data.Body])
-      const fileReader = new FileReader()
+    if (body instanceof ReadableStream) {
+      const parseStream = bigJSON.createParseStream()
+
+      const promise = new Promise<T>((resolve, reject) => {
+        parseStream.on('data', resolve)
+        parseStream.on('error', reject)
+      })
+      await body.pipeTo(parseStream)
+
+      return await promise
+    }
+
+    if (body instanceof Blob) {
       return new Promise<T>((resolve, reject) => {
+        const fileReader = new FileReader()
         fileReader.onload = function (event) {
           bigJSON.parse(
             {
-              // @ts-expect-error
-              body: event.target.result,
+              body: event.target?.result,
             },
             (error: Error, preFillData: T) => {
               if (error) {
@@ -288,26 +245,28 @@ const downloadPreFillData = <T>({
           reject(fileReader.error)
         }
 
-        fileReader.readAsText(blob)
+        fileReader.readAsText(body)
       })
-    })
-    .catch((error) => {
-      Sentry.captureException(error)
-      // AWS will return an "Access Denied" error for objects that have been
-      // deleted. As we should only be getting these if objects are not there
-      // (because our API should always return valid credentials) we can tell
-      // the user that their data has been removed from OneBlink's stores.
-      if (error.name === 'AccessDenied') {
-        throw new OneBlinkAppsError(
-          "Data has been removed based on your administrator's prefill data retention policy.",
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      throw error
-    })
+    }
+
+    throw new Error('Unsupported body response from S3')
+  } catch (error) {
+    Sentry.captureException(error)
+    // AWS will return an "Access Denied" error for objects that have been
+    // deleted. As we should only be getting these if objects are not there
+    // (because our API should always return valid credentials) we can tell
+    // the user that their data has been removed from OneBlink's stores.
+    if (error.name === 'AccessDenied') {
+      throw new OneBlinkAppsError(
+        "Data has been removed based on your administrator's prefill data retention policy.",
+        {
+          originalError: error,
+          httpStatusCode: error.status,
+        },
+      )
+    }
+    throw error
+  }
 }
 
 export { uploadFormSubmission, downloadPreFillData, uploadAttachment }

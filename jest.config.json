@@ -1,4 +1,5 @@
 {
+  "testEnvironment": "jsdom",
   "moduleDirectories": [
     "src",
     "node_modules"

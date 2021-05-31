@@ -92,6 +92,7 @@ const getS3Instance = ({ credentials, s3: s3Meta }: S3Configuration) => {
     accessKeyId: credentials.AccessKeyId,
     secretAccessKey: credentials.SecretAccessKey,
     sessionToken: credentials.SessionToken,
+    correctClockSkew: true,
   })
 }
 const getObjectMeta = (
@@ -186,7 +187,7 @@ const uploadFormSubmission = (
 
     const promise = new Promise((resolve, reject) => {
       upload.on('error', function (error) {
-        reject(error)
+        reject(typeof error === 'string' ? new Error(error) : error)
       })
 
       upload.on('part', function (details) {

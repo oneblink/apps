@@ -92,6 +92,7 @@ const getS3Instance = ({ credentials, s3: s3Meta }: S3Configuration) => {
     accessKeyId: credentials.AccessKeyId,
     secretAccessKey: credentials.SecretAccessKey,
     sessionToken: credentials.SessionToken,
+    correctClockSkew: true,
   })
 }
 const getObjectMeta = (
@@ -186,7 +187,7 @@ const uploadFormSubmission = (
 
     const promise = new Promise((resolve, reject) => {
       upload.on('error', function (error) {
-        reject(error)
+        reject(typeof error === 'string' ? new Error(error) : error)
       })
 
       upload.on('part', function (details) {
@@ -247,13 +248,7 @@ const downloadPreFillData = <T>({
     return Promise.reject(new Error('s3 object details are required'))
   }
 
-  const s3 = new S3({
-    apiVersion,
-    region: s3Meta.region,
-    accessKeyId: credentials.AccessKeyId,
-    secretAccessKey: credentials.SecretAccessKey,
-    sessionToken: credentials.SessionToken,
-  })
+  const s3 = getS3Instance({ credentials, s3: s3Meta })
 
   const params = {
     Bucket: s3Meta.bucket,

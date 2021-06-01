@@ -2,6 +2,7 @@ import S3 from 'aws-sdk/clients/s3'
 import bigJSON from 'big-json'
 import s3UploadStream from 's3-upload-stream'
 import queryString from 'query-string'
+import contentDisposition from 'content-disposition'
 import { getUserProfile } from '../auth-service'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import { AWSTypes, FormTypes, SubmissionTypes } from '@oneblink/types'
@@ -105,7 +106,7 @@ const getObjectMeta = (
   Bucket: s3Meta.bucket,
   Key: s3Meta.key,
   ContentDisposition: data.fileName
-    ? `attachment; filename="${data.fileName}"`
+    ? contentDisposition(data.fileName)
     : undefined,
   ContentType: data.contentType,
   Tagging: data.tags ? queryString.stringify(data.tags) : undefined,

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 - time skew error when devices time is incorrect
+- `Content-Disposition` header for attachments
 
 ## [0.9.0] - 2021-05-26
 

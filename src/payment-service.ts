@@ -135,7 +135,7 @@ function verifyWestpacQuickWebPayment(
       maskedCardNumber?: string
       responseCode?: string
       responseDescription?: string
-      paymentAmount?: number
+      paymentAmount?: string
     }
     if (
       !query ||
@@ -143,7 +143,7 @@ function verifyWestpacQuickWebPayment(
       !receiptNumber ||
       !responseCode ||
       !responseDescription ||
-      typeof paymentAmount !== 'number'
+      !paymentAmount
     ) {
       throw new OneBlinkAppsError(
         'Transactions can not be verified unless navigating here directly after a payment.',
@@ -162,7 +162,7 @@ function verifyWestpacQuickWebPayment(
         errorMessage: responseDescription,
         id: receiptNumber,
         creditCardMask: maskedCardNumber || null,
-        amount: paymentAmount,
+        amount: parseFloat(paymentAmount),
       },
       submissionResult,
     }

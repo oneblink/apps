@@ -25,6 +25,10 @@ const generatePaymentConfiguration = (
       path = `/forms/${form.id}/bpoint-payment`
       break
     }
+    case 'WESTPAC_QUICK_WEB': {
+      path = `forms/${form.id}/westpac-quick-web-payment`
+      break
+    }
     default: {
       throw new OneBlinkAppsError(
         'It looks like you are attempting to make a payment using an unsupported payment method.',

@@ -117,6 +117,58 @@ function verifyBpointPayment(
     })
 }
 
+function verifyWestpacQuickWebPayment(
+  query: Record<string, unknown>,
+  submissionResult: SubmissionTypes.FormSubmissionResult,
+) {
+  return Promise.resolve().then(() => {
+    const {
+      paymentReference,
+      receiptNumber,
+      maskedCardNumber,
+      responseCode,
+      responseDescription,
+      paymentAmount,
+    } = query as {
+      paymentReference?: string
+      receiptNumber?: string
+      maskedCardNumber?: string
+      responseCode?: string
+      responseDescription?: string
+      paymentAmount?: number
+    }
+    if (
+      !query ||
+      !paymentReference ||
+      !receiptNumber ||
+      !responseCode ||
+      !responseDescription ||
+      typeof paymentAmount !== 'number'
+    ) {
+      throw new OneBlinkAppsError(
+        'Transactions can not be verified unless navigating here directly after a payment.',
+      )
+    }
+
+    if (submissionResult.submissionId !== paymentReference) {
+      throw new OneBlinkAppsError(
+        'It looks like you are attempting to view a receipt for the incorrect payment.',
+      )
+    }
+
+    return {
+      transaction: {
+        isSuccess: responseCode === '00',
+        errorMessage: responseDescription,
+        id: receiptNumber,
+        creditCardMask: maskedCardNumber || null,
+        amount: paymentAmount,
+      },
+      submissionResult,
+    }
+  })
+}
+
 export async function handlePaymentQuerystring(
   query: Record<string, unknown>,
 ): Promise<{
@@ -155,6 +207,10 @@ export async function handlePaymentQuerystring(
         }
         case 'BPOINT': {
           return verifyBpointPayment(query, submissionResult)
+        }
+        case 'WESTPAC_QUICK_WEB': {
+          return verifyWestpacQuickWebPayment(query, submissionResult)
+          break
         }
         default: {
           throw new OneBlinkAppsError(

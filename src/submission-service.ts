@@ -130,7 +130,8 @@ async function submit({
     ) => {
       if (
         submissionEvent.type === 'CP_PAY' ||
-        submissionEvent.type === 'BPOINT'
+        submissionEvent.type === 'BPOINT' ||
+        submissionEvent.type === 'WESTPAC_QUICK_WEB'
       ) {
         return submissionEvent
       }

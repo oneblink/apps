@@ -274,6 +274,7 @@ export async function handlePaymentSubmissionEvent({
     submissionId: string | null
     crn2?: string
     crn3?: string
+    customerReferenceNumber?: string
   } = {
     amount,
     redirectUrl: paymentReceiptUrl,
@@ -292,6 +293,14 @@ export async function handlePaymentSubmissionEvent({
     if (paymentSubmissionEvent.configuration.crn3) {
       payload.crn3 = replaceCustomValues(
         paymentSubmissionEvent.configuration.crn3,
+        formSubmissionResult,
+      )
+    }
+  }
+  if (paymentSubmissionEvent.type === 'WESTPAC_QUICK_WEB') {
+    if (paymentSubmissionEvent.configuration.customerReferenceNumber) {
+      payload.customerReferenceNumber = replaceCustomValues(
+        paymentSubmissionEvent.configuration.customerReferenceNumber,
         formSubmissionResult,
       )
     }

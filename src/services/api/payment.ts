@@ -26,7 +26,7 @@ const generatePaymentConfiguration = (
       break
     }
     case 'WESTPAC_QUICK_WEB': {
-      path = `forms/${form.id}/westpac-quick-web-payment`
+      path = `/forms/${form.id}/westpac-quick-web-payment`
       break
     }
     default: {

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- check for successful Westpac QuickWeb payments
+
 ## [0.9.2] - 2021-06-06
 
 ### Added

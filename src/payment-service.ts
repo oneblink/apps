@@ -126,14 +126,14 @@ function verifyWestpacQuickWebPayment(
       paymentReference,
       receiptNumber,
       maskedCardNumber,
-      responseCode,
+      summaryCode,
       responseDescription,
       paymentAmount,
     } = query as {
       paymentReference?: string
       receiptNumber?: string
       maskedCardNumber?: string
-      responseCode?: string
+      summaryCode?: string
       responseDescription?: string
       paymentAmount?: string
     }
@@ -141,7 +141,7 @@ function verifyWestpacQuickWebPayment(
       !query ||
       !paymentReference ||
       !receiptNumber ||
-      !responseCode ||
+      !summaryCode ||
       !responseDescription ||
       !paymentAmount
     ) {
@@ -158,7 +158,7 @@ function verifyWestpacQuickWebPayment(
 
     return {
       transaction: {
-        isSuccess: responseCode === '00',
+        isSuccess: summaryCode === '0',
         errorMessage: responseDescription,
         id: receiptNumber,
         creditCardMask: maskedCardNumber || null,

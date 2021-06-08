@@ -3,10 +3,17 @@ import { isOffline } from './offline-service'
 import { isLoggedIn } from './services/cognito'
 import { generateHeaders, getRequest, searchRequest } from './services/fetch'
 import tenants from './tenants'
-import { FormTypes, GeoscapeTypes, PointTypes } from '@oneblink/types'
+import { FormTypes } from '@oneblink/types'
 import Sentry from './Sentry'
+import {
+  getGeoscapeAddress,
+  getPointAddress,
+  searchGeoscapeAddresses,
+  searchPointAddresses,
+  searchCivicaStreetNames,
+} from './services/integration-elements'
 
-export async function getForms(formsAppId: number): Promise<FormTypes.Form[]> {
+async function getForms(formsAppId: number): Promise<FormTypes.Form[]> {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms`
   return getRequest<{ forms: FormTypes.Form[] }>(url)
     .then(({ forms }) => forms)
@@ -69,7 +76,7 @@ export async function getForms(formsAppId: number): Promise<FormTypes.Form[]> {
     })
 }
 
-export async function getForm(
+async function getForm(
   formId: number,
   formsAppId?: number,
 ): Promise<FormTypes.Form> {
@@ -164,7 +171,7 @@ export async function getForm(
   )
 }
 
-export async function getFormElementLookups(
+async function getFormElementLookups(
   organisationId: string,
   formsAppEnvironmentId: number,
 ): Promise<Array<FormTypes.FormElementLookup & { url: string | null }>> {
@@ -202,7 +209,7 @@ export async function getFormElementLookups(
     })
 }
 
-export async function getFormElementLookupById(
+async function getFormElementLookupById(
   organisationId: string,
   formsAppEnvironmentId: number,
   formElementLookupId: number,
@@ -227,7 +234,7 @@ async function getFormElementOptionsSets(
   return formElementDynamicOptionSets
 }
 
-export function parseFormElementOptionsSet(
+function parseFormElementOptionsSet(
   data: unknown,
 ): FormTypes.ChoiceElementOption[] {
   if (!Array.isArray(data)) {
@@ -275,7 +282,7 @@ export function parseFormElementOptionsSet(
   )
 }
 
-export type LoadFormElementDynamicOptionsResult =
+type LoadFormElementDynamicOptionsResult =
   | {
       ok: true
       elementId: string
@@ -287,7 +294,7 @@ export type LoadFormElementDynamicOptionsResult =
       error: OneBlinkAppsError
     }
 
-export async function getFormElementDynamicOptions(
+async function getFormElementDynamicOptions(
   input: FormTypes.Form | FormTypes.Form[],
 ): Promise<Array<LoadFormElementDynamicOptionsResult>> {
   const forms = Array.isArray(input) ? input : [input]
@@ -589,7 +596,7 @@ export async function getFormElementDynamicOptions(
   )
 }
 
-export function forEachFormElement(
+function forEachFormElement(
   elements: FormTypes.FormElement[],
   forEach: (
     element: FormTypes.FormElement,
@@ -602,7 +609,7 @@ export function forEachFormElement(
   })
 }
 
-export function forEachFormElementWithOptions(
+function forEachFormElementWithOptions(
   elements: FormTypes.FormElement[],
   forEach: (
     elementWithOptions: FormTypes.FormElementWithOptions,
@@ -623,7 +630,7 @@ export function forEachFormElementWithOptions(
   })
 }
 
-export function findFormElement(
+function findFormElement(
   elements: FormTypes.FormElement[],
   predicate: (
     element: FormTypes.FormElement,
@@ -655,269 +662,21 @@ export function findFormElement(
   }
 }
 
-export async function searchGeoscapeAddresses(
-  formId: number,
-  queryParams: {
-    query: string
-    maxNumberOfResults?: number
-    stateTerritory?: string
-    dataset?: string
-    addressType?: 'physical' | 'mailing' | 'all'
-    excludeAliases?: boolean
-  },
-  abortSignal?: AbortSignal,
-): Promise<GeoscapeTypes.GeoscapeAddressesSearchResult> {
-  try {
-    return await searchRequest(
-      `${tenants.current.apiOrigin}/forms/${formId}/geoscape/addresses`,
-      queryParams,
-      abortSignal,
-    )
-  } catch (error) {
-    Sentry.captureException(error)
-    if (isOffline()) {
-      throw new OneBlinkAppsError(
-        'You are currently offline, please connect to the internet and try again',
-        {
-          originalError: error,
-          isOffline: true,
-        },
-      )
-    }
-    switch (error.status) {
-      case 401: {
-        throw new OneBlinkAppsError('Please login and try again.', {
-          originalError: error,
-          requiresLogin: true,
-          httpStatusCode: error.status,
-        })
-      }
-      case 403: {
-        throw new OneBlinkAppsError(
-          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
-          {
-            originalError: error,
-            requiresAccessRequest: true,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      case 400:
-      case 404: {
-        throw new OneBlinkAppsError(
-          "Please contact your administrator to ensure this application's configuration has been completed successfully.",
-          {
-            originalError: error,
-            title: 'Unknown Application',
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      default: {
-        throw new OneBlinkAppsError(
-          'An unknown error has occurred. Please contact support if the problem persists.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-    }
-  }
-}
-
-export async function getGeoscapeAddress(
-  formId: number,
-  addressId: string,
-  abortSignal?: AbortSignal,
-): Promise<GeoscapeTypes.GeoscapeAddress> {
-  try {
-    return await getRequest(
-      `${tenants.current.apiOrigin}/forms/${formId}/geoscape/addresses/${addressId}`,
-      abortSignal,
-    )
-  } catch (error) {
-    Sentry.captureException(error)
-    if (isOffline()) {
-      throw new OneBlinkAppsError(
-        'You are currently offline, please connect to the internet and try again',
-        {
-          originalError: error,
-          isOffline: true,
-        },
-      )
-    }
-    switch (error.status) {
-      case 401: {
-        throw new OneBlinkAppsError('Please login and try again.', {
-          originalError: error,
-          requiresLogin: true,
-          httpStatusCode: error.status,
-        })
-      }
-      case 403: {
-        throw new OneBlinkAppsError(
-          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
-          {
-            originalError: error,
-            requiresAccessRequest: true,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      case 400:
-      case 404: {
-        throw new OneBlinkAppsError(
-          "Please contact your administrator to ensure this application's configuration has been completed successfully.",
-          {
-            originalError: error,
-            title: 'Unknown Application',
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      default: {
-        throw new OneBlinkAppsError(
-          'An unknown error has occurred. Please contact support if the problem persists.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-    }
-  }
-}
-
-export async function searchPointAddresses(
-  formId: number,
-  queryParams: {
-    address: string
-    maxNumberOfResults?: number
-    stateTerritory?: string
-    dataset?: string
-    addressType?: 'physical' | 'mailing' | 'all'
-  },
-  abortSignal?: AbortSignal,
-): Promise<PointTypes.PointAddressesSearchResult> {
-  try {
-    return await searchRequest(
-      `${tenants.current.apiOrigin}/forms/${formId}/point/addresses`,
-      queryParams,
-      abortSignal,
-    )
-  } catch (error) {
-    Sentry.captureException(error)
-    if (isOffline()) {
-      throw new OneBlinkAppsError(
-        'You are currently offline, please connect to the internet and try again',
-        {
-          originalError: error,
-          isOffline: true,
-        },
-      )
-    }
-    switch (error.status) {
-      case 401: {
-        throw new OneBlinkAppsError('Please login and try again.', {
-          originalError: error,
-          requiresLogin: true,
-          httpStatusCode: error.status,
-        })
-      }
-      case 403: {
-        throw new OneBlinkAppsError(
-          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
-          {
-            originalError: error,
-            requiresAccessRequest: true,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      case 400:
-      case 404: {
-        throw new OneBlinkAppsError(
-          "Please contact your administrator to ensure this application's configuration has been completed successfully.",
-          {
-            originalError: error,
-            title: 'Unknown Application',
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      default: {
-        throw new OneBlinkAppsError(
-          'An unknown error has occurred. Please contact support if the problem persists.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-    }
-  }
-}
-
-export async function getPointAddress(
-  formId: number,
-  addressId: string,
-  abortSignal?: AbortSignal,
-): Promise<PointTypes.PointAddress> {
-  try {
-    return await getRequest(
-      `${tenants.current.apiOrigin}/forms/${formId}/point/addresses/${addressId}`,
-      abortSignal,
-    )
-  } catch (error) {
-    Sentry.captureException(error)
-    if (isOffline()) {
-      throw new OneBlinkAppsError(
-        'You are currently offline, please connect to the internet and try again',
-        {
-          originalError: error,
-          isOffline: true,
-        },
-      )
-    }
-    switch (error.status) {
-      case 401: {
-        throw new OneBlinkAppsError('Please login and try again.', {
-          originalError: error,
-          requiresLogin: true,
-          httpStatusCode: error.status,
-        })
-      }
-      case 403: {
-        throw new OneBlinkAppsError(
-          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
-          {
-            originalError: error,
-            requiresAccessRequest: true,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      case 400:
-      case 404: {
-        throw new OneBlinkAppsError(
-          "Please contact your administrator to ensure this application's configuration has been completed successfully.",
-          {
-            originalError: error,
-            title: 'Unknown Application',
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      default: {
-        throw new OneBlinkAppsError(
-          'An unknown error has occurred. Please contact support if the problem persists.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-    }
-  }
+export {
+  LoadFormElementDynamicOptionsResult,
+  getForms,
+  getForm,
+  getFormElementLookups,
+  getFormElementLookupById,
+  parseFormElementOptionsSet,
+  getFormElementDynamicOptions,
+  forEachFormElement,
+  forEachFormElementWithOptions,
+  findFormElement,
+  // Integration element services
+  getGeoscapeAddress,
+  getPointAddress,
+  searchGeoscapeAddresses,
+  searchPointAddresses,
+  searchCivicaStreetNames,
 }

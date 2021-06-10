@@ -207,25 +207,11 @@ const queryParams = {
 const result = await formService.searchCivicaStreetNames(formId, queryParams)
 ```
 
-### `searchCivicaStreetNames()`
-
-Search for street names in Civica street register
-
-```js
-const formId = 1
-const queryParams = {
-  search: '1 Station ',
-  top: 10,
-}
-const results = await formService.searchCivicaStreetNames(formId, queryParams)
-```
-
 ### `getCivicaTitleCodes()`
 
 Get titles codes from Civica name register
 
 ```js
 const formId = 1
-}
 const results = await formService.getCivicaTitleCodes(formId)
 ```

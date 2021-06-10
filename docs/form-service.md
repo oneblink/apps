@@ -21,6 +21,8 @@ import { formService } from '@oneblink/apps'
 - [`getGeoscapeAddress()`](#getgeoscapeaddress)
 - [`searchPointAddresses()`](#searchpointaddresses)
 - [`getPointAddress()`](#getpointaddress)
+- [`searchCivicaStreetNames()`](#searchcivicastreetnames)
+- [`getCivicaTitleCodes()`](#getcivicatitlecodes)
 
 ### `getForms()`
 
@@ -190,4 +192,40 @@ Get the details for a single Point address based on the Id of a Point address re
 const formId = 1
 const addressId = 'ABC123'
 const result = await formService.getPointAddress(formId, addressId)
+```
+
+### `searchCivicaStreetNames()`
+
+Search for street names in Civica
+
+```js
+const formId = 1
+const queryParams = {
+  search: '1 Station ',
+  top: 10,
+}
+const result = await formService.searchCivicaStreetNames(formId, queryParams)
+```
+
+### `searchCivicaStreetNames()`
+
+Search for street names in Civica street register
+
+```js
+const formId = 1
+const queryParams = {
+  search: '1 Station ',
+  top: 10,
+}
+const results = await formService.searchCivicaStreetNames(formId, queryParams)
+```
+
+### `getCivicaTitleCodes()`
+
+Get titles codes from Civica name register
+
+```js
+const formId = 1
+}
+const results = await formService.getCivicaTitleCodes(formId)
 ```

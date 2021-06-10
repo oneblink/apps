@@ -11,6 +11,7 @@ import {
   searchGeoscapeAddresses,
   searchPointAddresses,
   searchCivicaStreetNames,
+  getCivicaTitleCodes,
 } from './services/integration-elements'
 
 async function getForms(formsAppId: number): Promise<FormTypes.Form[]> {
@@ -679,4 +680,5 @@ export {
   searchGeoscapeAddresses,
   searchPointAddresses,
   searchCivicaStreetNames,
+  getCivicaTitleCodes,
 }

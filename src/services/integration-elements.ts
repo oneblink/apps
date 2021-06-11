@@ -2,7 +2,12 @@ import OneBlinkAppsError from '../services/errors/oneBlinkAppsError'
 import { isOffline } from '../offline-service'
 import { getRequest, searchRequest } from '../services/fetch'
 import tenants from '../tenants'
-import { GeoscapeTypes, PointTypes, CivicaTypes } from '@oneblink/types'
+import {
+  GeoscapeTypes,
+  PointTypes,
+  CivicaTypes,
+  FormTypes,
+} from '@oneblink/types'
 import Sentry from '../Sentry'
 
 export async function searchGeoscapeAddresses(
@@ -342,7 +347,7 @@ export async function searchCivicaStreetNames(
 export async function getCivicaTitleCodes(
   formId: number,
   abortSignal?: AbortSignal,
-): Promise<{ label: string; value: string }[]> {
+): Promise<FormTypes.ChoiceElementOption[]> {
   try {
     return await getRequest(
       `${tenants.current.apiOrigin}/forms/${formId}/civica/nameregister/titlecodes`,

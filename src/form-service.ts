@@ -648,7 +648,8 @@ function findFormElement(
       (element.type === 'repeatableSet' ||
         element.type === 'page' ||
         element.type === 'form' ||
-        element.type === 'infoPage') &&
+        element.type === 'infoPage' ||
+        element.type === 'section') &&
       Array.isArray(element.elements)
     ) {
       const nestedElement = findFormElement(element.elements, predicate, [

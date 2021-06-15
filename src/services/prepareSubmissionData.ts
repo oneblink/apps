@@ -46,7 +46,8 @@ async function uploadAttachments(
         await uploadAttachments(formId, formElement.elements, submission)
         break
       }
-      case 'form': {
+      case 'form':
+      case 'section': {
         const nestedSubmission = submission[formElement.name]
         if (!nestedSubmission || typeof nestedSubmission !== 'object') {
           break

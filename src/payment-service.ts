@@ -7,7 +7,10 @@ import {
 import { findFormElement } from './form-service'
 import utilsService from './services/utils'
 import replaceCustomValues from './services/replace-custom-values'
-
+import {
+  getPaymentElementValuePath,
+  getPaymentValueFromPath,
+} from './services/prepareSubmissionData'
 import {
   SubmissionTypes,
   SubmissionEventTypes,
@@ -251,7 +254,12 @@ export async function handlePaymentSubmissionEvent({
 
   console.log('Found form element for payment submission event', amountElement)
 
-  const amount = submission[amountElement.name]
+  const amountValuePath = getPaymentElementValuePath(
+    amountElement.id,
+    form.elements,
+  )
+  const amount = getPaymentValueFromPath(amountValuePath, submission)
+
   if (!amount) {
     console.log(
       'Form has a payment submission event but the amount has been entered as 0 or not at all, finishing as normal submission',

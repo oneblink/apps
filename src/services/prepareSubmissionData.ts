@@ -135,11 +135,15 @@ export function getPaymentElementValuePath(
     if (element.id === elementId && element.type !== 'page') {
       return [element.name]
     }
-    if (element.type === 'section' && Array.isArray(element.elements)) {
+    if (
+      (element.type === 'section' || element.type === 'page') &&
+      Array.isArray(element.elements)
+    ) {
       const nestedPath = getPaymentElementValuePath(elementId, element.elements)
-
       // Found path to element inside nested elements
       if (nestedPath.length) {
+        // Page element names are not represented in the submission data, so we do not return the page name in front of the child element path
+        if (element.type === 'page') return nestedPath
         return [element.name, ...nestedPath]
       }
     }

@@ -47,6 +47,16 @@ const createSectionElement = (name, elements) => {
   }
   return sectionsElement
 }
+const createPageElement = (id, elements) => {
+  return {
+    id,
+    label: id,
+    type: 'page',
+    elements,
+    conditionallyShow: false,
+    requiresAllConditionallyShowPredicates: false,
+  }
+}
 const form = {
   cancelAction: 'BACK',
   createdAt: '2021-06-16 00:00:00',
@@ -64,22 +74,25 @@ const form = {
   submissionEvents: [],
   tags: [],
   elements: [
-    createTextElement('A'),
-    createSectionElement('B', [
-      createTextElement('B_A'),
-      createSectionElement('B_B', [
-        createTextElement('B_B_A'),
-        createTextElement('B_B_B'),
-        createNumberElement('B_B_C'),
+    createPageElement('Page1', [
+      createTextElement('A'),
+      createSectionElement('B', [
+        createTextElement('B_A'),
+        createSectionElement('B_B', [
+          createTextElement('B_B_A'),
+          createTextElement('B_B_B'),
+          createNumberElement('B_B_C'),
+        ]),
+        createSectionElement('B_C', [
+          createNumberElement('B_C_A'),
+          createTextElement('B_C_B'),
+          createSectionElement('B_C_C', [createTextElement('B_C_C_A')]),
+        ]),
       ]),
-      createSectionElement('B_C', [
-        createNumberElement('B_C_A'),
-        createTextElement('B_C_B'),
-        createSectionElement('B_C_C', [createTextElement('B_C_C_A')]),
-      ]),
+      createTextElement('C'),
+      createNumberElement('D'),
     ]),
-    createTextElement('C'),
-    createNumberElement('D'),
+    createPageElement('Page2', [createTextElement('Page2Text')]),
   ],
 }
 const submission = {
@@ -101,20 +114,27 @@ const submission = {
   },
   C: 'CText',
   D: 5,
+  Page2Text: 'Page 2 Text',
 }
 
 describe('findPaymentElementValue()', () => {
   test('should return a nested element value within a submission object', () => {
-    const elementName = 'D'
-    const valuePath = getPaymentElementValuePath(elementName, form.elements)
-    expect(valuePath).toStrictEqual([elementName])
+    const elementNameAndId = 'D'
+    const valuePath = getPaymentElementValuePath(
+      elementNameAndId,
+      form.elements,
+    )
+    expect(valuePath).toStrictEqual([elementNameAndId])
     const value = getPaymentValueFromPath(valuePath, submission)
     expect(value).toBe(5)
   })
   test('should return a nested element value within a submission object', () => {
-    const elementName = 'B_C_C_A'
-    const valuePath = getPaymentElementValuePath(elementName, form.elements)
-    expect(valuePath).toStrictEqual(['B', 'B_C', 'B_C_C', elementName])
+    const elementNameAndId = 'B_C_C_A'
+    const valuePath = getPaymentElementValuePath(
+      elementNameAndId,
+      form.elements,
+    )
+    expect(valuePath).toStrictEqual(['B', 'B_C', 'B_C_C', elementNameAndId])
     const value = getPaymentValueFromPath(valuePath, submission)
     expect(value).toBe('B_C_C_AText')
   })

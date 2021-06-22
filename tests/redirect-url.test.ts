@@ -1,23 +1,40 @@
-import replaceElementValues from '../dist/services/replace-custom-values'
+import { FormTypes } from '@oneblink/types'
+import replaceElementValues from '../src/services/replace-custom-values'
 
-const definition = {
-  id: 1,
-}
-const baseSubmissionResult = {
-  formsAppId: 1,
-  definition,
-  jobId: null,
-  draftId: null,
-  externalId: null,
-  preFillFormDataId: null,
-  submissionId: null,
-  submissionTimestamp: null,
-  payment: null,
-  captchaTokens: [],
-  isInPendingQueue: false,
-  isOffline: false,
-}
 describe('Form redirect URL', () => {
+  const definition: FormTypes.Form = {
+    id: 1,
+    name: 'string',
+    description: 'string',
+    organisationId: 'string',
+    formsAppEnvironmentId: 1,
+    formsAppIds: [],
+    elements: [],
+    isAuthenticated: false,
+    isMultiPage: false,
+    isInfoPage: false,
+    postSubmissionAction: 'FORMS_LIBRARY',
+    cancelAction: 'FORMS_LIBRARY',
+    submissionEvents: [],
+    tags: [],
+    createdAt: 'string',
+    updatedAt: 'string',
+  }
+  const baseSubmissionResult = {
+    formsAppId: 1,
+    definition,
+    jobId: null,
+    draftId: null,
+    externalId: null,
+    preFillFormDataId: null,
+    submissionId: null,
+    submissionTimestamp: null,
+    payment: null,
+    captchaTokens: [],
+    isInPendingQueue: false,
+    isOffline: false,
+  }
+
   test('should replace all instances of {ELEMENT} with correct property value', () => {
     const url = 'https://some-url.com?name={ELEMENT:name}&home={ELEMENT:home}'
 

@@ -1,5 +1,5 @@
-import tenants from '../dist/tenants'
-import localisationService from '../dist/localisation-service'
+import tenants from '../src/tenants'
+import localisationService from '../src/localisation-service'
 
 // Unfortunately this test will not with in Travis CI
 // as the locales are not supported, skipping for now.

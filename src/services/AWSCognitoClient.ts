@@ -246,6 +246,7 @@ export default class AWSCognitoClient {
     // Hash and base64-urlencode the secret to use as the challenge
     const code_challenge = await pkceChallengeFromVerifier(codeVerifier)
 
+    // @ts-ignore Jest seems to have a problem with this?
     window.location.href =
       `https://${loginDomain}/oauth2/authorize` +
       '?response_type=code' +

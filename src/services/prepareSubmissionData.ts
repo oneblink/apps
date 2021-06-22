@@ -127,44 +127,23 @@ async function uploadAttachments(
   return submission
 }
 
-export function getPaymentElementValuePath(
-  elementId: string,
-  elements: FormTypes.FormElement[],
-): string[] {
-  for (const element of elements) {
-    if (element.id === elementId && element.type !== 'page') {
-      return [element.name]
-    }
-    if (
-      (element.type === 'section' || element.type === 'page') &&
-      Array.isArray(element.elements)
-    ) {
-      const nestedPath = getPaymentElementValuePath(elementId, element.elements)
-      // Found path to element inside nested elements
-      if (nestedPath.length) {
-        // Page element names are not represented in the submission data, so we do not return the page name in front of the child element path
-        if (element.type === 'page') return nestedPath
-        return [element.name, ...nestedPath]
-      }
-    }
-  }
-  return []
-}
-
-export function getPaymentValueFromPath(
-  path: string[],
+export function getPaymentValue(
+  amountFormElementId: string,
+  formElements: FormTypes.FormElement[],
   submission: SubmissionTypes.FormSubmissionResult['submission'],
 ): unknown {
-  let val: unknown = submission
-  for (const key of path) {
-    if (!!val && typeof val === 'object') {
-      val = (val as SubmissionTypes.FormSubmissionResult['submission'])[key]
-      continue
+  for (const formElement of formElements) {
+    if (formElement.type === 'page' || formElement.type === 'section') {
+      const value = getPaymentValue(
+        amountFormElementId,
+        formElement.elements,
+        submission,
+      )
+      if (value !== undefined) {
+        return value
+      }
+    } else if (formElement.id === amountFormElementId) {
+      return submission[formElement.name]
     }
-    // In this case we encountered a value in the submission tree which should have been an object we can call a property on,
-    // but it was not an object, so we return undefined as the value
-    return
   }
-
-  return val
 }

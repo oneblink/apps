@@ -7,10 +7,7 @@ import {
 import { findFormElement } from './form-service'
 import utilsService from './services/utils'
 import replaceCustomValues from './services/replace-custom-values'
-import {
-  getPaymentElementValuePath,
-  getPaymentValueFromPath,
-} from './services/prepareSubmissionData'
+import { getPaymentValue } from './services/prepareSubmissionData'
 import {
   SubmissionTypes,
   SubmissionEventTypes,
@@ -254,11 +251,7 @@ export async function handlePaymentSubmissionEvent({
 
   console.log('Found form element for payment submission event', amountElement)
 
-  const amountValuePath = getPaymentElementValuePath(
-    amountElement.id,
-    form.elements,
-  )
-  const amount = getPaymentValueFromPath(amountValuePath, submission)
+  const amount = getPaymentValue(amountElement.id, form.elements, submission)
 
   if (!amount) {
     console.log(

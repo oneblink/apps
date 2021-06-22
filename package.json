@@ -7,9 +7,9 @@
     "url": "https://github.com/oneblink/apps/issues"
   },
   "dependencies": {
-    "@sentry/browser": "^6.5.0",
-    "@sentry/tracing": "^6.5.0",
-    "aws-sdk": "^2.918.0",
+    "@sentry/browser": "^6.7.2",
+    "@sentry/tracing": "^6.7.2",
+    "aws-sdk": "^2.932.0",
     "big-json": "^3.1.0",
     "content-disposition": "^0.5.3",
     "jwt-decode": "^3.1.2",
@@ -18,12 +18,12 @@
     "lodash.clonedeep": "^4.5.0",
     "lodash.differenceby": "^4.8.0",
     "lodash.orderby": "^4.6.0",
-    "query-string": "^7.0.0",
+    "query-string": "^7.0.1",
     "s3-upload-stream": "^1.0.7",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@babel/plugin-transform-modules-commonjs": "^7.14.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.14.5",
     "@oneblink/release-cli": "^1.0.0",
     "@oneblink/types": "github:oneblink/types",
     "@types/content-disposition": "^0.5.3",
@@ -33,17 +33,17 @@
     "@types/lodash.orderby": "^4.6.6",
     "@types/s3-upload-stream": "^1.0.2",
     "@types/uuid": "^8.3.0",
-    "@typescript-eslint/eslint-plugin": "^4.26.0",
-    "@typescript-eslint/parser": "^4.26.0",
-    "eslint": "^7.27.0",
+    "@typescript-eslint/eslint-plugin": "^4.28.0",
+    "@typescript-eslint/parser": "^4.28.0",
+    "eslint": "^7.29.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^3.4.0",
     "fixpack": "^4.0.0",
-    "jest": "^27.0.2",
-    "prettier": "^2.3.0",
-    "ts-jest": "^27.0.2",
+    "jest": "^27.0.4",
+    "prettier": "^2.3.1",
+    "ts-jest": "^27.0.3",
     "tsc-watch": "^4.4.0",
-    "typescript": "^4.3.2"
+    "typescript": "^4.3.4"
   },
   "directories": {
     "doc": "docs"
@@ -71,12 +71,12 @@
     "build": "tsc",
     "eslint": "eslint --fix --cache .",
     "fixpack": "fixpack",
-    "jest": "jest",
+    "format": "prettier --write .",
     "prepare": "npm run build",
-    "pretest": "npm run fixpack && npm run eslint && npm run build",
+    "pretest": "npm run fixpack && npm run eslint",
     "release": "oneblink-release",
     "start": "tsc-watch",
-    "test": "npm run jest",
+    "test": "jest",
     "typescript": "tsc --noEmit"
   }
 }

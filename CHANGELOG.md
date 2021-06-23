@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.9.3] - 2021-06-23
+
 ### Added
 
 - `searchCivicaStreetNames` to forms service
@@ -15,6 +17,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 - check for successful Westpac QuickWeb payments
+
+### Dependencies
+
+- update [@sentry/browser](https://www.npmjs.com/package/@sentry/browser) to [6.7.2](https://github.com/getsentry/sentry-javascript/releases/tag/6.7.2) (from [6.5.0](https://github.com/getsentry/sentry-javascript/releases/tag/6.5.0))
+
+- update [@sentry/tracing](https://www.npmjs.com/package/@sentry/tracing) to [6.7.2](https://github.com/getsentry/sentry-javascript/releases/tag/6.7.2) (from [6.5.0](https://github.com/getsentry/sentry-javascript/releases/tag/6.5.0))
+
+- update [aws-sdk](https://www.npmjs.com/package/aws-sdk) to [2.932.0](https://github.com/aws/aws-sdk-js/releases/tag/v2.932.0) (from [2.918.0](https://github.com/aws/aws-sdk-js/releases/tag/v2.918.0))
+
+- update [query-string](https://www.npmjs.com/package/query-string) to [7.0.1](https://github.com/sindresorhus/query-string/releases/tag/v7.0.1) (from [7.0.0](https://github.com/sindresorhus/query-string/releases/tag/v7.0.0))
 
 ## [0.9.2] - 2021-06-06
 

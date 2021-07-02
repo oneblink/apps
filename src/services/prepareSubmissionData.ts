@@ -42,12 +42,12 @@ async function uploadAttachments(
 ): Promise<SubmissionTypes.NewDraftSubmission['submission']> {
   for (const formElement of formElements) {
     switch (formElement.type) {
-      case 'page': {
+      case 'page':
+      case 'section': {
         await uploadAttachments(formId, formElement.elements, submission)
         break
       }
-      case 'form':
-      case 'section': {
+      case 'form': {
         const nestedSubmission = submission[formElement.name]
         if (!nestedSubmission || typeof nestedSubmission !== 'object') {
           break

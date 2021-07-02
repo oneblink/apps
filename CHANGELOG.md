@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- attachments in sections not uploading for offline submissions
+
 ## [0.9.3] - 2021-06-23
 
 ### Added

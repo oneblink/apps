@@ -34,12 +34,11 @@ describe('findPaymentElementValue()', () => {
     return numberElement
   }
   const createSectionElement = (
-    name: string,
+    id: string,
     elements: FormTypes.FormElement[],
   ) => {
     const sectionsElement: FormTypes.SectionElement = {
-      id: name,
-      name,
+      id,
       type: 'section',
       conditionallyShow: false,
       label: 'Section',

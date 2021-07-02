@@ -23,7 +23,6 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@babel/plugin-transform-modules-commonjs": "^7.14.5",
     "@oneblink/release-cli": "^1.0.0",
     "@oneblink/types": "github:oneblink/types",
     "@types/content-disposition": "^0.5.3",

@@ -24,6 +24,7 @@ import {
 import { getUserToken } from './services/user-token'
 import Sentry from './Sentry'
 import prepareSubmissionData from './services/prepareSubmissionData'
+import { conditionalLogicService } from '@oneblink/sdk-core'
 
 let _isProcessingPendingQueue = false
 
@@ -129,9 +130,18 @@ async function submit({
       submissionEvent,
     ) => {
       if (
-        submissionEvent.type === 'CP_PAY' ||
-        submissionEvent.type === 'BPOINT' ||
-        submissionEvent.type === 'WESTPAC_QUICK_WEB'
+        (submissionEvent.type === 'CP_PAY' ||
+          submissionEvent.type === 'BPOINT' ||
+          submissionEvent.type === 'WESTPAC_QUICK_WEB') &&
+        conditionalLogicService.evaluateConditionalPredicates({
+          isConditional: !!submissionEvent.conditionallyExecute,
+          requiresAllConditionalPredicates:
+            !!submissionEvent.requiresAllConditionallyExecutePredicates,
+          conditionalPredicates:
+            submissionEvent.conditionallyExecutePredicates || [],
+          submission: formSubmission.submission,
+          formElements: formSubmission.definition.elements,
+        })
       ) {
         return submissionEvent
       }
@@ -147,7 +157,8 @@ async function submit({
   if (isOffline()) {
     if (paymentSubmissionEvent) {
       console.log(
-        'Offline - form has a payment submission event and payment has not been processed yet, return offline',
+        'Offline - form has a payment submission event that has not been processed yet, return offline',
+        { paymentSubmissionEvent },
       )
       return Object.assign({}, formSubmission, {
         isOffline: true,

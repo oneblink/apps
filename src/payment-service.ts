@@ -1,10 +1,10 @@
+import { formElementsService } from '@oneblink/sdk-core'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import {
   acknowledgeCPPayTransaction,
   verifyPaymentTransaction,
   generatePaymentConfiguration,
 } from './services/api/payment'
-import { findFormElement } from './form-service'
 import utilsService from './services/utils'
 import replaceCustomValues from './services/replace-custom-values'
 import { getPaymentValue } from './services/prepareSubmissionData'
@@ -16,10 +16,21 @@ import {
 
 const KEY = 'PAYMENT_SUBMISSION_RESULT'
 
+type HandlePaymentResult = {
+  transaction: {
+    isSuccess: boolean
+    errorMessage: string | MiscTypes.NoU
+    id: string | MiscTypes.NoU
+    creditCardMask: string | MiscTypes.NoU
+    amount: number | MiscTypes.NoU
+  }
+  submissionResult: SubmissionTypes.FormSubmissionResult
+}
+
 function verifyCPPayPayment(
   query: Record<string, unknown>,
   submissionResult: SubmissionTypes.FormSubmissionResult,
-) {
+): Promise<HandlePaymentResult> {
   return Promise.resolve()
     .then(() => {
       const { transactionToken, orderNumber: submissionId } = query
@@ -74,7 +85,7 @@ function verifyCPPayPayment(
 function verifyBpointPayment(
   query: Record<string, unknown>,
   submissionResult: SubmissionTypes.FormSubmissionResult,
-) {
+): Promise<HandlePaymentResult> {
   return Promise.resolve()
     .then(() => {
       const { ResultKey: transactionToken } = query
@@ -120,7 +131,7 @@ function verifyBpointPayment(
 function verifyWestpacQuickWebPayment(
   query: Record<string, unknown>,
   submissionResult: SubmissionTypes.FormSubmissionResult,
-) {
+): Promise<HandlePaymentResult> {
   return Promise.resolve().then(() => {
     const {
       paymentReference,
@@ -171,16 +182,7 @@ function verifyWestpacQuickWebPayment(
 
 export async function handlePaymentQuerystring(
   query: Record<string, unknown>,
-): Promise<{
-  transaction: {
-    isSuccess: boolean
-    errorMessage: string | MiscTypes.NoU
-    id: string | MiscTypes.NoU
-    creditCardMask: string | MiscTypes.NoU
-    amount: number | MiscTypes.NoU
-  }
-  submissionResult: SubmissionTypes.FormSubmissionResult
-}> {
+): Promise<HandlePaymentResult> {
   return utilsService
     .getLocalForageItem<SubmissionTypes.FormSubmissionResult | null>(KEY)
     .then((submissionResult) => {
@@ -236,7 +238,7 @@ export async function handlePaymentSubmissionEvent({
   console.log('Attempting to handle submission with payment submission event')
   const { definition: form, submission } = formSubmissionResult
 
-  const amountElement = findFormElement(
+  const amountElement = formElementsService.findFormElement(
     form.elements,
     (element) => element.id === paymentSubmissionEvent.configuration.elementId,
   )

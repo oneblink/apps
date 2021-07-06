@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- handling for multiple payment submission events with conditions
+
+### Removed
+
+- **[BREAKING]** `formService.forEachFormElementWithOptions()` moved to [@oneblink/sdk-core](npmjs.com/package/@oneblink/sdk-core)
+- **[BREAKING]** `formService.forEachFormElement()` moved to [@oneblink/sdk-core](npmjs.com/package/@oneblink/sdk-core)
+- **[BREAKING]** `formService.forEachFormElement()` moved to [@oneblink/sdk-core](npmjs.com/package/@oneblink/sdk-core)
+- **[BREAKING]** `formService.parseFormElementOptionsSet()` moved to [@oneblink/sdk-core](npmjs.com/package/@oneblink/sdk-core)
+
 ## [0.9.4] - 2021-07-02
 
 ### Fixed

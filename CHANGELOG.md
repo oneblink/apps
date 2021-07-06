@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+- [`schedulingService`](./docs/scheduling-service.md)
 - handling for multiple payment submission events with conditions
 
 ### Removed

@@ -7,7 +7,7 @@ import {
 } from './services/api/payment'
 import utilsService from './services/utils'
 import replaceCustomValues from './services/replace-custom-values'
-import { getPaymentValue } from './services/prepareSubmissionData'
+import { getRootElementValue } from './services/prepareSubmissionData'
 import {
   SubmissionTypes,
   SubmissionEventTypes,
@@ -253,7 +253,11 @@ export async function handlePaymentSubmissionEvent({
 
   console.log('Found form element for payment submission event', amountElement)
 
-  const amount = getPaymentValue(amountElement.id, form.elements, submission)
+  const amount = getRootElementValue(
+    amountElement.id,
+    form.elements,
+    submission,
+  )
 
   if (!amount) {
     console.log(

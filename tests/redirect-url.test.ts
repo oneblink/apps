@@ -30,6 +30,7 @@ describe('Form redirect URL', () => {
     submissionId: null,
     submissionTimestamp: null,
     payment: null,
+    scheduling: null,
     captchaTokens: [],
     isInPendingQueue: false,
     isOffline: false,

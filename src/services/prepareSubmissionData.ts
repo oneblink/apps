@@ -127,22 +127,22 @@ async function uploadAttachments(
   return submission
 }
 
-export function getPaymentValue(
-  amountFormElementId: string,
+export function getRootElementValue(
+  formElementId: string,
   formElements: FormTypes.FormElement[],
   submission: SubmissionTypes.FormSubmissionResult['submission'],
 ): unknown {
   for (const formElement of formElements) {
     if (formElement.type === 'page' || formElement.type === 'section') {
-      const value = getPaymentValue(
-        amountFormElementId,
+      const value = getRootElementValue(
+        formElementId,
         formElement.elements,
         submission,
       )
       if (value !== undefined) {
         return value
       }
-    } else if (formElement.id === amountFormElementId) {
+    } else if (formElement.id === formElementId) {
       return submission[formElement.name]
     }
   }

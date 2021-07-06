@@ -51,16 +51,19 @@ import { submissionService } from '@oneblink/apps'
 
 Inherits properties from [`FormSubmission`](#formsubmission)
 
-| Property                         | Type               | Description                                                                                                                                 |
-| -------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `submissionId`                   | `string` \| `null` | `null` if the form submission was unsuccessful                                                                                              |
-| `submissionTimestamp`            | `string` \| `null` | `null` if the form submission was unsuccessful                                                                                              |
-| `payment`                        | `object` \| `null` | `null` if the form submission does not require a payment                                                                                    |
-| `payment.hostedFormUrl`          | `string`           | The URL to redirect the user to to complete the payment process                                                                             |
-| `payment.paymentSubmissionEvent` | `object`           | The payment submission event                                                                                                                |
-| `keyId`                          | `string` \| `null` | The id of the Forms Developer Key used to create the token passed to [`authService.setFormsKeyToken()`](./auth-service.md#setformskeytoken) |
-| `isInPendingQueue`               | `boolean`          | `true` if the submission was not submitted yet and was added to the pending queue                                                           |
-| `isOffline`                      | `boolean`          | `true` if the submission was attempted offline                                                                                              |
+| Property                     | Type               | Description                                                                                                                                 |
+| ---------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `submissionId`               | `string` \| `null` | `null` if the form submission was unsuccessful                                                                                              |
+| `submissionTimestamp`        | `string` \| `null` | `null` if the form submission was unsuccessful                                                                                              |
+| `payment`                    | `object` \| `null` | `null` if the form submission does not require a payment                                                                                    |
+| `payment.hostedFormUrl`      | `string`           | The URL to redirect the user to to complete the payment process                                                                             |
+| `payment.submissionEvent`    | `object`           | The payment submission event                                                                                                                |
+| `scheduling`                 | `object` \| `null` | `null` if the form submission does not require a booking                                                                                    |
+| `scheduling.bookingUrl`      | `string`           | The URL to redirect the user to to complete the booking process                                                                             |
+| `scheduling.submissionEvent` | `object`           | The scheduling submission event                                                                                                             |
+| `keyId`                      | `string` \| `null` | The id of the Forms Developer Key used to create the token passed to [`authService.setFormsKeyToken()`](./auth-service.md#setformskeytoken) |
+| `isInPendingQueue`           | `boolean`          | `true` if the submission was not submitted yet and was added to the pending queue                                                           |
+| `isOffline`                  | `boolean`          | `true` if the submission was attempted offline                                                                                              |
 
 ### PendingFormSubmission
 
@@ -99,9 +102,15 @@ const submissionResult = await submissionService.submit({
   paymentReceiptUrl,
 })
 
+if (submissionResult.scheduling) {
+  // Redirect user to booking form
+  window.location.href = submissionResult.scheduling.hostedFormUrl
+  return
+}
+
 if (submissionResult.payment) {
   // Redirect user to payment form
-  window.location.href = paymentSubmissionResult.payment.hostedFormUrl
+  window.location.href = submissionResult.payment.hostedFormUrl
   return
 }
 

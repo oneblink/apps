@@ -5,17 +5,19 @@ import { SubmissionTypes, SubmissionEventTypes } from '@oneblink/types'
 
 const KEY = 'SCHEDULING_SUBMISSION_RESULT'
 
+type SchedulingBooking = {
+  startTime: Date
+  endTime: Date
+  location: string
+}
+
 async function handleSchedulingQuerystring({
   start_time,
   end_time,
   location,
   submissionId,
 }: Record<string, unknown>): Promise<{
-  booking: {
-    startTime: Date
-    endTime: Date
-    location: string
-  }
+  booking: SchedulingBooking
   formSubmissionResult: SubmissionTypes.FormSubmissionResult
 }> {
   const formSubmissionResult =
@@ -103,4 +105,8 @@ async function handleSchedulingSubmissionEvent({
   return submissionResult
 }
 
-export { handleSchedulingQuerystring, handleSchedulingSubmissionEvent }
+export {
+  SchedulingBooking,
+  handleSchedulingQuerystring,
+  handleSchedulingSubmissionEvent,
+}

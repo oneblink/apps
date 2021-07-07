@@ -250,7 +250,11 @@ async function submit({
   let paymentSubmissionResult:
     | SubmissionTypes.FormSubmissionResult
     | undefined = undefined
-  if (paymentSubmissionEvent && paymentReceiptUrl) {
+  if (
+    !schedulingSubmissionResult &&
+    paymentSubmissionEvent &&
+    paymentReceiptUrl
+  ) {
     paymentSubmissionResult = await handlePaymentSubmissionEvent({
       formSubmissionResult,
       paymentSubmissionEvent,

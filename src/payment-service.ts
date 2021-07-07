@@ -16,7 +16,7 @@ import {
 
 const KEY = 'PAYMENT_SUBMISSION_RESULT'
 
-type HandlePaymentResult = {
+export type HandlePaymentResult = {
   transaction: {
     isSuccess: boolean
     errorMessage: string | MiscTypes.NoU

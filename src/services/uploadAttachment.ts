@@ -4,6 +4,7 @@ import {
   uploadAttachment as uploadAttachmentToS3,
 } from './s3Submit'
 import tenants from '../tenants'
+import { SubmissionTypes } from '@oneblink/types'
 
 export default async function uploadAttachment(
   {
@@ -16,7 +17,7 @@ export default async function uploadAttachment(
     formId: number
   },
   abortSignal?: AbortSignal,
-) {
+): Promise<SubmissionTypes.FormSubmissionAttachment> {
   const formAttachmentS3Credentials = await generateUploadAttachmentCredentials(
     formId,
     abortSignal,

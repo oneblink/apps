@@ -14,7 +14,7 @@ const generatePaymentConfiguration = (
     crn2?: string
     crn3?: string
   },
-): Promise<{ hostedFormUrl: string; submissionId: string }> => {
+): Promise<{ hostedFormUrl: string }> => {
   let path
   switch (paymentSubmissionEvent.type) {
     case 'CP_PAY': {
@@ -37,10 +37,7 @@ const generatePaymentConfiguration = (
   }
   const url = `${tenants.current.apiOrigin}${path}`
   console.log('Attempting to generate payment configuration', url)
-  return postRequest<{ hostedFormUrl: string; submissionId: string }>(
-    url,
-    payload,
-  ).catch((error) => {
+  return postRequest<{ hostedFormUrl: string }>(url, payload).catch((error) => {
     Sentry.captureException(error)
     console.warn(
       'Error occurred while attempting to generate configuration for payment',

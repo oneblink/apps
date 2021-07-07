@@ -3,6 +3,7 @@ import * as authService from './auth-service'
 import * as draftService from './draft-service'
 import * as prefillService from './prefill-service'
 import * as paymentService from './payment-service'
+import * as schedulingService from './scheduling-service'
 import * as jobService from './job-service'
 import * as submissionService from './submission-service'
 import * as autoSaveService from './auto-save-service'
@@ -31,5 +32,6 @@ export {
   formService,
   localisationService,
   approvalsService,
+  schedulingService,
   Sentry,
 }

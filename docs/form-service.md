@@ -13,10 +13,6 @@ import { formService } from '@oneblink/apps'
 - [`getFormElementLookups()`](#getformelementlookups)
 - [`getFormElementLookupById()`](#getformelementlookupbyid)
 - [`getFormElementDynamicOptions()`](#getformelementdynamicoptions)
-- [`forEachFormElement()`](#foreachformelement)
-- [`forEachFormElementWithOptions()`](#foreachformelementwithoptions)
-- [`findFormElement()`](#findformelement)
-- [`parseFormElementOptionsSet()`](#parseformelementoptionsset)
 - [`searchGeoscapeAddresses()`](#searchgeoscapeaddresses)
 - [`getGeoscapeAddress()`](#getgeoscapeaddress)
 - [`searchPointAddresses()`](#searchpointaddresses)
@@ -95,57 +91,6 @@ for (const { elementId, options } of optionsForElementId.filter(
     }
   }
 }
-```
-
-### `forEachFormElement()`
-
-Iterate over OneBlink Form Elements. Helpful to recursively check form elements in repeatable sets and pages.
-
-```js
-formService.forEachFormElement(
-  form.elements,
-  (formElement, parentFormElements) => {
-    // Do what you need to do to each form element
-  },
-)
-```
-
-### `forEachFormElementWithOptions()`
-
-Iterate over OneBlink Form Elements that have options e.g. `'select'` type elements. Helpful to recursively check form elements in repeatable sets and pages.
-
-```js
-formService.forEachFormElementWithOptions(
-  form.elements,
-  (formElementWithOptions, parentFormElements) => {
-    // Do what you need to do to each form element
-  },
-)
-```
-
-### `findFormElement()`
-
-Iterate over OneBlink Form Elements and return one based on a predicate. Helpful to recursively find a form element in repeatable sets and pages.
-
-```js
-const formElement = formService.findFormElement(
-  form.elements,
-  (formElement, parentFormElements) => {
-    return formElement.id === 'the id you are looking for'
-  },
-)
-if (formElement) {
-  // Found the one you were looking for
-}
-```
-
-### `parseFormElementOptionsSet()`
-
-Parse unknown data as valid options for a forms element. This will always return an Array of valid options.
-
-```js
-const options = formService.parseFormElementOptionsSet(data)
-// "options" are valid for a form element
 ```
 
 ### `searchGeoscapeAddresses()`

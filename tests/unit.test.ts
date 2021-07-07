@@ -1,5 +1,5 @@
 import { FormTypes, SubmissionTypes } from '@oneblink/types'
-import { getPaymentValue } from '../src/services/prepareSubmissionData'
+import { getRootElementValue } from '../src/services/prepareSubmissionData'
 
 describe('findPaymentElementValue()', () => {
   const createTextElement = (name: string) => {
@@ -98,17 +98,17 @@ describe('findPaymentElementValue()', () => {
 
   test('should return a nested element value within a submission object', () => {
     const elementNameAndId = 'D'
-    const value = getPaymentValue(elementNameAndId, elements, submission)
+    const value = getRootElementValue(elementNameAndId, elements, submission)
     expect(value).toBe(5)
   })
   test('should return a nested element value within a submission object', () => {
     const elementNameAndId = 'B_C_C_A'
-    const value = getPaymentValue(elementNameAndId, elements, submission)
+    const value = getRootElementValue(elementNameAndId, elements, submission)
     expect(value).toBe('B_C_C_AText')
   })
 
   test('`getPaymentValueFromPath` should return undefined when given an invalid element id', () => {
-    const value = getPaymentValue('abc123', elements, submission)
+    const value = getRootElementValue('abc123', elements, submission)
     expect(value).toBe(undefined)
   })
 })

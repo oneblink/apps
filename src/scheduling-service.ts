@@ -82,7 +82,9 @@ async function handleSchedulingSubmissionEvent({
   schedulingSubmissionEvent: SubmissionEventTypes.SchedulingSubmissionEvent
   schedulingReceiptUrl: string
 }): Promise<SubmissionTypes.FormSubmissionResult> {
-  console.log('Attempting to handle submission with scheduling submission event')
+  console.log(
+    'Attempting to handle submission with scheduling submission event',
+  )
 
   const { bookingUrl } = await generateSchedulingConfiguration({
     formSubmissionResult,

@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
 
+- **[BREAKING]** `paymentService.handlePaymentSubmissionEvent()`
 - **[BREAKING]** `formService.forEachFormElementWithOptions()` moved to [@oneblink/sdk-core](npmjs.com/package/@oneblink/sdk-core)
 - **[BREAKING]** `formService.forEachFormElement()` moved to [@oneblink/sdk-core](npmjs.com/package/@oneblink/sdk-core)
 - **[BREAKING]** `formService.forEachFormElement()` moved to [@oneblink/sdk-core](npmjs.com/package/@oneblink/sdk-core)

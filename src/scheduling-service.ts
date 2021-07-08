@@ -1,7 +1,13 @@
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { generateSchedulingConfiguration } from './services/api/scheduling'
 import utilsService from './services/utils'
-import { SubmissionTypes, SubmissionEventTypes } from '@oneblink/types'
+import { SubmissionEventTypes } from '@oneblink/types'
+import { conditionalLogicService } from '@oneblink/sdk-core'
+import {
+  checkForPaymentSubmissionEvent,
+  handlePaymentSubmissionEvent,
+} from './payment-service'
+import { FormSubmissionResult, NewDraftSubmission } from './types/submissions'
 
 const KEY = 'SCHEDULING_SUBMISSION_RESULT'
 
@@ -18,20 +24,24 @@ async function handleSchedulingQuerystring({
   submissionId,
 }: Record<string, unknown>): Promise<{
   booking: SchedulingBooking
-  formSubmissionResult: SubmissionTypes.FormSubmissionResult
+  formSubmissionResult: FormSubmissionResult
 }> {
-  const formSubmissionResult =
-    await utilsService.getLocalForageItem<SubmissionTypes.FormSubmissionResult | null>(
-      KEY,
-    )
+  const schedulingSubmissionResultConfiguration =
+    await utilsService.getLocalForageItem<{
+      formSubmissionResult: FormSubmissionResult
+      paymentReceiptUrl?: string
+    } | null>(KEY)
   // If the current transaction does not match the submission
   // we will display message to user indicating
   // they are looking for the wrong transaction receipt.
-  if (!formSubmissionResult) {
+  if (!schedulingSubmissionResultConfiguration) {
     throw new OneBlinkAppsError(
       'It looks like you are attempting to view a scheduling receipt for an unknown booking.',
     )
   }
+
+  const { formSubmissionResult, paymentReceiptUrl } =
+    schedulingSubmissionResultConfiguration
   if (
     !formSubmissionResult.scheduling ||
     !formSubmissionResult.scheduling.submissionEvent
@@ -58,6 +68,18 @@ async function handleSchedulingQuerystring({
     )
   }
 
+  if (paymentReceiptUrl) {
+    const paymentSubmissionEventConfiguration =
+      checkForPaymentSubmissionEvent(formSubmissionResult)
+    if (paymentSubmissionEventConfiguration) {
+      formSubmissionResult.payment = await handlePaymentSubmissionEvent({
+        ...paymentSubmissionEventConfiguration,
+        formSubmissionResult,
+        paymentReceiptUrl,
+      })
+    }
+  }
+
   await utilsService.removeLocalForageItem(KEY)
 
   const booking = {
@@ -73,15 +95,38 @@ async function handleSchedulingQuerystring({
   }
 }
 
+function checkForSchedulingSubmissionEvent(
+  newDraftSubmission: NewDraftSubmission,
+): SubmissionEventTypes.SchedulingSubmissionEvent | undefined {
+  const submissionEvents = newDraftSubmission.definition.submissionEvents || []
+  for (const submissionEvent of submissionEvents) {
+    if (
+      submissionEvent.type === 'SCHEDULING' &&
+      conditionalLogicService.evaluateConditionalPredicates({
+        isConditional: !!submissionEvent.conditionallyExecute,
+        requiresAllConditionalPredicates:
+          !!submissionEvent.requiresAllConditionallyExecutePredicates,
+        conditionalPredicates:
+          submissionEvent.conditionallyExecutePredicates || [],
+        submission: newDraftSubmission.submission,
+        formElements: newDraftSubmission.definition.elements,
+      })
+    ) {
+      console.log('Form has a scheduling submission event', submissionEvent)
+      return submissionEvent
+    }
+  }
+}
+
 async function handleSchedulingSubmissionEvent({
   formSubmissionResult,
   schedulingSubmissionEvent,
   schedulingReceiptUrl,
 }: {
-  formSubmissionResult: SubmissionTypes.FormSubmissionResult
+  formSubmissionResult: FormSubmissionResult
   schedulingSubmissionEvent: SubmissionEventTypes.SchedulingSubmissionEvent
   schedulingReceiptUrl: string
-}): Promise<SubmissionTypes.FormSubmissionResult> {
+}): Promise<FormSubmissionResult['scheduling']> {
   console.log(
     'Attempting to handle submission with scheduling submission event',
   )
@@ -97,18 +142,17 @@ async function handleSchedulingSubmissionEvent({
     bookingUrl,
   }
   console.log('Created scheduling configuration to start booking', scheduling)
-  const submissionResult = {
+  await utilsService.setLocalForageItem(KEY, {
     ...formSubmissionResult,
     scheduling,
-  }
+  })
 
-  await utilsService.setLocalForageItem(KEY, submissionResult)
-
-  return submissionResult
+  return scheduling
 }
 
 export {
   SchedulingBooking,
   handleSchedulingQuerystring,
+  checkForSchedulingSubmissionEvent,
   handleSchedulingSubmissionEvent,
 }

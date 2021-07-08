@@ -7,10 +7,11 @@ import tenants from '../../tenants'
 import { getUserToken } from '../user-token'
 import Sentry from '../../Sentry'
 import prepareSubmissionData from '../prepareSubmissionData'
+import { DraftSubmission } from '../../types/submissions'
 
 const uploadDraftData = async (
   draft: SubmissionTypes.FormsAppDraft,
-  draftSubmission: SubmissionTypes.DraftSubmission,
+  draftSubmission: DraftSubmission,
 ): Promise<string> => {
   const url = `${tenants.current.apiOrigin}/forms/${draft.formId}/upload-draft-data-credentials`
   console.log('Attempting to get Credentials to upload draft data', url)

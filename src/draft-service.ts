@@ -17,6 +17,7 @@ import {
 } from './services/draft-data-store'
 import { MiscTypes, SubmissionTypes } from '@oneblink/types'
 import Sentry from './Sentry'
+import { DraftSubmission } from './types/submissions'
 
 interface DraftsData {
   createdAt?: string
@@ -64,7 +65,7 @@ function executeDraftsListeners(draftsData: DraftsData) {
 
 async function upsertDraftByKey(
   draft: SubmissionTypes.FormsAppDraft,
-  draftSubmission: SubmissionTypes.DraftSubmission,
+  draftSubmission: DraftSubmission,
 ): Promise<string> {
   if (!draftSubmission.keyId) {
     throw new Error('Could not create draft for key without a keyId')
@@ -85,7 +86,7 @@ async function upsertDraftByKey(
 
 export async function addDraft(
   newDraft: SubmissionTypes.NewFormsAppDraft,
-  draftSubmission: SubmissionTypes.DraftSubmission,
+  draftSubmission: DraftSubmission,
 ): Promise<void> {
   const draft: SubmissionTypes.FormsAppDraft = {
     ...newDraft,

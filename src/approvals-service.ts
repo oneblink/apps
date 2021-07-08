@@ -2,17 +2,16 @@ import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { isOffline } from './offline-service'
 import { getRequest, putRequest } from './services/fetch'
 import tenants from './tenants'
-import { SubmissionTypes, FormTypes, ApprovalTypes } from '@oneblink/types'
+import { SubmissionTypes, ApprovalTypes } from '@oneblink/types'
 import { generateRetrieveApprovalSubmissionCredentials } from './services/api/submissions'
 import { downloadPreFillData } from './services/s3Submit'
 import Sentry from './Sentry'
+import {
+  FormSubmissionApprovalsResponse,
+  FormSubmissionApprovalResponse,
+} from './types/approvals'
 
-export interface FormSubmissionApprovalsResponse {
-  forms: FormTypes.Form[]
-  formSubmissionApprovals: ApprovalTypes.FormSubmissionApproval[]
-  formApprovalFlowInstances: ApprovalTypes.FormApprovalFlowInstance[]
-  formSubmissionMeta: SubmissionTypes.FormSubmissionMeta[]
-}
+export { FormSubmissionApprovalsResponse }
 export async function getFormSubmissionApprovals(
   formsAppId: number,
 ): Promise<FormSubmissionApprovalsResponse> {
@@ -74,18 +73,7 @@ export async function getFormSubmissionApprovals(
   }
 }
 
-export interface FormApprovalFlowInstanceHistory {
-  formApprovalFlowInstance: ApprovalTypes.FormApprovalFlowInstance
-  formSubmissionMeta: SubmissionTypes.FormSubmissionMeta
-  formSubmissionApprovals: ApprovalTypes.FormSubmissionApproval[]
-}
-export interface FormSubmissionApprovalResponse {
-  formSubmissionMeta: SubmissionTypes.FormSubmissionMeta
-  formApprovalFlowInstance: ApprovalTypes.FormApprovalFlowInstance
-  formSubmissionApproval: ApprovalTypes.FormSubmissionApproval
-  form: FormTypes.Form
-  history: FormApprovalFlowInstanceHistory[]
-}
+export { FormSubmissionApprovalResponse }
 export async function getFormSubmissionApproval(
   formSubmissionApprovalId: string,
 ): Promise<FormSubmissionApprovalResponse> {

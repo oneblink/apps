@@ -2,13 +2,16 @@ import { isOffline } from './offline-service'
 import { getFormsKeyId, isLoggedIn } from './auth-service'
 import {
   registerPendingQueueListener,
-  addSubmissionToPendingQueue,
+  addFormSubmissionToPendingQueue,
   getPendingQueueSubmissions,
-  getPendingQueueSubmission,
+  getFormSubmission,
   updatePendingQueueSubmission,
   deletePendingQueueSubmission,
 } from './services/pending-queue'
-import { handlePaymentSubmissionEvent } from './payment-service'
+import {
+  checkForPaymentSubmissionEvent,
+  handlePaymentSubmissionEvent,
+} from './payment-service'
 import { generateSubmissionCredentials } from './services/api/submissions'
 import { uploadFormSubmission } from './services/s3Submit'
 import uploadAttachment from './services/uploadAttachment'
@@ -16,16 +19,22 @@ import { deleteDraft } from './draft-service'
 import { removePrefillFormData } from './prefill-service'
 import replaceCustomValues from './services/replace-custom-values'
 import recentlySubmittedJobsService from './services/recently-submitted-jobs'
-import {
-  FormTypes,
-  SubmissionEventTypes,
-  SubmissionTypes,
-} from '@oneblink/types'
+import { FormTypes } from '@oneblink/types'
 import { getUserToken } from './services/user-token'
 import Sentry from './Sentry'
 import prepareSubmissionData from './services/prepareSubmissionData'
-import { conditionalLogicService } from '@oneblink/sdk-core'
-import { handleSchedulingSubmissionEvent } from './scheduling-service'
+import {
+  handleSchedulingSubmissionEvent,
+  checkForSchedulingSubmissionEvent,
+} from './scheduling-service'
+import {
+  PendingFormSubmission,
+  FormSubmission,
+  FormSubmissionResult,
+  NewDraftSubmission,
+  NewFormSubmission,
+  DraftSubmission,
+} from './types/submissions'
 
 let _isProcessingPendingQueue = false
 
@@ -64,10 +73,10 @@ async function processPendingQueue(): Promise<void> {
         pendingQueueSubmission,
       )
       // Get Submission again to get ensure we are submitting all the data
-      const existingSubmission = await getPendingQueueSubmission(
+      const formSubmission = await getFormSubmission(
         pendingQueueSubmission.pendingTimestamp,
       )
-      if (!existingSubmission) {
+      if (!formSubmission) {
         console.log(
           'Skipping submission as it has already been processed',
           pendingQueueSubmission,
@@ -82,8 +91,8 @@ async function processPendingQueue(): Promise<void> {
         pendingQueueSubmission,
       )
 
-      const submission = await prepareSubmissionData(existingSubmission)
-      await submit({ formSubmission: { ...existingSubmission, submission } })
+      const submission = await prepareSubmissionData(formSubmission)
+      await submit({ formSubmission: { ...formSubmission, submission } })
 
       await deletePendingQueueSubmission(
         pendingQueueSubmission.pendingTimestamp,
@@ -121,83 +130,22 @@ async function submit({
   paymentReceiptUrl,
   schedulingReceiptUrl,
 }: {
-  formSubmission: SubmissionTypes.FormSubmission
+  formSubmission: FormSubmission
   paymentReceiptUrl?: string
   schedulingReceiptUrl?: string
-}): Promise<SubmissionTypes.FormSubmissionResult> {
+}): Promise<FormSubmissionResult> {
   formSubmission.keyId = getFormsKeyId() || undefined
-  const submissionEvents = formSubmission.definition.submissionEvents || []
-  const paymentSubmissionEvent = submissionEvents.reduce(
-    (
-      p: SubmissionEventTypes.PaymentSubmissionEvent | null,
-      submissionEvent,
-    ) => {
-      if (p) {
-        return p
-      }
-      if (
-        (submissionEvent.type === 'CP_PAY' ||
-          submissionEvent.type === 'BPOINT' ||
-          submissionEvent.type === 'WESTPAC_QUICK_WEB') &&
-        conditionalLogicService.evaluateConditionalPredicates({
-          isConditional: !!submissionEvent.conditionallyExecute,
-          requiresAllConditionalPredicates:
-            !!submissionEvent.requiresAllConditionallyExecutePredicates,
-          conditionalPredicates:
-            submissionEvent.conditionallyExecutePredicates || [],
-          submission: formSubmission.submission,
-          formElements: formSubmission.definition.elements,
-        })
-      ) {
-        return submissionEvent
-      }
-      return p
-    },
-    null,
-  )
+  const paymentSubmissionEventConfiguration =
+    checkForPaymentSubmissionEvent(formSubmission)
 
-  if (paymentSubmissionEvent) {
-    console.log('Form has a payment submission event', paymentSubmissionEvent)
-  }
-
-  const schedulingSubmissionEvent = submissionEvents.reduce(
-    (
-      memo: SubmissionEventTypes.SchedulingSubmissionEvent | null,
-      submissionEvent,
-    ) => {
-      if (memo) {
-        return memo
-      }
-      if (
-        submissionEvent.type === 'SCHEDULING' &&
-        conditionalLogicService.evaluateConditionalPredicates({
-          isConditional: !!submissionEvent.conditionallyExecute,
-          requiresAllConditionalPredicates:
-            !!submissionEvent.requiresAllConditionallyExecutePredicates,
-          conditionalPredicates:
-            submissionEvent.conditionallyExecutePredicates || [],
-          submission: formSubmission.submission,
-          formElements: formSubmission.definition.elements,
-        })
-      ) {
-        return submissionEvent
-      }
-      return memo
-    },
-    null,
-  )
-  if (schedulingSubmissionEvent) {
-    console.log(
-      'Form has a scheduling submission event',
-      schedulingSubmissionEvent,
-    )
-  }
+  const schedulingSubmissionEvent =
+    checkForSchedulingSubmissionEvent(formSubmission)
 
   if (isOffline()) {
-    if (paymentSubmissionEvent || schedulingSubmissionEvent) {
+    if (paymentSubmissionEventConfiguration || schedulingSubmissionEvent) {
       console.log(
         'Offline - form has a payment/scheduling submission event that has not been processed yet, return offline',
-        { paymentSubmissionEvent, schedulingSubmissionEvent },
+        { paymentSubmissionEventConfiguration, schedulingSubmissionEvent },
       )
       return Object.assign({}, formSubmission, {
         isOffline: true,
@@ -210,11 +158,7 @@ async function submit({
     }
 
     console.log('Offline - saving submission to pending queue..')
-    await addSubmissionToPendingQueue(
-      Object.assign({}, formSubmission, {
-        pendingTimestamp: new Date().toISOString(),
-      }),
-    )
+    await addFormSubmissionToPendingQueue(formSubmission)
     return Object.assign({}, formSubmission, {
       isOffline: true,
       isInPendingQueue: true,
@@ -227,7 +171,7 @@ async function submit({
 
   const data = await generateSubmissionCredentials(formSubmission)
 
-  const formSubmissionResult = {
+  const formSubmissionResult: FormSubmissionResult = {
     ...formSubmission,
     payment: null,
     scheduling: null,
@@ -237,27 +181,16 @@ async function submit({
     submissionId: data.submissionId,
   }
 
-  let schedulingSubmissionResult:
-    | SubmissionTypes.FormSubmissionResult
-    | undefined = undefined
   if (schedulingSubmissionEvent && schedulingReceiptUrl) {
-    schedulingSubmissionResult = await handleSchedulingSubmissionEvent({
+    formSubmissionResult.scheduling = await handleSchedulingSubmissionEvent({
       formSubmissionResult,
       schedulingSubmissionEvent,
       schedulingReceiptUrl,
     })
-  }
-  let paymentSubmissionResult:
-    | SubmissionTypes.FormSubmissionResult
-    | undefined = undefined
-  if (
-    !schedulingSubmissionResult &&
-    paymentSubmissionEvent &&
-    paymentReceiptUrl
-  ) {
-    paymentSubmissionResult = await handlePaymentSubmissionEvent({
+  } else if (paymentSubmissionEventConfiguration && paymentReceiptUrl) {
+    formSubmissionResult.payment = await handlePaymentSubmissionEvent({
+      ...paymentSubmissionEventConfiguration,
       formSubmissionResult,
-      paymentSubmissionEvent,
       paymentReceiptUrl,
     })
   }
@@ -289,13 +222,6 @@ async function submit({
   }
   if (formSubmission.jobId) {
     await recentlySubmittedJobsService.add(formSubmission.jobId)
-  }
-
-  if (schedulingSubmissionResult) {
-    return schedulingSubmissionResult
-  }
-  if (paymentSubmissionResult) {
-    return paymentSubmissionResult
   }
 
   return formSubmissionResult
@@ -340,7 +266,7 @@ async function executeCancelAction(
   },
   push: (url: string) => void,
 ): Promise<void> {
-  const formSubmissionResult: SubmissionTypes.FormSubmissionResult = {
+  const formSubmissionResult: FormSubmissionResult = {
     ...options,
     formsAppId: NaN,
     draftId: null,
@@ -366,7 +292,7 @@ async function executeCancelAction(
 }
 
 async function executePostSubmissionAction(
-  submissionResult: SubmissionTypes.FormSubmissionResult,
+  submissionResult: FormSubmissionResult,
   push: (url: string) => void,
 ): Promise<void> {
   console.log('Attempting to run post submission action')
@@ -385,7 +311,7 @@ async function executePostSubmissionAction(
 }
 
 async function executeAction(
-  submissionResult: SubmissionTypes.FormSubmissionResult,
+  submissionResult: FormSubmissionResult,
   action: FormTypes.FormPostSubmissionAction,
   redirectUrl: string | undefined,
   push: (url: string) => void,
@@ -435,4 +361,10 @@ export {
   registerPendingQueueListener,
   processPendingQueue,
   uploadAttachment,
+  NewDraftSubmission,
+  NewFormSubmission,
+  DraftSubmission,
+  FormSubmission,
+  FormSubmissionResult,
+  PendingFormSubmission,
 }

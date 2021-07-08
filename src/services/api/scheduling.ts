@@ -1,13 +1,14 @@
-import { SubmissionEventTypes, SubmissionTypes } from '@oneblink/types'
+import { SubmissionEventTypes } from '@oneblink/types'
 import { postRequest } from '../fetch'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 import Sentry from '../../Sentry'
 import { getRootElementValue } from '../prepareSubmissionData'
+import { FormSubmissionResult } from '../../types/submissions'
 
 function getBookingQuerystringValue(
   elementId: string | undefined,
-  formSubmissionResult: SubmissionTypes.FormSubmissionResult,
+  formSubmissionResult: FormSubmissionResult,
 ) {
   if (elementId) {
     const value = getRootElementValue(
@@ -26,7 +27,7 @@ function generateSchedulingConfiguration({
   schedulingSubmissionEvent,
   schedulingReceiptUrl,
 }: {
-  formSubmissionResult: SubmissionTypes.FormSubmissionResult
+  formSubmissionResult: FormSubmissionResult
   schedulingSubmissionEvent: SubmissionEventTypes.SchedulingSubmissionEvent
   schedulingReceiptUrl: string
 }): Promise<{ bookingUrl: string }> {

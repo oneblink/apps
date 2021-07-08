@@ -1,12 +1,11 @@
-import { SubmissionTypes, FormTypes } from '@oneblink/types'
+import { FormTypes } from '@oneblink/types'
+import { FormSubmissionResult, NewDraftSubmission } from '../types/submissions'
 import uploadAttachment from './uploadAttachment'
 
 export default async function prepareSubmissionData({
   definition,
   submission,
-}: SubmissionTypes.NewDraftSubmission): Promise<
-  SubmissionTypes.NewDraftSubmission['submission']
-> {
+}: NewDraftSubmission): Promise<NewDraftSubmission['submission']> {
   return uploadAttachments(definition.id, definition.elements, submission)
 }
 
@@ -38,8 +37,8 @@ async function maybeUploadAttachment(
 async function uploadAttachments(
   formId: number,
   formElements: FormTypes.FormElement[],
-  submission: SubmissionTypes.NewDraftSubmission['submission'],
-): Promise<SubmissionTypes.NewDraftSubmission['submission']> {
+  submission: NewDraftSubmission['submission'],
+): Promise<NewDraftSubmission['submission']> {
   for (const formElement of formElements) {
     switch (formElement.type) {
       case 'page':
@@ -55,7 +54,7 @@ async function uploadAttachments(
         await uploadAttachments(
           formId,
           formElement.elements || [],
-          nestedSubmission as SubmissionTypes.NewDraftSubmission['submission'],
+          nestedSubmission as NewDraftSubmission['submission'],
         )
         break
       }
@@ -130,7 +129,7 @@ async function uploadAttachments(
 export function getRootElementValue(
   formElementId: string,
   formElements: FormTypes.FormElement[],
-  submission: SubmissionTypes.FormSubmissionResult['submission'],
+  submission: FormSubmissionResult['submission'],
 ): unknown {
   for (const formElement of formElements) {
     if (formElement.type === 'page' || formElement.type === 'section') {

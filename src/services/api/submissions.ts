@@ -3,6 +3,7 @@ import { HTTPError, postRequest } from '../fetch'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 import Sentry from '../../Sentry'
+import { FormSubmission } from '../../types/submissions'
 
 const getBadRequestError = (error: HTTPError) => {
   return new OneBlinkAppsError(
@@ -75,13 +76,13 @@ const handleError = (error: HTTPError) => {
 }
 
 export const generateSubmissionCredentials = async (
-  submissionData: SubmissionTypes.FormSubmission,
+  formSubmission: FormSubmission,
 ): Promise<SubmissionTypes.S3UploadCredentials> => {
   return postRequest<SubmissionTypes.S3UploadCredentials>(
-    `${tenants.current.apiOrigin}/forms/${submissionData.definition.id}/submission-credentials`,
+    `${tenants.current.apiOrigin}/forms/${formSubmission.definition.id}/submission-credentials`,
     {
-      formsAppId: submissionData.formsAppId,
-      recaptchas: (submissionData.captchaTokens || []).map((token: string) => ({
+      formsAppId: formSubmission.formsAppId,
+      recaptchas: (formSubmission.captchaTokens || []).map((token: string) => ({
         token,
       })),
     },

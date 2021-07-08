@@ -135,7 +135,7 @@ export async function addDraft(
 
 export async function updateDraft(
   draft: SubmissionTypes.FormsAppDraft,
-  draftSubmission: SubmissionTypes.DraftSubmission,
+  draftSubmission: DraftSubmission,
 ): Promise<void> {
   draftSubmission.keyId = getFormsKeyId() || undefined
   if (draftSubmission.keyId) {
@@ -220,7 +220,7 @@ export async function getDraftAndData(
   draftId: string | MiscTypes.NoU,
 ): Promise<{
   draft: SubmissionTypes.FormsAppDraft
-  draftData: SubmissionTypes.FormSubmission['submission']
+  draftData: DraftSubmission['submission']
 } | null> {
   if (!draftId) {
     return null

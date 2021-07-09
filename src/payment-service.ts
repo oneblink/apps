@@ -1,4 +1,5 @@
 import {
+  typeCastService,
   conditionalLogicService,
   formElementsService,
 } from '@oneblink/sdk-core'
@@ -204,7 +205,6 @@ export async function handlePaymentQuerystring(
         }
         case 'WESTPAC_QUICK_WEB': {
           return verifyWestpacQuickWebPayment(query, submissionResult)
-          break
         }
         default: {
           throw new OneBlinkAppsError(
@@ -233,21 +233,23 @@ export function checkForPaymentSubmissionEvent(formSubmission: FormSubmission):
       if (p) {
         return p
       }
+      const paymentSubmissionEvent =
+        typeCastService.submissionEvents.toPaymentSubmissionEvent(
+          submissionEvent,
+        )
       if (
-        (submissionEvent.type === 'CP_PAY' ||
-          submissionEvent.type === 'BPOINT' ||
-          submissionEvent.type === 'WESTPAC_QUICK_WEB') &&
+        paymentSubmissionEvent &&
         conditionalLogicService.evaluateConditionalPredicates({
-          isConditional: !!submissionEvent.conditionallyExecute,
+          isConditional: !!paymentSubmissionEvent.conditionallyExecute,
           requiresAllConditionalPredicates:
-            !!submissionEvent.requiresAllConditionallyExecutePredicates,
+            !!paymentSubmissionEvent.requiresAllConditionallyExecutePredicates,
           conditionalPredicates:
-            submissionEvent.conditionallyExecutePredicates || [],
+            paymentSubmissionEvent.conditionallyExecutePredicates || [],
           submission: formSubmission.submission,
           formElements: formSubmission.definition.elements,
         })
       ) {
-        return submissionEvent
+        return paymentSubmissionEvent
       }
       return p
     },

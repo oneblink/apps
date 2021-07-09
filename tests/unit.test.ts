@@ -1,5 +1,6 @@
-import { FormTypes, SubmissionTypes } from '@oneblink/types'
+import { FormTypes } from '@oneblink/types'
 import { getRootElementValue } from '../src/services/prepareSubmissionData'
+import { FormSubmissionResult } from '../src/types/submissions'
 
 describe('findPaymentElementValue()', () => {
   const createTextElement = (name: string) => {
@@ -82,7 +83,7 @@ describe('findPaymentElementValue()', () => {
     ]),
     createPageElement('Page2', [createTextElement('Page2Text')]),
   ]
-  const submission: SubmissionTypes.FormSubmissionResult['submission'] = {
+  const submission: FormSubmissionResult['submission'] = {
     A: 'AText',
     B_A: 'B_AText',
     B_B_A: 'B_B_AText',

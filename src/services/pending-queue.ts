@@ -1,14 +1,7 @@
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import utilsService from './utils'
-import { SubmissionTypes } from '@oneblink/types'
 import Sentry from '../Sentry'
-
-type PendingFormSubmissionResultWithOptionalSubmission = Pick<
-  SubmissionTypes.PendingFormSubmissionResult,
-  Exclude<keyof SubmissionTypes.PendingFormSubmissionResult, 'submission'>
-> & {
-  submission?: SubmissionTypes.PendingFormSubmissionResult['submission']
-}
+import { FormSubmission, PendingFormSubmission } from '../types/submissions'
 
 function errorHandler(error: Error): Error {
   Sentry.captureException(error)
@@ -26,13 +19,11 @@ function errorHandler(error: Error): Error {
 }
 
 const pendingQueueListeners: Array<
-  (results: PendingFormSubmissionResultWithOptionalSubmission[]) => unknown
+  (results: PendingFormSubmission[]) => unknown
 > = []
 
 export function registerPendingQueueListener(
-  listener: (
-    results: PendingFormSubmissionResultWithOptionalSubmission[],
-  ) => unknown,
+  listener: (results: PendingFormSubmission[]) => unknown,
 ): () => void {
   pendingQueueListeners.push(listener)
 
@@ -44,29 +35,29 @@ export function registerPendingQueueListener(
   }
 }
 
-function executePendingQueueListeners(
-  newSubmissions: PendingFormSubmissionResultWithOptionalSubmission[],
-) {
+function executePendingQueueListeners(newSubmissions: PendingFormSubmission[]) {
   console.log('Pending Queue submissions have been updated', newSubmissions)
   for (const pendingQueueListener of pendingQueueListeners) {
     pendingQueueListener(newSubmissions)
   }
 }
 
-export async function addSubmissionToPendingQueue(
-  formSubmissionResult: SubmissionTypes.PendingFormSubmissionResult,
+export async function addFormSubmissionToPendingQueue(
+  formSubmission: FormSubmission,
 ) {
+  const pendingTimestamp = new Date().toISOString()
   try {
     await utilsService.setLocalForageItem(
-      `SUBMISSION_${formSubmissionResult.pendingTimestamp}`,
-      formSubmissionResult,
+      `SUBMISSION_${pendingTimestamp}`,
+      formSubmission,
     )
-    const submissions: PendingFormSubmissionResultWithOptionalSubmission[] =
+    const submissions: PendingFormSubmission[] =
       await getPendingQueueSubmissions()
     submissions.push({
-      ...formSubmissionResult,
+      ...formSubmission,
+      pendingTimestamp,
       submission: undefined,
-    })
+    } as PendingFormSubmission)
     await utilsService.localForage.setItem('submissions', submissions)
     executePendingQueueListeners(submissions)
   } catch (error) {
@@ -77,7 +68,7 @@ export async function addSubmissionToPendingQueue(
 
 export async function updatePendingQueueSubmission(
   pendingTimestamp: string,
-  newSubmission: SubmissionTypes.PendingFormSubmissionResult,
+  newSubmission: PendingFormSubmission,
 ) {
   try {
     const submissions = await getPendingQueueSubmissions()
@@ -95,17 +86,15 @@ export async function updatePendingQueueSubmission(
   }
 }
 
-export function getPendingQueueSubmissions(): Promise<
-  SubmissionTypes.PendingFormSubmissionResult[]
-> {
+export function getPendingQueueSubmissions(): Promise<PendingFormSubmission[]> {
   return utilsService.localForage
     .getItem('submissions')
     .then((submissions) => (Array.isArray(submissions) ? submissions : []))
 }
 
-export function getPendingQueueSubmission(
+export function getFormSubmission(
   pendingTimestamp: string,
-): Promise<SubmissionTypes.PendingFormSubmissionResult | null> {
+): Promise<FormSubmission | null> {
   return utilsService.getLocalForageItem(`SUBMISSION_${pendingTimestamp}`)
 }
 
@@ -114,8 +103,7 @@ export async function deletePendingQueueSubmission(pendingTimestamp: string) {
     await utilsService.removeLocalForageItem(`SUBMISSION_${pendingTimestamp}`)
     const submissions = await getPendingQueueSubmissions()
     const newSubmissions = submissions.filter(
-      (submission: SubmissionTypes.PendingFormSubmissionResult) =>
-        submission.pendingTimestamp !== pendingTimestamp,
+      (submission) => submission.pendingTimestamp !== pendingTimestamp,
     )
     await utilsService.localForage.setItem('submissions', newSubmissions)
     executePendingQueueListeners(newSubmissions)

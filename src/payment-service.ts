@@ -1,4 +1,8 @@
-import { formElementsService } from '@oneblink/sdk-core'
+import {
+  typeCastService,
+  conditionalLogicService,
+  formElementsService,
+} from '@oneblink/sdk-core'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import {
   acknowledgeCPPayTransaction,
@@ -8,28 +12,17 @@ import {
 import utilsService from './services/utils'
 import replaceCustomValues from './services/replace-custom-values'
 import { getRootElementValue } from './services/prepareSubmissionData'
-import {
-  SubmissionTypes,
-  SubmissionEventTypes,
-  MiscTypes,
-} from '@oneblink/types'
+import { SubmissionEventTypes } from '@oneblink/types'
+import { FormSubmission, FormSubmissionResult } from './types/submissions'
+import { HandlePaymentResult } from './types/payments'
 
 const KEY = 'PAYMENT_SUBMISSION_RESULT'
 
-export type HandlePaymentResult = {
-  transaction: {
-    isSuccess: boolean
-    errorMessage: string | MiscTypes.NoU
-    id: string | MiscTypes.NoU
-    creditCardMask: string | MiscTypes.NoU
-    amount: number | MiscTypes.NoU
-  }
-  submissionResult: SubmissionTypes.FormSubmissionResult
-}
+export { HandlePaymentResult }
 
 function verifyCPPayPayment(
   query: Record<string, unknown>,
-  submissionResult: SubmissionTypes.FormSubmissionResult,
+  submissionResult: FormSubmissionResult,
 ): Promise<HandlePaymentResult> {
   return Promise.resolve()
     .then(() => {
@@ -84,7 +77,7 @@ function verifyCPPayPayment(
 
 function verifyBpointPayment(
   query: Record<string, unknown>,
-  submissionResult: SubmissionTypes.FormSubmissionResult,
+  submissionResult: FormSubmissionResult,
 ): Promise<HandlePaymentResult> {
   return Promise.resolve()
     .then(() => {
@@ -130,7 +123,7 @@ function verifyBpointPayment(
 
 function verifyWestpacQuickWebPayment(
   query: Record<string, unknown>,
-  submissionResult: SubmissionTypes.FormSubmissionResult,
+  submissionResult: FormSubmissionResult,
 ): Promise<HandlePaymentResult> {
   return Promise.resolve().then(() => {
     const {
@@ -184,7 +177,7 @@ export async function handlePaymentQuerystring(
   query: Record<string, unknown>,
 ): Promise<HandlePaymentResult> {
   return utilsService
-    .getLocalForageItem<SubmissionTypes.FormSubmissionResult | null>(KEY)
+    .getLocalForageItem<FormSubmissionResult | null>(KEY)
     .then((submissionResult) => {
       // If the current transaction does not match the submission
       // we will display message to user indicating
@@ -212,7 +205,6 @@ export async function handlePaymentQuerystring(
         }
         case 'WESTPAC_QUICK_WEB': {
           return verifyWestpacQuickWebPayment(query, submissionResult)
-          break
         }
         default: {
           throw new OneBlinkAppsError(
@@ -226,20 +218,54 @@ export async function handlePaymentQuerystring(
     )
 }
 
-export async function handlePaymentSubmissionEvent({
-  formSubmissionResult,
-  paymentSubmissionEvent,
-  paymentReceiptUrl,
-}: {
-  formSubmissionResult: SubmissionTypes.FormSubmissionResult
-  paymentSubmissionEvent: SubmissionEventTypes.PaymentSubmissionEvent
-  paymentReceiptUrl: string
-}): Promise<SubmissionTypes.FormSubmissionResult | undefined> {
-  console.log('Attempting to handle submission with payment submission event')
-  const { definition: form, submission } = formSubmissionResult
+export function checkForPaymentSubmissionEvent(formSubmission: FormSubmission):
+  | {
+      paymentSubmissionEvent: SubmissionEventTypes.PaymentSubmissionEvent
+      amount: number
+    }
+  | undefined {
+  const submissionEvents = formSubmission.definition.submissionEvents || []
+  const paymentSubmissionEvent = submissionEvents.reduce(
+    (
+      p: SubmissionEventTypes.PaymentSubmissionEvent | null,
+      submissionEvent,
+    ) => {
+      if (p) {
+        return p
+      }
+      const paymentSubmissionEvent =
+        typeCastService.submissionEvents.toPaymentSubmissionEvent(
+          submissionEvent,
+        )
+      if (
+        paymentSubmissionEvent &&
+        conditionalLogicService.evaluateConditionalPredicates({
+          isConditional: !!paymentSubmissionEvent.conditionallyExecute,
+          requiresAllConditionalPredicates:
+            !!paymentSubmissionEvent.requiresAllConditionallyExecutePredicates,
+          conditionalPredicates:
+            paymentSubmissionEvent.conditionallyExecutePredicates || [],
+          submission: formSubmission.submission,
+          formElements: formSubmission.definition.elements,
+        })
+      ) {
+        return paymentSubmissionEvent
+      }
+      return p
+    },
+    null,
+  )
+
+  if (!paymentSubmissionEvent) {
+    return
+  }
+
+  console.log(
+    'Checking if submission with payment submission event needs processing',
+  )
 
   const amountElement = formElementsService.findFormElement(
-    form.elements,
+    formSubmission.definition.elements,
     (element) => element.id === paymentSubmissionEvent.configuration.elementId,
   )
   if (!amountElement || amountElement.type === 'page') {
@@ -255,8 +281,8 @@ export async function handlePaymentSubmissionEvent({
 
   const amount = getRootElementValue(
     amountElement.id,
-    form.elements,
-    submission,
+    formSubmission.definition.elements,
+    formSubmission.submission,
   )
 
   if (!amount) {
@@ -275,6 +301,25 @@ export async function handlePaymentSubmissionEvent({
     )
   }
 
+  const result = {
+    paymentSubmissionEvent,
+    amount,
+  }
+  console.log('Form has a payment submission event with amount', result)
+  return result
+}
+
+export async function handlePaymentSubmissionEvent({
+  amount,
+  formSubmissionResult,
+  paymentSubmissionEvent,
+  paymentReceiptUrl,
+}: {
+  amount: number
+  formSubmissionResult: FormSubmissionResult
+  paymentSubmissionEvent: SubmissionEventTypes.PaymentSubmissionEvent
+  paymentReceiptUrl: string
+}): Promise<FormSubmissionResult['payment']> {
   const payload: {
     amount: number
     redirectUrl: string
@@ -286,8 +331,6 @@ export async function handlePaymentSubmissionEvent({
     amount,
     redirectUrl: paymentReceiptUrl,
     submissionId: formSubmissionResult.submissionId,
-    crn2: undefined,
-    crn3: undefined,
   }
 
   if (paymentSubmissionEvent.type === 'BPOINT') {
@@ -314,18 +357,22 @@ export async function handlePaymentSubmissionEvent({
   }
 
   const paymentConfiguration = await generatePaymentConfiguration(
-    form,
+    formSubmissionResult.definition,
     paymentSubmissionEvent,
     payload,
   )
-  console.log('Created Payment configuration to start transaction')
-  const submissionResult = Object.assign({}, formSubmissionResult, {
-    payment: {
-      submissionEvent: paymentSubmissionEvent,
-      hostedFormUrl: paymentConfiguration.hostedFormUrl,
-    },
-  })
-  await utilsService.setLocalForageItem(KEY, submissionResult)
 
-  return submissionResult
+  const payment = {
+    submissionEvent: paymentSubmissionEvent,
+    hostedFormUrl: paymentConfiguration.hostedFormUrl,
+    amount,
+  }
+  console.log('Created Payment configuration to start transaction', payment)
+
+  await utilsService.setLocalForageItem(KEY, {
+    ...formSubmissionResult,
+    payment,
+  })
+
+  return payment
 }

@@ -7,6 +7,7 @@ import { getUserProfile } from '../auth-service'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import { AWSTypes, FormTypes, SubmissionTypes } from '@oneblink/types'
 import Sentry from '../Sentry'
+import { FormSubmission } from '../types/submissions'
 
 const apiVersion = '2006-03-01'
 
@@ -159,7 +160,7 @@ const uploadFormSubmission = (
   s3Configuration: S3Configuration,
   formJson: {
     definition: FormTypes.Form
-    submission: SubmissionTypes.FormSubmission['submission']
+    submission: FormSubmission['submission']
     submissionTimestamp: string
     keyId?: string
     formsAppId: number

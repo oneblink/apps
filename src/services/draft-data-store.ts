@@ -4,13 +4,14 @@ import utilsService from './utils'
 import { uploadDraftData, downloadDraftData } from './api/drafts'
 import { MiscTypes, SubmissionTypes } from '@oneblink/types'
 import Sentry from '../Sentry'
+import { DraftSubmission } from '../types/submissions'
 function getDraftDataKey(draftDataId: string) {
   return `DRAFT_DATA_${draftDataId}`
 }
 
 async function getLocalDraftData(
   draftDataId: MiscTypes.NoU | string,
-): Promise<SubmissionTypes.DraftSubmission | null> {
+): Promise<DraftSubmission | null> {
   if (!draftDataId) {
     return null
   }
@@ -20,8 +21,8 @@ async function getLocalDraftData(
 
 async function setLocalDraftData(
   draftDataId: string,
-  model: SubmissionTypes.DraftSubmission,
-): Promise<SubmissionTypes.DraftSubmission> {
+  model: DraftSubmission,
+): Promise<DraftSubmission> {
   const key = getDraftDataKey(draftDataId)
   return utilsService.setLocalForageItem(key, model)
 }
@@ -38,7 +39,7 @@ export async function removeDraftData(
 
 export function saveDraftData(
   draft: SubmissionTypes.FormsAppDraft,
-  draftSubmission: SubmissionTypes.DraftSubmission,
+  draftSubmission: DraftSubmission,
   defaultDraftDataId: string,
 ): Promise<string> {
   return uploadDraftData(draft, draftSubmission)
@@ -57,16 +58,14 @@ export function saveDraftData(
 export async function getDraftData(
   formId: number,
   draftDataId: string,
-): Promise<SubmissionTypes.DraftSubmission> {
+): Promise<DraftSubmission> {
   return getLocalDraftData(draftDataId)
     .then((draftData) => {
       if (draftData) return draftData
 
-      return downloadDraftData<SubmissionTypes.DraftSubmission>(
-        formId,
-        draftDataId,
-      ).then((downloadedDraftData) =>
-        setLocalDraftData(draftDataId, downloadedDraftData),
+      return downloadDraftData<DraftSubmission>(formId, draftDataId).then(
+        (downloadedDraftData) =>
+          setLocalDraftData(draftDataId, downloadedDraftData),
       )
     })
     .then((formSubmissionResult) => {

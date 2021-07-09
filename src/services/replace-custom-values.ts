@@ -1,10 +1,10 @@
-import { SubmissionTypes } from '@oneblink/types'
+import { FormSubmissionResult } from '../types/submissions'
 import { replaceCustomValues } from '@oneblink/sdk-core'
 import localisationService from '../localisation-service'
 
 export default function (
   string: string,
-  submissionResult: SubmissionTypes.FormSubmissionResult,
+  submissionResult: FormSubmissionResult,
 ): string {
   return replaceCustomValues(string, {
     form: submissionResult.definition,

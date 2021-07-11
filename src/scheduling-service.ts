@@ -155,14 +155,6 @@ async function handleSchedulingSubmissionEvent({
   return scheduling
 }
 
-async function handleCancelSchedulingBooking(details: {
-  submissionId: string
-  nylasEditHash: string
-  reason: string
-}) {
-  return await cancelSchedulingBooking(details)
-}
-
 export {
   SchedulingBooking,
   handleSchedulingQuerystring,

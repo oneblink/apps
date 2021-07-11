@@ -1,5 +1,8 @@
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
-import { generateSchedulingConfiguration } from './services/api/scheduling'
+import {
+  generateSchedulingConfiguration,
+  cancelSchedulingBooking,
+} from './services/api/scheduling'
 import utilsService from './services/utils'
 import { SubmissionEventTypes } from '@oneblink/types'
 import { conditionalLogicService } from '@oneblink/sdk-core'
@@ -8,7 +11,6 @@ import {
   handlePaymentSubmissionEvent,
 } from './payment-service'
 import { FormSubmissionResult, NewDraftSubmission } from './types/submissions'
-
 const KEY = 'SCHEDULING_SUBMISSION_RESULT'
 
 type SchedulingBooking = {
@@ -121,11 +123,14 @@ function checkForSchedulingSubmissionEvent(
 async function handleSchedulingSubmissionEvent({
   formSubmissionResult,
   schedulingSubmissionEvent,
-  schedulingReceiptUrl,
+  schedulingUrlConfiguration,
 }: {
   formSubmissionResult: FormSubmissionResult
   schedulingSubmissionEvent: SubmissionEventTypes.SchedulingSubmissionEvent
-  schedulingReceiptUrl: string
+  schedulingUrlConfiguration: {
+    schedulingReceiptUrl: string
+    schedulingCancelUrl: string
+  }
 }): Promise<FormSubmissionResult['scheduling']> {
   console.log(
     'Attempting to handle submission with scheduling submission event',
@@ -134,7 +139,7 @@ async function handleSchedulingSubmissionEvent({
   const { bookingUrl } = await generateSchedulingConfiguration({
     formSubmissionResult,
     schedulingSubmissionEvent,
-    schedulingReceiptUrl,
+    schedulingUrlConfiguration,
   })
 
   const scheduling = {
@@ -150,9 +155,18 @@ async function handleSchedulingSubmissionEvent({
   return scheduling
 }
 
+async function handleCancelSchedulingBooking(details: {
+  submissionId: string
+  nylasEditHash: string
+  reason: string
+}) {
+  return await cancelSchedulingBooking(details)
+}
+
 export {
   SchedulingBooking,
   handleSchedulingQuerystring,
   checkForSchedulingSubmissionEvent,
   handleSchedulingSubmissionEvent,
+  cancelSchedulingBooking,
 }

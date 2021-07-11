@@ -25,11 +25,14 @@ function getBookingQuerystringValue(
 function generateSchedulingConfiguration({
   formSubmissionResult,
   schedulingSubmissionEvent,
-  schedulingReceiptUrl,
+  schedulingUrlConfiguration: { schedulingReceiptUrl, schedulingCancelUrl },
 }: {
   formSubmissionResult: FormSubmissionResult
   schedulingSubmissionEvent: SubmissionEventTypes.SchedulingSubmissionEvent
-  schedulingReceiptUrl: string
+  schedulingUrlConfiguration: {
+    schedulingReceiptUrl: string
+    schedulingCancelUrl: string
+  }
 }): Promise<{ bookingUrl: string }> {
   const url = `${tenants.current.apiOrigin}/scheduling/generate-booking-url`
   const body = {
@@ -38,6 +41,7 @@ function generateSchedulingConfiguration({
       schedulingSubmissionEvent.configuration.nylasSchedulingPageId,
     submissionId: formSubmissionResult.submissionId,
     schedulingReceiptUrl,
+    schedulingCancelUrl,
     name: getBookingQuerystringValue(
       schedulingSubmissionEvent.configuration.nameElementId,
       formSubmissionResult,
@@ -55,19 +59,9 @@ function generateSchedulingConfiguration({
       error,
     )
     switch (error.status) {
-      case 401: {
-        throw new OneBlinkAppsError(
-          'You cannot make bookings until you have logged in. Please login and try again.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-            requiresLogin: true,
-          },
-        )
-      }
       case 403: {
         throw new OneBlinkAppsError(
-          'You do not have access make bookings. Please contact your administrator to gain the correct level of access.',
+          'You do not have access to make bookings. Please contact your administrator to gain the correct level of access.',
           {
             originalError: error,
             httpStatusCode: error.status,
@@ -78,7 +72,7 @@ function generateSchedulingConfiguration({
       case 400:
       case 404: {
         throw new OneBlinkAppsError(
-          'We could not find the configuration required to make a booking. Please contact your administrator to ensure your application configuration has been completed successfully.',
+          'We could not find the configuration required to make a booking. Please contact your administrator to verify your configuration.',
           {
             originalError: error,
             httpStatusCode: error.status,
@@ -98,4 +92,52 @@ function generateSchedulingConfiguration({
   })
 }
 
-export { generateSchedulingConfiguration }
+function cancelSchedulingBooking(details: {
+  submissionId: string
+  nylasEditHash: string
+  reason: string
+}): Promise<void> {
+  const url = `${tenants.current.apiOrigin}/scheduling/cancel-booking`
+  console.log('Attempting to cancel scheduling booking', url, details)
+
+  return postRequest<void>(url, details).catch((error) => {
+    Sentry.captureException(error)
+    console.warn(
+      'Error occurred while attempting to cancel scheduling booking',
+      error,
+    )
+    switch (error.status) {
+      case 403: {
+        throw new OneBlinkAppsError(
+          'You do not have access to cancel bookings. Please contact your administrator to gain the correct level of access.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+            requiresAccessRequest: true,
+          },
+        )
+      }
+      case 400:
+      case 404: {
+        throw new OneBlinkAppsError(
+          'We could not find the booking to be cancelled. It may have already been cancelled, otherwise please contact your administrator.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  })
+}
+
+export { generateSchedulingConfiguration, cancelSchedulingBooking }

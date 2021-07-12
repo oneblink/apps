@@ -45,6 +45,7 @@ async function handleSchedulingQuerystring({
   const { formSubmissionResult, paymentReceiptUrl } =
     schedulingSubmissionResultConfiguration
   if (
+    !formSubmissionResult ||
     !formSubmissionResult.scheduling ||
     !formSubmissionResult.scheduling.submissionEvent
   ) {
@@ -124,6 +125,7 @@ async function handleSchedulingSubmissionEvent({
   formSubmissionResult,
   schedulingSubmissionEvent,
   schedulingUrlConfiguration,
+  paymentReceiptUrl,
 }: {
   formSubmissionResult: FormSubmissionResult
   schedulingSubmissionEvent: SubmissionEventTypes.SchedulingSubmissionEvent
@@ -131,6 +133,7 @@ async function handleSchedulingSubmissionEvent({
     schedulingReceiptUrl: string
     schedulingCancelUrl: string
   }
+  paymentReceiptUrl?: string
 }): Promise<FormSubmissionResult['scheduling']> {
   console.log(
     'Attempting to handle submission with scheduling submission event',
@@ -148,8 +151,11 @@ async function handleSchedulingSubmissionEvent({
   }
   console.log('Created scheduling configuration to start booking', scheduling)
   await utilsService.setLocalForageItem(KEY, {
-    ...formSubmissionResult,
-    scheduling,
+    formSubmissionResult: {
+      ...formSubmissionResult,
+      scheduling,
+    },
+    paymentReceiptUrl,
   })
 
   return scheduling

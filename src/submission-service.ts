@@ -189,6 +189,7 @@ async function submit({
       formSubmissionResult,
       schedulingSubmissionEvent,
       schedulingUrlConfiguration,
+      paymentReceiptUrl,
     })
   } else if (paymentSubmissionEventConfiguration && paymentReceiptUrl) {
     formSubmissionResult.payment = await handlePaymentSubmissionEvent({

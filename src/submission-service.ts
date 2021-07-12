@@ -26,7 +26,7 @@ import prepareSubmissionData from './services/prepareSubmissionData'
 import {
   handleSchedulingSubmissionEvent,
   checkForSchedulingSubmissionEvent,
-} from './scheduling-service'
+} from './services/schedulingHandlers'
 import {
   PendingFormSubmission,
   FormSubmission,
@@ -128,11 +128,14 @@ async function processPendingQueue(): Promise<void> {
 async function submit({
   formSubmission,
   paymentReceiptUrl,
-  schedulingReceiptUrl,
+  schedulingUrlConfiguration,
 }: {
   formSubmission: FormSubmission
   paymentReceiptUrl?: string
-  schedulingReceiptUrl?: string
+  schedulingUrlConfiguration?: {
+    schedulingReceiptUrl: string
+    schedulingCancelUrl: string
+  }
 }): Promise<FormSubmissionResult> {
   formSubmission.keyId = getFormsKeyId() || undefined
   const paymentSubmissionEventConfiguration =
@@ -181,11 +184,11 @@ async function submit({
     submissionId: data.submissionId,
   }
 
-  if (schedulingSubmissionEvent && schedulingReceiptUrl) {
+  if (schedulingSubmissionEvent && schedulingUrlConfiguration) {
     formSubmissionResult.scheduling = await handleSchedulingSubmissionEvent({
       formSubmissionResult,
       schedulingSubmissionEvent,
-      schedulingReceiptUrl,
+      schedulingUrlConfiguration,
       paymentReceiptUrl,
     })
   } else if (paymentSubmissionEventConfiguration && paymentReceiptUrl) {

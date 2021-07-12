@@ -1,14 +1,11 @@
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
-import { generateSchedulingConfiguration } from './services/api/scheduling'
+import { cancelSchedulingBooking } from './services/api/scheduling'
 import utilsService from './services/utils'
-import { SubmissionEventTypes } from '@oneblink/types'
-import { conditionalLogicService } from '@oneblink/sdk-core'
 import {
   checkForPaymentSubmissionEvent,
   handlePaymentSubmissionEvent,
 } from './payment-service'
-import { FormSubmissionResult, NewDraftSubmission } from './types/submissions'
-
+import { FormSubmissionResult } from './types/submissions'
 const KEY = 'SCHEDULING_SUBMISSION_RESULT'
 
 type SchedulingBooking = {
@@ -96,69 +93,54 @@ async function handleSchedulingQuerystring({
   }
 }
 
-function checkForSchedulingSubmissionEvent(
-  newDraftSubmission: NewDraftSubmission,
-): SubmissionEventTypes.SchedulingSubmissionEvent | undefined {
-  const submissionEvents = newDraftSubmission.definition.submissionEvents || []
-  for (const submissionEvent of submissionEvents) {
-    if (
-      submissionEvent.type === 'SCHEDULING' &&
-      conditionalLogicService.evaluateConditionalPredicates({
-        isConditional: !!submissionEvent.conditionallyExecute,
-        requiresAllConditionalPredicates:
-          !!submissionEvent.requiresAllConditionallyExecutePredicates,
-        conditionalPredicates:
-          submissionEvent.conditionallyExecutePredicates || [],
-        submission: newDraftSubmission.submission,
-        formElements: newDraftSubmission.definition.elements,
-      })
-    ) {
-      console.log('Form has a scheduling submission event', submissionEvent)
-      return submissionEvent
-    }
+async function handleCancelSchedulingBookingQuerystring({
+  nylasEditHash,
+  submissionId,
+  startTime,
+  endTime,
+  eventName,
+  location,
+  timezone,
+}: Record<string, unknown>): Promise<{
+  nylasEditHash: string
+  submissionId: string
+  startTime: Date
+  endTime: Date
+  eventName: string
+  location: string
+  timezone: string
+}> {
+  if (
+    typeof submissionId !== 'string' ||
+    typeof nylasEditHash !== 'string' ||
+    typeof startTime !== 'string' ||
+    typeof endTime !== 'string' ||
+    typeof eventName !== 'string' ||
+    typeof location !== 'string' ||
+    typeof timezone !== 'string'
+  ) {
+    throw new OneBlinkAppsError(
+      'Scheduling bookings cannot be cancelled unless navigating here from the correct link.',
+    )
   }
-}
 
-async function handleSchedulingSubmissionEvent({
-  formSubmissionResult,
-  schedulingSubmissionEvent,
-  schedulingReceiptUrl,
-  paymentReceiptUrl,
-}: {
-  formSubmissionResult: FormSubmissionResult
-  schedulingSubmissionEvent: SubmissionEventTypes.SchedulingSubmissionEvent
-  schedulingReceiptUrl: string
-  paymentReceiptUrl?: string
-}): Promise<FormSubmissionResult['scheduling']> {
-  console.log(
-    'Attempting to handle submission with scheduling submission event',
-  )
-
-  const { bookingUrl } = await generateSchedulingConfiguration({
-    formSubmissionResult,
-    schedulingSubmissionEvent,
-    schedulingReceiptUrl,
-  })
-
-  const scheduling = {
-    submissionEvent: schedulingSubmissionEvent,
-    bookingUrl,
+  const booking = {
+    nylasEditHash,
+    submissionId,
+    startTime: new Date(parseInt(startTime) * 1000),
+    endTime: new Date(parseInt(endTime) * 1000),
+    eventName,
+    location,
+    timezone,
   }
-  console.log('Created scheduling configuration to start booking', scheduling)
-  await utilsService.setLocalForageItem(KEY, {
-    formSubmissionResult: {
-      ...formSubmissionResult,
-      scheduling,
-    },
-    paymentReceiptUrl,
-  })
+  console.log('Parsed scheduling booking cancel data', booking)
 
-  return scheduling
+  return booking
 }
 
 export {
   SchedulingBooking,
   handleSchedulingQuerystring,
-  checkForSchedulingSubmissionEvent,
-  handleSchedulingSubmissionEvent,
+  cancelSchedulingBooking,
+  handleCancelSchedulingBookingQuerystring,
 }

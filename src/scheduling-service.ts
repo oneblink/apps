@@ -9,9 +9,11 @@ import { FormSubmissionResult } from './types/submissions'
 const KEY = 'SCHEDULING_SUBMISSION_RESULT'
 
 type SchedulingBooking = {
+  submissionId: string
   startTime: Date
   endTime: Date
   location: string
+  isReschedule: boolean
 }
 
 async function handleSchedulingQuerystring({
@@ -19,10 +21,36 @@ async function handleSchedulingQuerystring({
   end_time,
   location,
   submissionId,
+  isReschedule,
 }: Record<string, unknown>): Promise<{
   booking: SchedulingBooking
-  formSubmissionResult: FormSubmissionResult
+  formSubmissionResult?: FormSubmissionResult
 }> {
+  if (
+    typeof submissionId !== 'string' ||
+    typeof start_time !== 'string' ||
+    typeof end_time !== 'string' ||
+    typeof location !== 'string'
+  ) {
+    throw new OneBlinkAppsError(
+      'Scheduling receipts cannot be displayed unless navigating here directly after a booking.',
+    )
+  }
+  const booking = {
+    submissionId,
+    startTime: new Date(parseInt(start_time) * 1000),
+    endTime: new Date(parseInt(end_time) * 1000),
+    location,
+    isReschedule: isReschedule === 'true',
+  }
+  console.log('Parsed booking result', booking)
+
+  if (isReschedule) {
+    return {
+      booking,
+    }
+  }
+
   const schedulingSubmissionResultConfiguration =
     await utilsService.getLocalForageItem<{
       formSubmissionResult: FormSubmissionResult
@@ -49,17 +77,6 @@ async function handleSchedulingQuerystring({
     )
   }
 
-  if (
-    typeof submissionId !== 'string' ||
-    typeof start_time !== 'string' ||
-    typeof end_time !== 'string' ||
-    typeof location !== 'string'
-  ) {
-    throw new OneBlinkAppsError(
-      'Scheduling receipts cannot be displayed unless navigating here directly after a booking.',
-    )
-  }
-
   if (formSubmissionResult.submissionId !== submissionId) {
     throw new OneBlinkAppsError(
       'It looks like you are attempting to view a scheduling receipt for the incorrect booking.',
@@ -79,13 +96,6 @@ async function handleSchedulingQuerystring({
   }
 
   await utilsService.removeLocalForageItem(KEY)
-
-  const booking = {
-    startTime: new Date(parseInt(start_time) * 1000),
-    endTime: new Date(parseInt(end_time) * 1000),
-    location,
-  }
-  console.log('Parsed booking result', booking)
 
   return {
     formSubmissionResult,

@@ -34,15 +34,16 @@ import { schedulingService } from '@oneblink/apps'
 
 #### BookingToCancel
 
-| Property        | Type     | Description                                                          |
-| --------------- | -------- | -------------------------------------------------------------------- |
-| `submissionId`  | `string` | The unique identifier for the submission associated with the booking |
-| `nylasEditHash` | `string` | The nylas edit hash associated with the booking                      |
-| `startTime`     | `Date`   | The start time of the booking                                        |
-| `endTime`       | `Date`   | The end time of the booking                                          |
-| `location`      | `string` | The location of the event                                            |
-| `eventName`     | `string` | The name of the event the booking is for                             |
-| `timezone`      | `string` | The timezone the booking was booked in                               |
+| Property             | Type                    | Description                                                                   |
+| -------------------- | ----------------------- | ----------------------------------------------------------------------------- |
+| `submissionId`       | `string`                | The unique identifier for the submission associated with the booking          |
+| `nylasEditHash`      | `string`                | The nylas edit hash associated with the booking                               |
+| `startTime`          | `Date`                  | The start time of the booking                                                 |
+| `endTime`            | `Date`                  | The end time of the booking                                                   |
+| `location`           | `string`                | The location of the event                                                     |
+| `eventName`          | `string`                | The name of the event the booking is for                                      |
+| `timezone`           | `string`                | The timezone the booking was booked in                                        |
+| `cancellationPolicy` | `string` \| `undefined` | The policy to display to users when asked why they are cancelling the booking |
 
 ### `handleSchedulingQuerystring()`
 

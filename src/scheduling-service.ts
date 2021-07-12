@@ -111,6 +111,7 @@ async function handleCancelSchedulingBookingQuerystring({
   eventName,
   location,
   timezone,
+  cancellationPolicy,
 }: Record<string, unknown>): Promise<{
   nylasEditHash: string
   submissionId: string
@@ -142,6 +143,7 @@ async function handleCancelSchedulingBookingQuerystring({
     eventName,
     location,
     timezone,
+    cancellationPolicy,
   }
   console.log('Parsed scheduling booking cancel data', booking)
 

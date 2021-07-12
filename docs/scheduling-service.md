@@ -16,35 +16,37 @@ import { schedulingService } from '@oneblink/apps'
 
 #### Booking
 
-| Property    | Type     | Description                      |
-| ----------- | -------- | -------------------------------- |
-| `startTime` | `Date`   | Date and time the booking starts |
-| `endTime`   | `Date`   | Date and time the booking ends   |
-| `location`  | `string` | Location of booking              |
+| Property       | Type      | Description                                                          |
+| -------------- | --------- | -------------------------------------------------------------------- |
+| `submissionId` | `string`  | The unique identifier for the submission associated with the booking |
+| `startTime`    | `Date`    | Date and time the booking starts                                     |
+| `endTime`      | `Date`    | Date and time the booking ends                                       |
+| `location`     | `string`  | Location of booking                                                  |
+| `isReschedule` | `boolean` | `true` if the booking has been rescheduled, otherwise `false`        |
 
 #### BookingCancelConfiguration
 
-| Property        | Type     | Description                                     |
-| --------------- | -------- | ----------------------------------------------- |
-| `submissionId`  | `string` | The submissionId associated with the booking    |
-| `nylasEditHash` | `string` | The nylas edit hash associated with the booking |
-| `reason`        | `string` | Reason for cancelling the booking               |
+| Property        | Type     | Description                                                          |
+| --------------- | -------- | -------------------------------------------------------------------- |
+| `submissionId`  | `string` | The unique identifier for the submission associated with the booking |
+| `nylasEditHash` | `string` | The nylas edit hash associated with the booking                      |
+| `reason`        | `string` | Reason for cancelling the booking                                    |
 
 #### BookingToCancel
 
-| Property        | Type     | Description                                     |
-| --------------- | -------- | ----------------------------------------------- |
-| `nylasEditHash` | `string` | The nylas edit hash associated with the booking |
-| `submissionId`  | `string` | The submissionId associated with the booking    |
-| `startTime`     | `Date`   | The start time of the booking                   |
-| `endTime`       | `Date`   | The end time of the booking                     |
-| `eventName`     | `string` | The name of the event the booking is for        |
-| `location`      | `string` | The location of the event                       |
-| `timezone`      | `string` | The timezone the booking was booked in          |
+| Property        | Type     | Description                                                          |
+| --------------- | -------- | -------------------------------------------------------------------- |
+| `submissionId`  | `string` | The unique identifier for the submission associated with the booking |
+| `nylasEditHash` | `string` | The nylas edit hash associated with the booking                      |
+| `startTime`     | `Date`   | The start time of the booking                                        |
+| `endTime`       | `Date`   | The end time of the booking                                          |
+| `location`      | `string` | The location of the event                                            |
+| `eventName`     | `string` | The name of the event the booking is for                             |
+| `timezone`      | `string` | The timezone the booking was booked in                               |
 
 ### `handleSchedulingQuerystring()`
 
-Pass in query string parameters after a redirect back to your app after a booking is processed. Will return a [Booking](#booking) and the submission result from the original submission before redirecting to `scheduling.bookingUrl`.
+Pass in query string parameters after a redirect back to your app after a booking is processed. Will return a [Booking](#booking) and the submission result from the original submission before redirecting to `scheduling.bookingUrl`. If the booking has been rescheduled, the submission result will not be returned.
 
 ```js
 import queryString from 'query-string'

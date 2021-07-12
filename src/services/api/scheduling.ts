@@ -59,6 +59,16 @@ function generateSchedulingConfiguration({
       error,
     )
     switch (error.status) {
+      case 401: {
+        throw new OneBlinkAppsError(
+          'You cannot make bookings until you have logged in. Please login and try again.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+            requiresLogin: true,
+          },
+        )
+      }
       case 403: {
         throw new OneBlinkAppsError(
           'You do not have access to make bookings. Please contact your administrator to gain the correct level of access.',
@@ -107,6 +117,16 @@ function cancelSchedulingBooking(details: {
       error,
     )
     switch (error.status) {
+      case 401: {
+        throw new OneBlinkAppsError(
+          'You cannot cancel this booking until you have logged in. Please login and try again.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+            requiresLogin: true,
+          },
+        )
+      }
       case 403: {
         throw new OneBlinkAppsError(
           'You do not have access to cancel bookings. Please contact your administrator to gain the correct level of access.',

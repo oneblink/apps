@@ -26,7 +26,7 @@ import prepareSubmissionData from './services/prepareSubmissionData'
 import {
   handleSchedulingSubmissionEvent,
   checkForSchedulingSubmissionEvent,
-} from './scheduling-service'
+} from './services/schedulingHandlers'
 import {
   PendingFormSubmission,
   FormSubmission,

@@ -10,6 +10,7 @@ import { schedulingService } from '@oneblink/apps'
 
 - [`handleSchedulingQuerystring()`](#handleschedulingquerystring)
 - [`cancelSchedulingBooking()`](#cancelschedulingbooking)
+- [`handleCancelSchedulingBookingQuerystring`](#handlecancelschedulingbookingquerystring)
 
 ### Types
 

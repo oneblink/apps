@@ -29,6 +29,18 @@ import { schedulingService } from '@oneblink/apps'
 | `nylasEditHash` | `string` | The nylas edit hash associated with the booking |
 | `reason`        | `string` | Reason for cancelling the booking               |
 
+#### BookingToCancel
+
+| Property        | Type     | Description                                     |
+| --------------- | -------- | ----------------------------------------------- |
+| `nylasEditHash` | `string` | The nylas edit hash associated with the booking |
+| `submissionId`  | `string` | The submissionId associated with the booking    |
+| `startTime`     | `Date`   | The start time of the booking                   |
+| `endTime`       | `Date`   | The end time of the booking                     |
+| `eventName`     | `string` | The name of the event the booking is for        |
+| `location`      | `string` | The location of the event                       |
+| `timezone`      | `string` | The timezone the booking was booked in          |
+
 ### `handleSchedulingQuerystring()`
 
 Pass in query string parameters after a redirect back to your app after a booking is processed. Will return a [Booking](#booking) and the submission result from the original submission before redirecting to `scheduling.bookingUrl`.
@@ -44,7 +56,7 @@ const { booking, formSubmissionResult } =
 
 ### `cancelSchedulingBooking()`
 
-Pass in a `BookingCancelConfiguration`. Will return `void`.
+Pass in a [BookingCancelConfiguration](#Bookingcancelconfiguration). Will return `void`.
 
 ```js
 await schedulingService.cancelSchedulingBooking({
@@ -53,4 +65,17 @@ await schedulingService.cancelSchedulingBooking({
   reason: 'Busy at time of booking.',
 })
 // Booking Cancelled
+```
+
+### `handleCancelSchedulingBookingQuerystring()`
+
+Pass in query string parameters after navigation to your app via a valid cancellation link. Will return a [BookingToCancel](#Bookingtocancel).
+
+```js
+import queryString from 'query-string'
+
+const query = queryString.parse(window.location.search)
+
+const bookingToCancel =
+  await schedulingService.handleCancelSchedulingBookingQuerystring(query)
 ```

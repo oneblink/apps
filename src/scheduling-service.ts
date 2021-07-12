@@ -93,8 +93,54 @@ async function handleSchedulingQuerystring({
   }
 }
 
+async function handleCancelSchedulingBookingQuerystring({
+  nylasEditHash,
+  submissionId,
+  startTime,
+  endTime,
+  eventName,
+  location,
+  timezone,
+}: Record<string, unknown>): Promise<{
+  nylasEditHash: string
+  submissionId: string
+  startTime: Date
+  endTime: Date
+  eventName: string
+  location: string
+  timezone: string
+}> {
+  if (
+    typeof submissionId !== 'string' ||
+    typeof nylasEditHash !== 'string' ||
+    typeof startTime !== 'string' ||
+    typeof endTime !== 'string' ||
+    typeof eventName !== 'string' ||
+    typeof location !== 'string' ||
+    typeof timezone !== 'string'
+  ) {
+    throw new OneBlinkAppsError(
+      'Scheduling bookings cannot be cancelled unless navigating here from the correct link.',
+    )
+  }
+
+  const booking = {
+    nylasEditHash,
+    submissionId,
+    startTime: new Date(parseInt(startTime) * 1000),
+    endTime: new Date(parseInt(endTime) * 1000),
+    eventName,
+    location,
+    timezone,
+  }
+  console.log('Parsed scheduling booking cancel data', booking)
+
+  return booking
+}
+
 export {
   SchedulingBooking,
   handleSchedulingQuerystring,
   cancelSchedulingBooking,
+  handleCancelSchedulingBookingQuerystring,
 }

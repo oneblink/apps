@@ -97,14 +97,20 @@ const formSubmission = {
 // Pass paymentReceiptUrl if submission may require a payment
 const paymentReceiptUrl = `${window.location.origin}/payment-receipt`
 
+// Pass schedulingBookingUrlConfiguration if submission utilise scheduling
+const schedulingBookingUrlConfiguration = {
+  schedulingReceiptUrl: 'https://my-website.com/receipt',
+  schedulingCancelUrl: 'https://my-website.com/cancel',
+}
 const submissionResult = await submissionService.submit({
   formSubmission,
   paymentReceiptUrl,
+  schedulingBookingUrlConfiguration,
 })
 
 if (submissionResult.scheduling) {
   // Redirect user to booking form
-  window.location.href = submissionResult.scheduling.hostedFormUrl
+  window.location.href = submissionResult.scheduling.bookingUrl
   return
 }
 

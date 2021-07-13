@@ -120,6 +120,7 @@ function handleCancelSchedulingBookingQuerystring({
   eventName: string
   location: string
   timezone: string
+  cancellationPolicy?: string
 } {
   if (
     typeof submissionId !== 'string' ||
@@ -128,7 +129,8 @@ function handleCancelSchedulingBookingQuerystring({
     typeof endTime !== 'string' ||
     typeof eventName !== 'string' ||
     typeof location !== 'string' ||
-    typeof timezone !== 'string'
+    typeof timezone !== 'string' ||
+    (typeof cancellationPolicy !== 'string' && cancellationPolicy !== undefined)
   ) {
     throw new OneBlinkAppsError(
       'Scheduling bookings cannot be cancelled unless navigating here from the correct link.',

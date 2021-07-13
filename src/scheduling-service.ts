@@ -103,7 +103,7 @@ async function handleSchedulingQuerystring({
   }
 }
 
-async function handleCancelSchedulingBookingQuerystring({
+function handleCancelSchedulingBookingQuerystring({
   nylasEditHash,
   submissionId,
   startTime,
@@ -112,7 +112,7 @@ async function handleCancelSchedulingBookingQuerystring({
   location,
   timezone,
   cancellationPolicy,
-}: Record<string, unknown>): Promise<{
+}: Record<string, unknown>): {
   nylasEditHash: string
   submissionId: string
   startTime: Date
@@ -120,7 +120,7 @@ async function handleCancelSchedulingBookingQuerystring({
   eventName: string
   location: string
   timezone: string
-}> {
+} {
   if (
     typeof submissionId !== 'string' ||
     typeof nylasEditHash !== 'string' ||

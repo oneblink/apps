@@ -371,6 +371,7 @@ export async function handlePaymentSubmissionEvent({
 
   await utilsService.setLocalForageItem(KEY, {
     ...formSubmissionResult,
+    scheduling: null,
     payment,
   })
 

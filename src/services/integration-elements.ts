@@ -29,7 +29,9 @@ export async function searchGeoscapeAddresses(
       abortSignal,
     )
   } catch (error) {
-    Sentry.captureException(error)
+    if (!abortSignal?.aborted) {
+      Sentry.captureException(error)
+    }
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',
@@ -92,7 +94,9 @@ export async function getGeoscapeAddress(
       abortSignal,
     )
   } catch (error) {
-    Sentry.captureException(error)
+    if (!abortSignal?.aborted) {
+      Sentry.captureException(error)
+    }
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',
@@ -162,7 +166,9 @@ export async function searchPointAddresses(
       abortSignal,
     )
   } catch (error) {
-    Sentry.captureException(error)
+    if (!abortSignal?.aborted) {
+      Sentry.captureException(error)
+    }
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',
@@ -225,7 +231,9 @@ export async function getPointAddress(
       abortSignal,
     )
   } catch (error) {
-    Sentry.captureException(error)
+    if (!abortSignal?.aborted) {
+      Sentry.captureException(error)
+    }
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',
@@ -292,7 +300,9 @@ export async function searchCivicaStreetNames(
       abortSignal,
     )
   } catch (error) {
-    Sentry.captureException(error)
+    if (!abortSignal?.aborted) {
+      Sentry.captureException(error)
+    }
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',
@@ -354,7 +364,9 @@ export async function getCivicaTitleCodes(
       abortSignal,
     )
   } catch (error) {
-    Sentry.captureException(error)
+    if (!abortSignal?.aborted) {
+      Sentry.captureException(error)
+    }
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',

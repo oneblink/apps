@@ -146,13 +146,13 @@ export const generateUploadAttachmentCredentials = async (
     abortSignal,
   ).catch((error) => {
     // Cancelling will throw an error.
-    if (error.name === 'AbortError') {
+    if (!abortSignal?.aborted) {
       throw error
     }
 
-    Sentry.captureException(error)
     // handle only credential errors here
     console.error('Error getting credentials for upload:', error)
+    Sentry.captureException(error)
     throw handleError(error)
   })
 }

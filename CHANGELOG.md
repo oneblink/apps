@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.10.0] - 2021-07-20
+
 ### Added
 
 - [`schedulingService`](./docs/scheduling-service.md)
@@ -19,6 +21,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - **[BREAKING]** `formService.forEachFormElement()` moved to [@oneblink/sdk-core](npmjs.com/package/@oneblink/sdk-core)
 - **[BREAKING]** `formService.forEachFormElement()` moved to [@oneblink/sdk-core](npmjs.com/package/@oneblink/sdk-core)
 - **[BREAKING]** `formService.parseFormElementOptionsSet()` moved to [@oneblink/sdk-core](npmjs.com/package/@oneblink/sdk-core)
+
+### Dependencies
+
+- update [@sentry/browser](https://www.npmjs.com/package/@sentry/browser) to [6.9.0](https://github.com/getsentry/sentry-javascript/releases/tag/6.9.0) (from [6.7.2](https://github.com/getsentry/sentry-javascript/releases/tag/6.7.2))
+
+- update [@sentry/tracing](https://www.npmjs.com/package/@sentry/tracing) to [6.9.0](https://github.com/getsentry/sentry-javascript/releases/tag/6.9.0) (from [6.7.2](https://github.com/getsentry/sentry-javascript/releases/tag/6.7.2))
+
+- update [aws-sdk](https://www.npmjs.com/package/aws-sdk) to [2.948.0](https://github.com/aws/aws-sdk-js/releases/tag/v2.948.0) (from [2.932.0](https://github.com/aws/aws-sdk-js/releases/tag/v2.932.0))
+
+- depend upon [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) [0.1.0-beta.3](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md)
 
 ## [0.9.4] - 2021-07-02
 

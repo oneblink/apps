@@ -2,7 +2,7 @@ import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { isOffline } from './offline-service'
 import { getRequest, putRequest } from './services/fetch'
 import tenants from './tenants'
-import { SubmissionTypes, ApprovalTypes } from '@oneblink/types'
+import { SubmissionTypes, ApprovalTypes, FormTypes } from '@oneblink/types'
 import { generateRetrieveApprovalSubmissionCredentials } from './services/api/submissions'
 import { downloadPreFillData } from './services/s3Submit'
 import Sentry from './Sentry'
@@ -218,4 +218,69 @@ export async function retrieveFormSubmissionApprovalSubmission(
       },
     )
   })
+}
+
+type FormApprovalFlowResponse = {
+  forms: FormTypes.Form[]
+  formApprovalFlows: ApprovalTypes.FormApprovalFlow[]
+}
+
+export async function getFormApprovalFlows(
+  formsAppId: number,
+): Promise<FormApprovalFlowResponse> {
+  try {
+    return await getRequest<FormApprovalFlowResponse>(
+      `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/form-approval-flows`,
+    )
+  } catch (error) {
+    Sentry.captureException(error)
+    console.error('Error retrieving form approval flows', error)
+    if (isOffline()) {
+      throw new OneBlinkAppsError(
+        'You are currently offline, please connect to the internet and try again',
+        {
+          originalError: error,
+          isOffline: true,
+        },
+      )
+    }
+    switch (error.status) {
+      case 401: {
+        throw new OneBlinkAppsError(
+          'You cannot access form approval flows without first logging in. Please login and try again.',
+          {
+            originalError: error,
+            requiresLogin: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 403: {
+        throw new OneBlinkAppsError(
+          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
+          {
+            originalError: error,
+            requiresAccessRequest: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 400:
+      case 404: {
+        throw new OneBlinkAppsError(error.message, {
+          title: 'Invalid Request',
+          httpStatusCode: error.status,
+        })
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  }
 }

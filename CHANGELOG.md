@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `getFormApprovalFlows` to approvals service
+
 ## [0.10.0] - 2021-07-20
 
 ### Added

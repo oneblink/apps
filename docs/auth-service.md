@@ -28,6 +28,7 @@ import { authService } from '@oneblink/apps'
 - [`getFormsKeyId()`](#getformskeyid)
 - [`setUserToken()`](#setusertoken)
 - [`getUserToken()`](#getusertoken)
+- [`isAdministator()`](#isadministator)
 
 ### `init()`
 
@@ -259,5 +260,17 @@ Can be used to retrieve the `userToken` passed to [setUserToken()](#setusertoken
 const userToken = authService.getUserToken()
 if (userToken) {
   // Use token here...
+}
+```
+
+### `isAdministator()`
+
+Determine if the current user is a OneBlink App User administrator for a OneBlink Forms App. Returns `false` if the current user is not.
+
+```js
+const formsAppId = 1
+const isAdministator = await authService.isAdministator(formsAppId)
+if (isAdministator) {
+  // handle administator user
 }
 ```

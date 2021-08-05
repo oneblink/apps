@@ -121,5 +121,5 @@ Must be an Approvals Administrator.
 ```js
 const formsAppId = 1
 const { approvals } =
-  await approvalsService.getFormSubmissionAdministrationApprovals(formAppId)
+  await approvalsService.getFormSubmissionAdministrationApprovals({ formAppId })
 ```

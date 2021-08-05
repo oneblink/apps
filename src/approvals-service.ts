@@ -286,16 +286,25 @@ export async function getFormApprovalFlows(
   }
 }
 
-export async function getFormSubmissionAdministrationApprovals(
-  formsAppId: number,
-  formId?: number,
-  externalId?: string,
-  submissionid?: string,
-  submittedAfterDateTime?: string,
-  submittedBeforeDateTime?: string,
-  limit?: number,
-  offset?: number,
-): Promise<FormSubmissionsAdministrationApprovalsResponse> {
+export async function getFormSubmissionAdministrationApprovals({
+  formsAppId,
+  formId,
+  externalId,
+  submissionid,
+  submittedAfterDateTime,
+  submittedBeforeDateTime,
+  limit,
+  offset,
+}: {
+  formsAppId: number
+  formId?: number
+  externalId?: string
+  submissionid?: string
+  submittedAfterDateTime?: string
+  submittedBeforeDateTime?: string
+  limit?: number
+  offset?: number
+}): Promise<FormSubmissionsAdministrationApprovalsResponse> {
   try {
     return await searchRequest<FormSubmissionsAdministrationApprovalsResponse>(
       `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/approvals`,

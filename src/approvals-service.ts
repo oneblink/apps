@@ -295,6 +295,7 @@ export async function getFormSubmissionAdministrationApprovals({
   submittedBeforeDateTime,
   limit,
   offset,
+  statuses,
 }: {
   formsAppId: number
   formId?: number
@@ -304,6 +305,7 @@ export async function getFormSubmissionAdministrationApprovals({
   submittedBeforeDateTime?: string
   limit?: number
   offset?: number
+  statuses?: string[]
 }): Promise<FormSubmissionsAdministrationApprovalsResponse> {
   try {
     return await searchRequest<FormSubmissionsAdministrationApprovalsResponse>(
@@ -316,6 +318,7 @@ export async function getFormSubmissionAdministrationApprovals({
         submittedBeforeDateTime,
         limit,
         offset,
+        statuses,
       },
     )
   } catch (error) {

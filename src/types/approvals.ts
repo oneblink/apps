@@ -20,3 +20,16 @@ export type FormSubmissionApprovalResponse = {
   form: FormTypes.Form
   history: FormApprovalFlowInstanceHistory[]
 }
+
+export type FormSubmissionsAdministrationApprovalsResponse = {
+  approvals: Array<{
+    formSubmissionMeta: SubmissionTypes.FormSubmissionMeta
+    formApprovalFlowInstance: ApprovalTypes.FormApprovalFlowInstance
+    formSubmissionApprovals: ApprovalTypes.FormSubmissionApproval[]
+    history: Array<{
+      formSubmissionMeta: SubmissionTypes.FormSubmissionMeta
+      formApprovalFlowInstance: ApprovalTypes.FormApprovalFlowInstance
+      formSubmissionApprovals: ApprovalTypes.FormSubmissionApproval[]
+    }>
+  }>
+}

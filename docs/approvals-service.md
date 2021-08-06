@@ -115,11 +115,17 @@ const formSubmission =
 
 ### `getFormSubmissionAdministrationApprovals()`
 
-Get an Object containing approvals for the app regardless of approval groups.
+Get an Object containing approvals for the app regardless of approval groups and meta for paging.
 Must be an Approvals Administrator.
 
 ```js
 const formsAppId = 1
-const { approvals } =
-  await approvalsService.getFormSubmissionAdministrationApprovals({ formAppId })
+const limit = 50
+const offset = 0
+const { approvals, meta } =
+  await approvalsService.getFormSubmissionAdministrationApprovals({
+    formAppId,
+    limit,
+    offset,
+  })
 ```

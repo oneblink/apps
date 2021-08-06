@@ -33,8 +33,8 @@ export type FormSubmissionsAdministrationApprovalsResponse = {
     }>
   }>
   meta: {
-    limit?: number
-    offset?: number
+    limit: number
+    offset: number
     nextOffset?: number
   }
 }

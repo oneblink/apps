@@ -15,6 +15,7 @@ import { approvalsService } from '@oneblink/apps'
 - [`getFormSubmissionApproval()`](#getformsubmissionapproval)
 - [`updateFormSubmissionApproval()`](#updateformsubmissionapproval)
 - [`retrieveFormSubmissionApprovalSubmission()`](#retrieveformsubmissionapprovalsubmission)
+- [`getFormSubmissionAdministrationApprovals()`](#getformsubmissionadministrationapprovals)
 
 ### FormApprovalFlowInstanceStep
 
@@ -110,4 +111,21 @@ const formSubmission =
   await approvalsService.retrieveFormSubmissionApprovalSubmission(
     formSubmissionApprovalId,
   )
+```
+
+### `getFormSubmissionAdministrationApprovals()`
+
+Get an Object containing approvals for the app regardless of approval groups and meta for paging.
+Must be an Approvals Administrator.
+
+```js
+const formsAppId = 1
+const limit = 50
+const offset = 0
+const { approvals, meta } =
+  await approvalsService.getFormSubmissionAdministrationApprovals({
+    formAppId,
+    limit,
+    offset,
+  })
 ```

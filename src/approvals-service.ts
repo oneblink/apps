@@ -1,6 +1,6 @@
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { isOffline } from './offline-service'
-import { getRequest, putRequest } from './services/fetch'
+import { getRequest, putRequest, searchRequest } from './services/fetch'
 import tenants from './tenants'
 import { SubmissionTypes, ApprovalTypes, FormTypes } from '@oneblink/types'
 import { generateRetrieveApprovalSubmissionCredentials } from './services/api/submissions'
@@ -9,6 +9,7 @@ import Sentry from './Sentry'
 import {
   FormSubmissionApprovalsResponse,
   FormSubmissionApprovalResponse,
+  FormSubmissionsAdministrationApprovalsResponse,
 } from './types/approvals'
 
 export { FormSubmissionApprovalsResponse }
@@ -248,6 +249,98 @@ export async function getFormApprovalFlows(
       case 401: {
         throw new OneBlinkAppsError(
           'You cannot access form approval flows without first logging in. Please login and try again.',
+          {
+            originalError: error,
+            requiresLogin: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 403: {
+        throw new OneBlinkAppsError(
+          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
+          {
+            originalError: error,
+            requiresAccessRequest: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 400:
+      case 404: {
+        throw new OneBlinkAppsError(error.message, {
+          title: 'Invalid Request',
+          httpStatusCode: error.status,
+        })
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  }
+}
+
+export async function getFormSubmissionAdministrationApprovals({
+  formsAppId,
+  formId,
+  externalId,
+  submissionid,
+  submittedAfterDateTime,
+  submittedBeforeDateTime,
+  limit,
+  offset,
+  statuses,
+}: {
+  formsAppId: number
+  formId?: number
+  externalId?: string
+  submissionid?: string
+  submittedAfterDateTime?: string
+  submittedBeforeDateTime?: string
+  limit: number
+  offset: number
+  statuses?: string[]
+}): Promise<FormSubmissionsAdministrationApprovalsResponse> {
+  try {
+    return await searchRequest<FormSubmissionsAdministrationApprovalsResponse>(
+      `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/approvals`,
+      {
+        formId,
+        externalId,
+        submissionid,
+        submittedAfterDateTime,
+        submittedBeforeDateTime,
+        limit,
+        offset,
+        statuses,
+      },
+    )
+  } catch (error) {
+    Sentry.captureException(error)
+    console.error(
+      'Error retrieving administrator form submission approvals',
+      error,
+    )
+
+    if (isOffline()) {
+      throw new OneBlinkAppsError(
+        'You are currently offline and do not have a local copy of this app available, please connect to the internet and try again',
+        {
+          originalError: error,
+          isOffline: true,
+        },
+      )
+    }
+    switch (error.status) {
+      case 401: {
+        throw new OneBlinkAppsError(
+          'You cannot view approvals without first logging in. Please login and try again.',
           {
             originalError: error,
             requiresLogin: true,

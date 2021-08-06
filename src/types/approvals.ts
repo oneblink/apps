@@ -32,4 +32,9 @@ export type FormSubmissionsAdministrationApprovalsResponse = {
       formSubmissionApprovals: ApprovalTypes.FormSubmissionApproval[]
     }>
   }>
+  meta: {
+    limit?: number
+    offset?: number
+    nextOffset?: number
+  }
 }

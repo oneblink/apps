@@ -303,8 +303,8 @@ export async function getFormSubmissionAdministrationApprovals({
   submissionid?: string
   submittedAfterDateTime?: string
   submittedBeforeDateTime?: string
-  limit?: number
-  offset?: number
+  limit: number
+  offset: number
   statuses?: string[]
 }): Promise<FormSubmissionsAdministrationApprovalsResponse> {
   try {

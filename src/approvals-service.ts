@@ -290,7 +290,7 @@ export async function getFormSubmissionAdministrationApprovals({
   formsAppId,
   formId,
   externalId,
-  submissionid,
+  submissionId,
   submittedAfterDateTime,
   submittedBeforeDateTime,
   limit,
@@ -300,7 +300,7 @@ export async function getFormSubmissionAdministrationApprovals({
   formsAppId: number
   formId?: number
   externalId?: string
-  submissionid?: string
+  submissionId?: string
   submittedAfterDateTime?: string
   submittedBeforeDateTime?: string
   limit: number
@@ -313,7 +313,7 @@ export async function getFormSubmissionAdministrationApprovals({
       {
         formId,
         externalId,
-        submissionid,
+        submissionId,
         submittedAfterDateTime,
         submittedBeforeDateTime,
         limit,

@@ -96,9 +96,12 @@ export const generateSubmissionCredentials = async (
 
 export const generateRetrieveApprovalSubmissionCredentials = async (
   formSubmissionApprovalId: string,
+  abortSignal?: AbortSignal,
 ) => {
   return postRequest<AWSTypes.FormS3Credentials>(
     `${tenants.current.apiOrigin}/form-submission-approvals/${formSubmissionApprovalId}/retrieval-credentials`,
+    undefined,
+    abortSignal,
   ).catch((error) => {
     Sentry.captureException(error)
     // handle only credential errors here

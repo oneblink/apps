@@ -15,10 +15,12 @@ import {
 export { FormSubmissionApprovalsResponse }
 export async function getFormSubmissionApprovals(
   formsAppId: number,
+  abortSignal?: AbortSignal,
 ): Promise<FormSubmissionApprovalsResponse> {
   try {
     return await getRequest<FormSubmissionApprovalsResponse>(
       `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/my-approvals`,
+      abortSignal,
     )
   } catch (error) {
     Sentry.captureException(error)
@@ -77,10 +79,12 @@ export async function getFormSubmissionApprovals(
 export { FormSubmissionApprovalResponse }
 export async function getFormSubmissionApproval(
   formSubmissionApprovalId: string,
+  abortSignal?: AbortSignal,
 ): Promise<FormSubmissionApprovalResponse> {
   try {
     const result = await getRequest<FormSubmissionApprovalResponse>(
       `${tenants.current.apiOrigin}/form-submission-approvals/${formSubmissionApprovalId}`,
+      abortSignal,
     )
     return result
   } catch (error) {
@@ -139,11 +143,13 @@ export async function getFormSubmissionApproval(
 
 export async function updateFormSubmissionApproval(
   formSubmissionApproval: ApprovalTypes.FormSubmissionApproval,
+  abortSignal?: AbortSignal,
 ): Promise<ApprovalTypes.FormSubmissionApproval> {
   try {
     return await putRequest<ApprovalTypes.FormSubmissionApproval>(
       `${tenants.current.apiOrigin}/form-submission-approvals/${formSubmissionApproval.id}`,
       formSubmissionApproval,
+      abortSignal,
     )
   } catch (error) {
     Sentry.captureException(error)
@@ -202,9 +208,11 @@ export async function updateFormSubmissionApproval(
 
 export async function retrieveFormSubmissionApprovalSubmission(
   formSubmissionApprovalId: string,
+  abortSignal?: AbortSignal,
 ): Promise<SubmissionTypes.S3SubmissionData> {
   const credentials = await generateRetrieveApprovalSubmissionCredentials(
     formSubmissionApprovalId,
+    abortSignal,
   )
   return downloadPreFillData<SubmissionTypes.S3SubmissionData>({
     credentials: credentials.credentials,
@@ -228,10 +236,12 @@ type FormApprovalFlowResponse = {
 
 export async function getFormApprovalFlows(
   formsAppId: number,
+  abortSignal?: AbortSignal,
 ): Promise<FormApprovalFlowResponse> {
   try {
     return await getRequest<FormApprovalFlowResponse>(
       `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/form-approval-flows`,
+      abortSignal,
     )
   } catch (error) {
     Sentry.captureException(error)
@@ -286,27 +296,30 @@ export async function getFormApprovalFlows(
   }
 }
 
-export async function getFormSubmissionAdministrationApprovals({
-  formsAppId,
-  formId,
-  externalId,
-  submissionId,
-  submittedAfterDateTime,
-  submittedBeforeDateTime,
-  limit,
-  offset,
-  statuses,
-}: {
-  formsAppId: number
-  formId?: number
-  externalId?: string
-  submissionId?: string
-  submittedAfterDateTime?: string
-  submittedBeforeDateTime?: string
-  limit: number
-  offset: number
-  statuses?: string[]
-}): Promise<FormSubmissionsAdministrationApprovalsResponse> {
+export async function getFormSubmissionAdministrationApprovals(
+  {
+    formsAppId,
+    formId,
+    externalId,
+    submissionId,
+    submittedAfterDateTime,
+    submittedBeforeDateTime,
+    limit,
+    offset,
+    statuses,
+  }: {
+    formsAppId: number
+    formId?: number
+    externalId?: string
+    submissionId?: string
+    submittedAfterDateTime?: string
+    submittedBeforeDateTime?: string
+    limit: number
+    offset: number
+    statuses?: string[]
+  },
+  abortSignal?: AbortSignal,
+): Promise<FormSubmissionsAdministrationApprovalsResponse> {
   try {
     return await searchRequest<FormSubmissionsAdministrationApprovalsResponse>(
       `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/approvals`,
@@ -320,6 +333,7 @@ export async function getFormSubmissionAdministrationApprovals({
         offset,
         statuses,
       },
+      abortSignal,
     )
   } catch (error) {
     Sentry.captureException(error)

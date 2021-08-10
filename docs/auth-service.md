@@ -28,7 +28,7 @@ import { authService } from '@oneblink/apps'
 - [`getFormsKeyId()`](#getformskeyid)
 - [`setUserToken()`](#setusertoken)
 - [`getUserToken()`](#getusertoken)
-- [`isAdministator()`](#isadministator)
+- [`isAdministrator()`](#isadministrator)
 
 ### `init()`
 
@@ -263,14 +263,14 @@ if (userToken) {
 }
 ```
 
-### `isAdministator()`
+### `isAdministrator()`
 
 Determine if the current user is a OneBlink App User administrator for a OneBlink Forms App. Returns `false` if the current user is not.
 
 ```js
 const formsAppId = 1
-const isAdministator = await authService.isAdministator(formsAppId)
-if (isAdministator) {
+const isAdministrator = await authService.isAdministrator(formsAppId)
+if (isAdministrator) {
   // handle administator user
 }
 ```

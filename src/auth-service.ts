@@ -128,7 +128,7 @@ export async function requestAccess(formsAppId: number): Promise<void> {
   }
 }
 
-export async function isAdministator(formsAppId: number): Promise<boolean> {
+export async function isAdministrator(formsAppId: number): Promise<boolean> {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/my-forms-app-user`
   const appUser = await getRequest<FormsAppsTypes.FormsAppUser>(url)
   return appUser.groups.some((group) => group === 'oneblink:administrator')

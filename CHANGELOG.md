@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- [`approvalsService.getFormApprovalFlowInstanceSubmission()`](./docs/approvals-service.md#getformapprovalflowinstancesubmission)
+
+### Removed
+
+- **[BREAKING]** `approvalsService.retrieveFormSubmissionApprovalSubmission()`
+
 ## [0.10.1] - 2021-08-11
 
 ### Added

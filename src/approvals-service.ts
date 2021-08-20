@@ -207,11 +207,11 @@ export async function updateFormSubmissionApproval(
 }
 
 export async function retrieveFormSubmissionApprovalSubmission(
-  formSubmissionApprovalId: string,
+  formApprovalFlowInstanceId: number,
   abortSignal?: AbortSignal,
 ): Promise<SubmissionTypes.S3SubmissionData> {
   const credentials = await generateRetrieveApprovalSubmissionCredentials(
-    formSubmissionApprovalId,
+    formApprovalFlowInstanceId,
     abortSignal,
   )
   return downloadPreFillData<SubmissionTypes.S3SubmissionData>({

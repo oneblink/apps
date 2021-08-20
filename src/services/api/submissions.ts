@@ -95,11 +95,11 @@ export const generateSubmissionCredentials = async (
 }
 
 export const generateRetrieveApprovalSubmissionCredentials = async (
-  formSubmissionApprovalId: string,
+  formApprovalFlowInstanceId: number,
   abortSignal?: AbortSignal,
 ) => {
   return postRequest<AWSTypes.FormS3Credentials>(
-    `${tenants.current.apiOrigin}/form-submission-approvals/${formSubmissionApprovalId}/retrieval-credentials`,
+    `${tenants.current.apiOrigin}/form-approval-flow-instances/${formApprovalFlowInstanceId}/retrieval-credentials`,
     undefined,
     abortSignal,
   ).catch((error) => {

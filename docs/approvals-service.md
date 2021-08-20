@@ -14,7 +14,7 @@ import { approvalsService } from '@oneblink/apps'
 - [`getFormSubmissionApprovals()`](#getformsubmissionapprovals)
 - [`getFormSubmissionApproval()`](#getformsubmissionapproval)
 - [`updateFormSubmissionApproval()`](#updateformsubmissionapproval)
-- [`retrieveFormSubmissionApprovalSubmission()`](#retrieveformsubmissionapprovalsubmission)
+- [`getFormApprovalFlowInstanceSubmission()`](#getformapprovalflowinstancesubmission)
 - [`getFormSubmissionAdministrationApprovals()`](#getformsubmissionadministrationapprovals)
 
 ### FormApprovalFlowInstanceStep
@@ -101,15 +101,15 @@ const updatedFormSubmissionApproval =
   await approvalsService.updateFormSubmissionApproval(formSubmissionApproval)
 ```
 
-### `retrieveFormSubmissionApprovalSubmission()`
+### `getFormApprovalFlowInstanceSubmission()`
 
-Retrieve the submission data associated with a [`FormSubmissionApproval`](#formsubmissionapproval).
+Retrieve the submission data associated with a [`FormApprovalFlowInstance`](#formapprovalflowinstance).
 
 ```js
-const formSubmissionApprovalId = 'd27966cc-128d-48a2-b681-6ad52012e113'
+const formApprovalFlowInstanceId = 1
 const formSubmission =
-  await approvalsService.retrieveFormSubmissionApprovalSubmission(
-    formSubmissionApprovalId,
+  await approvalsService.getFormApprovalFlowInstanceSubmission(
+    formApprovalFlowInstanceId,
   )
 ```
 

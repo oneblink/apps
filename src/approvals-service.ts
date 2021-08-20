@@ -206,7 +206,7 @@ export async function updateFormSubmissionApproval(
   }
 }
 
-export async function retrieveFormSubmissionApprovalSubmission(
+export async function getFormApprovalFlowInstanceSubmission(
   formApprovalFlowInstanceId: number,
   abortSignal?: AbortSignal,
 ): Promise<SubmissionTypes.S3SubmissionData> {

@@ -1,4 +1,3 @@
-import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import utilsService from './utils'
 
 import { uploadDraftData, downloadDraftData } from './api/drafts'
@@ -74,16 +73,6 @@ export async function getDraftData(
       }
       return formSubmissionResult
     })
-    .catch((error) => {
-      console.warn('Could not download Draft Data as JSON', error)
-      throw new OneBlinkAppsError(
-        'The draft data associated to this form is no longer available',
-        {
-          title: 'Draft Data Unavailable',
-          originalError: error,
-        },
-      )
-    })
 }
 
 export async function ensureDraftsDataExists(
@@ -104,7 +93,6 @@ export async function ensureDraftsDataExists(
       return
     }
     await getDraftData(draft.formId, draftDataId).catch((error) => {
-      Sentry.captureException(error)
       console.warn('Could not download Draft Data as JSON', error)
     })
   }

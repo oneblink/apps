@@ -238,7 +238,7 @@ const uploadAttachment = async (
   )
 }
 
-const downloadPreFillData = <T>({
+const downloadS3Data = <T>({
   credentials,
   s3: s3Meta,
 }: AWSTypes.FormS3Credentials): Promise<T> => {
@@ -288,23 +288,87 @@ const downloadPreFillData = <T>({
         fileReader.readAsText(blob)
       })
     })
-    .catch((error) => {
-      Sentry.captureException(error)
-      // AWS will return an "Access Denied" error for objects that have been
-      // deleted. As we should only be getting these if objects are not there
-      // (because our API should always return valid credentials) we can tell
-      // the user that their data has been removed from OneBlink's stores.
-      if (error.name === 'AccessDenied') {
-        throw new OneBlinkAppsError(
-          "Data has been removed based on your administrator's prefill data retention policy.",
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      throw error
-    })
 }
 
-export { uploadFormSubmission, downloadPreFillData, uploadAttachment }
+async function downloadPreFillS3Data<T>(
+  options: AWSTypes.FormS3Credentials,
+): Promise<T> {
+  try {
+    return await downloadS3Data<T>(options)
+  } catch (error) {
+    Sentry.captureException(error)
+    // AWS will return an "Access Denied" error for objects that have been
+    // deleted. As we should only be getting these if objects are not there
+    // (because our API should always return valid credentials) we can tell
+    // the user that their data has been removed from OneBlink's stores.
+    if (error.name === 'AccessDenied') {
+      throw new OneBlinkAppsError(
+        "Data has been removed based on your administrator's prefill data retention policy.",
+        {
+          title: 'Prefill Data Unavailable',
+          originalError: error,
+          httpStatusCode: error.status,
+        },
+      )
+    }
+    throw error
+  }
+}
+
+async function downloadDraftS3Data<T>(
+  options: AWSTypes.FormS3Credentials,
+): Promise<T> {
+  try {
+    return await downloadS3Data<T>(options)
+  } catch (error) {
+    Sentry.captureException(error)
+    // AWS will return an "Access Denied" error for objects that have been
+    // deleted. As we should only be getting these if objects are not there
+    // (because our API should always return valid credentials) we can tell
+    // the user that their data has been removed from OneBlink's stores.
+    if (error.name === 'AccessDenied') {
+      throw new OneBlinkAppsError(
+        "Data has been removed based on your administrator's draft data retention policy.",
+        {
+          title: 'Draft Data Unavailable',
+          originalError: error,
+          httpStatusCode: error.status,
+        },
+      )
+    }
+    throw error
+  }
+}
+
+async function downloadSubmissionS3Data<T>(
+  options: AWSTypes.FormS3Credentials,
+): Promise<T> {
+  try {
+    return await downloadS3Data<T>(options)
+  } catch (error) {
+    Sentry.captureException(error)
+    // AWS will return an "Access Denied" error for objects that have been
+    // deleted. As we should only be getting these if objects are not there
+    // (because our API should always return valid credentials) we can tell
+    // the user that their data has been removed from OneBlink's stores.
+    if (error.name === 'AccessDenied') {
+      throw new OneBlinkAppsError(
+        "This submission has been removed based on your administrator's retention policy.",
+        {
+          title: 'Submission Data Unavailable',
+          originalError: error,
+          httpStatusCode: error.status,
+        },
+      )
+    }
+    throw error
+  }
+}
+
+export {
+  uploadFormSubmission,
+  downloadPreFillS3Data,
+  downloadDraftS3Data,
+  downloadSubmissionS3Data,
+  uploadAttachment,
+}

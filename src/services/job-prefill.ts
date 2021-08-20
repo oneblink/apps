@@ -1,8 +1,6 @@
-import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import utilsService from './utils'
 import { downloadPreFillFormData } from './api/prefill'
 import { MiscTypes, SubmissionTypes } from '@oneblink/types'
-import Sentry from '../Sentry'
 
 export function getPrefillKey(prefillFormDataId: string) {
   return `V2_PREFILL_${prefillFormDataId}`
@@ -29,29 +27,14 @@ export async function getPrefillFormData<T extends Record<string, unknown>>(
     return null
   }
 
-  return get<T>(prefillFormDataId)
-    .then((prefillData) => {
-      if (prefillData) return prefillData
+  return get<T>(prefillFormDataId).then((prefillData) => {
+    if (prefillData) return prefillData
 
-      return downloadPreFillFormData<T>(formId, prefillFormDataId).then(
-        (downloadedPrefillData) =>
-          set<T>(prefillFormDataId, downloadedPrefillData),
-      )
-    })
-    .catch((error) => {
-      Sentry.captureException(error)
-      console.warn(
-        'An error occurred attempting to retrieve prefill data',
-        error,
-      )
-      throw new OneBlinkAppsError(
-        'The prefill data associated to this form is no longer available.',
-        {
-          originalError: error,
-          title: 'Prefill Data Unavailable',
-        },
-      )
-    })
+    return downloadPreFillFormData<T>(formId, prefillFormDataId).then(
+      (downloadedPrefillData) =>
+        set<T>(prefillFormDataId, downloadedPrefillData),
+    )
+  })
 }
 
 export async function ensurePrefillFormDataExists(

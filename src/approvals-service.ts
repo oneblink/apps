@@ -4,7 +4,7 @@ import { getRequest, putRequest, searchRequest } from './services/fetch'
 import tenants from './tenants'
 import { SubmissionTypes, ApprovalTypes, FormTypes } from '@oneblink/types'
 import { generateRetrieveApprovalSubmissionCredentials } from './services/api/submissions'
-import { downloadPreFillData } from './services/s3Submit'
+import { downloadSubmissionS3Data } from './services/s3Submit'
 import Sentry from './Sentry'
 import {
   FormSubmissionApprovalsResponse,
@@ -214,18 +214,9 @@ export async function getFormApprovalFlowInstanceSubmission(
     formApprovalFlowInstanceId,
     abortSignal,
   )
-  return downloadPreFillData<SubmissionTypes.S3SubmissionData>({
+  return await downloadSubmissionS3Data<SubmissionTypes.S3SubmissionData>({
     credentials: credentials.credentials,
     s3: credentials.s3,
-  }).catch((err) => {
-    Sentry.captureException(err)
-    throw new OneBlinkAppsError(
-      'The form submission associated with this pending approval could not be retrieved.',
-      {
-        originalError: err,
-        title: 'Submission Data Unavailable',
-      },
-    )
   })
 }
 

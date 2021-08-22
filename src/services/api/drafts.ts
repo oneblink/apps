@@ -1,7 +1,7 @@
 import { AWSTypes, SubmissionTypes } from '@oneblink/types'
 import { postRequest, putRequest } from '../fetch'
 import { isLoggedIn } from '../../auth-service'
-import { uploadFormSubmission, downloadPreFillData } from '../s3Submit'
+import { uploadFormSubmission, downloadDraftS3Data } from '../s3Submit'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 import { getUserToken } from '../user-token'
@@ -180,7 +180,7 @@ async function downloadDraftData<T>(
 
   const data = await postRequest<AWSTypes.FormS3Credentials>(url)
   console.log('Attempting to download draft form data:', data)
-  return downloadPreFillData<T>(data)
+  return downloadDraftS3Data<T>(data)
 }
 
 export { uploadDraftData, putDrafts, downloadDraftData }

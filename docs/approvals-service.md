@@ -14,6 +14,7 @@ import { approvalsService } from '@oneblink/apps'
 - [`getFormSubmissionApprovals()`](#getformsubmissionapprovals)
 - [`getFormSubmissionApproval()`](#getformsubmissionapproval)
 - [`updateFormSubmissionApproval()`](#updateformsubmissionapproval)
+- [`reopenFormSubmissionApproval()`](#reopenformsubmissionapproval)
 - [`getFormApprovalFlowInstanceSubmission()`](#getformapprovalflowinstancesubmission)
 - [`getFormSubmissionAdministrationApprovals()`](#getformsubmissionadministrationapprovals)
 
@@ -99,6 +100,19 @@ const formSubmissionApproval = {
 }
 const updatedFormSubmissionApproval =
   await approvalsService.updateFormSubmissionApproval(formSubmissionApproval)
+```
+
+### `reopenFormSubmissionApproval()`
+
+As an administrator, reopen a submission that has been approved or denied .
+
+```js
+await approvalsService.updateFormSubmissionApproval({
+  formApprovalFlowInstanceId: 1,
+  notificationEmailAddress: 'email@example.com',
+  notes: 'Great work!!!',
+  internalNotes: 'It was not really that great...',
+})
 ```
 
 ### `getFormApprovalFlowInstanceSubmission()`

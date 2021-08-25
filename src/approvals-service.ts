@@ -211,7 +211,7 @@ export async function updateFormSubmissionApproval(
   }
 }
 
-export async function reportFormSubmissionApproval(
+export async function reopenFormSubmissionApproval(
   {
     formApprovalFlowInstanceId,
     ...payload

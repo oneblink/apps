@@ -316,59 +316,49 @@ export async function syncDrafts({
   _isSyncingDrafts = true
 
   console.log('Start attempting to sync drafts.')
-  return getDraftsData()
-    .then((localDraftsData) => {
-      console.log(
-        `Found ${localDraftsData.drafts.length} local drafts(s).`,
-        localDraftsData,
-      )
-      return ensureDraftsDataIsUploaded(localDraftsData)
-        .then((draftsData) => putDrafts(draftsData, formsAppId))
-        .then((syncDraftsData) => {
-          return setDrafts(syncDraftsData).then(() => syncDraftsData)
-        })
-        .then((syncDraftsData) => {
-          console.log(
-            'Ensuring all draft data is available for offline use for synced drafts',
-            syncDraftsData,
-          )
-          return ensureDraftsDataExists(
-            syncDraftsData.drafts.filter(
-              (draft) => draft.draftId !== draft.draftDataId,
-            ),
-          ).then(() => {
-            // Attempt to get drafts that have been deleted and
-            // remove draft data from local storage
-            const deletedLocalDrafts = _differenceBy(
-              localDraftsData.drafts,
-              syncDraftsData.drafts,
-              'draftId',
-            )
-            console.log(
-              'Removing local draft data for delete drafts',
-              deletedLocalDrafts,
-            )
-            return Promise.all([
-              deletedLocalDrafts.map(({ draftDataId }) =>
-                removeDraftData(draftDataId),
-              ),
-            ])
-          })
-        })
-    })
-    .then(() => {
-      console.log('Finished syncing drafts.')
-      _isSyncingDrafts = false
-    })
-    .catch((error) => {
-      Sentry.captureException(error)
-      _isSyncingDrafts = false
-      console.warn(
-        'Error while attempting to sync and update local drafts',
-        error,
-      )
-      if (throwError) {
-        throw error
-      }
-    })
+  try {
+    const localDraftsData = await getDraftsData()
+    console.log(
+      `Found ${localDraftsData.drafts.length} local drafts(s).`,
+      localDraftsData,
+    )
+    const draftsData = await ensureDraftsDataIsUploaded(localDraftsData)
+    const syncDraftsData = await putDrafts(draftsData, formsAppId)
+    await setDrafts(syncDraftsData)
+    console.log(
+      'Ensuring all draft data is available for offline use for synced drafts',
+      syncDraftsData,
+    )
+    await ensureDraftsDataExists(
+      syncDraftsData.drafts.filter(
+        (draft) => draft.draftId !== draft.draftDataId,
+      ),
+    )
+    // Attempt to get drafts that have been deleted and
+    // remove draft data from local storage
+    const deletedLocalDrafts = _differenceBy(
+      localDraftsData.drafts,
+      syncDraftsData.drafts,
+      'draftId',
+    )
+    console.log(
+      'Removing local draft data for delete drafts',
+      deletedLocalDrafts,
+    )
+    await Promise.all([
+      deletedLocalDrafts.map(({ draftDataId }) => removeDraftData(draftDataId)),
+    ])
+    console.log('Finished syncing drafts.')
+    _isSyncingDrafts = false
+  } catch (error) {
+    Sentry.captureException(error)
+    _isSyncingDrafts = false
+    console.warn(
+      'Error while attempting to sync and update local drafts',
+      error,
+    )
+    if (throwError) {
+      throw error
+    }
+  }
 }

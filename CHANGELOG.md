@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [0.11.1] - 2021-08-25
+### Added
 
 - [`approvalsService.reopenFormSubmissionApproval()`](./docs/approvals-service.md#reopenformsubmissionapproval)
+
+### Changed
+
+- the notifications errors that are sent to Sentry
+
+## [0.11.1] - 2021-08-25
+
+**Deprecated**
 
 ## [0.11.0] - 2021-08-23
 

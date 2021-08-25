@@ -1,6 +1,11 @@
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { isOffline } from './offline-service'
-import { getRequest, putRequest, searchRequest } from './services/fetch'
+import {
+  getRequest,
+  putRequest,
+  searchRequest,
+  postRequest,
+} from './services/fetch'
 import tenants from './tenants'
 import { SubmissionTypes, ApprovalTypes, FormTypes } from '@oneblink/types'
 import { generateRetrieveApprovalSubmissionCredentials } from './services/api/submissions'
@@ -178,6 +183,83 @@ export async function updateFormSubmissionApproval(
       case 403: {
         throw new OneBlinkAppsError(
           'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
+          {
+            originalError: error,
+            requiresAccessRequest: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 400:
+      case 404:
+      case 409: {
+        throw new OneBlinkAppsError(error.message, {
+          title: 'Invalid Request',
+          httpStatusCode: error.status,
+        })
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  }
+}
+
+export async function reportFormSubmissionApproval(
+  {
+    formApprovalFlowInstanceId,
+    ...payload
+  }: {
+    formApprovalFlowInstanceId: number
+    notificationEmailAddress: string
+    notes: string
+    internalNotes?: string
+  },
+  abortSignal?: AbortSignal,
+): Promise<ApprovalTypes.FormSubmissionApproval> {
+  console.log('Reopening form submission approval', {
+    formApprovalFlowInstanceId,
+    ...payload,
+  })
+  try {
+    return await postRequest<ApprovalTypes.FormSubmissionApproval>(
+      `${tenants.current.apiOrigin}/form-approval-flow-instances/${formApprovalFlowInstanceId}/reopen`,
+      payload,
+      abortSignal,
+    )
+  } catch (error) {
+    console.error('Error reopening form submission approval', error)
+    Sentry.captureException(error)
+
+    if (isOffline()) {
+      throw new OneBlinkAppsError(
+        'You are currently offline, please connect to the internet and try again',
+        {
+          originalError: error,
+          isOffline: true,
+        },
+      )
+    }
+    switch (error.status) {
+      case 401: {
+        throw new OneBlinkAppsError(
+          'You cannot reopen this approval without first logging in. Please login and try again.',
+          {
+            originalError: error,
+            requiresLogin: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 403: {
+        throw new OneBlinkAppsError(
+          'You do not have access to this approval. Please contact your administrator to gain the correct level of access.',
           {
             originalError: error,
             requiresAccessRequest: true,

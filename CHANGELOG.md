@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.11.1] - 2021-08-25
+
 - [`approvalsService.reopenFormSubmissionApproval()`](./docs/approvals-service.md#reopenformsubmissionapproval)
 
 ## [0.11.0] - 2021-08-23

@@ -59,39 +59,38 @@ async function isSubscribed(): Promise<boolean> {
 }
 
 async function subscribe(formsAppId: number): Promise<boolean> {
+  if (isOffline()) {
+    throw new OneBlinkAppsError(
+      'You are currently offline, please connect to the internet and try again.',
+      {
+        isOffline: true,
+      },
+    )
+  }
+
+  const swRegistration = await getServiceWorkerRegistration()
+  if (!swRegistration) {
+    return false
+  }
+
+  if (
+    !('Notification' in window) ||
+    !swRegistration.pushManager ||
+    !swRegistration.pushManager.subscribe
+  ) {
+    throw new OneBlinkAppsError(
+      'Sorry, push notifications are not support for your device.',
+      {
+        title: 'Unsupported Device',
+      },
+    )
+  }
+
   try {
-    if (isOffline()) {
-      throw new OneBlinkAppsError(
-        'You are currently offline, please connect to the internet and try again.',
-        {
-          isOffline: true,
-        },
-      )
-    }
-
     const key = applicationServerKey
-
     if (!key) {
       throw new Error(
         'Notifications have not been configured for your application.',
-      )
-    }
-
-    const swRegistration = await getServiceWorkerRegistration()
-    if (!swRegistration) {
-      return false
-    }
-
-    if (
-      !('Notification' in window) ||
-      !swRegistration.pushManager ||
-      !swRegistration.pushManager.subscribe
-    ) {
-      throw new OneBlinkAppsError(
-        'Sorry, push notifications are not support for your device.',
-        {
-          title: 'Unsupported Device',
-        },
       )
     }
 
@@ -117,7 +116,6 @@ async function subscribe(formsAppId: number): Promise<boolean> {
     console.log('Successfully subscribed to push notifications')
     return true
   } catch (error) {
-    Sentry.captureException(error)
     console.warn('Failed to subscribe the user:', error)
 
     if (Notification.permission === 'denied') {
@@ -130,6 +128,8 @@ async function subscribe(formsAppId: number): Promise<boolean> {
         },
       )
     }
+
+    Sentry.captureException(error)
 
     if (error instanceof OneBlinkAppsError) {
       throw error

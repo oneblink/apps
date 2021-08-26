@@ -1,4 +1,5 @@
 import { FormTypes, SubmissionEventTypes } from '@oneblink/types'
+import { S3ObjectCredentials } from '@oneblink/types/typescript/aws'
 
 export type NewDraftSubmission = {
   submission: {
@@ -39,10 +40,25 @@ export type FormSubmissionResult = FormSubmission & {
   } | null
   isInPendingQueue: boolean
   isOffline: boolean
+  ipAddress?: string
 }
 
 export type PendingFormSubmission = Omit<FormSubmission, 'submission'> & {
   pendingTimestamp: string
   isSubmitting?: boolean
   error?: string
+}
+
+type _S3UploadCredentials = S3ObjectCredentials & {
+  submissionTimestamp: string
+  usernameToken: string
+}
+
+export type S3UploadCredentials = _S3UploadCredentials & {
+  submissionId: string
+  ipAddress?: string
+}
+
+export type S3DraftUploadCredentials = _S3UploadCredentials & {
+  draftDataId: string
 }

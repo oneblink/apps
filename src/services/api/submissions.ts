@@ -1,9 +1,9 @@
-import { SubmissionTypes, AWSTypes } from '@oneblink/types'
+import { AWSTypes } from '@oneblink/types'
 import { HTTPError, postRequest } from '../fetch'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 import Sentry from '../../Sentry'
-import { FormSubmission } from '../../types/submissions'
+import { FormSubmission, S3UploadCredentials } from '../../types/submissions'
 
 const getBadRequestError = (error: HTTPError) => {
   return new OneBlinkAppsError(
@@ -77,8 +77,8 @@ const handleError = (error: HTTPError) => {
 
 export const generateSubmissionCredentials = async (
   formSubmission: FormSubmission,
-): Promise<SubmissionTypes.S3UploadCredentials> => {
-  return postRequest<SubmissionTypes.S3UploadCredentials>(
+): Promise<S3UploadCredentials> => {
+  return postRequest<S3UploadCredentials>(
     `${tenants.current.apiOrigin}/forms/${formSubmission.definition.id}/submission-credentials`,
     {
       formsAppId: formSubmission.formsAppId,

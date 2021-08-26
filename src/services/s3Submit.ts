@@ -5,9 +5,9 @@ import queryString from 'query-string'
 import contentDisposition from 'content-disposition'
 import { getUserProfile } from '../auth-service'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
-import { AWSTypes, FormTypes, SubmissionTypes } from '@oneblink/types'
+import { AWSTypes, SubmissionTypes } from '@oneblink/types'
 import Sentry from '../Sentry'
-import { FormSubmission } from '../types/submissions'
+import { S3UploadCredentials } from '../types/submissions'
 
 const apiVersion = '2006-03-01'
 
@@ -28,8 +28,8 @@ declare global {
 }
 
 interface S3Configuration {
-  credentials: SubmissionTypes.S3UploadCredentials['credentials']
-  s3: SubmissionTypes.S3UploadCredentials['s3']
+  credentials: S3UploadCredentials['credentials']
+  s3: S3UploadCredentials['s3']
 }
 interface UploadFileConfiguration {
   fileName?: string
@@ -46,9 +46,9 @@ export type UploadAttachmentConfiguration =
     data: S3.PutObjectRequest['Body']
   }
 
-const getDeviceInformation = () => {
+function getDeviceInformation(): SubmissionTypes.S3SubmissionDataDevice {
   if (window.cordova) {
-    const deviceInformation = {
+    const deviceInformation: SubmissionTypes.S3SubmissionDataDevice = {
       type: 'CORDOVA',
     }
     if (!window.device) {
@@ -98,7 +98,7 @@ const getS3Instance = ({ credentials, s3: s3Meta }: S3Configuration) => {
   })
 }
 const getObjectMeta = (
-  s3Meta: SubmissionTypes.S3UploadCredentials['s3'],
+  s3Meta: S3UploadCredentials['s3'],
   data: UploadFileConfigurationWithTags,
 ): S3.PutObjectRequest => ({
   ServerSideEncryption: 'AES256',
@@ -158,13 +158,7 @@ const prepareFileAndUploadToS3 = async (
 
 const uploadFormSubmission = (
   s3Configuration: S3Configuration,
-  formJson: {
-    definition: FormTypes.Form
-    submission: FormSubmission['submission']
-    submissionTimestamp: string
-    keyId?: string
-    formsAppId: number
-  },
+  formJson: SubmissionTypes.S3SubmissionData,
   tags: Record<string, string | undefined>,
 ) => {
   console.log('Uploading submission')
@@ -173,14 +167,14 @@ const uploadFormSubmission = (
     s3: S3,
     objectMeta: S3.PutObjectRequest,
   ) => {
-    const json = {
-      body: {
-        ...formJson,
-        user: getUserProfile(),
-        device: getDeviceInformation(),
-      },
+    const body: SubmissionTypes.S3SubmissionData = {
+      ...formJson,
+      user: getUserProfile() || undefined,
+      device: getDeviceInformation(),
     }
-    const readStream = bigJSON.createStringifyStream(json)
+    const readStream = bigJSON.createStringifyStream({
+      body,
+    })
     const s3StreamClient = s3UploadStream(s3)
 
     const upload = s3StreamClient.upload(objectMeta)

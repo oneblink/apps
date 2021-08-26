@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+- `ipAddress` to S3 JSON on submission
 - [`approvalsService.reopenFormSubmissionApproval()`](./docs/approvals-service.md#reopenformsubmissionapproval)
 
 ### Changed

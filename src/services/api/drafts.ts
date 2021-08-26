@@ -7,7 +7,10 @@ import tenants from '../../tenants'
 import { getUserToken } from '../user-token'
 import Sentry from '../../Sentry'
 import prepareSubmissionData from '../prepareSubmissionData'
-import { DraftSubmission } from '../../types/submissions'
+import {
+  DraftSubmission,
+  S3DraftUploadCredentials,
+} from '../../types/submissions'
 
 const uploadDraftData = async (
   draft: SubmissionTypes.FormsAppDraft,
@@ -18,9 +21,7 @@ const uploadDraftData = async (
 
   try {
     const submission = await prepareSubmissionData(draftSubmission)
-    const data = await postRequest<SubmissionTypes.S3DraftUploadCredentials>(
-      url,
-    )
+    const data = await postRequest<S3DraftUploadCredentials>(url)
     const userToken = getUserToken()
     console.log('Attempting to upload draft data:', data)
     await uploadFormSubmission(

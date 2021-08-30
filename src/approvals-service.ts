@@ -372,14 +372,7 @@ export async function getFormApprovalFlows(
 export async function getFormSubmissionAdministrationApprovals(
   {
     formsAppId,
-    formId,
-    externalId,
-    submissionId,
-    submittedAfterDateTime,
-    submittedBeforeDateTime,
-    limit,
-    offset,
-    statuses,
+    ...rest
   }: {
     formsAppId: number
     formId?: number
@@ -390,6 +383,9 @@ export async function getFormSubmissionAdministrationApprovals(
     limit: number
     offset: number
     statuses?: string[]
+    updatedAfterDateTime?: string
+    updatedBeforeDateTime?: string
+    lastUpdatedBy?: string[]
   },
   abortSignal?: AbortSignal,
 ): Promise<FormSubmissionsAdministrationApprovalsResponse> {
@@ -397,14 +393,7 @@ export async function getFormSubmissionAdministrationApprovals(
     return await searchRequest<FormSubmissionsAdministrationApprovalsResponse>(
       `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/approvals`,
       {
-        formId,
-        externalId,
-        submissionId,
-        submittedAfterDateTime,
-        submittedBeforeDateTime,
-        limit,
-        offset,
-        statuses,
+        ...rest,
       },
       abortSignal,
     )

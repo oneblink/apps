@@ -453,3 +453,66 @@ export async function getFormSubmissionAdministrationApprovals(
     }
   }
 }
+
+type FormApprovalUsernamesResponse = { usernames: Array<{ username: string }> }
+export async function getFormApprovalUsernames(
+  formsAppId: number,
+  abortSignal?: AbortSignal,
+): Promise<FormApprovalUsernamesResponse> {
+  try {
+    return await getRequest<FormApprovalUsernamesResponse>(
+      `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/approvals/usernames`,
+      abortSignal,
+    )
+  } catch (error) {
+    Sentry.captureException(error)
+    console.error('Error retrieving form approval usernames', error)
+    if (isOffline()) {
+      throw new OneBlinkAppsError(
+        'You are currently offline, please connect to the internet and try again',
+        {
+          originalError: error,
+          isOffline: true,
+        },
+      )
+    }
+    switch (error.status) {
+      case 401: {
+        throw new OneBlinkAppsError(
+          'You cannot access form approval usernames without first logging in. Please login and try again.',
+          {
+            originalError: error,
+            requiresLogin: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 403: {
+        throw new OneBlinkAppsError(
+          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
+          {
+            originalError: error,
+            requiresAccessRequest: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 400:
+      case 404: {
+        throw new OneBlinkAppsError(error.message, {
+          title: 'Invalid Request',
+          httpStatusCode: error.status,
+        })
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  }
+}

@@ -143,3 +143,15 @@ const { approvals, meta } =
     offset,
   })
 ```
+
+### `getFormApprovalUsernames()`
+
+Get an array containing usernames that have updated approvals in the within the formsAppId associated with the passed `formsAppId`.
+Must be an Approvals Administrator.
+
+```js
+const formsAppId = 1
+const { usernames } = await approvalsService.getFormApprovalUsernames(
+  formsAppId,
+)
+```

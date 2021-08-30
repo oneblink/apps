@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - `ipAddress` to S3 JSON on submission
 - [`approvalsService.reopenFormSubmissionApproval()`](./docs/approvals-service.md#reopenformsubmissionapproval)
-  `updatedAfterDateTime`, `updatedBeforeDateTime` and `lastUpdatedBy` search paramaters to `approvalsService.getFormApprovalFlowInstanceSubmission()`
+- `updatedAfterDateTime`, `updatedBeforeDateTime` and `lastUpdatedBy` search paramaters to `approvalsService.getFormApprovalFlowInstanceSubmission()`
+- [`approvalsService.getFormApprovalUsernames()`](./docs/approvals-service.md#getformapprovalusernames)
 
 ### Changed
 

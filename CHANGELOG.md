@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `previousFormSubmissionApprovalId` to replaceable values
+
 ## [0.11.2] - 2021-08-31
 
 ### Added

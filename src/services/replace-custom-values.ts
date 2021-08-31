@@ -7,6 +7,7 @@ export default function (
   submissionResult: FormSubmissionResult,
 ): string {
   return replaceCustomValues(string, {
+    previousApprovalId: submissionResult.previousFormSubmissionApprovalId,
     form: submissionResult.definition,
     submission: submissionResult.submission,
     submissionId: submissionResult.submissionId || '',

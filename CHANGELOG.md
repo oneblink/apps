@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.11.2] - 2021-08-31
+
 ### Added
 
 - `ipAddress` to S3 JSON on submission
@@ -17,6 +19,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 
 - the notifications errors that are sent to Sentry
+
+### Dependencies
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [0.1.0](https://github.com/oneblink/sdk-core-js/releases/tag/v0.1.0) (from [0.1.0-beta.3](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
+
+- update [@sentry/browser](https://www.npmjs.com/package/@sentry/browser) to [6.11.0](https://github.com/getsentry/sentry-javascript/releases/tag/6.11.0) (from [6.9.0](https://github.com/getsentry/sentry-javascript/releases/tag/6.9.0))
+
+- update [@sentry/tracing](https://www.npmjs.com/package/@sentry/tracing) to [6.11.0](https://github.com/getsentry/sentry-javascript/releases/tag/6.11.0) (from [6.9.0](https://github.com/getsentry/sentry-javascript/releases/tag/6.9.0))
+
+- update [aws-sdk](https://www.npmjs.com/package/aws-sdk) to [2.976.0](https://github.com/aws/aws-sdk-js/releases/tag/v2.976.0) (from [2.948.0](https://github.com/aws/aws-sdk-js/releases/tag/v2.948.0))
+
+- update [localforage](https://www.npmjs.com/package/localforage) to [1.10.0](https://github.com/localForage/localForage/releases/tag/1.10.0) (from [1.9.0](https://github.com/localForage/localForage/releases/tag/1.9.0))
 
 ## [0.11.1] - 2021-08-25
 

@@ -1,4 +1,4 @@
-import { FormTypes, SubmissionEventTypes } from '@oneblink/types'
+import { FormTypes, SubmissionEventTypes, MiscTypes } from '@oneblink/types'
 import { S3ObjectCredentials } from '@oneblink/types/typescript/aws'
 
 export type NewDraftSubmission = {
@@ -57,6 +57,7 @@ type _S3UploadCredentials = S3ObjectCredentials & {
 export type S3UploadCredentials = _S3UploadCredentials & {
   submissionId: string
   ipAddress?: string
+  userProfile?: MiscTypes.UserProfile
 }
 
 export type S3DraftUploadCredentials = _S3UploadCredentials & {

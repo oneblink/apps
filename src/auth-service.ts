@@ -19,7 +19,7 @@ import {
 import { getRequest, postRequest } from './services/fetch'
 import tenants from './tenants'
 import { getUserToken, setUserToken } from './services/user-token'
-import { FormsAppsTypes } from '@oneblink/types'
+import { userService } from '@oneblink/sdk-core'
 
 export {
   registerAuthListener,
@@ -54,19 +54,7 @@ export function getUserFriendlyName(): string | undefined {
     return
   }
 
-  if (profile.fullName) {
-    return profile.fullName
-  }
-
-  if (profile.firstName || profile.lastName) {
-    return [profile.firstName, profile.lastName].filter((str) => str).join(' ')
-  }
-
-  if (profile.email) {
-    return profile.email
-  }
-
-  return profile.username
+  return userService.getUserFriendlyName(profile)
 }
 
 export async function isAuthorised(formsAppId: number): Promise<boolean> {
@@ -130,6 +118,6 @@ export async function requestAccess(formsAppId: number): Promise<void> {
 
 export async function isAdministrator(formsAppId: number): Promise<boolean> {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/my-forms-app-user`
-  const appUser = await getRequest<FormsAppsTypes.FormsAppUser>(url)
+  const appUser = await getRequest<{ groups: string[] }>(url)
   return appUser.groups.some((group) => group === 'oneblink:administrator')
 }

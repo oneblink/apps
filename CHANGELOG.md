@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- to use `userService` from SDK for parsing JWT payload
+
 ## [0.11.3] - 2021-09-01
 
 ### Added

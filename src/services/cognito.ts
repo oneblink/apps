@@ -4,6 +4,7 @@ import AWSCognitoClient from './AWSCognitoClient'
 
 import utilsService from './utils'
 import * as offlineService from '../offline-service'
+import { userService } from '@oneblink/sdk-core'
 import { MiscTypes } from '@oneblink/types'
 import Sentry from '../Sentry'
 
@@ -146,61 +147,8 @@ function getUserProfile(): MiscTypes.UserProfile | null {
     return null
   }
 
-  const userProfile = jwtDecode(idToken) as {
-    sub: string
-    email?: string
-    given_name?: string
-    family_name?: string
-    name?: string
-    preferred_username?: string
-    picture?: string
-    'custom:role'?: string
-    'custom:supervisor_name'?: string
-    'custom:supervisor_email'?: string
-    'custom:supervisor_user_id'?: string
-    identities?: Array<{
-      providerType: string
-      userId: string
-    }>
-  }
-
-  const user: MiscTypes.UserProfile = {
-    isSAMLUser: false,
-    providerType: 'Cognito',
-    providerUserId: userProfile.sub,
-    userId: userProfile.sub,
-    email: userProfile.email,
-    firstName: userProfile.given_name,
-    lastName: userProfile.family_name,
-    fullName: userProfile.name,
-    picture: userProfile.picture,
-    role: userProfile['custom:role'],
-    username: userProfile.email,
-    supervisor: undefined,
-  }
-
-  if (
-    userProfile['custom:supervisor_name'] ||
-    userProfile['custom:supervisor_email'] ||
-    userProfile['custom:supervisor_user_id']
-  ) {
-    user.supervisor = {
-      fullName: userProfile['custom:supervisor_name'],
-      email: userProfile['custom:supervisor_email'],
-      providerUserId: userProfile['custom:supervisor_user_id'],
-    }
-  }
-
-  if (Array.isArray(userProfile.identities) && userProfile.identities.length) {
-    user.providerType = userProfile.identities[0].providerType
-    user.providerUserId = userProfile.identities[0].userId
-    user.isSAMLUser = user.providerType === 'SAML'
-    if (user.isSAMLUser) {
-      user.username = userProfile.preferred_username || user.providerUserId
-    }
-  }
-
-  return user
+  const jwtToken = jwtDecode(idToken)
+  return userService.parseUserProfile(jwtToken) || null
 }
 
 export function getUsername(): string | undefined {

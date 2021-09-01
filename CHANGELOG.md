@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.11.3] - 2021-09-01
+
 ### Added
 
 - `previousFormSubmissionApprovalId` to replaceable values
+
+### Dependencies
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [0.1.1-beta.1](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [0.1.0](https://github.com/oneblink/sdk-core-js/releases/tag/v0.1.0))
 
 ## [0.11.2] - 2021-08-31
 

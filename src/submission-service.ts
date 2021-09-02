@@ -209,6 +209,7 @@ async function submit({
       submissionTimestamp: data.submissionTimestamp,
       keyId: formSubmission.keyId,
       ipAddress: data.ipAddress,
+      user: data.userProfile,
     },
     {
       externalId: formSubmission.externalId || undefined,

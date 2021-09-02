@@ -3,7 +3,6 @@ import bigJSON from 'big-json'
 import s3UploadStream from 's3-upload-stream'
 import queryString from 'query-string'
 import contentDisposition from 'content-disposition'
-import { getUserProfile } from '../auth-service'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import { AWSTypes, SubmissionTypes } from '@oneblink/types'
 import Sentry from '../Sentry'
@@ -169,7 +168,6 @@ const uploadFormSubmission = (
   ) => {
     const body: SubmissionTypes.S3SubmissionData = {
       ...formJson,
-      user: getUserProfile() || undefined,
       device: getDeviceInformation(),
     }
     const readStream = bigJSON.createStringifyStream({

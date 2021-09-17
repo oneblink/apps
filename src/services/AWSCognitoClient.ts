@@ -1,6 +1,7 @@
 import { EventListeners, CognitoIdentityServiceProvider } from 'aws-sdk'
 import { parseQueryString } from './query-string'
 import Sentry from '../Sentry'
+import { OneBlinkAppsError } from '..'
 
 interface AWSAuthenticationResult {
   AccessToken: string
@@ -392,7 +393,7 @@ export default class AWSCognitoClient {
       }
     } catch (error) {
       Sentry.captureException(error)
-      if (!error.requiresLogin) {
+      if (!(error as OneBlinkAppsError).requiresLogin) {
         throw error
       }
     } finally {

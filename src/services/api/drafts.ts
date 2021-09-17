@@ -1,5 +1,5 @@
 import { AWSTypes, SubmissionTypes } from '@oneblink/types'
-import { postRequest, putRequest } from '../fetch'
+import { postRequest, putRequest, HTTPError } from '../fetch'
 import { isLoggedIn } from '../../auth-service'
 import { uploadFormSubmission, downloadDraftS3Data } from '../s3Submit'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
@@ -46,6 +46,7 @@ const uploadDraftData = async (
   } catch (error) {
     Sentry.captureException(error)
     console.warn('Error occurred while attempting to upload draft data', error)
+    if (!(error instanceof HTTPError)) throw error
     switch (error.status) {
       case 401: {
         throw new OneBlinkAppsError(
@@ -122,12 +123,11 @@ const putDrafts = async (
       data.drafts.push(draft)
     })
     return data
-  } catch (error) {
-    Sentry.captureException(error)
-    console.warn(
-      'Error occurred while attempting to sync drafts with API',
-      error,
-    )
+  } catch (err) {
+    Sentry.captureException(err)
+    console.warn('Error occurred while attempting to sync drafts with API', err)
+
+    const error = err as HTTPError
     switch (error.status) {
       case 401: {
         throw new OneBlinkAppsError(

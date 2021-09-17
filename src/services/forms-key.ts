@@ -4,6 +4,7 @@ import { getCognitoIdToken } from './cognito'
 import Sentry from '../Sentry'
 
 import { MiscTypes } from '@oneblink/types'
+import { OneBlinkAppsError } from '..'
 let formsKeyToken: string | MiscTypes.NoU = null
 
 export function setFormsKeyToken(jwtToken: string | MiscTypes.NoU): void {
@@ -32,7 +33,7 @@ export async function getIdToken() {
     return await getCognitoIdToken()
   } catch (error) {
     Sentry.captureException(error)
-    if (!error.requiresLogin) {
+    if (!(error as OneBlinkAppsError).requiresLogin) {
       throw error
     }
   }

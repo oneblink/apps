@@ -62,7 +62,7 @@ export async function addFormSubmissionToPendingQueue(
     executePendingQueueListeners(submissions)
   } catch (error) {
     Sentry.captureException(error)
-    throw errorHandler(error)
+    throw error instanceof Error ? errorHandler(error) : error
   }
 }
 
@@ -82,7 +82,7 @@ export async function updatePendingQueueSubmission(
     executePendingQueueListeners(newSubmissions)
   } catch (error) {
     Sentry.captureException(error)
-    throw errorHandler(error)
+    throw error instanceof Error ? errorHandler(error) : error
   }
 }
 
@@ -109,6 +109,6 @@ export async function deletePendingQueueSubmission(pendingTimestamp: string) {
     executePendingQueueListeners(newSubmissions)
   } catch (error) {
     Sentry.captureException(error)
-    throw errorHandler(error)
+    throw error instanceof Error ? errorHandler(error) : error
   }
 }

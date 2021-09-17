@@ -7,6 +7,7 @@ import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import { AWSTypes, SubmissionTypes } from '@oneblink/types'
 import Sentry from '../Sentry'
 import { S3UploadCredentials } from '../types/submissions'
+import { HTTPError } from './fetch'
 
 const apiVersion = '2006-03-01'
 
@@ -136,16 +137,16 @@ const prepareFileAndUploadToS3 = async (
   try {
     await request(s3, objectMeta)
   } catch (err) {
-    if (err.name !== 'RequestAbortedError') {
+    if ((err as Error).name !== 'RequestAbortedError') {
       Sentry.captureException(err)
       // handle storing in s3 errors here
-      if (/Network Failure/.test(err.message)) {
+      if (/Network Failure/.test((err as Error).message)) {
         console.warn('Network error uploading to S3:', err)
         throw new OneBlinkAppsError(
           'There was an error saving the file. Please try again. If the problem persists, contact your administrator',
           {
             title: 'Connectivity Issues',
-            originalError: err,
+            originalError: err as Error,
           },
         )
       }
@@ -293,13 +294,13 @@ async function downloadPreFillS3Data<T>(
     // deleted. As we should only be getting these if objects are not there
     // (because our API should always return valid credentials) we can tell
     // the user that their data has been removed from OneBlink's stores.
-    if (error.name === 'AccessDenied') {
+    if ((error as Error).name === 'AccessDenied') {
       throw new OneBlinkAppsError(
         "Data has been removed based on your administrator's prefill data retention policy.",
         {
           title: 'Prefill Data Unavailable',
-          originalError: error,
-          httpStatusCode: error.status,
+          originalError: error as HTTPError,
+          httpStatusCode: (error as HTTPError).status,
         },
       )
     }
@@ -318,13 +319,13 @@ async function downloadDraftS3Data<T>(
     // deleted. As we should only be getting these if objects are not there
     // (because our API should always return valid credentials) we can tell
     // the user that their data has been removed from OneBlink's stores.
-    if (error.name === 'AccessDenied') {
+    if ((error as Error).name === 'AccessDenied') {
       throw new OneBlinkAppsError(
         "Data has been removed based on your administrator's draft data retention policy.",
         {
           title: 'Draft Data Unavailable',
-          originalError: error,
-          httpStatusCode: error.status,
+          originalError: error as HTTPError,
+          httpStatusCode: (error as HTTPError).status,
         },
       )
     }
@@ -343,13 +344,13 @@ async function downloadSubmissionS3Data<T>(
     // deleted. As we should only be getting these if objects are not there
     // (because our API should always return valid credentials) we can tell
     // the user that their data has been removed from OneBlink's stores.
-    if (error.name === 'AccessDenied') {
+    if ((error as Error).name === 'AccessDenied') {
       throw new OneBlinkAppsError(
         "This submission has been removed based on your administrator's retention policy.",
         {
           title: 'Submission Data Unavailable',
-          originalError: error,
-          httpStatusCode: error.status,
+          originalError: error as HTTPError,
+          httpStatusCode: (error as HTTPError).status,
         },
       )
     }

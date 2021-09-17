@@ -123,13 +123,11 @@ const putDrafts = async (
       data.drafts.push(draft)
     })
     return data
-  } catch (error) {
-    Sentry.captureException(error)
-    console.warn(
-      'Error occurred while attempting to sync drafts with API',
-      error,
-    )
-    if (!(error instanceof HTTPError)) throw error
+  } catch (err) {
+    Sentry.captureException(err)
+    console.warn('Error occurred while attempting to sync drafts with API', err)
+
+    const error = err as HTTPError
     switch (error.status) {
       case 401: {
         throw new OneBlinkAppsError(

@@ -28,11 +28,10 @@ export async function getFormSubmissionApprovals(
       `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/my-approvals`,
       abortSignal,
     )
-  } catch (error) {
-    Sentry.captureException(error)
-    console.error('Error retrieving form submission approvals', error)
-
-    if (!(error instanceof HTTPError)) throw error
+  } catch (err) {
+    Sentry.captureException(err)
+    console.error('Error retrieving form submission approvals', err)
+    const error = err as HTTPError
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline and do not have a local copy of this app available, please connect to the internet and try again',
@@ -94,11 +93,11 @@ export async function getFormSubmissionApproval(
       abortSignal,
     )
     return result
-  } catch (error) {
-    Sentry.captureException(error)
-    console.error('Error retrieving form submission approval', error)
+  } catch (err) {
+    Sentry.captureException(err)
+    console.error('Error retrieving form submission approval', err)
 
-    if (!(error instanceof HTTPError)) throw error
+    const error = err as HTTPError
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline and do not have a local copy of this app available, please connect to the internet and try again',
@@ -159,11 +158,11 @@ export async function updateFormSubmissionApproval(
       formSubmissionApproval,
       abortSignal,
     )
-  } catch (error) {
-    Sentry.captureException(error)
-    console.error('Error updating form submission approval', error)
+  } catch (err) {
+    Sentry.captureException(err)
+    console.error('Error updating form submission approval', err)
 
-    if (!(error instanceof HTTPError)) throw error
+    const error = err as HTTPError
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',
@@ -237,11 +236,11 @@ export async function reopenFormSubmissionApproval(
       payload,
       abortSignal,
     )
-  } catch (error) {
-    console.error('Error reopening form submission approval', error)
-    Sentry.captureException(error)
+  } catch (err) {
+    console.error('Error reopening form submission approval', err)
+    Sentry.captureException(err)
 
-    if (!(error instanceof HTTPError)) throw error
+    const error = err as HTTPError
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',
@@ -321,11 +320,11 @@ export async function getFormApprovalFlows(
       `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/form-approval-flows`,
       abortSignal,
     )
-  } catch (error) {
-    Sentry.captureException(error)
-    console.error('Error retrieving form approval flows', error)
+  } catch (err) {
+    Sentry.captureException(err)
+    console.error('Error retrieving form approval flows', err)
 
-    if (!(error instanceof HTTPError)) throw error
+    const error = err as HTTPError
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',
@@ -404,14 +403,14 @@ export async function getFormSubmissionAdministrationApprovals(
       },
       abortSignal,
     )
-  } catch (error) {
-    Sentry.captureException(error)
+  } catch (err) {
+    Sentry.captureException(err)
     console.error(
       'Error retrieving administrator form submission approvals',
-      error,
+      err,
     )
 
-    if (!(error instanceof HTTPError)) throw error
+    const error = err as HTTPError
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline and do not have a local copy of this app available, please connect to the internet and try again',
@@ -472,11 +471,11 @@ export async function getFormApprovalUsernames(
       `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/approvals/usernames`,
       abortSignal,
     )
-  } catch (error) {
-    Sentry.captureException(error)
-    console.error('Error retrieving form approval usernames', error)
+  } catch (err) {
+    Sentry.captureException(err)
+    console.error('Error retrieving form approval usernames', err)
 
-    if (!(error instanceof HTTPError)) throw error
+    const error = err as HTTPError
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',

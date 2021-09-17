@@ -105,13 +105,13 @@ export async function requestAccess(formsAppId: number): Promise<void> {
   } catch (error) {
     Sentry.captureException(error)
     console.warn('Error while requesting access to forms app', error)
-    if (!(error instanceof HTTPError)) throw error
+
     throw new OneBlinkAppsError(
       'Sorry, we could not request access automatically right now, please try again. If the problem persists, please contact your administrator yourself.',
       {
-        originalError: error,
+        originalError: error as Error,
         title: 'Error Requesting Access',
-        httpStatusCode: error.status,
+        httpStatusCode: (error as HTTPError).status,
       },
     )
   }

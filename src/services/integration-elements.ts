@@ -28,11 +28,11 @@ export async function searchGeoscapeAddresses(
       queryParams,
       abortSignal,
     )
-  } catch (error) {
+  } catch (err) {
     if (!abortSignal?.aborted) {
-      Sentry.captureException(error)
+      Sentry.captureException(err)
     }
-    if (!(error instanceof HTTPError)) throw error
+    const error = err as HTTPError
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',
@@ -94,11 +94,11 @@ export async function getGeoscapeAddress(
       `${tenants.current.apiOrigin}/forms/${formId}/geoscape/addresses/${addressId}`,
       abortSignal,
     )
-  } catch (error) {
+  } catch (err) {
     if (!abortSignal?.aborted) {
-      Sentry.captureException(error)
+      Sentry.captureException(err)
     }
-    if (!(error instanceof HTTPError)) throw error
+    const error = err as HTTPError
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',
@@ -167,11 +167,11 @@ export async function searchPointAddresses(
       queryParams,
       abortSignal,
     )
-  } catch (error) {
+  } catch (err) {
     if (!abortSignal?.aborted) {
-      Sentry.captureException(error)
+      Sentry.captureException(err)
     }
-    if (!(error instanceof HTTPError)) throw error
+    const error = err as HTTPError
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',
@@ -233,11 +233,11 @@ export async function getPointAddress(
       `${tenants.current.apiOrigin}/forms/${formId}/point/addresses/${addressId}`,
       abortSignal,
     )
-  } catch (error) {
+  } catch (err) {
     if (!abortSignal?.aborted) {
-      Sentry.captureException(error)
+      Sentry.captureException(err)
     }
-    if (!(error instanceof HTTPError)) throw error
+    const error = err as HTTPError
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',
@@ -303,11 +303,11 @@ export async function searchCivicaStreetNames(
       queryParams,
       abortSignal,
     )
-  } catch (error) {
+  } catch (err) {
     if (!abortSignal?.aborted) {
-      Sentry.captureException(error)
+      Sentry.captureException(err)
     }
-    if (!(error instanceof HTTPError)) throw error
+    const error = err as HTTPError
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',
@@ -368,11 +368,11 @@ export async function getCivicaTitleCodes(
       `${tenants.current.apiOrigin}/forms/${formId}/civica/nameregister/titlecodes`,
       abortSignal,
     )
-  } catch (error) {
+  } catch (err) {
     if (!abortSignal?.aborted) {
-      Sentry.captureException(error)
+      Sentry.captureException(err)
     }
-    if (!(error instanceof HTTPError)) throw error
+    const error = err as HTTPError
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',

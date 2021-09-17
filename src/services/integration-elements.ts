@@ -1,6 +1,6 @@
 import OneBlinkAppsError from '../services/errors/oneBlinkAppsError'
 import { isOffline } from '../offline-service'
-import { getRequest, searchRequest } from '../services/fetch'
+import { getRequest, HTTPError, searchRequest } from '../services/fetch'
 import tenants from '../tenants'
 import {
   GeoscapeTypes,
@@ -32,6 +32,7 @@ export async function searchGeoscapeAddresses(
     if (!abortSignal?.aborted) {
       Sentry.captureException(error)
     }
+    if (!(error instanceof HTTPError)) throw error
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',
@@ -97,6 +98,7 @@ export async function getGeoscapeAddress(
     if (!abortSignal?.aborted) {
       Sentry.captureException(error)
     }
+    if (!(error instanceof HTTPError)) throw error
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',
@@ -169,6 +171,7 @@ export async function searchPointAddresses(
     if (!abortSignal?.aborted) {
       Sentry.captureException(error)
     }
+    if (!(error instanceof HTTPError)) throw error
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',
@@ -234,6 +237,7 @@ export async function getPointAddress(
     if (!abortSignal?.aborted) {
       Sentry.captureException(error)
     }
+    if (!(error instanceof HTTPError)) throw error
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',
@@ -303,6 +307,7 @@ export async function searchCivicaStreetNames(
     if (!abortSignal?.aborted) {
       Sentry.captureException(error)
     }
+    if (!(error instanceof HTTPError)) throw error
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',
@@ -367,6 +372,7 @@ export async function getCivicaTitleCodes(
     if (!abortSignal?.aborted) {
       Sentry.captureException(error)
     }
+    if (!(error instanceof HTTPError)) throw error
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',

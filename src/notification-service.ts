@@ -124,7 +124,7 @@ async function subscribe(formsAppId: number): Promise<boolean> {
         'It looks like you may have denied this app permission to send you push notifications. Please grant this app the notifications permission and try again.',
         {
           title: 'Permission Required',
-          originalError: error,
+          originalError: error as Error,
         },
       )
     }
@@ -139,7 +139,7 @@ async function subscribe(formsAppId: number): Promise<boolean> {
       'We were unable to subscribe you to push notifications, please try again and contact support if the problem persists.',
       {
         title: 'Permission Required',
-        originalError: error,
+        originalError: error as Error,
       },
     )
   }
@@ -188,7 +188,7 @@ async function unsubscribe(formsAppId: number): Promise<void> {
     throw new OneBlinkAppsError(
       'We were unable to unsubscribe you from push notifications, please try again and contact support if the problem persists.',
       {
-        originalError: error,
+        originalError: error as Error,
       },
     )
   }

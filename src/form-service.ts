@@ -2,7 +2,12 @@ import { formElementsService } from '@oneblink/sdk-core'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { isOffline } from './offline-service'
 import { isLoggedIn } from './services/cognito'
-import { generateHeaders, getRequest, searchRequest } from './services/fetch'
+import {
+  generateHeaders,
+  getRequest,
+  HTTPError,
+  searchRequest,
+} from './services/fetch'
 import tenants from './tenants'
 import { FormTypes } from '@oneblink/types'
 import Sentry from './Sentry'
@@ -384,7 +389,7 @@ async function getFormElementDynamicOptions(
               `Options could not be loaded. Please contact your administrator to rectify the issue.`,
               {
                 title: 'Invalid Options Set Response',
-                httpStatusCode: error.status,
+                httpStatusCode: (error as HTTPError).status,
                 originalError: new OneBlinkAppsError(
                   JSON.stringify(
                     {
@@ -397,7 +402,7 @@ async function getFormElementDynamicOptions(
                     2,
                   ),
                   {
-                    originalError: error,
+                    originalError: error as HTTPError,
                   },
                 ),
               },

@@ -106,8 +106,8 @@ async function processPendingQueue(): Promise<void> {
       Sentry.captureException(error)
       console.error('Error processing submission from the pending queue', error)
       pendingQueueSubmission.isSubmitting = false
-      if (error.message) {
-        pendingQueueSubmission.error = error.message
+      if ((error as Error).message) {
+        pendingQueueSubmission.error = (error as Error).message
       } else {
         pendingQueueSubmission.error =
           'An unknown error has occurred, which has prevented your Form from submitting. Please try again, or contact your Administrator if the problem persists.'

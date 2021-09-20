@@ -11,14 +11,7 @@ import {
 import tenants from './tenants'
 import { FormTypes } from '@oneblink/types'
 import Sentry from './Sentry'
-import {
-  getGeoscapeAddress,
-  getPointAddress,
-  searchGeoscapeAddresses,
-  searchPointAddresses,
-  searchCivicaStreetNames,
-  getCivicaTitleCodes,
-} from './services/integration-elements'
+export * from './services/integration-elements'
 
 async function getForms(formsAppId: number): Promise<FormTypes.Form[]> {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms`
@@ -566,11 +559,4 @@ export {
   getFormElementLookups,
   getFormElementLookupById,
   getFormElementDynamicOptions,
-  // Integration element services
-  getGeoscapeAddress,
-  getPointAddress,
-  searchGeoscapeAddresses,
-  searchPointAddresses,
-  searchCivicaStreetNames,
-  getCivicaTitleCodes,
 }

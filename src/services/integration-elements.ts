@@ -429,7 +429,7 @@ export async function getBSBRecord(
   formId: number,
   bsb: string,
   abortSignal?: AbortSignal,
-): Promise<MiscTypes.BSBRecord[]> {
+): Promise<MiscTypes.BSBRecord> {
   try {
     return await getRequest(
       `${tenants.current.apiOrigin}/forms/${formId}/bsb-records/${bsb}`,

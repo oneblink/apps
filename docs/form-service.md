@@ -19,6 +19,7 @@ import { formService } from '@oneblink/apps'
 - [`getPointAddress()`](#getpointaddress)
 - [`searchCivicaStreetNames()`](#searchcivicastreetnames)
 - [`getCivicaTitleCodes()`](#getcivicatitlecodes)
+- [`getBSBRecord()`](#getbsbrecord)
 
 ### `getForms()`
 
@@ -159,4 +160,14 @@ Get titles codes from Civica name register
 ```js
 const formId = 1
 const results = await formService.getCivicaTitleCodes(formId)
+```
+
+### `getBSBRecord()`
+
+Get BSB record based on a BSB number codes from Civica name register
+
+```js
+const formId = 1
+const bsb = '123-321'
+const results = await formService.getBSBRecord(formId, bsb)
 ```

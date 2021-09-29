@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- `authService` to handle forms app logic
+
 ## [0.11.6] - 2021-09-24
 
 ### Added

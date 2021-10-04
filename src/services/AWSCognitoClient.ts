@@ -38,6 +38,7 @@ export default class AWSCognitoClient {
   cognitoIdentityServiceProvider: CognitoIdentityServiceProvider
   loginDomain: string | void
   redirectUri: string | void
+  logoutUri: string | void
   listeners: Array<() => unknown>
 
   constructor({
@@ -45,10 +46,12 @@ export default class AWSCognitoClient {
     region,
     loginDomain,
     redirectUri,
+    logoutUri,
   }: {
     clientId: string
     region: string
     redirectUri?: string
+    logoutUri?: string
     loginDomain?: string
   }) {
     if (!clientId) {
@@ -60,6 +63,7 @@ export default class AWSCognitoClient {
 
     this.listeners = []
     this.redirectUri = redirectUri
+    this.logoutUri = logoutUri
     this.loginDomain = loginDomain
     this.clientId = clientId
     this.cognitoIdentityServiceProvider = new CognitoIdentityServiceProvider({
@@ -373,6 +377,24 @@ export default class AWSCognitoClient {
         }),
       )
     }
+  }
+
+  logoutHostedUI(): void {
+    const loginDomain = this.loginDomain
+    const logoutUri = this.logoutUri
+    if (!loginDomain || !logoutUri) {
+      throw new TypeError(
+        '"loginDomain" or "logoutUri" was not passed to constructor. Both are required before attempting to logout.',
+      )
+    }
+
+    // @ts-ignore Jest seems to have a problem with this?
+    window.location.href =
+      `https://${loginDomain}/logout` +
+      '?client_id=' +
+      encodeURIComponent(this.clientId) +
+      '&logout_uri=' +
+      encodeURIComponent(logoutUri)
   }
 
   async logout(): Promise<void> {

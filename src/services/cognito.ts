@@ -11,6 +11,7 @@ interface CognitoServiceData {
   loginDomain: string
   region: string
   redirectUri: string
+  logoutUri: string
 }
 
 const CONTINUE_TO = 'continueTo'
@@ -25,6 +26,7 @@ function init(cognitoServiceData: CognitoServiceData) {
     region: cognitoServiceData.region,
     loginDomain: cognitoServiceData.loginDomain,
     redirectUri: cognitoServiceData.redirectUri,
+    logoutUri: cognitoServiceData.logoutUri,
   })
 }
 
@@ -99,6 +101,12 @@ async function forgotPassword(username: string) {
   return await awsCognitoClient.forgotPassword(username)
 }
 
+function logoutHostedUI(): void {
+  if (awsCognitoClient) {
+    awsCognitoClient.logoutHostedUI()
+  }
+}
+
 async function logout() {
   if (awsCognitoClient) {
     await awsCognitoClient.logout()
@@ -151,6 +159,7 @@ export {
   handleAuthentication,
   changePassword,
   forgotPassword,
+  logoutHostedUI,
   logout,
   isLoggedIn,
   getCognitoIdToken,

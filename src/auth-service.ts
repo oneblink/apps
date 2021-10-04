@@ -13,6 +13,7 @@ import {
   changePassword,
   forgotPassword,
   handleAuthentication,
+  logoutHostedUI,
   logout as logoutCognito,
   getUserProfile,
   getUsername,
@@ -28,6 +29,7 @@ export {
   loginHostedUI,
   loginUsernamePassword,
   handleAuthentication,
+  logoutHostedUI,
   changePassword,
   forgotPassword,
   isLoggedIn,
@@ -59,6 +61,7 @@ export function init({ oAuthClientId }: { oAuthClientId: string }) {
     loginDomain: tenants.current.loginDomain,
     oAuthClientId,
     redirectUri: window.location.origin + '/callback',
+    logoutUri: window.location.origin + '/logout',
   })
 
   const listener = () => {

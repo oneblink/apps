@@ -13,25 +13,28 @@ import {
   changePassword,
   forgotPassword,
   handleAuthentication,
-  logout,
+  logoutHostedUI,
+  logout as logoutCognito,
   getUserProfile,
+  getUsername,
 } from './services/cognito'
 import { getRequest, postRequest, HTTPError } from './services/fetch'
 import tenants from './tenants'
 import { getUserToken, setUserToken } from './services/user-token'
 import { userService } from '@oneblink/sdk-core'
+import utilsService from './services/utils'
 
 export {
   registerAuthListener,
   loginHostedUI,
   loginUsernamePassword,
   handleAuthentication,
+  logoutHostedUI,
   changePassword,
   forgotPassword,
   isLoggedIn,
   getIdToken,
   getUserProfile,
-  logout,
   getFormsKeyId,
   setFormsKeyToken,
   getUserToken,
@@ -39,13 +42,33 @@ export {
 }
 import Sentry from './Sentry'
 
+export async function logout() {
+  console.log('Logging out...')
+
+  try {
+    await utilsService.localForage.clear()
+  } catch (error) {
+    Sentry.captureException(error)
+    console.warn('Could not clear localForage before logging out', error)
+  }
+
+  await logoutCognito()
+}
+
 export function init({ oAuthClientId }: { oAuthClientId: string }) {
   initCognito({
     region: tenants.current.awsRegion,
     loginDomain: tenants.current.loginDomain,
     oAuthClientId,
     redirectUri: window.location.origin + '/callback',
+    logoutUri: window.location.origin + '/logout',
   })
+
+  const listener = () => {
+    Sentry.setTag('username', getUsername() || undefined)
+  }
+  listener()
+  registerAuthListener(listener)
 }
 
 export function getUserFriendlyName(): string | undefined {

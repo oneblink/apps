@@ -2,17 +2,16 @@ import jwtDecode from 'jwt-decode'
 
 import AWSCognitoClient from './AWSCognitoClient'
 
-import utilsService from './utils'
 import * as offlineService from '../offline-service'
 import { userService } from '@oneblink/sdk-core'
 import { MiscTypes } from '@oneblink/types'
-import Sentry from '../Sentry'
 
 interface CognitoServiceData {
   oAuthClientId: string
   loginDomain: string
   region: string
   redirectUri: string
+  logoutUri: string
 }
 
 const CONTINUE_TO = 'continueTo'
@@ -27,13 +26,8 @@ function init(cognitoServiceData: CognitoServiceData) {
     region: cognitoServiceData.region,
     loginDomain: cognitoServiceData.loginDomain,
     redirectUri: cognitoServiceData.redirectUri,
+    logoutUri: cognitoServiceData.logoutUri,
   })
-
-  const listener = () => {
-    Sentry.setTag('username', getUsername() || undefined)
-  }
-  listener()
-  registerAuthListener(listener)
 }
 
 function registerAuthListener(listener: () => unknown): () => void {
@@ -107,16 +101,13 @@ async function forgotPassword(username: string) {
   return await awsCognitoClient.forgotPassword(username)
 }
 
-async function logout() {
-  console.log('Logging out...')
-
-  try {
-    await utilsService.localForage.clear()
-  } catch (error) {
-    Sentry.captureException(error)
-    console.warn('Could not clear localForage before logging out', error)
+function logoutHostedUI(): void {
+  if (awsCognitoClient) {
+    awsCognitoClient.logoutHostedUI()
   }
+}
 
+async function logout() {
   if (awsCognitoClient) {
     await awsCognitoClient.logout()
   }
@@ -168,6 +159,7 @@ export {
   handleAuthentication,
   changePassword,
   forgotPassword,
+  logoutHostedUI,
   logout,
   isLoggedIn,
   getCognitoIdToken,

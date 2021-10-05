@@ -32,8 +32,8 @@ export async function getIdToken() {
   try {
     return await getCognitoIdToken()
   } catch (error) {
-    Sentry.captureException(error)
     if (!(error as OneBlinkAppsError).requiresLogin) {
+      Sentry.captureException(error)
       throw error
     }
   }

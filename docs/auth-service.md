@@ -15,6 +15,7 @@ import { authService } from '@oneblink/apps'
 - [`isLoggedIn()`](#isloggedin)
 - [`loginHostedUI()`](#loginhostedui) - requires `init()` to be called first
 - [`handleAuthentication()`](#handleauthentication) - requires `init()` to be called first
+- [`logoutHostedUI()`](#logouthostedui) - requires `init()` to be called first
 - [`loginUsernamePassword()`](#loginusernamepassword) - requires `init()` to be called first
 - [`changePassword()`](#changepassword) - requires `init()` to be called first
 - [`forgotPassword()`](#forgotPassword) - requires `init()` to be called first
@@ -87,6 +88,14 @@ try {
 } catch (error) {
   // handle failed login attempts here.
 }
+```
+
+### `logoutHostedUI()`
+
+Redirect the user to the logout screen to clear the users session on the hosted login page. User will then be redirected to `/logout`. After being redirected back to the application, the [`logout()`](#logout) function should be called to clear the session data from browser storage.
+
+```js
+authService.logoutHostedUI()
 ```
 
 ### `loginUsernamePassword()`

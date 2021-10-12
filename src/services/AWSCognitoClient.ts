@@ -231,7 +231,7 @@ export default class AWSCognitoClient {
     throw new Error('Could not authenticate user.')
   }
 
-  async loginHostedUI(identityProviderName: string | void): Promise<void> {
+  async loginHostedUI(identityProviderName?: string): Promise<void> {
     const loginDomain = this.loginDomain
     const redirectUri = this.redirectUri
     if (!loginDomain || !redirectUri) {

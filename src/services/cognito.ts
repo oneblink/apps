@@ -49,7 +49,7 @@ async function loginUsernamePassword(username: string, password: string) {
   return awsCognitoClient.loginUsernamePassword(username, password)
 }
 
-async function loginHostedUI(identityProviderName: string): Promise<void> {
+async function loginHostedUI(identityProviderName?: string): Promise<void> {
   if (!awsCognitoClient) {
     throw new Error(
       '"authService" has not been initiated. You must call the init() function before attempting to login.',

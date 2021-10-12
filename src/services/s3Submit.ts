@@ -110,7 +110,12 @@ const getObjectMeta = (
     ? contentDisposition(data.fileName)
     : undefined,
   ContentType: data.contentType,
-  Tagging: data.tags ? queryString.stringify(data.tags) : undefined,
+  Tagging: data.tags
+    ? queryString.stringify(data.tags, {
+        skipEmptyString: true,
+        skipNull: true,
+      })
+    : undefined,
   ACL: data.isPrivate ? 'private' : 'public-read',
 })
 

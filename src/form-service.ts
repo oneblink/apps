@@ -2,12 +2,7 @@ import { formElementsService } from '@oneblink/sdk-core'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { isOffline } from './offline-service'
 import { isLoggedIn } from './services/cognito'
-import {
-  generateHeaders,
-  getRequest,
-  HTTPError,
-  searchRequest,
-} from './services/fetch'
+import { generateHeaders, HTTPError, searchRequest } from './services/fetch'
 import tenants from './tenants'
 import { FormTypes } from '@oneblink/types'
 import Sentry from './Sentry'
@@ -15,7 +10,9 @@ export * from './services/integration-elements'
 
 async function getForms(formsAppId: number): Promise<FormTypes.Form[]> {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms`
-  return getRequest<{ forms: FormTypes.Form[] }>(url)
+  return searchRequest<{ forms: FormTypes.Form[] }>(url, {
+    injectForms: true,
+  })
     .then(({ forms }) => forms)
     .catch((error) => {
       Sentry.captureException(error)

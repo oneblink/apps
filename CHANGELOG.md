@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- `getForms()` not setting `injectForms` to true
+
 ## [0.11.7] - 2021-10-14
 
 ### Added

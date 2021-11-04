@@ -12,6 +12,7 @@ async function getForms(formsAppId: number): Promise<FormTypes.Form[]> {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms`
   return searchRequest<{ forms: FormTypes.Form[] }>(url, {
     injectForms: true,
+    isAuthenticated: isLoggedIn(),
   })
     .then(({ forms }) => forms)
     .catch((error) => {

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 - `getForms()` not setting `injectForms` to true
+- `getForms()` not sending `isAuthenticated` qs param
 
 ## [0.11.7] - 2021-10-14
 

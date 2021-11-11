@@ -10,7 +10,6 @@ export function isOffline(): boolean {
   }
 
   if (window.cordova) {
-    // @ts-expect-error
     return window.navigator.connection.type === 'none'
   } else {
     return !window.navigator.onLine

@@ -38,12 +38,9 @@ const generateFormatters = (locale: Locale) => {
       day: '2-digit',
     }),
     dateLong: new Intl.DateTimeFormat(locale, {
-      // These properties are missing in the type for some reason..
-      // @ts-expect-error
       dateStyle: 'full',
     }),
     time: new Intl.DateTimeFormat(locale, {
-      // @ts-expect-error
       timeStyle: 'short',
     }),
   }

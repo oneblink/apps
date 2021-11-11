@@ -17,11 +17,11 @@ import {
   logout as logoutCognito,
   getUserProfile,
   getUsername,
+  getUserFriendlyName,
 } from './services/cognito'
 import { getRequest, postRequest, HTTPError } from './services/fetch'
 import tenants from './tenants'
 import { getUserToken, setUserToken } from './services/user-token'
-import { userService } from '@oneblink/sdk-core'
 import utilsService from './services/utils'
 
 export {
@@ -39,6 +39,7 @@ export {
   setFormsKeyToken,
   getUserToken,
   setUserToken,
+  getUserFriendlyName,
 }
 import Sentry from './Sentry'
 
@@ -69,15 +70,6 @@ export function init({ oAuthClientId }: { oAuthClientId: string }) {
   }
   listener()
   registerAuthListener(listener)
-}
-
-export function getUserFriendlyName(): string | undefined {
-  const profile = getUserProfile()
-  if (!profile) {
-    return
-  }
-
-  return userService.getUserFriendlyName(profile)
 }
 
 export async function isAuthorised(formsAppId: number): Promise<boolean> {

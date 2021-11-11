@@ -170,7 +170,6 @@ export default class AWSCognitoClient {
       )
       this._storeAuthenticationResult(result.AuthenticationResult)
     } catch (error) {
-      Sentry.captureException(error)
       console.warn('Error while attempting to refresh session', error)
       this._removeAuthenticationResult()
       throw error
@@ -414,7 +413,6 @@ export default class AWSCognitoClient {
         )
       }
     } catch (error) {
-      Sentry.captureException(error)
       if (!(error as OneBlinkAppsError).requiresLogin) {
         throw error
       }

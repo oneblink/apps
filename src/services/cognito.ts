@@ -71,12 +71,11 @@ async function handleAuthentication(): Promise<string> {
   const continueTo = localStorage.getItem(CONTINUE_TO) || '/'
   if (isLoggedIn()) {
     console.log('Already authenticated, redirecting to:', continueTo)
-    return continueTo
+  } else {
+    await awsCognitoClient.handleAuthentication()
   }
 
   localStorage.removeItem(CONTINUE_TO)
-
-  await awsCognitoClient.handleAuthentication()
 
   return continueTo
 }
@@ -151,6 +150,15 @@ export function getUsername(): string | undefined {
   return profile.username
 }
 
+function getUserFriendlyName(): string | undefined {
+  const profile = getUserProfile()
+  if (!profile) {
+    return
+  }
+
+  return userService.getUserFriendlyName(profile)
+}
+
 export {
   init,
   registerAuthListener,
@@ -164,4 +172,5 @@ export {
   isLoggedIn,
   getCognitoIdToken,
   getUserProfile,
+  getUserFriendlyName,
 }

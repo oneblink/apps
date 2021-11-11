@@ -15,5 +15,7 @@ export default function (
     externalId: submissionResult.externalId || undefined,
     formatDate: (value) => localisationService.formatDate(new Date(value)),
     formatTime: (value) => localisationService.formatTime(new Date(value)),
+    formatCurrency: (value) => localisationService.formatCurrency(value),
+    formatNumber: (value) => value.toString(),
   })
 }

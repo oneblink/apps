@@ -510,7 +510,7 @@ async function getFormElementDynamicOptions(
                   }
                 }
 
-                const predicateOption = predicateElementOptions.find(
+                const predicateOption = predicateElementOptions?.find(
                   (option) => option.value === value,
                 )
                 if (elementId && predicateOption) {

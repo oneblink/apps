@@ -7,9 +7,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.12.0] - 2021-11-15
+
 ### Fixed
 
 - `getForms()` not setting `injectForms` to true
+
+### Dependencies
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [0.2.4-beta.2](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [0.1.3-beta.1](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
+
+- update [@sentry/browser](https://www.npmjs.com/package/@sentry/browser) to [6.14.3](https://github.com/getsentry/sentry-javascript/releases/tag/6.14.3) (from [6.11.0](https://github.com/getsentry/sentry-javascript/releases/tag/6.11.0))
+
+- update [@sentry/tracing](https://www.npmjs.com/package/@sentry/tracing) to [6.14.3](https://github.com/getsentry/sentry-javascript/releases/tag/6.14.3) (from [6.11.0](https://github.com/getsentry/sentry-javascript/releases/tag/6.11.0))
 
 ## [0.11.7] - 2021-10-14
 

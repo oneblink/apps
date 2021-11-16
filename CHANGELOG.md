@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- [`formsAppService.getFormsAppConfiguration()`](./docs/forms-app-service.md#getFormsAppConfiguration)
+
 ## [0.12.0] - 2021-11-15
 
 ### Fixed

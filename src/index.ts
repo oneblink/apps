@@ -10,6 +10,7 @@ import * as autoSaveService from './auto-save-service'
 import * as notificationService from './notification-service'
 import * as formService from './form-service'
 import * as approvalsService from './approvals-service'
+import * as formsAppService from './forms-app-service'
 import localisationService from './localisation-service'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import tenants from './tenants'
@@ -30,6 +31,7 @@ export {
   autoSaveService,
   notificationService,
   formService,
+  formsAppService,
   localisationService,
   approvalsService,
   schedulingService,

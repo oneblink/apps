@@ -8,7 +8,7 @@ Helper functions for forms apps
 import { formsAppService } from '@oneblink/apps'
 ```
 
-- [`getFormsAppConfiguration()`](#getFormsAppConfiguration)
+- [`getFormsAppConfiguration()`](#`getFormsAppConfiguration()`)
 
 ### `getFormsAppConfiguration()`
 

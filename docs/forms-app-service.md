@@ -16,5 +16,5 @@ Get configuration for a OneBlink Forms App.
 
 ```js
 const formsAppId = 1
-const forms = await formService.getFormsAppConfiguration(formAppId)
+const formsApp = await formsAppService.getFormsAppConfiguration(formAppId)
 ```

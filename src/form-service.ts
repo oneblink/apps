@@ -2,9 +2,14 @@ import { formElementsService } from '@oneblink/sdk-core'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { isOffline } from './offline-service'
 import { isLoggedIn } from './services/cognito'
-import { generateHeaders, HTTPError, searchRequest } from './services/fetch'
+import {
+  generateHeaders,
+  HTTPError,
+  searchRequest,
+  getRequest,
+} from './services/fetch'
 import tenants from './tenants'
-import { FormTypes } from '@oneblink/types'
+import { FormTypes, FreshdeskTypes } from '@oneblink/types'
 import Sentry from './Sentry'
 export * from './services/integration-elements'
 
@@ -221,34 +226,40 @@ async function getFormElementLookupById(
 
 async function getFormElementOptionsSets(
   organisationId: string,
+  abortSignal?: AbortSignal,
 ): Promise<Array<FormTypes.FormElementDynamicOptionSet>> {
   const { formElementDynamicOptionSets } = await searchRequest(
     `${tenants.current.apiOrigin}/form-element-options/dynamic`,
     {
       organisationId,
     },
+    abortSignal,
   )
   return formElementDynamicOptionSets
 }
 
-type LoadFormElementDynamicOptionsResult =
+type LoadFormElementOptionsResult = {
+  elementId: string
+} & (
   | {
       ok: true
-      elementId: string
       options: FormTypes.ChoiceElementOption[]
     }
   | {
       ok: false
-      elementId: string
       error: OneBlinkAppsError
     }
+)
 
 async function getFormElementDynamicOptions(
   input: FormTypes.Form | FormTypes.Form[],
-): Promise<Array<LoadFormElementDynamicOptionsResult>> {
+  abortSignal?: AbortSignal,
+): Promise<Array<LoadFormElementOptionsResult>> {
+  const freshdeskFieldOptionsResults =
+    await getFormElementFreshdeskFieldOptions(input, abortSignal)
   const forms = Array.isArray(input) ? input : [input]
   if (!forms.length) {
-    return []
+    return freshdeskFieldOptionsResults
   }
 
   // Get the options sets id for each element
@@ -267,20 +278,21 @@ async function getFormElementDynamicOptions(
   }, [])
 
   if (!formElementOptionsSetIds.length) {
-    return []
+    return freshdeskFieldOptionsResults
   }
 
   // Get the options sets for all the ids
   const organisationId = forms[0].organisationId
   const allFormElementOptionsSets = await getFormElementOptionsSets(
     organisationId,
+    abortSignal,
   )
 
   const formElementOptionsSets = allFormElementOptionsSets.filter(({ id }) =>
     formElementOptionsSetIds.includes(id || 0),
   )
   if (!formElementOptionsSetIds.length) {
-    return []
+    return freshdeskFieldOptionsResults
   }
 
   const formsAppEnvironmentId = forms[0].formsAppEnvironmentId
@@ -357,6 +369,7 @@ async function getFormElementDynamicOptions(
           const headers = await generateHeaders()
           const response = await fetch(formElementOptionsSetUrl, {
             headers,
+            signal: abortSignal,
           })
 
           if (!response.ok) {
@@ -403,7 +416,7 @@ async function getFormElementDynamicOptions(
     ),
   )
 
-  return forms.reduce<Array<LoadFormElementDynamicOptionsResult>>(
+  return forms.reduce<Array<LoadFormElementOptionsResult>>(
     (optionsForElementId, form) => {
       formElementsService.forEachFormElementWithOptions(
         form.elements,
@@ -545,12 +558,114 @@ async function getFormElementDynamicOptions(
 
       return optionsForElementId
     },
+    freshdeskFieldOptionsResults,
+  )
+}
+
+async function getFormElementFreshdeskFieldOptions(
+  input: FormTypes.Form | FormTypes.Form[],
+  abortSignal?: AbortSignal,
+): Promise<Array<LoadFormElementOptionsResult>> {
+  const forms = Array.isArray(input) ? input : [input]
+
+  const freshdeskFieldNames = forms.reduce<string[]>((names, form) => {
+    formElementsService.forEachFormElementWithOptions(form.elements, (el) => {
+      if (
+        // Ignore elements that have options as we don't need to fetch these again
+        !Array.isArray(el.options) &&
+        el.optionsType === 'FRESHDESK_FIELD' &&
+        el.freshdeskFieldName
+      ) {
+        names.push(el.freshdeskFieldName)
+      }
+    })
+    return names
+  }, [])
+
+  if (!freshdeskFieldNames.length) {
+    return []
+  }
+
+  const allFreshdeskFields = await getRequest<FreshdeskTypes.FreshdeskField[]>(
+    `${tenants.current.apiOrigin}/forms/${forms[0].id}/freshdesk-fields`,
+    abortSignal,
+  )
+  const freshdeskFields = allFreshdeskFields.filter(({ name }) =>
+    freshdeskFieldNames.includes(name),
+  )
+  if (!freshdeskFields.length) {
+    return []
+  }
+
+  return forms.reduce<Array<LoadFormElementOptionsResult>>(
+    (optionsForElementId, form) => {
+      formElementsService.forEachFormElementWithOptions(
+        form.elements,
+        (element) => {
+          // Elements with options already can be ignored
+          if (
+            element.optionsType !== 'FRESHDESK_FIELD' ||
+            Array.isArray(element.options)
+          ) {
+            return
+          }
+
+          const freshdeskField = freshdeskFields.find(
+            (freshdeskField) =>
+              element.freshdeskFieldName === freshdeskField.name,
+          )
+          if (!freshdeskField) {
+            optionsForElementId.push({
+              ok: false,
+              elementId: element.id,
+              error: new OneBlinkAppsError(
+                `Freshdesk Field does not exist. Please contact your administrator to rectify the issue.`,
+                {
+                  title: 'Missing Freshdesk Field',
+                  originalError: new Error(JSON.stringify(element, null, 2)),
+                },
+              ),
+            })
+            return
+          }
+          const options = freshdeskField.options
+          if (!Array.isArray(options)) {
+            optionsForElementId.push({
+              ok: false,
+              elementId: element.id,
+              error: new OneBlinkAppsError(
+                `Freshdesk Field does not have options. Please contact your administrator to rectify the issue.`,
+                {
+                  title: 'Invalid Freshdesk Field',
+                  originalError: new Error(
+                    JSON.stringify({ element, freshdeskField }, null, 2),
+                  ),
+                },
+              ),
+            })
+            return
+          }
+
+          optionsForElementId.push({
+            ok: true,
+            elementId: element.id,
+            options: options.map(({ label, value }) => ({
+              id: value.toString(),
+              value: value.toString(),
+              label,
+            })),
+          })
+        },
+      )
+
+      return optionsForElementId
+    },
     [],
   )
 }
 
 export {
-  LoadFormElementDynamicOptionsResult,
+  LoadFormElementOptionsResult,
   getForms,
   getForm,
   getFormElementLookups,

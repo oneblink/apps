@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- freshdesk fields to dynamic options sets
+
 ## [0.12.3] - 2021-11-19
 
 ### Dependencies

@@ -1,5 +1,4 @@
 import {
-  typeCastService,
   conditionalLogicService,
   formElementsService,
 } from '@oneblink/sdk-core'
@@ -224,20 +223,10 @@ export function checkForPaymentSubmissionEvent(formSubmission: FormSubmission):
       amount: number
     }
   | undefined {
-  const submissionEvents = formSubmission.definition.submissionEvents || []
-  const paymentSubmissionEvent = submissionEvents.reduce(
-    (
-      p: SubmissionEventTypes.PaymentSubmissionEvent | null,
-      submissionEvent,
-    ) => {
-      if (p) {
-        return p
-      }
-      const paymentSubmissionEvent =
-        typeCastService.submissionEvents.toPaymentSubmissionEvent(
-          submissionEvent,
-        )
-      if (
+  const paymentSubmissionEvents = formSubmission.definition.paymentEvents || []
+  const paymentSubmissionEvent = paymentSubmissionEvents.find(
+    (paymentSubmissionEvent) => {
+      return (
         paymentSubmissionEvent &&
         conditionalLogicService.evaluateConditionalPredicates({
           isConditional: !!paymentSubmissionEvent.conditionallyExecute,
@@ -248,12 +237,8 @@ export function checkForPaymentSubmissionEvent(formSubmission: FormSubmission):
           submission: formSubmission.submission,
           formElements: formSubmission.definition.elements,
         })
-      ) {
-        return paymentSubmissionEvent
-      }
-      return p
+      )
     },
-    null,
   )
 
   if (!paymentSubmissionEvent) {

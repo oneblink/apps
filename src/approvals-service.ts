@@ -308,7 +308,7 @@ export async function getFormApprovalFlowInstanceSubmission(
 
 type FormApprovalFlowResponse = {
   forms: FormTypes.Form[]
-  formApprovalFlows: ApprovalTypes.FormApprovalFlow[]
+  formApprovalFlows: ApprovalTypes.FormApprovalFlowInstance[]
 }
 
 export async function getFormApprovalFlows(

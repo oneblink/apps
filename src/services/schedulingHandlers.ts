@@ -16,30 +16,25 @@ function checkForSchedulingSubmissionEvent(
 ): SubmissionEventTypes.SchedulingSubmissionEvent | undefined {
   const schedulingSubmissionEvents =
     newDraftSubmission.definition.schedulingEvents || []
-  const schedulingSubmissionEvent = schedulingSubmissionEvents.find(
-    (schedulingSubmissionEvent) => {
-      if (
-        conditionalLogicService.evaluateConditionalPredicates({
-          isConditional: !!schedulingSubmissionEvent.conditionallyExecute,
-          requiresAllConditionalPredicates:
-            !!schedulingSubmissionEvent.requiresAllConditionallyExecutePredicates,
-          conditionalPredicates:
-            schedulingSubmissionEvent.conditionallyExecutePredicates || [],
-          submission: newDraftSubmission.submission,
-          formElements: newDraftSubmission.definition.elements,
-        })
-      ) {
-        console.log(
-          'Form has a scheduling submission event',
-          schedulingSubmissionEvent,
-        )
-        return schedulingSubmissionEvent
-      }
-    },
-  )
-  if (!schedulingSubmissionEvent) {
-    return
-  }
+  return schedulingSubmissionEvents.find((schedulingSubmissionEvent) => {
+    if (
+      conditionalLogicService.evaluateConditionalPredicates({
+        isConditional: !!schedulingSubmissionEvent.conditionallyExecute,
+        requiresAllConditionalPredicates:
+          !!schedulingSubmissionEvent.requiresAllConditionallyExecutePredicates,
+        conditionalPredicates:
+          schedulingSubmissionEvent.conditionallyExecutePredicates || [],
+        submission: newDraftSubmission.submission,
+        formElements: newDraftSubmission.definition.elements,
+      })
+    ) {
+      console.log(
+        'Form has a scheduling submission event',
+        schedulingSubmissionEvent,
+      )
+      return schedulingSubmissionEvent
+    }
+  })
 }
 
 async function handleSchedulingSubmissionEvent({

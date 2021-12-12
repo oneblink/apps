@@ -14,24 +14,27 @@ type SchedulingBooking = {
 function checkForSchedulingSubmissionEvent(
   newDraftSubmission: NewDraftSubmission,
 ): SubmissionEventTypes.SchedulingSubmissionEvent | undefined {
-  const submissionEvents = newDraftSubmission.definition.submissionEvents || []
-  for (const submissionEvent of submissionEvents) {
+  const schedulingSubmissionEvents =
+    newDraftSubmission.definition.schedulingEvents || []
+  return schedulingSubmissionEvents.find((schedulingSubmissionEvent) => {
     if (
-      submissionEvent.type === 'SCHEDULING' &&
       conditionalLogicService.evaluateConditionalPredicates({
-        isConditional: !!submissionEvent.conditionallyExecute,
+        isConditional: !!schedulingSubmissionEvent.conditionallyExecute,
         requiresAllConditionalPredicates:
-          !!submissionEvent.requiresAllConditionallyExecutePredicates,
+          !!schedulingSubmissionEvent.requiresAllConditionallyExecutePredicates,
         conditionalPredicates:
-          submissionEvent.conditionallyExecutePredicates || [],
+          schedulingSubmissionEvent.conditionallyExecutePredicates || [],
         submission: newDraftSubmission.submission,
         formElements: newDraftSubmission.definition.elements,
       })
     ) {
-      console.log('Form has a scheduling submission event', submissionEvent)
-      return submissionEvent
+      console.log(
+        'Form has a scheduling submission event',
+        schedulingSubmissionEvent,
+      )
+      return schedulingSubmissionEvent
     }
-  }
+  })
 }
 
 async function handleSchedulingSubmissionEvent({

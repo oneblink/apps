@@ -139,6 +139,43 @@ export const generateRetrieveApprovalSubmissionCredentials = async (
   })
 }
 
+export async function generateFormSubmissionApprovalSubmissionCredentials(
+  formSubmissionApprovalId: string,
+  abortSignal?: AbortSignal,
+) {
+  return postRequest<AWSTypes.FormS3Credentials>(
+    `${tenants.current.apiOrigin}/form-submission-approvals/${formSubmissionApprovalId}/retrieval-credentials`,
+    undefined,
+    abortSignal,
+  ).catch((error) => {
+    console.error('Error with getting credentials for retrieval:', error)
+    Sentry.captureException(error)
+    // handle only credential errors here
+    switch (error.status) {
+      case 400: {
+        throw getBadRequestError(error)
+      }
+      case 401: {
+        throw getUnauthenticatedError(error)
+      }
+      case 403: {
+        throw getUnauthorisedError(error)
+      }
+      case 404:
+      default: {
+        throw new OneBlinkAppsError(
+          'We could not find the approval submission you are looking for. Please contact your administrator to ensure your form configuration has been completed successfully.',
+          {
+            title: 'Unknown Form or Submission',
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  })
+}
+
 export const generateUploadAttachmentCredentials = async (
   formId: number,
   abortSignal: AbortSignal | undefined,

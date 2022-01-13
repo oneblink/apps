@@ -9,7 +9,10 @@ import {
 } from './services/fetch'
 import tenants from './tenants'
 import { SubmissionTypes, ApprovalTypes, FormTypes } from '@oneblink/types'
-import { generateRetrieveApprovalSubmissionCredentials } from './services/api/submissions'
+import {
+  generateFormSubmissionApprovalSubmissionCredentials,
+  generateRetrieveApprovalSubmissionCredentials,
+} from './services/api/submissions'
 import { downloadSubmissionS3Data } from './services/s3Submit'
 import Sentry from './Sentry'
 import {
@@ -298,6 +301,20 @@ export async function getFormApprovalFlowInstanceSubmission(
 ): Promise<SubmissionTypes.S3SubmissionData> {
   const credentials = await generateRetrieveApprovalSubmissionCredentials(
     formApprovalFlowInstanceId,
+    abortSignal,
+  )
+  return await downloadSubmissionS3Data<SubmissionTypes.S3SubmissionData>({
+    credentials: credentials.credentials,
+    s3: credentials.s3,
+  })
+}
+
+export async function getFormSubmissionApprovalSubmission(
+  formSubmissionApprovalId: string,
+  abortSignal?: AbortSignal,
+): Promise<SubmissionTypes.S3SubmissionData> {
+  const credentials = await generateFormSubmissionApprovalSubmissionCredentials(
+    formSubmissionApprovalId,
     abortSignal,
   )
   return await downloadSubmissionS3Data<SubmissionTypes.S3SubmissionData>({

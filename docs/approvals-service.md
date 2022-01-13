@@ -16,15 +16,17 @@ import { approvalsService } from '@oneblink/apps'
 - [`updateFormSubmissionApproval()`](#updateformsubmissionapproval)
 - [`reopenFormSubmissionApproval()`](#reopenformsubmissionapproval)
 - [`getFormApprovalFlowInstanceSubmission()`](#getformapprovalflowinstancesubmission)
+- [`getFormSubmissionApprovalSubmission()`](#getformsubmissionapprovalsubmission)
 - [`getFormSubmissionAdministrationApprovals()`](#getformsubmissionadministrationapprovals)
 
 ### FormApprovalFlowInstanceStep
 
-| Property    | Type      | Description                                               |
-| ----------- | --------- | --------------------------------------------------------- |
-| `label`     | `string`  | The unique label for the step                             |
-| `group`     | `string`  | The group that will be assigned an approval for this step |
-| `isSkipped` | `boolean` | Indicates if step has been skipped                        |
+| Property         | Type                  | Description                                               |
+| ---------------- | --------------------- | --------------------------------------------------------- |
+| `label`          | `string`              | The unique label for the step                             |
+| `group`          | `string`              | The group that will be assigned an approval for this step |
+| `approvalFormId` | `number \| undefined` | The id of a form that should be submitted with approval   |
+| `isSkipped`      | `boolean`             | Indicates if step has been skipped                        |
 
 ### FormApprovalFlowInstance
 
@@ -52,6 +54,8 @@ import { approvalsService } from '@oneblink/apps'
 | `createdAt`                  | `string`              | The date and time (in ISO format) the approval was created                                                |
 | `updatedAt`                  | `string`              | The date and time (in ISO format) the approval was last updated                                           |
 | `updatedBy`                  | `string \| undefined` | The username who last updated the step                                                                    |
+| `approvalFormId`             | `number \| undefined` | The id of a form that should be submitted with approval                                                   |
+| `approvalFormSubmissionId`   | `string \| undefined` | The id of a submission that was submitted with approval                                                   |
 
 ### `getFormSubmissionApprovals()`
 
@@ -124,6 +128,18 @@ const formApprovalFlowInstanceId = 1
 const formSubmission =
   await approvalsService.getFormApprovalFlowInstanceSubmission(
     formApprovalFlowInstanceId,
+  )
+```
+
+### `getFormSubmissionApprovalSubmission()`
+
+Retrieve the submission data associated with a [`FormSubmissionApproval`](#formsubmissionapproval).
+
+```js
+const formSubmissionApprovalId = '7145544d-853a-47e8-873c-1e849698e414'
+const formSubmission =
+  await approvalsService.getFormSubmissionApprovalSubmission(
+    formSubmissionApprovalId,
   )
 ```
 

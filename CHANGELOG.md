@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- [`approvalsService.getFormSubmissionApprovalSubmission()`](./docs/approvals-service.md#getformsubmissionapprovalsubmission)
+
 ## [0.12.5] - 2021-12-21
 
 ### Dependencies

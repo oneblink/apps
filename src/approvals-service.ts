@@ -546,10 +546,16 @@ export async function getFormApprovalUsernames(
 }
 
 export async function submitApprovalForm(
-  params: SubmissionParams,
+  params: SubmissionParams & {
+    formSubmissionApprovalId: string
+  },
 ): Promise<FormSubmissionResult> {
   return submitForm({
     ...params,
-    generateCredentials: generateApprovalFormSubmissionCredentials,
+    generateCredentials: (formSubmission) =>
+      generateApprovalFormSubmissionCredentials(
+        formSubmission,
+        params.formSubmissionApprovalId,
+      ),
   })
 }

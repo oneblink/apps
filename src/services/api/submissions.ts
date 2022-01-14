@@ -96,9 +96,10 @@ export const generateSubmissionCredentials = async (
 }
 export const generateApprovalFormSubmissionCredentials = async (
   formSubmission: FormSubmission,
+  formSubmissionApprovalId: string,
 ): Promise<S3UploadCredentials> => {
   return postRequest<S3UploadCredentials>(
-    `${tenants.current.apiOrigin}/form-submission-approvals/${formSubmission.definition.id}/submission-credentials`,
+    `${tenants.current.apiOrigin}/form-submission-approvals/${formSubmissionApprovalId}/submission-credentials`,
     generateSubmissionCredentialsBody(formSubmission),
   ).catch((error) => {
     Sentry.captureException(error)

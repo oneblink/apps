@@ -75,21 +75,35 @@ const handleError = (error: HTTPError) => {
   }
 }
 
+const generateSubmissionCredentialsBody = (formSubmission: FormSubmission) => ({
+  formsAppId: formSubmission.formsAppId,
+  recaptchas: (formSubmission.captchaTokens || []).map((token: string) => ({
+    token,
+  })),
+})
 export const generateSubmissionCredentials = async (
   formSubmission: FormSubmission,
 ): Promise<S3UploadCredentials> => {
   return postRequest<S3UploadCredentials>(
     `${tenants.current.apiOrigin}/forms/${formSubmission.definition.id}/submission-credentials`,
-    {
-      formsAppId: formSubmission.formsAppId,
-      recaptchas: (formSubmission.captchaTokens || []).map((token: string) => ({
-        token,
-      })),
-    },
+    generateSubmissionCredentialsBody(formSubmission),
   ).catch((error) => {
     Sentry.captureException(error)
     // handle only credential errors here
-    console.error('Error with getting credentials for submit:', error)
+    console.error('Error getting credentials for submit:', error)
+    throw handleError(error)
+  })
+}
+export const generateApprovalFormSubmissionCredentials = async (
+  formSubmission: FormSubmission,
+): Promise<S3UploadCredentials> => {
+  return postRequest<S3UploadCredentials>(
+    `${tenants.current.apiOrigin}/form-submission-approvals/${formSubmission.definition.id}/submission-credentials`,
+    generateSubmissionCredentialsBody(formSubmission),
+  ).catch((error) => {
+    Sentry.captureException(error)
+    // handle only credential errors here
+    console.error('Error getting credentials for submit:', error)
     throw handleError(error)
   })
 }

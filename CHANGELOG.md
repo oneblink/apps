@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - [`approvalsService.getFormSubmissionApprovalSubmission()`](./docs/approvals-service.md#getformsubmissionapprovalsubmission)
+- [`approvalsService.submitApprovalForm()`](./docs/approvals-service.md#submitapprovalform)
 
 ## [0.12.5] - 2021-12-21
 

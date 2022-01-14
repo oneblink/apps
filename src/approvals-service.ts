@@ -12,14 +12,17 @@ import { SubmissionTypes, ApprovalTypes, FormTypes } from '@oneblink/types'
 import {
   generateFormSubmissionApprovalSubmissionCredentials,
   generateRetrieveApprovalSubmissionCredentials,
+  generateApprovalFormSubmissionCredentials,
 } from './services/api/submissions'
 import { downloadSubmissionS3Data } from './services/s3Submit'
 import Sentry from './Sentry'
+import submitForm, { SubmissionParams } from './services/submit'
 import {
   FormSubmissionApprovalsResponse,
   FormSubmissionApprovalResponse,
   FormSubmissionsAdministrationApprovalsResponse,
 } from './types/approvals'
+import { FormSubmissionResult } from './types/submissions'
 
 export { FormSubmissionApprovalsResponse }
 export async function getFormSubmissionApprovals(
@@ -540,4 +543,19 @@ export async function getFormApprovalUsernames(
       }
     }
   }
+}
+
+export async function submitApprovalForm(
+  params: SubmissionParams & {
+    formSubmissionApprovalId: string
+  },
+): Promise<FormSubmissionResult> {
+  return submitForm({
+    ...params,
+    generateCredentials: (formSubmission) =>
+      generateApprovalFormSubmissionCredentials(
+        formSubmission,
+        params.formSubmissionApprovalId,
+      ),
+  })
 }

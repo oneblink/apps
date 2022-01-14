@@ -171,3 +171,42 @@ const { usernames } = await approvalsService.getFormApprovalUsernames(
   formsAppId,
 )
 ```
+
+### `submit()`
+
+Submit a [FormSubmission](#formsubmission). Offline submissions will be added to a pending queue and be processed using the [processPendingQueue()](#processpendingqueue) function. Will also handle cleaning up locally stored drafts and prefill data.
+
+```js
+const formSubmission = {
+  formsAppId: 1,
+  submission: {
+    form: 'data',
+    goes: 'here',
+  },
+  definition: OneBlinkForm,
+  captchaTokens: [],
+  draftId: null,
+  jobId: null,
+  preFillFormDataId: '7763f828-4aaf-49dc-9c1b-e2eeea8fa990',
+  externalId: 'external-id-set-by-developer',
+}
+
+const submissionResult = await submissionService.submit({
+  formSubmission,
+  formSubmissionApprovalId: '3245a275-7bfa-49dc-9c1b-e2eeea8rt678',
+})
+
+if (submissionResult.isOffline) {
+  if (submissionResult.isInPendingQueue) {
+    // Display message to user that the submission
+    // has been added to the pending queue
+  } else {
+    // Display message to user that this submission can
+    // not be processed while offline (most likely because it requires a payment)
+  }
+  return
+}
+
+// submissionResult.submissionId and submissionResult.submissionTimestamp
+// will be set if the submission was successful
+```

@@ -39,5 +39,6 @@ export default async function uploadAttachment(
     fileName,
     id: formAttachmentS3Credentials.attachmentDataId,
     isPrivate,
+    uploadedAt: formAttachmentS3Credentials.uploadedAt,
   }
 }

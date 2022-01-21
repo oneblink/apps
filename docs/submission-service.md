@@ -272,5 +272,6 @@ const {
   fileName, // string
   id, //string
   isPrivate, // boolean
+  uploadedAt, // string
 } = await submissionService.uploadAttachment(file, abortController.signal)
 ```

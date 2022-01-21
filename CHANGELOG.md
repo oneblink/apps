@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+- `uploadAttachment` now returns `uploadedAt` string
 - `contentDisposition` changed to be a SDK-Core function
 
 ## [0.12.6] - 2022-01-19

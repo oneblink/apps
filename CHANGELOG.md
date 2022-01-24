@@ -7,10 +7,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.12.7] - 2022-01-24
+
 ### Changed
 
 - `uploadAttachment` now returns `uploadedAt` string
 - `contentDisposition` changed to be a SDK-Core function
+
+### Dependencies
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [0.3.3-beta.1](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [0.3.2-beta.1](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
+
+- no longer depend upon [content-disposition](https://www.npmjs.com/package/content-disposition)
 
 ## [0.12.6] - 2022-01-19
 

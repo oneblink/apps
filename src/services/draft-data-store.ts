@@ -1,6 +1,10 @@
 import utilsService from './utils'
 
-import { uploadDraftData, downloadDraftData } from './api/drafts'
+import {
+  uploadDraftData,
+  downloadDraftData,
+  PutDraftsPayload,
+} from './api/drafts'
 import { MiscTypes, SubmissionTypes } from '@oneblink/types'
 import Sentry from '../Sentry'
 import { DraftSubmission } from '../types/submissions'
@@ -98,9 +102,7 @@ export async function ensureDraftsDataExists(
   }
 }
 
-export async function ensureDraftsDataIsUploaded(
-  draftsData: SubmissionTypes.FormsAppDrafts,
-) {
+export async function ensureDraftsDataIsUploaded(draftsData: PutDraftsPayload) {
   const newDrafts = []
   for (const draft of draftsData.drafts) {
     // draftId will be set as draftDataId if data cannot be uploaded

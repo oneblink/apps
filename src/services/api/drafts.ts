@@ -1,4 +1,4 @@
-import { AWSTypes, SubmissionTypes } from '@oneblink/types'
+import { AWSTypes, FormsAppsTypes, SubmissionTypes } from '@oneblink/types'
 import { postRequest, putRequest, HTTPError } from '../fetch'
 import { isLoggedIn } from '../../auth-service'
 import { uploadFormSubmission, downloadDraftS3Data } from '../s3Submit'
@@ -92,10 +92,15 @@ const uploadDraftData = async (
   }
 }
 
+export type PutDraftsPayload = Omit<
+  FormsAppsTypes.NewFormsAppsDraft,
+  'formsAppUserUsername' | 'formsAppId'
+>
+
 const putDrafts = async (
-  draftsData: SubmissionTypes.FormsAppDrafts,
+  draftsData: PutDraftsPayload,
   formsAppId: number,
-): Promise<SubmissionTypes.FormsAppDrafts> => {
+): Promise<PutDraftsPayload> => {
   if (!isLoggedIn()) {
     console.log(
       'Could not sync drafts with API as the current user is not logged in.',

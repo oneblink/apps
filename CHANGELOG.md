@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- `updatedAt` being set on drafts before sync
+
 ## [0.12.7] - 2022-01-24
 
 ### Changed

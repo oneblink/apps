@@ -6,7 +6,11 @@ import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { isOffline } from './offline-service'
 import { getUsername, isLoggedIn } from './services/cognito'
 import { getFormsKeyId } from './auth-service'
-import { uploadDraftData, putDrafts } from './services/api/drafts'
+import {
+  uploadDraftData,
+  putDrafts,
+  PutDraftsPayload,
+} from './services/api/drafts'
 import { getPendingQueueSubmissions } from './services/pending-queue'
 import {
   getDraftData,
@@ -90,7 +94,6 @@ export async function addDraft(
 ): Promise<void> {
   const draft: SubmissionTypes.FormsAppDraft = {
     ...newDraft,
-    updatedAt: new Date().toISOString(),
     draftId: uuidv4(),
   }
   draftSubmission.keyId = getFormsKeyId() || undefined
@@ -138,6 +141,7 @@ export async function updateDraft(
   draftSubmission: DraftSubmission,
 ): Promise<void> {
   draftSubmission.keyId = getFormsKeyId() || undefined
+  draft.updatedAt = undefined
   if (draftSubmission.keyId) {
     await upsertDraftByKey(draft, draftSubmission)
     return
@@ -282,9 +286,7 @@ export async function deleteDraft(
     })
 }
 
-async function setDrafts(
-  draftsData: SubmissionTypes.FormsAppDrafts,
-): Promise<void> {
+async function setDrafts(draftsData: PutDraftsPayload): Promise<void> {
   const username = getUsername()
   if (!username) {
     throw new OneBlinkAppsError('Must be logged in to manage drafts', {

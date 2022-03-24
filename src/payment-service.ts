@@ -223,7 +223,9 @@ export function checkForPaymentSubmissionEvent(formSubmission: FormSubmission):
     formSubmission.definition,
     formSubmission.submission,
   )
-  console.log('Form has a payment submission event with amount', result)
+  if (result) {
+    console.log('Form has a payment submission event with amount', result)
+  }
   return result
 }
 

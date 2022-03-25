@@ -1,7 +1,4 @@
-import {
-  conditionalLogicService,
-  formElementsService,
-} from '@oneblink/sdk-core'
+import { validatePaymentAmount } from '@oneblink/sdk-core'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import {
   acknowledgeCPPayTransaction,
@@ -10,7 +7,6 @@ import {
 } from './services/api/payment'
 import utilsService from './services/utils'
 import replaceCustomValues from './services/replace-custom-values'
-import { getRootElementValue } from './services/prepareSubmissionData'
 import { SubmissionEventTypes } from '@oneblink/types'
 import { FormSubmission, FormSubmissionResult } from './types/submissions'
 import { HandlePaymentResult } from './types/payments'
@@ -223,74 +219,13 @@ export function checkForPaymentSubmissionEvent(formSubmission: FormSubmission):
       amount: number
     }
   | undefined {
-  const paymentSubmissionEvents = formSubmission.definition.paymentEvents || []
-  const paymentSubmissionEvent = paymentSubmissionEvents.find(
-    (paymentSubmissionEvent) => {
-      return (
-        paymentSubmissionEvent &&
-        conditionalLogicService.evaluateConditionalPredicates({
-          isConditional: !!paymentSubmissionEvent.conditionallyExecute,
-          requiresAllConditionalPredicates:
-            !!paymentSubmissionEvent.requiresAllConditionallyExecutePredicates,
-          conditionalPredicates:
-            paymentSubmissionEvent.conditionallyExecutePredicates || [],
-          submission: formSubmission.submission,
-          formElements: formSubmission.definition.elements,
-        })
-      )
-    },
-  )
-
-  if (!paymentSubmissionEvent) {
-    return
-  }
-
-  console.log(
-    'Checking if submission with payment submission event needs processing',
-  )
-
-  const amountElement = formElementsService.findFormElement(
-    formSubmission.definition.elements,
-    (element) => element.id === paymentSubmissionEvent.configuration.elementId,
-  )
-  if (!amountElement || amountElement.type === 'page') {
-    console.log(
-      'Form has a payment submission event but the amount element does not exist, throwing error',
-    )
-    throw new OneBlinkAppsError(
-      'We could not find the configuration required to make a payment. Please contact your administrator to ensure your application configuration has been completed successfully.',
-    )
-  }
-
-  console.log('Found form element for payment submission event', amountElement)
-
-  const amount = getRootElementValue(
-    amountElement.id,
-    formSubmission.definition.elements,
+  const result = validatePaymentAmount(
+    formSubmission.definition,
     formSubmission.submission,
   )
-
-  if (!amount) {
-    console.log(
-      'Form has a payment submission event but the amount has been entered as 0 or not at all, finishing as normal submission',
-    )
-    return
+  if (result) {
+    console.log('Form has a payment submission event with amount', result)
   }
-
-  if (typeof amount !== 'number') {
-    console.log(
-      'Form has a payment submission event but the amount is not a number, throwing error',
-    )
-    throw new OneBlinkAppsError(
-      'The configuration required to make a payment is incorrect. Please contact your administrator to ensure your application configuration has been completed successfully.',
-    )
-  }
-
-  const result = {
-    paymentSubmissionEvent,
-    amount,
-  }
-  console.log('Form has a payment submission event with amount', result)
   return result
 }
 

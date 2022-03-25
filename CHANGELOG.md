@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- code to now use `validatePaymentAmount()` and `getRootElementValueById()` from SDK-core
+
 ## [0.12.8] - 2022-03-02
 
 ### Fixed

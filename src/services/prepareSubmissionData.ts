@@ -1,5 +1,5 @@
 import { FormTypes } from '@oneblink/types'
-import { FormSubmissionResult, NewDraftSubmission } from '../types/submissions'
+import { NewDraftSubmission } from '../types/submissions'
 import uploadAttachment from './uploadAttachment'
 
 export default async function prepareSubmissionData({
@@ -124,25 +124,4 @@ async function uploadAttachments(
   }
 
   return submission
-}
-
-export function getRootElementValue(
-  formElementId: string,
-  formElements: FormTypes.FormElement[],
-  submission: FormSubmissionResult['submission'],
-): unknown {
-  for (const formElement of formElements) {
-    if (formElement.type === 'page' || formElement.type === 'section') {
-      const value = getRootElementValue(
-        formElementId,
-        formElement.elements,
-        submission,
-      )
-      if (value !== undefined) {
-        return value
-      }
-    } else if (formElement.id === formElementId) {
-      return submission[formElement.name]
-    }
-  }
 }

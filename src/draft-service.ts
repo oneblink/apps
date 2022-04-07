@@ -95,6 +95,7 @@ export async function addDraft(
   const draft: SubmissionTypes.FormsAppDraft = {
     ...newDraft,
     draftId: uuidv4(),
+    createdAt: new Date().toISOString(),
   }
   draftSubmission.keyId = getFormsKeyId() || undefined
   if (draftSubmission.keyId) {
@@ -141,6 +142,7 @@ export async function updateDraft(
   draftSubmission: DraftSubmission,
 ): Promise<void> {
   draftSubmission.keyId = getFormsKeyId() || undefined
+  draft.createdAt = new Date().toISOString()
   draft.updatedAt = undefined
   if (draftSubmission.keyId) {
     await upsertDraftByKey(draft, draftSubmission)

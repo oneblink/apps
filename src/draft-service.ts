@@ -177,6 +177,7 @@ export async function updateDraft(
           existingDraft.draftDataId = draftDataId
           existingDraft.title = draft.title
           existingDraft.updatedAt = new Date().toISOString()
+          existingDraft.createdAt = new Date().toISOString()
           return utilsService.localForage
             .setItem(`DRAFTS_${username}`, draftsData)
             .then(() => executeDraftsListeners(draftsData))

@@ -1,7 +1,7 @@
 import S3 from 'aws-sdk/clients/s3'
 import bigJSON from 'big-json'
 import s3UploadStream from 's3-upload-stream'
-import { getContentDisposition } from '@oneblink/sdk-core'
+import { fileUploadService } from '@oneblink/sdk-core'
 import queryString from 'query-string'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import { AWSTypes, SubmissionTypes } from '@oneblink/types'
@@ -107,7 +107,7 @@ const getObjectMeta = (
   Bucket: s3Meta.bucket,
   Key: s3Meta.key,
   ContentDisposition: data.fileName
-    ? getContentDisposition(data.fileName)
+    ? fileUploadService.getContentDisposition(data.fileName)
     : undefined,
   ContentType: data.contentType,
   Tagging: data.tags

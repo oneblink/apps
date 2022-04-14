@@ -1,4 +1,4 @@
-import { validatePaymentAmount } from '@oneblink/sdk-core'
+import { paymentService } from '@oneblink/sdk-core'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import {
   acknowledgeCPPayTransaction,
@@ -219,7 +219,7 @@ export function checkForPaymentSubmissionEvent(formSubmission: FormSubmission):
       amount: number
     }
   | undefined {
-  const result = validatePaymentAmount(
+  const result = paymentService.checkForPaymentEvent(
     formSubmission.definition,
     formSubmission.submission,
   )

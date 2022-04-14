@@ -4,14 +4,14 @@ import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 import Sentry from '../../Sentry'
 import { FormSubmissionResult } from '../../types/submissions'
-import { formElementsService } from '@oneblink/sdk-core'
+import { submissionService } from '@oneblink/sdk-core'
 
 function getBookingQuerystringValue(
   elementId: string | undefined,
   formSubmissionResult: FormSubmissionResult,
 ) {
   if (elementId) {
-    const value = formElementsService.getRootElementValueById(
+    const value = submissionService.getRootElementValueById(
       elementId,
       formSubmissionResult.definition.elements,
       formSubmissionResult.submission,

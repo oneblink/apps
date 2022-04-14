@@ -1,7 +1,7 @@
 import { generateSchedulingConfiguration } from './api/scheduling'
 import utilsService from './utils'
 import { SubmissionEventTypes } from '@oneblink/types'
-import { conditionalLogicService } from '@oneblink/sdk-core'
+import { schedulingService } from '@oneblink/sdk-core'
 import { FormSubmissionResult, NewDraftSubmission } from '../types/submissions'
 const KEY = 'SCHEDULING_SUBMISSION_RESULT'
 
@@ -14,27 +14,17 @@ type SchedulingBooking = {
 function checkForSchedulingSubmissionEvent(
   newDraftSubmission: NewDraftSubmission,
 ): SubmissionEventTypes.SchedulingSubmissionEvent | undefined {
-  const schedulingSubmissionEvents =
-    newDraftSubmission.definition.schedulingEvents || []
-  return schedulingSubmissionEvents.find((schedulingSubmissionEvent) => {
-    if (
-      conditionalLogicService.evaluateConditionalPredicates({
-        isConditional: !!schedulingSubmissionEvent.conditionallyExecute,
-        requiresAllConditionalPredicates:
-          !!schedulingSubmissionEvent.requiresAllConditionallyExecutePredicates,
-        conditionalPredicates:
-          schedulingSubmissionEvent.conditionallyExecutePredicates || [],
-        submission: newDraftSubmission.submission,
-        formElements: newDraftSubmission.definition.elements,
-      })
-    ) {
-      console.log(
-        'Form has a scheduling submission event',
-        schedulingSubmissionEvent,
-      )
-      return schedulingSubmissionEvent
-    }
-  })
+  const schedulingSubmissionEvent = schedulingService.checkForSchedulingEvent(
+    newDraftSubmission.definition,
+    newDraftSubmission.submission,
+  )
+  if (schedulingSubmissionEvent) {
+    console.log(
+      'Form has a scheduling submission event',
+      schedulingSubmissionEvent,
+    )
+  }
+  return schedulingSubmissionEvent
 }
 
 async function handleSchedulingSubmissionEvent({

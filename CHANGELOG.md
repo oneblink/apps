@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.12.11] - 2022-04-19
+
+### Dependencies
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [0.4.0-beta.2](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [0.3.6-beta.3](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
+
+- update [@sentry/browser](https://www.npmjs.com/package/@sentry/browser) to [6.19.6](https://github.com/getsentry/sentry-javascript/releases/tag/6.19.6) (from [6.14.3](https://github.com/getsentry/sentry-javascript/releases/tag/6.14.3))
+
+- update [@sentry/tracing](https://www.npmjs.com/package/@sentry/tracing) to [6.19.6](https://github.com/getsentry/sentry-javascript/releases/tag/6.19.6) (from [6.14.3](https://github.com/getsentry/sentry-javascript/releases/tag/6.14.3))
+
+- update [aws-sdk](https://www.npmjs.com/package/aws-sdk) to [2.1114.0](https://github.com/aws/aws-sdk-js/releases/tag/v2.1114.0) (from [2.976.0](https://github.com/aws/aws-sdk-js/releases/tag/v2.976.0))
+
+- update [query-string](https://www.npmjs.com/package/query-string) to [7.1.1](https://github.com/sindresorhus/query-string/releases/tag/v7.1.1) (from [7.0.1](https://github.com/sindresorhus/query-string/releases/tag/v7.0.1))
+
 ## [0.12.10] - 2022-04-13
 
 ### Added

@@ -47,6 +47,25 @@ const draftsListeners: Array<
   (draft: SubmissionTypes.FormsAppDraft[]) => unknown
 > = []
 
+/**
+ * Register a lister function that will be passed an array of Drafts when a
+ * draft is added, updated or deleted.
+ *
+ * #### Example
+ *
+ * ```js
+ * const listener = async (drafts) => {
+ *   // use drafts here...
+ * }
+ * const deregister = await draftService.registerDraftsListener(listener)
+ *
+ * // When no longer needed, remember to deregister the listener
+ * deregister()
+ * ```
+ *
+ * @param listener
+ * @returns
+ */
 export function registerDraftsListener(
   listener: (draft: SubmissionTypes.FormsAppDraft[]) => unknown,
 ): () => void {
@@ -88,6 +107,38 @@ async function upsertDraftByKey(
   return uploadDraftData(draft, draftSubmission)
 }
 
+/**
+ * Add a Draft to the local store and sync it with remote drafts.
+ *
+ * #### Example
+ *
+ * ```js
+ * const draft = {
+ *   draftId: 'd3aeb944-d0b3-11ea-87d0-0242ac130003',
+ *   title: 'I Will Finish This Later',
+ *   formId: 1,
+ *   externalId: 'external'
+ *   jobId: '0ac41494-723b-4a5d-90bb-534b8360f31d',
+ *   previousFormSubmissionApprovalId: '7fa79583-ec45-4ffc-8f72-4be80ef2c2b7',
+ * }
+ * const data = {
+ *   formsAppId: 1,
+ *   submission: {
+ *     form: 'data',
+ *     goes: 'here'
+ *   },
+ *   definition: OneBlinkForm,
+ * }
+ * await draftService.addDraft(
+ *   draft,
+ *   data,
+ * )
+ * ```
+ *
+ * @param newDraft The draft
+ * @param draftSubmission The draft data
+ * @returns
+ */
 export async function addDraft(
   newDraft: SubmissionTypes.NewFormsAppDraft,
   draftSubmission: DraftSubmission,
@@ -137,6 +188,38 @@ export async function addDraft(
     })
 }
 
+/**
+ * Update a Draft in the local store and sync it with remote drafts.
+ *
+ * #### Example
+ *
+ * ```js
+ * const draft = {
+ *   draftId: 'd3aeb944-d0b3-11ea-87d0-0242ac130003',
+ *   title: 'I Will Finish This Later',
+ *   formId: 1,
+ *   externalId: 'external'
+ *   jobId: '0ac41494-723b-4a5d-90bb-534b8360f31d',
+ *   previousFormSubmissionApprovalId: '7fa79583-ec45-4ffc-8f72-4be80ef2c2b7',
+ * }
+ * const data = {
+ *   formsAppId: 1,
+ *   submission: {
+ *     form: 'data',
+ *     goes: 'here'
+ *   },
+ *   definition: OneBlinkForm,
+ * }
+ * await draftService.updateDraft(
+ *   draft,
+ *   data,
+ * )
+ * ```
+ *
+ * @param draft
+ * @param draftSubmission
+ * @returns
+ */
 export async function updateDraft(
   draft: SubmissionTypes.FormsAppDraft,
   draftSubmission: DraftSubmission,
@@ -211,6 +294,17 @@ async function getDraftsData(): Promise<DraftsData> {
     })
 }
 
+/**
+ * Get an array of Drafts for the currently logged in user.
+ *
+ * #### Example
+ *
+ * ```js
+ * const drafts = await draftService.getDrafts()
+ * ```
+ *
+ * @returns
+ */
 export async function getDrafts(): Promise<SubmissionTypes.FormsAppDraft[]> {
   // Get list of pending submissions
   const [draftsData, pendingSubmissions] = await Promise.all([
@@ -223,6 +317,20 @@ export async function getDrafts(): Promise<SubmissionTypes.FormsAppDraft[]> {
   )
 }
 
+/**
+ * Get a single Draft and the associated submission data.
+ *
+ * #### Example
+ *
+ * ```js
+ * const draftId = 'd3aeb944-d0b3-11ea-87d0-0242ac130003'
+ * const { draft, draftData } = await draftService.getDraftAndData(draftId)
+ * // use "draftData" to prefill a from
+ * ```
+ *
+ * @param draftId
+ * @returns
+ */
 export async function getDraftAndData(
   draftId: string | MiscTypes.NoU,
 ): Promise<{
@@ -248,6 +356,20 @@ export async function getDraftAndData(
   }
 }
 
+/**
+ * Remove a draft from the local store and sync with remote drafts.
+ *
+ * #### Example
+ *
+ * ```js
+ * const draftId = 'd3aeb944-d0b3-11ea-87d0-0242ac130003'
+ * await draftService.deleteDraft(draftId)
+ * ```
+ *
+ * @param draftId
+ * @param formsAppId
+ * @returns
+ */
 export async function deleteDraft(
   draftId: string,
   formsAppId: number,
@@ -302,11 +424,29 @@ async function setDrafts(draftsData: PutDraftsPayload): Promise<void> {
 
 let _isSyncingDrafts = false
 
+/**
+ * Force a sync of remote drafts with locally stored drafts. This function will
+ * swallow all errors thrown unless `true` is passed for the `throwError` property.
+ *
+ * #### Example
+ *
+ * ```js
+ * await draftService.syncDrafts({
+ *   throwError: true,
+ *   formsAppId: 1,
+ * })
+ * ```
+ *
+ * @param param0
+ * @returns
+ */
 export async function syncDrafts({
   formsAppId,
   throwError,
 }: {
+  /** The id of the OneBlink Forms App to sync drafts with */
   formsAppId: number
+  /** `true` to throw errors while syncing */
   throwError?: boolean
 }): Promise<void> {
   if (!isLoggedIn()) {

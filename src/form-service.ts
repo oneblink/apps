@@ -13,6 +13,19 @@ import { FormTypes, FreshdeskTypes } from '@oneblink/types'
 import Sentry from './Sentry'
 export * from './services/integration-elements'
 
+/**
+ * Get an array of OneBlink Forms.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formsAppId = 1
+ * const forms = await formService.getForms(formAppId)
+ * ```
+ *
+ * @param formsAppId
+ * @returns
+ */
 async function getForms(formsAppId: number): Promise<FormTypes.Form[]> {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms`
   return searchRequest<{ forms: FormTypes.Form[] }>(url, {
@@ -78,6 +91,21 @@ async function getForms(formsAppId: number): Promise<FormTypes.Form[]> {
     })
 }
 
+/**
+ * Get a OneBlink Form.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formId = 1
+ * const formsAppId = 1 // `formsAppId` is optional
+ * const form = await formService.getForm(formId, formAppId)
+ * ```
+ *
+ * @param formId
+ * @param formsAppId
+ * @returns
+ */
 async function getForm(
   formId: number,
   formsAppId?: number,
@@ -173,6 +201,24 @@ async function getForm(
   )
 }
 
+/**
+ * Get an array of OneBlink Form Element Lookups.
+ *
+ * #### Example
+ *
+ * ```js
+ * const organisationId = '1234567890ABCDEFG'
+ * const formsAppEnvironmentId = 1
+ * const formElementLookups = await formService.getFormElementLookups(
+ *   organisationId,
+ *   formsAppEnvironmentId,
+ * )
+ * ```
+ *
+ * @param organisationId
+ * @param formsAppEnvironmentId
+ * @returns
+ */
 async function getFormElementLookups(
   organisationId: string,
   formsAppEnvironmentId: number,
@@ -211,6 +257,30 @@ async function getFormElementLookups(
     })
 }
 
+/**
+ * Get a OneBlink Form Element Lookup.
+ *
+ * #### Example
+ *
+ * ```js
+ * const organisationId = '1234567890ABCDEFG'
+ * const formsAppEnvironmentId = 1
+ * const formElementLookupId = 1
+ * const formElementLookup = await formService.getFormElementLookupById(
+ *   organisationId,
+ *   formsAppEnvironmentId,
+ *   formElementLookupId,
+ * )
+ * if (formElementLookup) {
+ *   // Use lookup
+ * }
+ * ```
+ *
+ * @param organisationId
+ * @param formsAppEnvironmentId
+ * @param formElementLookupId
+ * @returns
+ */
 async function getFormElementLookupById(
   organisationId: string,
   formsAppEnvironmentId: number,
@@ -251,6 +321,36 @@ type LoadFormElementOptionsResult = {
     }
 )
 
+/**
+ * Get a the options for a single Form or an array of Forms for Form Elements
+ * that are using a OneBlink Form Element Options Set.
+ *
+ * #### Example
+ *
+ * ```js
+ * const optionsForElementId =
+ *   await formService.getFormElementDynamicOptions(form)
+ *
+ * // Set all the options for the required elements
+ * for (const { elementId, options } of optionsForElementId.filter(
+ *   ({ ok }) => ok,
+ * )) {
+ *   // BEWARE
+ *   // this example does not accommodate for
+ *   // nested elements in pages and repeatable sets
+ *   // or for options sets that fail to load
+ *   for (const formElement of form.elements) {
+ *     if (formElement.id === elementId) {
+ *       formElement.options = options
+ *     }
+ *   }
+ * }
+ * ```
+ *
+ * @param input
+ * @param abortSignal
+ * @returns
+ */
 async function getFormElementDynamicOptions(
   input: FormTypes.Form | FormTypes.Form[],
   abortSignal?: AbortSignal,

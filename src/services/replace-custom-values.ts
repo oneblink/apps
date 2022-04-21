@@ -1,6 +1,6 @@
 import { FormSubmissionResult } from '../types/submissions'
 import { submissionService } from '@oneblink/sdk-core'
-import localisationService from '../localisation-service'
+import * as localisationService from '../localisation-service'
 
 export default function (
   string: string,

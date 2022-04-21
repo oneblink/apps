@@ -102,9 +102,29 @@ function generateSchedulingConfiguration({
   })
 }
 
+/**
+ * Cancel a booking
+ *
+ * #### Example
+ *
+ * ```js
+ * await schedulingService.cancelSchedulingBooking({
+ *   submissionId: '89c6e98e-f56f-45fc-84fe-c4fc62331d34',
+ *   nylasEditHash: '123abc321abcCBA456abcabc123456',
+ *   reason: 'Busy at time of booking.',
+ * })
+ * // Booking Cancelled
+ * ```
+ *
+ * @param details
+ * @returns
+ */
 function cancelSchedulingBooking(details: {
+  /** The unique identifier for the submission associated with the booking */
   submissionId: string
+  /** The nylas edit hash associated with the booking */
   nylasEditHash: string
+  /** Reason for cancelling the booking */
   reason: string
 }): Promise<void> {
   const url = `${tenants.current.apiOrigin}/scheduling/cancel-booking`

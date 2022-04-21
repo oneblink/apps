@@ -28,6 +28,18 @@ import {
 
 let _isProcessingPendingQueue = false
 
+/**
+ * Force processing the pending queue. This must be called to process the
+ * pending queue and is best used when the application comes back online.
+ *
+ * ### Example
+ *
+ * ```js
+ * await submissionService.processPendingQueue()
+ * ```
+ *
+ * @returns
+ */
 async function processPendingQueue(): Promise<void> {
   if (_isProcessingPendingQueue) {
     return
@@ -115,6 +127,74 @@ async function processPendingQueue(): Promise<void> {
   _isProcessingPendingQueue = false
 }
 
+/**
+ * Submit a FormSubmission. Offline submissions will be added to a pending queue
+ * and be processed using the `processPendingQueue()` function. FormSubmissions
+ * with payment submission events will return the FormSubmissionResult with a
+ * `payment` property set, this should be used to redirect the user to the
+ * payment URL. Will also handle cleaning up locally stored drafts and prefill data.
+ *
+ * ### Example
+ *
+ * ```js
+ * const formSubmission = {
+ *   formsAppId: 1,
+ *   submission: {
+ *     form: 'data',
+ *     goes: 'here',
+ *   },
+ *   definition: OneBlinkForm,
+ *   captchaTokens: [],
+ *   draftId: '2974602c-2c5b-4b46-b086-87ee9b2aa233',
+ *   jobId: 'bb37d1da-9cda-4950-a36a-22f58b25de3a',
+ *   preFillFormDataId: '7763f828-4aaf-49dc-9c1b-e2eeea8fa990',
+ *   externalId: 'external-id-set-by-developer',
+ * }
+ *
+ * // Pass paymentReceiptUrl if submission may require a payment
+ * const paymentReceiptUrl = `${window.location.origin}/payment-receipt`
+ *
+ * // Pass schedulingBookingUrlConfiguration if submission utilise scheduling
+ * const schedulingBookingUrlConfiguration = {
+ *   schedulingReceiptUrl: 'https://my-website.com/receipt',
+ *   schedulingCancelUrl: 'https://my-website.com/cancel',
+ * }
+ * const submissionResult = await submissionService.submit({
+ *   formSubmission,
+ *   paymentReceiptUrl,
+ *   schedulingBookingUrlConfiguration,
+ * })
+ *
+ * if (submissionResult.scheduling) {
+ *   // Redirect user to booking form
+ *   window.location.href = submissionResult.scheduling.bookingUrl
+ *   return
+ * }
+ *
+ * if (submissionResult.payment) {
+ *   // Redirect user to payment form
+ *   window.location.href = submissionResult.payment.hostedFormUrl
+ *   return
+ * }
+ *
+ * if (submissionResult.isOffline) {
+ *   if (submissionResult.isInPendingQueue) {
+ *     // Display message to user that the submission
+ *     // has been added to the pending queue
+ *   } else {
+ *     // Display message to user that this submission can
+ *     // not be processed while offline (most likely because it requires a payment)
+ *   }
+ *   return
+ * }
+ *
+ * // submissionResult.submissionId and submissionResult.submissionTimestamp
+ * // will be set if the submission was successful
+ * ```
+ *
+ * @param params
+ * @returns
+ */
 async function submit(params: SubmissionParams): Promise<FormSubmissionResult> {
   return submitForm({
     ...params,
@@ -146,6 +226,23 @@ async function closeWindow(): Promise<void> {
   })
 }
 
+/**
+ * Go back in the browser history or attempts to close the browser tab if there
+ * is no history.
+ *
+ * ### Example
+ *
+ * ```js
+ * try {
+ *   await submissionService.goBackOrCloseWindow()
+ * } catch (error) {
+ *   // Handle error while closing browser tab.
+ *   // Display message to user to close it manually
+ * }
+ * ```
+ *
+ * @returns
+ */
 async function goBackOrCloseWindow(): Promise<void> {
   if (window.history.length <= 1) {
     return closeWindow()
@@ -154,6 +251,32 @@ async function goBackOrCloseWindow(): Promise<void> {
   }
 }
 
+/**
+ * Action to cancel completing a form, currently goes back in the browser
+ * history or attempts to close the browser tab if there is no history.
+ *
+ * ### Example
+ *
+ * ```js
+ * const options = {
+ *   definition: OneBlinkForm,
+ *   externalId: 'external-id-set-by-developer',
+ * }
+ * // Only used for relative URLs
+ * const pushRelativePath = (path) => {
+ *   window.location.href = path
+ * }
+ * try {
+ *   await submissionService.executeCancelAction(options, pushRelativePath)
+ * } catch (error) {
+ *   // Handle error while closing browser tab.
+ *   // Display message to user to close it manually
+ * }
+ * ```
+ *
+ * @param options
+ * @param push
+ */
 async function executeCancelAction(
   options: {
     definition: FormTypes.Form
@@ -186,6 +309,44 @@ async function executeCancelAction(
   )
 }
 
+/**
+ * Execute the post submission action for a form after a successful form submission.
+ *
+ * ### Example
+ *
+ * ```js
+ * const formSubmissionResult = {
+ *   submissionId: '89c6e98e-f56f-45fc-84fe-c4fc62331d34',
+ *   submissionTimestamp: '2020-07-29T01:03:26.573Z'
+ *   formsAppId: 1,
+ *   submission: {
+ *     form: 'data',
+ *     goes: 'here'
+ *   },
+ *   definition: OneBlinkForm,
+ *   payment: {
+ *     hostedFormUrl: 'https://payment.com/transaction'
+ *   },
+ *   draftId: '2974602c-2c5b-4b46-b086-87ee9b2aa233',
+ *   jobId: 'bb37d1da-9cda-4950-a36a-22f58b25de3a',
+ *   preFillFormDataId: '7763f828-4aaf-49dc-9c1b-e2eeea8fa990',
+ *   externalId: 'external-id-set-by-developer',
+ * }
+ * // Only used for relative URLs
+ * const pushRelativePath = (path) => {
+ *   window.location.href = path
+ * }
+ * try {
+ *   await submissionService.executePostSubmissionAction(formSubmissionResult, pushRelativePath)
+ * } catch (error) {
+ *   // Handle error while closing browser tab.
+ *   // Display message to user to close it manually
+ * }
+ * ```
+ *
+ * @param submissionResult
+ * @param push
+ */
 async function executePostSubmissionAction(
   submissionResult: FormSubmissionResult,
   push: (url: string) => void,

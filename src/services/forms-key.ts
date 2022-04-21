@@ -7,10 +7,37 @@ import { MiscTypes } from '@oneblink/types'
 import { OneBlinkAppsError } from '..'
 let formsKeyToken: string | MiscTypes.NoU = null
 
+/**
+ * Set the Forms Key token being used to make requests to the OneBlink API on
+ * behalf of the user.
+ *
+ * #### Example
+ *
+ * ```js
+ * authService.setFormsKeyToken('a valid json web token')
+ * ```
+ *
+ * @param jwtToken
+ */
 export function setFormsKeyToken(jwtToken: string | MiscTypes.NoU): void {
   formsKeyToken = jwtToken || null
 }
 
+/**
+ * Can be used to extract the `keyId` from the Forms Key token passed to
+ * `setFormsKeyToken()`. Will be `undefined` if the token has not been set yet.
+ *
+ * #### Example
+ *
+ * ```js
+ * const keyId = authService.getFormsKeyId()
+ * if (keyId) {
+ *   // Use keyId here...
+ * }
+ * ```
+ *
+ * @returns
+ */
 export function getFormsKeyId(): string | void {
   if (formsKeyToken) {
     console.log('Attempting to decode JWT')
@@ -24,6 +51,27 @@ export function getFormsKeyId(): string | void {
   }
 }
 
+/**
+ * Get the Id Token used to make requests to the OneBlink API. This will return
+ * `undefined` if the current user is not logged in.
+ *
+ * #### Example
+ *
+ * ```js
+ * const idToken = await authService.getIdToken()
+ * if (idToken) {
+ *   await fetch(url, {
+ *     headers: {
+ *       Authorization: `Bearer ${idToken}`,
+ *     },
+ *   })
+ * } else {
+ *   // Handle user not being logged in
+ * }
+ * ```
+ *
+ * @returns
+ */
 export async function getIdToken() {
   if (formsKeyToken) {
     return formsKeyToken

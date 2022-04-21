@@ -22,6 +22,27 @@ const pendingQueueListeners: Array<
   (results: PendingFormSubmission[]) => unknown
 > = []
 
+/**
+ * Register a lister function that will be passed an array of
+ * PendingFormSubmissions when the pending queue is modified.
+ *
+ * ### Example
+ *
+ * ```js
+ * const listener = async (pendingSubmissions) => {
+ *   // use pending submissions here...
+ * }
+ * const deregister = await submissionService.registerPendingQueueListener(
+ *   listener,
+ * )
+ *
+ * // When no longer needed, remember to deregister the listener
+ * deregister()
+ * ```
+ *
+ * @param listener
+ * @returns
+ */
 export function registerPendingQueueListener(
   listener: (results: PendingFormSubmission[]) => unknown,
 ): () => void {
@@ -86,6 +107,19 @@ export async function updatePendingQueueSubmission(
   }
 }
 
+/**
+ * Get an array of PendingFormSubmission
+ *
+ * ### Example
+ *
+ * ```js
+ * const pendingSubmission =
+ *   await submissionService.getPendingQueueSubmissions()
+ * // Display pending submissions to user...
+ * ```
+ *
+ * @returns
+ */
 export function getPendingQueueSubmissions(): Promise<PendingFormSubmission[]> {
   return utilsService.localForage
     .getItem('submissions')
@@ -98,6 +132,19 @@ export function getFormSubmission(
   return utilsService.getLocalForageItem(`SUBMISSION_${pendingTimestamp}`)
 }
 
+/**
+ * Delete a PendingFormSubmission before it is processed based on the
+ * `pendingTimestamp` property.
+ *
+ * ### Example
+ *
+ * ```js
+ * const pendingTimestamp = '2020-07-29T01:03:26.573Z'
+ * await submissionService.deletePendingQueueSubmission(pendingTimestamp)
+ * ```
+ *
+ * @param pendingTimestamp
+ */
 export async function deletePendingQueueSubmission(pendingTimestamp: string) {
   try {
     await utilsService.removeLocalForageItem(`SUBMISSION_${pendingTimestamp}`)

@@ -43,6 +43,15 @@ export {
 }
 import Sentry from './Sentry'
 
+/**
+ * Log the current user out and remove an data stored locally by the user e.g. drafts.
+ *
+ * #### Example
+ *
+ * ```js
+ * await authService.logout()
+ * ```
+ */
 export async function logout() {
   console.log('Logging out...')
 
@@ -56,6 +65,20 @@ export async function logout() {
   await logoutCognito()
 }
 
+/**
+ * Initialize the service with required configuration. **This must be done
+ * before using before some of the function in this service.**
+ *
+ * #### Example
+ *
+ * ```js
+ * authService.init({
+ *   oAuthClientId: 'YOUR_OAUTH_CLIENT_ID',
+ * })
+ * ```
+ *
+ * @param options
+ */
 export function init({ oAuthClientId }: { oAuthClientId: string }) {
   initCognito({
     region: tenants.current.awsRegion,
@@ -72,6 +95,23 @@ export function init({ oAuthClientId }: { oAuthClientId: string }) {
   registerAuthListener(listener)
 }
 
+/**
+ * Determine if the current user is a OneBlink App User for a OneBlink Forms
+ * App. Returns `false` if the current user is not logged in.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formsAppId = 1
+ * const isAuthorised = await authService.isAuthorised(formsAppId)
+ * if (!isAuthorised) {
+ *   // handle unauthorised user
+ * }
+ * ```
+ *
+ * @param formsAppId
+ * @returns
+ */
 export async function isAuthorised(formsAppId: number): Promise<boolean> {
   if (getFormsKeyId()) {
     return true
@@ -104,6 +144,21 @@ export async function isAuthorised(formsAppId: number): Promise<boolean> {
     })
 }
 
+/**
+ * If the current user is not a Forms App User, this function will send a
+ * request on behalf of the current user to the OneBlink Forms App
+ * administrators to request access.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formsAppId = 1
+ * await authService.requestAccess(formsAppId)
+ * // Display a message to user indicating a request has been sent to the application administrators
+ * ```
+ *
+ * @param formsAppId
+ */
 export async function requestAccess(formsAppId: number): Promise<void> {
   if (!isLoggedIn()) {
     throw new OneBlinkAppsError(
@@ -132,6 +187,23 @@ export async function requestAccess(formsAppId: number): Promise<void> {
   }
 }
 
+/**
+ * Determine if the current user is a OneBlink App User administrator for a
+ * OneBlink Forms App. Returns `false` if the current user is not.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formsAppId = 1
+ * const isAdministrator = await authService.isAdministrator(formsAppId)
+ * if (isAdministrator) {
+ *   // handle administator user
+ * }
+ * ```
+ *
+ * @param formsAppId
+ * @returns
+ */
 export async function isAdministrator(formsAppId: number): Promise<boolean> {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/my-forms-app-user`
   const appUser = await getRequest<{ groups: string[] }>(url)

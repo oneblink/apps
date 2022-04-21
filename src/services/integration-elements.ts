@@ -11,6 +11,25 @@ import {
 } from '@oneblink/types'
 import Sentry from '../Sentry'
 
+/**
+ * Search for geoscape addresses based on a partial address.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formId = 1
+ * const result = await formService.searchGeoscapeAddresses(formId, {
+ *   query: '123 N',
+ *   maxNumberOfResults: 10
+ *   stateTerritory: 'NSW'
+ * })
+ * ```
+ *
+ * @param formId
+ * @param queryParams
+ * @param abortSignal
+ * @returns
+ */
 export async function searchGeoscapeAddresses(
   formId: number,
   queryParams: {
@@ -85,6 +104,23 @@ export async function searchGeoscapeAddresses(
   }
 }
 
+/**
+ * Get the details for a single geoscape address based on the Id of a geoscape
+ * address resource.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formId = 1
+ * const addressId = 'ABC123'
+ * const result = await formService.getGeoscapeAddress(formId, addressId)
+ * ```
+ *
+ * @param formId
+ * @param addressId
+ * @param abortSignal
+ * @returns
+ */
 export async function getGeoscapeAddress(
   formId: number,
   addressId: string,
@@ -151,6 +187,25 @@ export async function getGeoscapeAddress(
   }
 }
 
+/**
+ * Search for Point addresses based on a partial address.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formId = 1
+ * const result = await formService.searchPointAddresses(formId, {
+ *   address: '123 N',
+ *   maxNumberOfResults: 10
+ *   stateTerritory: 'NSW'
+ * })
+ * ```
+ *
+ * @param formId
+ * @param queryParams
+ * @param abortSignal
+ * @returns
+ */
 export async function searchPointAddresses(
   formId: number,
   queryParams: {
@@ -224,6 +279,22 @@ export async function searchPointAddresses(
   }
 }
 
+/**
+ * Get the details for a single Point address based on the Id of a Point address resource.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formId = 1
+ * const addressId = 'ABC123'
+ * const result = await formService.getPointAddress(formId, addressId)
+ * ```
+ *
+ * @param formId
+ * @param addressId
+ * @param abortSignal
+ * @returns
+ */
 export async function getPointAddress(
   formId: number,
   addressId: string,
@@ -290,6 +361,28 @@ export async function getPointAddress(
   }
 }
 
+/**
+ * Search for street names in Civica
+ *
+ * #### Example
+ *
+ * ```js
+ * const formId = 1
+ * const queryParams = {
+ *   search: '1 Station ',
+ *   top: 10,
+ * }
+ * const result = await formService.searchCivicaStreetNames(
+ *   formId,
+ *   queryParams,
+ * )
+ * ```
+ *
+ * @param formId
+ * @param queryParams
+ * @param abortSignal
+ * @returns
+ */
 export async function searchCivicaStreetNames(
   formId: number,
   queryParams: {
@@ -360,6 +453,20 @@ export async function searchCivicaStreetNames(
   }
 }
 
+/**
+ * Get titles codes from Civica name register
+ *
+ * #### Example
+ *
+ * ```js
+ * const formId = 1
+ * const results = await formService.getCivicaTitleCodes(formId)
+ * ```
+ *
+ * @param formId
+ * @param abortSignal
+ * @returns
+ */
 export async function getCivicaTitleCodes(
   formId: number,
   abortSignal?: AbortSignal,
@@ -425,6 +532,22 @@ export async function getCivicaTitleCodes(
   }
 }
 
+/**
+ * Get BSB record based on a BSB number codes from Civica name register
+ *
+ * #### Example
+ *
+ * ```js
+ * const formId = 1
+ * const bsb = '123-321'
+ * const results = await formService.getBSBRecord(formId, bsb)
+ * ```
+ *
+ * @param formId
+ * @param bsb
+ * @param abortSignal
+ * @returns
+ */
 export async function getBSBRecord(
   formId: number,
   bsb: string,

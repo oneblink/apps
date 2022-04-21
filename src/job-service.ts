@@ -33,6 +33,22 @@ async function tagDrafts(jobList: SubmissionTypes.FormsAppJob[]) {
   )
 }
 
+/**
+ * Get Jobs for the current user. Jobs that are in the pending queue will be
+ * filtered out and Jobs with drafts will include the `draft` property.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formsAppId = 1
+ * const label = 'Applications'
+ * const jobs = await jobService.getJobs(formsAppId, label)
+ * ```
+ *
+ * @param formsAppId
+ * @param jobsLabel
+ * @returns
+ */
 export async function getJobs(
   formsAppId: number,
   jobsLabel: string,

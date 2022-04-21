@@ -9,13 +9,39 @@ import { FormSubmissionResult } from './types/submissions'
 const KEY = 'SCHEDULING_SUBMISSION_RESULT'
 
 type SchedulingBooking = {
+  /** The unique identifier for the submission associated with the booking */
   submissionId: string
+  /** Date and time the booking starts */
   startTime: Date
+  /** Date and time the booking ends */
   endTime: Date
+  /** Location of booking */
   location: string
+  /** `true` if the booking has been rescheduled, otherwise `false` */
   isReschedule: boolean
 }
 
+/**
+ * Pass in query string parameters after a redirect back to your app after a
+ * booking is processed. Will return a SchedulingBooking and the submission
+ * result from the original submission before redirecting to
+ * `scheduling.bookingUrl`. If the booking has been rescheduled, the submission
+ * result will not be returned.
+ *
+ * #### Example
+ *
+ * ```js
+ * import queryString from 'query-string'
+ *
+ * const query = queryString.parse(window.location.search)
+ *
+ * const { booking, formSubmissionResult } =
+ *   await schedulingService.handleSchedulingQuerystring(query)
+ * ```
+ *
+ * @param options
+ * @returns
+ */
 async function handleSchedulingQuerystring({
   start_time,
   end_time,
@@ -103,6 +129,24 @@ async function handleSchedulingQuerystring({
   }
 }
 
+/**
+ * Pass in query string parameters after navigation to your app via a valid
+ * cancellation link.
+ *
+ * #### Example
+ *
+ * ```js
+ * import queryString from 'query-string'
+ *
+ * const query = queryString.parse(window.location.search)
+ *
+ * const bookingToCancel =
+ *   await schedulingService.handleCancelSchedulingBookingQuerystring(query)
+ * ```
+ *
+ * @param options
+ * @returns
+ */
 function handleCancelSchedulingBookingQuerystring({
   nylasEditHash,
   submissionId,
@@ -113,13 +157,21 @@ function handleCancelSchedulingBookingQuerystring({
   timezone,
   cancellationPolicy,
 }: Record<string, unknown>): {
+  /** The nylas edit hash associated with the booking */
   nylasEditHash: string
+  /** The unique identifier for the submission associated with the booking */
   submissionId: string
+  /** The start time of the booking */
   startTime: Date
+  /** The end time of the booking */
   endTime: Date
+  /** The event name */
   eventName: string
+  /** The location of the event */
   location: string
+  /** The timezone the booking was booked in */
   timezone: string
+  /** The policy to display to users when asked why they are cancelling the booking */
   cancellationPolicy?: string
 } {
   if (

@@ -5,7 +5,7 @@ import {
   checkForPaymentSubmissionEvent,
   handlePaymentSubmissionEvent,
 } from '../payment-service'
-import { uploadFormSubmission } from './s3Submit'
+import { uploadFormSubmission, UploadFileConfiguration } from './s3Submit'
 import { deleteDraft } from '../draft-service'
 import { removePrefillFormData } from '../prefill-service'
 import recentlySubmittedJobsService from './recently-submitted-jobs'
@@ -20,7 +20,7 @@ import {
   S3UploadCredentials,
 } from '../types/submissions'
 
-export type SubmissionParams = {
+type SubmissionParams = {
   formSubmission: FormSubmission
   paymentReceiptUrl?: string
   schedulingUrlConfiguration?: {
@@ -28,7 +28,10 @@ export type SubmissionParams = {
     schedulingCancelUrl: string
   }
 }
-async function submit({
+
+export { SubmissionParams, UploadFileConfiguration }
+
+export default async function submit({
   formSubmission,
   paymentReceiptUrl,
   schedulingUrlConfiguration,
@@ -133,5 +136,3 @@ async function submit({
 
   return formSubmissionResult
 }
-
-export default submit

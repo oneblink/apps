@@ -1,6 +1,6 @@
 import tenants from './tenants'
 
-class LocalisationService {
+export class LocalisationService {
   get locale() {
     return tenants.locale
   }

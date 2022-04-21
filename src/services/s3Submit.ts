@@ -31,7 +31,7 @@ interface S3Configuration {
   credentials: S3UploadCredentials['credentials']
   s3: S3UploadCredentials['s3']
 }
-interface UploadFileConfiguration {
+export interface UploadFileConfiguration {
   fileName?: string
   contentType: string
   isPrivate: boolean

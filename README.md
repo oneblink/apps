@@ -2,12 +2,6 @@
 
 Helper functions for OneBlink apps in JavaScript.
 
-## Installation
+## Documentation
 
-```sh
-npm install @oneblink/apps --save
-```
-
-## Usage
-
-- [Usage Documentation](./docs/README.md)
+See the [Documentation](https://oneblink.github.io/apps/) for more details.

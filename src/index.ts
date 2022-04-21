@@ -11,6 +11,16 @@ import * as notificationService from './notification-service'
 import * as formService from './form-service'
 import * as approvalsService from './approvals-service'
 import * as formsAppService from './forms-app-service'
+/**
+ * ## Form Store Service
+ *
+ * Helper functions for handling Form Store Records
+ *
+ * ```js
+ * import { formStoreService } from '@oneblink/apps'
+ * ```
+ */
+import * as formStoreService from './form-store-service'
 import localisationService from './localisation-service'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import tenants from './tenants'
@@ -32,6 +42,7 @@ export {
   notificationService,
   formService,
   formsAppService,
+  formStoreService,
   localisationService,
   approvalsService,
   schedulingService,

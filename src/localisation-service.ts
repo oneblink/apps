@@ -15,6 +15,24 @@ export class LocalisationService {
     }
   }
 
+  get dateFnsFormats() {
+    switch (this.locale) {
+      case 'en-US':
+        return {
+          shortDateFormat: 'MM/DD/YYYY',
+          longDateFormat: 'MMM do, YYYY',
+          longDateTimeFormat: 'MMM do, YYYY h:mm aaa',
+        }
+      case 'en-AU':
+      default:
+        return {
+          shortDateFormat: 'DD/MM/YYYY',
+          longDateFormat: 'do MMM, YYYY',
+          longDateTimeFormat: 'do MMM, YYYY h:mm aaa',
+        }
+    }
+  }
+
   get flatpickrTimeFormat() {
     return 'h:i K'
   }

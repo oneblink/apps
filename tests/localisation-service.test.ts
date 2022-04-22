@@ -1,5 +1,5 @@
 import tenants from '../src/tenants'
-import localisationService from '../src/localisation-service'
+import * as localisationService from '../src/localisation-service'
 
 // Unfortunately this test will not with in Travis CI
 // as the locales are not supported, skipping for now.
@@ -14,14 +14,14 @@ test.skip('it should format currency, date and times correctly', () => {
 
   // OneBlink Tenant
   tenants.useOneBlink()
-  expect(localisationService.locale).toBe('en-AU')
+  expect(localisationService.getLocale()).toBe('en-AU')
 
   expect(localisationService.formatCurrency(amount1)).toBe('$123.00')
   expect(localisationService.formatCurrency(amount2)).toBe('$0.12')
   expect(localisationService.formatCurrency(amount3)).toBe('$9.91')
   expect(localisationService.formatCurrency(amount4)).toBe('$10.00')
 
-  expect(localisationService.flatpickrDateFormat).toBe('d/m/Y')
+  expect(localisationService.getFlatpickrFormats().shortDate).toBe('d/m/Y')
 
   expect(localisationService.formatDate(date1)).toBe('21/12/2020')
   expect(localisationService.formatDate(date2)).toBe('02/01/2020')
@@ -48,14 +48,14 @@ test.skip('it should format currency, date and times correctly', () => {
 
   // CivicPlus Tenant
   tenants.useCivicPlus()
-  expect(localisationService.locale).toBe('en-US')
+  expect(localisationService.getLocale()).toBe('en-US')
 
   expect(localisationService.formatCurrency(amount1)).toBe('$123.00')
   expect(localisationService.formatCurrency(amount2)).toBe('$0.12')
   expect(localisationService.formatCurrency(amount3)).toBe('$9.91')
   expect(localisationService.formatCurrency(amount4)).toBe('$10.00')
 
-  expect(localisationService.flatpickrDateFormat).toBe('m/d/Y')
+  expect(localisationService.getFlatpickrFormats().shortDate).toBe('m/d/Y')
 
   expect(localisationService.formatDate(date1)).toBe('12/21/2020')
   expect(localisationService.formatDate(date2)).toBe('01/02/2020')

@@ -8,6 +8,22 @@ import Sentry from './Sentry'
 export type FormsAppConfigurationResponse =
   FormsAppsTypes.FormsAppConfiguration<FormsAppsTypes.BaseFormsAppStyles>
 
+/**
+ * Get configuration for a OneBlink Forms App.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formsAppId = 1
+ * const formsApp = await formsAppService.getFormsAppConfiguration(
+ *   formAppId,
+ * )
+ * ```
+ *
+ * @param formsAppId
+ * @param abortSignal
+ * @returns
+ */
 export async function getFormsAppConfiguration(
   formsAppId: number,
   abortSignal?: AbortSignal,

@@ -1,51 +1,88 @@
-import { FormTypes, SubmissionEventTypes, MiscTypes } from '@oneblink/types'
+import {
+  FormTypes,
+  SubmissionEventTypes,
+  MiscTypes,
+  SubmissionTypes,
+} from '@oneblink/types'
 import { S3ObjectCredentials } from '@oneblink/types/typescript/aws'
 
 export type NewDraftSubmission = {
-  submission: {
-    readonly [key: string]: unknown
-  }
+  /** The submission data */
+  submission: SubmissionTypes.S3SubmissionData['submission']
+  /** The form definition when the draft was saved */
   definition: FormTypes.Form
 }
 
 export type NewFormSubmission = NewDraftSubmission & {
+  /** Captcha tokens gathered by a `captcha` Form Element */
   captchaTokens: string[]
 }
 
 export type DraftSubmission = NewDraftSubmission & {
+  /** The id of the Forms App submitting for */
   formsAppId: number
+  /**
+   * The id of the Forms Developer Key used to create the token passed to
+   * `authService.setFormsKeyToken()`
+   */
   keyId?: string
 }
 
 export type FormSubmission = DraftSubmission &
   NewFormSubmission & {
+    /** The id of the draft to clean up after successful submission */
     draftId: string | null
+    /** The id of the job to submit */
     jobId: string | null
+    /** The id of the Forms App submitting for */
     externalId: string | null
+    /** The id of the prefill data to clean up after successful submission */
     preFillFormDataId: string | null
+    /**
+     * The id of the previous form submission approval id. (Only used when the
+     * form submission is in response to `CLARIFICATION_REQUIRED` approval.
+     */
     previousFormSubmissionApprovalId?: string
   }
 
 export type FormSubmissionResult = FormSubmission & {
+  /** `null` if the form submission was unsuccessful */
   submissionId: string | null
+  /** `null` if the form submission was unsuccessful */
   submissionTimestamp: string | null
+  /** `null` if the form submission does not require a payment */
   payment: {
+    /** The amount required to pay */
     amount: number
+    /** The URL to redirect the user to to complete the payment process */
     hostedFormUrl: string
+    /** The payment submission event */
     submissionEvent: SubmissionEventTypes.PaymentSubmissionEvent
   } | null
+  /** `null` if the form submission does not require a booking */
   scheduling: {
+    /** The URL to redirect the user to to complete the booking process */
     bookingUrl: string
+    /** The scheduling submission event */
     submissionEvent: SubmissionEventTypes.SchedulingSubmissionEvent
   } | null
+  /** `true` if the submission was not submitted yet and was added to the pending queue */
   isInPendingQueue: boolean
+  /** `true` if the submission was attempted offline */
   isOffline: boolean
+  /** The ipAddress of the client submitting */
   ipAddress?: string
 }
 
 export type PendingFormSubmission = Omit<FormSubmission, 'submission'> & {
+  /** The date and time (in ISO format) the submission was attempted */
   pendingTimestamp: string
+  /** `true` if the submission is currently being processed by the pending queue */
   isSubmitting?: boolean
+  /**
+   * An error message that might be set while attempting to process the
+   * submission in the pending queue
+   */
   error?: string
 }
 

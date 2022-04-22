@@ -48,6 +48,18 @@ async function getServiceWorkerRegistration(): Promise<ServiceWorkerRegistration
   return _swRegistration
 }
 
+/**
+ * Check if the user is currently subscribed to notifications
+ *
+ * #### Example
+ *
+ * ```js
+ * const isSubscribed = await notificationService.isSubscribed()
+ * // Allow user to subscribe or unsubscribe
+ * ```
+ *
+ * @returns
+ */
 async function isSubscribed(): Promise<boolean> {
   const swRegistration = await getServiceWorkerRegistration()
   if (!swRegistration) {
@@ -58,6 +70,20 @@ async function isSubscribed(): Promise<boolean> {
   return !!subscription
 }
 
+/**
+ * Subscribe the current user to notifications
+ *
+ * #### Example
+ *
+ * ```js
+ * const formsAppId = 1
+ * const isSubscribed = await notificationService.subscribe(formsAppId)
+ * // isSubscribed will be false if user denied permission to push notifications
+ * ```
+ *
+ * @param formsAppId
+ * @returns
+ */
 async function subscribe(formsAppId: number): Promise<boolean> {
   if (isOffline()) {
     throw new OneBlinkAppsError(
@@ -145,6 +171,20 @@ async function subscribe(formsAppId: number): Promise<boolean> {
   }
 }
 
+/**
+ * Subscribe the current user to notifications
+ *
+ * #### Example
+ *
+ * ```js
+ * const formsAppId = 1
+ * await notificationService.unsubscribe(formsAppId)
+ * // isSubscribed will be false if user denied permission to push notifications
+ * ```
+ *
+ * @param formsAppId
+ * @returns
+ */
 async function unsubscribe(formsAppId: number): Promise<void> {
   if (isOffline()) {
     throw new OneBlinkAppsError(

@@ -89,7 +89,6 @@ async function uploadAttachments(
               formElement,
               value,
             )
-            // @ts-expect-error Submission is readonly...we don't care
             submission[formElement.name] = newValue
             break
           }

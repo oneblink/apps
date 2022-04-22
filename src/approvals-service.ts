@@ -58,6 +58,26 @@ export type FormSubmissionsAdministrationApprovalsResponse = {
   }
 }
 
+/**
+ * Get an Object containing FormSubmissionApprovals assigned to the current user
+ * and the Form definitions in those approvals.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formsAppId = 1
+ * const {
+ *   formSubmissionApprovals,
+ *   formApprovalFlowInstances,
+ *   forms,
+ *   formSubmissionMeta,
+ * } = await approvalsService.getFormSubmissionApprovals(formAppId)
+ * ```
+ *
+ * @param formsAppId
+ * @param abortSignal
+ * @returns
+ */
 export async function getFormSubmissionApprovals(
   formsAppId: number,
   abortSignal?: AbortSignal,
@@ -121,6 +141,28 @@ export async function getFormSubmissionApprovals(
   }
 }
 
+/**
+ * Get a single FormSubmissionApproval belonging to the given id.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formSubmissionApprovalId = 'd27966cc-128d-48a2-b681-6ad52012e113'
+ * const {
+ *   formSubmissionApproval,
+ *   formApprovalFlowInstance,
+ *   formSubmissionMeta,
+ *   form,
+ *   history,
+ * } = await approvalsService.getFormSubmissionApproval(
+ *   formSubmissionApprovalId,
+ * )
+ * ```
+ *
+ * @param formSubmissionApprovalId
+ * @param abortSignal
+ * @returns
+ */
 export async function getFormSubmissionApproval(
   formSubmissionApprovalId: string,
   abortSignal?: AbortSignal,
@@ -186,6 +228,33 @@ export async function getFormSubmissionApproval(
   }
 }
 
+/**
+ * Update a single FormSubmissionApproval assigned to the current user.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formSubmissionApproval = {
+ *   id: 'd27966cc-128d-48a2-b681-6ad52012e113',
+ *   status: 'APPROVED',
+ *   username: 'email@example.com',
+ *   formApprovalFlowInstanceId: 1,
+ *   notificationEmailAddress: 'email@example.com',
+ *   notes: 'Great work!!!',
+ *   internalNotes: 'It was not really that great...',
+ *   createdAt: '2021-02-21T22:57:56.257Z',
+ *   updatedAt: '2021-02-21T22:57:56.257Z',
+ * }
+ * const updatedFormSubmissionApproval =
+ *   await approvalsService.updateFormSubmissionApproval(
+ *     formSubmissionApproval,
+ *   )
+ * ```
+ *
+ * @param formSubmissionApproval
+ * @param abortSignal
+ * @returns
+ */
 export async function updateFormSubmissionApproval(
   formSubmissionApproval: ApprovalTypes.FormSubmissionApproval,
   abortSignal?: AbortSignal,
@@ -252,6 +321,24 @@ export async function updateFormSubmissionApproval(
   }
 }
 
+/**
+ * As an administrator, reopen a submission that has been approved or denied .
+ *
+ * #### Example
+ *
+ * ```js
+ * await approvalsService.updateFormSubmissionApproval({
+ *   formApprovalFlowInstanceId: 1,
+ *   notificationEmailAddress: 'email@example.com',
+ *   notes: 'Great work!!!',
+ *   internalNotes: 'It was not really that great...',
+ * })
+ * ```
+ *
+ * @param options
+ * @param abortSignal
+ * @returns
+ */
 export async function reopenFormSubmissionApproval(
   {
     formApprovalFlowInstanceId,
@@ -330,6 +417,23 @@ export async function reopenFormSubmissionApproval(
   }
 }
 
+/**
+ * Retrieve the submission data associated with a FormApprovalFlowInstance.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formApprovalFlowInstanceId = 1
+ * const formSubmission =
+ *   await approvalsService.getFormApprovalFlowInstanceSubmission(
+ *     formApprovalFlowInstanceId,
+ *   )
+ * ```
+ *
+ * @param formApprovalFlowInstanceId
+ * @param abortSignal
+ * @returns
+ */
 export async function getFormApprovalFlowInstanceSubmission(
   formApprovalFlowInstanceId: number,
   abortSignal?: AbortSignal,
@@ -344,6 +448,23 @@ export async function getFormApprovalFlowInstanceSubmission(
   })
 }
 
+/**
+ * Retrieve the submission data associated with a FormSubmissionApproval.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formSubmissionApprovalId = '7145544d-853a-47e8-873c-1e849698e414'
+ * const formSubmission =
+ *   await approvalsService.getFormSubmissionApprovalSubmission(
+ *     formSubmissionApprovalId,
+ *   )
+ * ```
+ *
+ * @param formSubmissionApprovalId
+ * @param abortSignal
+ * @returns
+ */
 export async function getFormSubmissionApprovalSubmission(
   formSubmissionApprovalId: string,
   abortSignal?: AbortSignal,
@@ -426,6 +547,28 @@ export async function getFormApprovalFlows(
   }
 }
 
+/**
+ * Get an Object containing approvals for the app regardless of approval groups
+ * and meta for paging. Must be an Approvals Administrator.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formsAppId = 1
+ * const limit = 50
+ * const offset = 0
+ * const { approvals, meta } =
+ *   await approvalsService.getFormSubmissionAdministrationApprovals({
+ *     formAppId,
+ *     limit,
+ *     offset,
+ *   })
+ * ```
+ *
+ * @param options
+ * @param abortSignal
+ * @returns
+ */
 export async function getFormSubmissionAdministrationApprovals(
   {
     formsAppId,
@@ -515,6 +658,24 @@ export async function getFormSubmissionAdministrationApprovals(
 export type FormApprovalUsernamesResponse = {
   usernames: Array<{ username: string }>
 }
+/**
+ * Get an array containing usernames that have updated approvals in the within
+ * the formsAppId associated with the passed `formsAppId`. Must be an Approvals
+ * Administrator.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formsAppId = 1
+ * const { usernames } = await approvalsService.getFormApprovalUsernames(
+ *   formsAppId,
+ * )
+ * ```
+ *
+ * @param formsAppId
+ * @param abortSignal
+ * @returns
+ */
 export async function getFormApprovalUsernames(
   formsAppId: number,
   abortSignal?: AbortSignal,
@@ -579,17 +740,62 @@ export async function getFormApprovalUsernames(
   }
 }
 
+/**
+ * Submit a FormSubmission. Offline submissions will be added to a pending queue
+ * and be processed using the processPendingQueue() function. Will also handle
+ * cleaning up locally stored drafts and prefill data.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formSubmission = {
+ *   formsAppId: 1,
+ *   submission: {
+ *     form: 'data',
+ *     goes: 'here',
+ *   },
+ *   definition: OneBlinkForm,
+ *   captchaTokens: [],
+ *   draftId: null,
+ *   jobId: null,
+ *   preFillFormDataId: '7763f828-4aaf-49dc-9c1b-e2eeea8fa990',
+ *   externalId: 'external-id-set-by-developer',
+ * }
+ *
+ * const submissionResult = await submissionService.submit({
+ *   formSubmission,
+ *   formSubmissionApprovalId: '3245a275-7bfa-49dc-9c1b-e2eeea8rt678',
+ * })
+ *
+ * if (submissionResult.isOffline) {
+ *   if (submissionResult.isInPendingQueue) {
+ *     // Display message to user that the submission
+ *     // has been added to the pending queue
+ *   } else {
+ *     // Display message to user that this submission can
+ *     // not be processed while offline (most likely because it requires a payment)
+ *   }
+ *   return
+ * }
+ *
+ * // submissionResult.submissionId and submissionResult.submissionTimestamp
+ * // will be set if the submission was successful
+ * ```
+ *
+ * @param options
+ * @returns
+ */
 export async function submitApprovalForm(
-  params: SubmissionParams & {
+  options: SubmissionParams & {
     formSubmissionApprovalId: string
   },
 ): Promise<FormSubmissionResult> {
   return submitForm({
-    ...params,
+    ...options,
     generateCredentials: (formSubmission) =>
       generateApprovalFormSubmissionCredentials(
         formSubmission,
-        params.formSubmissionApprovalId,
+        options.formSubmissionApprovalId,
       ),
   })
 }

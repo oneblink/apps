@@ -10,7 +10,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - `formStoreService`
-- `dateFnsFormats` to localisationService
+- `localisationService.getLocale()`
+- `localisationService.getFlatpickrFormats()`
+- `localisationService.getDateFnsFormats()`
+
+### Removed
+
+- **[BREAKING]** `localisationService.locale` function. Replaced by `localisationService.getLocale()`
+- **[BREAKING]** `localisationService.flatpickrDateFormat` function. Replaced by `localisationService.getFlatpickrFormats().shortDate`
+- **[BREAKING]** `localisationService.flatpickrTimeFormat` function. Replaced by `localisationService.getFlatpickrFormats().time`
+- **[BREAKING]** `localisationService.flatpickrDatetimeFormat` function. Replaced by `localisationService.getFlatpickrFormats().shortDateTime`
 
 ## [0.12.11] - 2022-04-19
 

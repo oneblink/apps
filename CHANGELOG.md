@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - `formStoreService`
-- `shortDateFormat`, `longDateFormat` and `longDateTimeFormat` to localisationService
+- `dateFnsFormats` to localisationService
 
 ## [0.12.11] - 2022-04-19
 

@@ -15,31 +15,21 @@ export class LocalisationService {
     }
   }
 
-  get shortDateFormat() {
+  get dateFnsFormats() {
     switch (this.locale) {
       case 'en-US':
-        return 'MM/DD/YYYY'
+        return {
+          shortDateFormat: 'MM/DD/YYYY',
+          longDateFormat: 'MMM do, YYYY',
+          longDateTimeFormat: 'MMM do, YYYY h:mm aaa',
+        }
       case 'en-AU':
       default:
-        return 'DD/MM/YYYY'
-    }
-  }
-  get longDateFormat() {
-    switch (this.locale) {
-      case 'en-US':
-        return 'MMM Do, YYYY'
-      case 'en-AU':
-      default:
-        return 'Do MMM, YYYY'
-    }
-  }
-  get longDateTimeFormat() {
-    switch (this.locale) {
-      case 'en-US':
-        return 'MMM Do, YYYY h:mm a'
-      case 'en-AU':
-      default:
-        return 'Do MMM, YYYY h:mm a'
+        return {
+          shortDateFormat: 'DD/MM/YYYY',
+          longDateFormat: 'do MMM, YYYY',
+          longDateTimeFormat: 'do MMM, YYYY h:mm aaa',
+        }
     }
   }
 

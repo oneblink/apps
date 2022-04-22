@@ -34,21 +34,21 @@ function generateFormats({
 }
 
 export function getDateFnsFormats() {
-  const time = 'h:mm aaa'
+  const time = 'h:mm a'
   switch (tenants.locale) {
     case 'en-US': {
       return generateFormats({
         time,
-        shortDate: 'MM/DD/YYYY',
-        longDate: 'MMM do, YYYY',
+        shortDate: 'MM/dd/yyyy',
+        longDate: 'MMM do, yyyy',
       })
     }
     case 'en-AU':
     default: {
       return generateFormats({
         time,
-        shortDate: 'DD/MM/YYYY',
-        longDate: 'do MMM, YYYY',
+        shortDate: 'dd/MM/yyyy',
+        longDate: 'do MMM, yyyy',
       })
     }
   }

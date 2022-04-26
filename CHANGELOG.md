@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `localisationService.getFlatpickrFormats()`
 - `localisationService.getDateFnsFormats()`
 
+### Changed
+
+- Added `abortSignal` param to `formService.getForms()`, `formService.getForm()`, `formService.getFormElementLookups()` and `formService.getFormElementLookupById()`
+
 ### Removed
 
 - **[BREAKING]** `localisationService.locale` function. Replaced by `localisationService.getLocale()`

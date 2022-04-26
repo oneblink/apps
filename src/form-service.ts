@@ -24,13 +24,21 @@ export * from './services/integration-elements'
  * ```
  *
  * @param formsAppId
+ * @param abortSignal
  * @returns
  */
-async function getForms(formsAppId: number): Promise<FormTypes.Form[]> {
+async function getForms(
+  formsAppId: number,
+  abortSignal?: AbortSignal,
+): Promise<FormTypes.Form[]> {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms`
-  return searchRequest<{ forms: FormTypes.Form[] }>(url, {
-    injectForms: true,
-  })
+  return searchRequest<{ forms: FormTypes.Form[] }>(
+    url,
+    {
+      injectForms: true,
+    },
+    abortSignal,
+  )
     .then(({ forms }) => forms)
     .catch((error) => {
       Sentry.captureException(error)
@@ -104,11 +112,13 @@ async function getForms(formsAppId: number): Promise<FormTypes.Form[]> {
  *
  * @param formId
  * @param formsAppId
+ * @param abortSignal
  * @returns
  */
 async function getForm(
   formId: number,
   formsAppId?: number,
+  abortSignal?: AbortSignal,
 ): Promise<FormTypes.Form> {
   return (
     searchRequest<FormTypes.Form>(
@@ -124,7 +134,7 @@ async function getForm(
           throw error
         }
 
-        return getForms(formsAppId)
+        return getForms(formsAppId, abortSignal)
           .catch(() => {
             // Ignore getForms() error and throw the error from attempt to get form by id
             throw error
@@ -217,17 +227,20 @@ async function getForm(
  *
  * @param organisationId
  * @param formsAppEnvironmentId
+ * @param abortSignal
  * @returns
  */
 async function getFormElementLookups(
   organisationId: string,
   formsAppEnvironmentId: number,
+  abortSignal?: AbortSignal,
 ): Promise<Array<FormTypes.FormElementLookup & { url: string | null }>> {
   return searchRequest<{ formElementLookups: FormTypes.FormElementLookup[] }>(
     `${tenants.current.apiOrigin}/form-element-lookups`,
     {
       organisationId,
     },
+    abortSignal,
   )
     .then((data) =>
       data.formElementLookups.map((formElementLookup) => ({
@@ -279,18 +292,23 @@ async function getFormElementLookups(
  * @param organisationId
  * @param formsAppEnvironmentId
  * @param formElementLookupId
+ * @param abortSignal
  * @returns
  */
 async function getFormElementLookupById(
   organisationId: string,
   formsAppEnvironmentId: number,
   formElementLookupId: number,
+  abortSignal?: AbortSignal,
 ): Promise<(FormTypes.FormElementLookup & { url: string | null }) | void> {
-  return getFormElementLookups(organisationId, formsAppEnvironmentId).then(
-    (formElementLookups) =>
-      formElementLookups.find(
-        (formElementLookup) => formElementLookup.id === formElementLookupId,
-      ),
+  return getFormElementLookups(
+    organisationId,
+    formsAppEnvironmentId,
+    abortSignal,
+  ).then((formElementLookups) =>
+    formElementLookups.find(
+      (formElementLookup) => formElementLookup.id === formElementLookupId,
+    ),
   )
 }
 

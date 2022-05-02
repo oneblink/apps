@@ -13,10 +13,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `localisationService.getLocale()`
 - `localisationService.getFlatpickrFormats()`
 - `localisationService.getDateFnsFormats()`
+- `abortSignal` param to `formService.getForms()`, `formService.getForm()`, `formService.getFormElementLookups()` and `formService.getFormElementLookupById()`
 
 ### Changed
 
-- Added `abortSignal` param to `formService.getForms()`, `formService.getForm()`, `formService.getFormElementLookups()` and `formService.getFormElementLookupById()`
+- JSON parsing and stringifing to use `JSON` instead of `big-json`
 
 ### Removed
 

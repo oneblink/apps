@@ -7,15 +7,16 @@ import {
   updatePendingQueueSubmission,
   deletePendingQueueSubmission,
 } from './services/pending-queue'
-import uploadAttachment, {
-  UploadAttachmentConfiguration,
-} from './services/uploadAttachment'
+import uploadAttachment from './services/uploadAttachment'
 import { generateSubmissionCredentials } from './services/api/submissions'
 import replaceCustomValues from './services/replace-custom-values'
 import { FormTypes } from '@oneblink/types'
 import Sentry from './Sentry'
 import prepareSubmissionData from './services/prepareSubmissionData'
-import submitForm, { SubmissionParams } from './services/submit'
+import submitForm, {
+  SubmissionParams,
+  UploadFileConfiguration,
+} from './services/submit'
 import {
   PendingFormSubmission,
   FormSubmission,
@@ -423,5 +424,5 @@ export {
   FormSubmissionResult,
   PendingFormSubmission,
   SubmissionParams,
-  UploadAttachmentConfiguration,
+  UploadFileConfiguration,
 }

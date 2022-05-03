@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.0.0] - 2022-05-03
+
 ### Added
 
 - `formStoreService`
@@ -25,6 +27,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - **[BREAKING]** `localisationService.flatpickrDateFormat` function. Replaced by `localisationService.getFlatpickrFormats().shortDate`
 - **[BREAKING]** `localisationService.flatpickrTimeFormat` function. Replaced by `localisationService.getFlatpickrFormats().time`
 - **[BREAKING]** `localisationService.flatpickrDatetimeFormat` function. Replaced by `localisationService.getFlatpickrFormats().shortDateTime`
+
+### Dependencies
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [0.4.0](https://github.com/oneblink/sdk-core-js/releases/tag/v0.4.0) (from [0.4.0-beta.2](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
+
+- update [@sentry/browser](https://www.npmjs.com/package/@sentry/browser) to [6.19.7](https://github.com/getsentry/sentry-javascript/releases/tag/6.19.7) (from [6.19.6](https://github.com/getsentry/sentry-javascript/releases/tag/6.19.6))
+
+- update [@sentry/tracing](https://www.npmjs.com/package/@sentry/tracing) to [6.19.7](https://github.com/getsentry/sentry-javascript/releases/tag/6.19.7) (from [6.19.6](https://github.com/getsentry/sentry-javascript/releases/tag/6.19.6))
+
+- update [aws-sdk](https://www.npmjs.com/package/aws-sdk) to [2.1126.0](https://github.com/aws/aws-sdk-js/releases/tag/v2.1126.0) (from [2.1114.0](https://github.com/aws/aws-sdk-js/releases/tag/v2.1114.0))
+
+- no longer depend upon [big-json](https://www.npmjs.com/package/big-json)
+
+- no longer depend upon [s3-upload-stream](https://www.npmjs.com/package/s3-upload-stream)
+
+- depend upon [file-saver](https://www.npmjs.com/package/file-saver) [2.0.5](https://github.com/eligrey/FileSaver.js/blob/master/CHANGELOG.md)
 
 ## [0.12.11] - 2022-04-19
 

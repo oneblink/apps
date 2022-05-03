@@ -83,5 +83,3 @@ export default async function uploadAttachment(
     uploadedAt: formAttachmentS3Credentials.uploadedAt,
   }
 }
-
-export { UploadAttachmentConfiguration }

@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `autoSaveKey` argument to `draftService.addDraft()`
 - `autoSaveKey` argument to `draftService.updateDraft()`
 
+### Fixed
+
+- Unsynced offline drafts disappearing when being saved
+
 ## [1.0.0] - 2022-05-03
 
 ### Added

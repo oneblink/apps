@@ -24,6 +24,7 @@ import {
   NewFormSubmission,
   DraftSubmission,
 } from './types/submissions'
+import { deleteAutoSaveData } from './auto-save-service'
 
 let _isProcessingPendingQueue = false
 
@@ -131,7 +132,8 @@ async function processPendingQueue(): Promise<void> {
  * and be processed using the `processPendingQueue()` function. FormSubmissions
  * with payment submission events will return the FormSubmissionResult with a
  * `payment` property set, this should be used to redirect the user to the
- * payment URL. Will also handle cleaning up locally stored drafts and prefill data.
+ * payment URL. Will also handle cleaning up auto save data (if the
+ * `autoSaveKey` property is passed), locally stored drafts and prefill data.
  *
  * ### Example
  *
@@ -194,11 +196,25 @@ async function processPendingQueue(): Promise<void> {
  * @param params
  * @returns
  */
-async function submit(params: SubmissionParams): Promise<FormSubmissionResult> {
-  return submitForm({
+async function submit({
+  autoSaveKey,
+  ...params
+}: SubmissionParams & {
+  autoSaveKey?: string
+}): Promise<FormSubmissionResult> {
+  const formSubmissionResult = await submitForm({
     ...params,
     generateCredentials: generateSubmissionCredentials,
   })
+  if (typeof autoSaveKey === 'string') {
+    try {
+      await deleteAutoSaveData(params.formSubmission.definition.id, autoSaveKey)
+    } catch (error) {
+      console.warn('Error removing auto save data: ', error)
+      Sentry.captureException(error)
+    }
+  }
+  return formSubmissionResult
 }
 
 async function closeWindow(): Promise<void> {

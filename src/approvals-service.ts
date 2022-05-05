@@ -18,6 +18,7 @@ import { downloadSubmissionS3Data } from './services/s3Submit'
 import Sentry from './Sentry'
 import submitForm, { SubmissionParams } from './services/submit'
 import { FormSubmissionResult } from './types/submissions'
+import { deleteAutoSaveData } from './auto-save-service'
 
 export type FormSubmissionApprovalsResponse = {
   forms: FormTypes.Form[]
@@ -743,7 +744,8 @@ export async function getFormApprovalUsernames(
 /**
  * Submit a FormSubmission. Offline submissions will be added to a pending queue
  * and be processed using the processPendingQueue() function. Will also handle
- * cleaning up locally stored drafts and prefill data.
+ * cleaning up auto save data (if the `autoSaveKey` property is passed), locally
+ * stored drafts and prefill data
  *
  * #### Example
  *
@@ -765,6 +767,7 @@ export async function getFormApprovalUsernames(
  * const submissionResult = await submissionService.submit({
  *   formSubmission,
  *   formSubmissionApprovalId: '3245a275-7bfa-49dc-9c1b-e2eeea8rt678',
+ *   autoSaveKey: 'my-key',
  * })
  *
  * if (submissionResult.isOffline) {
@@ -785,17 +788,32 @@ export async function getFormApprovalUsernames(
  * @param options
  * @returns
  */
-export async function submitApprovalForm(
-  options: SubmissionParams & {
-    formSubmissionApprovalId: string
-  },
-): Promise<FormSubmissionResult> {
-  return submitForm({
+export async function submitApprovalForm({
+  formSubmissionApprovalId,
+  autoSaveKey,
+  ...options
+}: SubmissionParams & {
+  formSubmissionApprovalId: string
+  autoSaveKey?: string
+}): Promise<FormSubmissionResult> {
+  const formSubmissionResult = await submitForm({
     ...options,
     generateCredentials: (formSubmission) =>
       generateApprovalFormSubmissionCredentials(
         formSubmission,
-        options.formSubmissionApprovalId,
+        formSubmissionApprovalId,
       ),
   })
+  if (typeof autoSaveKey === 'string') {
+    try {
+      await deleteAutoSaveData(
+        options.formSubmission.definition.id,
+        autoSaveKey,
+      )
+    } catch (error) {
+      console.warn('Error removing auto save data: ', error)
+      Sentry.captureException(error)
+    }
+  }
+  return formSubmissionResult
 }

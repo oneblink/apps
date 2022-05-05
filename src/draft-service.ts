@@ -108,7 +108,8 @@ async function upsertDraftByKey(
 }
 
 /**
- * Add a Draft to the local store and sync it with remote drafts.
+ * Add a Draft to the local store and sync it with remote drafts. Will also
+ * handle cleaning up auto save data (if the `autoSaveKey` property is passed).
  *
  * #### Example
  *
@@ -142,6 +143,7 @@ async function upsertDraftByKey(
 export async function addDraft(
   newDraft: SubmissionTypes.NewFormsAppDraft,
   draftSubmission: DraftSubmission,
+  autoSaveKey?: string,
 ): Promise<void> {
   const draft: SubmissionTypes.FormsAppDraft = {
     ...newDraft,
@@ -164,7 +166,7 @@ export async function addDraft(
   // add drafts to array in local storage
   // sync local storage drafts with server
   // draftId will be set as draftDataId if data cannot be uploaded
-  return saveDraftData(draft, draftSubmission, draft.draftId)
+  return saveDraftData(draft, draftSubmission, draft.draftId, autoSaveKey)
     .then((draftDataId) => {
       return getDraftsData().then((draftsData) => {
         draftsData.drafts.push({
@@ -189,7 +191,8 @@ export async function addDraft(
 }
 
 /**
- * Update a Draft in the local store and sync it with remote drafts.
+ * Update a Draft in the local store and sync it with remote drafts. Will also
+ * handle cleaning up auto save data (if the `autoSaveKey` property is passed).
  *
  * #### Example
  *
@@ -223,6 +226,7 @@ export async function addDraft(
 export async function updateDraft(
   draft: SubmissionTypes.FormsAppDraft,
   draftSubmission: DraftSubmission,
+  autoSaveKey?: string,
 ): Promise<void> {
   const now = new Date().toISOString()
   draftSubmission.keyId = getFormsKeyId() || undefined
@@ -255,7 +259,7 @@ export async function updateDraft(
       return removeDraftData(existingDraft.draftDataId)
         .then(() =>
           // draftId will be set as draftDataId if data cannot be uploaded
-          saveDraftData(draft, draftSubmission, draft.draftId),
+          saveDraftData(draft, draftSubmission, draft.draftId, autoSaveKey),
         )
         .then((draftDataId) => {
           existingDraft.draftDataId = draftDataId

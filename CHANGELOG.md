@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `autoSaveKey` property to `submissionService.submit()` options
+- `autoSaveKey` property to `approvalsService.submitApprovalForm()` options
+- `autoSaveKey` argument to `draftService.addDraft()`
+- `autoSaveKey` argument to `draftService.updateDraft()`
+
 ### Fixed
 
 - Unsynced offline drafts disappearing when being saved

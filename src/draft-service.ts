@@ -224,8 +224,9 @@ export async function updateDraft(
   draft: SubmissionTypes.FormsAppDraft,
   draftSubmission: DraftSubmission,
 ): Promise<void> {
+  const now = new Date().toISOString()
   draftSubmission.keyId = getFormsKeyId() || undefined
-  draft.createdAt = new Date().toISOString()
+  draft.createdAt = now
   draft.updatedAt = undefined
   if (draftSubmission.keyId) {
     await upsertDraftByKey(draft, draftSubmission)
@@ -259,8 +260,10 @@ export async function updateDraft(
         .then((draftDataId) => {
           existingDraft.draftDataId = draftDataId
           existingDraft.title = draft.title
-          existingDraft.updatedAt = new Date().toISOString()
-          existingDraft.createdAt = new Date().toISOString()
+          if (existingDraft.updatedAt) {
+            existingDraft.updatedAt = now
+          }
+          existingDraft.createdAt = now
           return utilsService.localForage
             .setItem(`DRAFTS_${username}`, draftsData)
             .then(() => executeDraftsListeners(draftsData))

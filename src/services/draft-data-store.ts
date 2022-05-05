@@ -8,6 +8,7 @@ import {
 import { MiscTypes, SubmissionTypes } from '@oneblink/types'
 import Sentry from '../Sentry'
 import { DraftSubmission } from '../types/submissions'
+import { deleteAutoSaveData } from '../auto-save-service'
 function getDraftDataKey(draftDataId: string) {
   return `DRAFT_DATA_${draftDataId}`
 }
@@ -40,22 +41,33 @@ export async function removeDraftData(
   return utilsService.removeLocalForageItem(key)
 }
 
-export function saveDraftData(
+export async function saveDraftData(
   draft: SubmissionTypes.FormsAppDraft,
   draftSubmission: DraftSubmission,
   defaultDraftDataId: string,
+  autoSaveKey: string | undefined,
 ): Promise<string> {
-  return uploadDraftData(draft, draftSubmission)
-    .catch((error: Error) => {
-      Sentry.captureException(error)
-      // Ignoring all errors here as we don't want draft submission data
-      // being saved to the cloud to prevent drafts from being saved on the device
-      console.warn('Could not upload Draft Data as JSON', error)
-      return defaultDraftDataId
-    })
-    .then((draftDataId) =>
-      setLocalDraftData(draftDataId, draftSubmission).then(() => draftDataId),
-    )
+  let draftDataId: string
+  try {
+    draftDataId = await uploadDraftData(draft, draftSubmission)
+
+    if (typeof autoSaveKey === 'string') {
+      try {
+        await deleteAutoSaveData(draftSubmission.definition.id, autoSaveKey)
+      } catch (error) {
+        console.warn('Error removing auto save data: ', error)
+        Sentry.captureException(error)
+      }
+    }
+  } catch (error) {
+    Sentry.captureException(error)
+    // Ignoring all errors here as we don't want draft submission data
+    // being saved to the cloud to prevent drafts from being saved on the device
+    console.warn('Could not upload Draft Data as JSON', error)
+    draftDataId = defaultDraftDataId
+  }
+  await setLocalDraftData(draftDataId, draftSubmission)
+  return draftDataId
 }
 
 export async function getDraftData(
@@ -121,6 +133,7 @@ export async function ensureDraftsDataIsUploaded(draftsData: PutDraftsPayload) {
       draft,
       draftSubmission,
       draft.draftId,
+      undefined,
     )
     newDrafts.push(
       Object.assign({}, draft, {

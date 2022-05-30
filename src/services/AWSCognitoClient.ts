@@ -172,7 +172,13 @@ export default class AWSCognitoClient {
     } catch (error) {
       console.warn('Error while attempting to refresh session', error)
       this._removeAuthenticationResult()
-      throw error
+      throw new OneBlinkAppsError(
+        'Your session has expired. Please login again to continue to use the application.',
+        {
+          requiresLogin: true,
+          originalError: error as Error,
+        },
+      )
     }
   }
 

@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - `unwindRepeatableSets` to form store
 
+### Fixed
+
+- duplicate `"An unknown error has occurred. Please contact support if the problem persists."` error being reported to Sentry
+- redundant `"Access Denied"` being reported to Sentry
+
 ## [1.1.0] - 2022-05-05
 
 ### Added

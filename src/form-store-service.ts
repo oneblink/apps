@@ -87,6 +87,7 @@ export async function getFormStoreDefinition(
     const error = err as HTTPError
     throw new OneBlinkAppsError(error.message, {
       httpStatusCode: error.status,
+      originalError: error,
     })
   }
 }
@@ -138,6 +139,7 @@ export async function searchFormStoreRecords(
     const error = err as HTTPError
     throw new OneBlinkAppsError(error.message, {
       httpStatusCode: error.status,
+      originalError: error,
     })
   }
 }

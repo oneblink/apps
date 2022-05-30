@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `unwindRepeatableSets` to form store
+
 ## [1.1.0] - 2022-05-05
 
 ### Added

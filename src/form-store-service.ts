@@ -26,8 +26,6 @@ export type FormStoreFilter<T> = {
 
 /** Filters available for filter Form Store Records */
 export type FormStoreFilters = {
-  /** Sort the results by multiple properties */
-  sorting?: Array<{ property: string; direction: 'ascending' | 'descending' }>
   /** Filter results by the date/time they were submitted */
   dateTimeSubmitted?: FormStoreFilter<string>
   /** Filter results by the user that submitted */
@@ -38,6 +36,23 @@ export type FormStoreFilters = {
   externalId?: FormStoreFilter<string>
   /** Filter results by the submission data */
   submission?: Record<string, FormStoreFilter<unknown> | undefined>
+}
+
+export type FormStoreParameters = {
+  /** Filters available for filter Form Store Records */
+  filters?: FormStoreFilters
+  /**
+   * Unwind repeatable set entries to denormalise data, this makes data cleaner
+   * for tabular data purposes
+   */
+  unwindRepeatableSets?: boolean
+  /** Sort the results by multiple properties */
+  sorting?: Array<{
+    /** Property to sort by */
+    property: string
+    /** Sorting direction */
+    direction: 'ascending' | 'descending'
+  }>
 }
 
 /**
@@ -103,8 +118,7 @@ export async function searchFormStoreRecords(
       limit: number
       offset: number
     }
-    filters?: FormStoreFilters
-  },
+  } & FormStoreParameters,
   abortSignal: AbortSignal,
 ): Promise<{
   formStoreRecords: SubmissionTypes.FormStoreRecord[]
@@ -113,10 +127,7 @@ export async function searchFormStoreRecords(
   try {
     const { submissions, meta } = await postRequest(
       `${tenants.current.apiOrigin}/form-store`,
-      {
-        sorting: searchParameters.filters?.sorting,
-        ...searchParameters,
-      },
+      searchParameters,
       abortSignal,
     )
     return {
@@ -153,9 +164,8 @@ export async function exportFormStoreRecords(
   fileName: string,
   searchParameters: {
     formId: number
-    filters?: FormStoreFilters
     includeColumns?: string[]
-  },
+  } & FormStoreParameters,
   abortSignal?: AbortSignal,
 ): Promise<void> {
   if (!fileName.toLowerCase().endsWith('.csv')) {

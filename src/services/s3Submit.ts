@@ -217,7 +217,6 @@ async function downloadPreFillS3Data<T>(
   try {
     return await downloadS3Data<T>(options)
   } catch (error) {
-    Sentry.captureException(error)
     // AWS will return an "Access Denied" error for objects that have been
     // deleted. As we should only be getting these if objects are not there
     // (because our API should always return valid credentials) we can tell
@@ -232,6 +231,7 @@ async function downloadPreFillS3Data<T>(
         },
       )
     }
+    Sentry.captureException(error)
     throw error
   }
 }
@@ -242,7 +242,6 @@ async function downloadDraftS3Data<T>(
   try {
     return await downloadS3Data<T>(options)
   } catch (error) {
-    Sentry.captureException(error)
     // AWS will return an "Access Denied" error for objects that have been
     // deleted. As we should only be getting these if objects are not there
     // (because our API should always return valid credentials) we can tell
@@ -257,6 +256,7 @@ async function downloadDraftS3Data<T>(
         },
       )
     }
+    Sentry.captureException(error)
     throw error
   }
 }
@@ -267,7 +267,6 @@ async function downloadSubmissionS3Data<T>(
   try {
     return await downloadS3Data<T>(options)
   } catch (error) {
-    Sentry.captureException(error)
     // AWS will return an "Access Denied" error for objects that have been
     // deleted. As we should only be getting these if objects are not there
     // (because our API should always return valid credentials) we can tell
@@ -282,6 +281,7 @@ async function downloadSubmissionS3Data<T>(
         },
       )
     }
+    Sentry.captureException(error)
     throw error
   }
 }

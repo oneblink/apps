@@ -767,11 +767,7 @@ async function getFormElementFreshdeskFieldOptions(
           optionsForElementId.push({
             ok: true,
             elementId: element.id,
-            options: options.map(({ label, value }) => ({
-              id: value.toString(),
-              value: value.toString(),
-              label,
-            })),
+            options: mapNestedOptions(options) || [],
           })
         },
       )
@@ -780,6 +776,17 @@ async function getFormElementFreshdeskFieldOptions(
     },
     [],
   )
+}
+
+const mapNestedOptions = (
+  options: FreshdeskTypes.FreshdeskFieldOption[] | undefined,
+): FormTypes.ChoiceElementOption[] | undefined => {
+  return options?.map(({ value, label, options: nestedOptions }) => ({
+    id: value.toString(),
+    value: value.toString(),
+    label,
+    options: mapNestedOptions(nestedOptions),
+  }))
 }
 
 export {

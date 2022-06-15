@@ -123,7 +123,12 @@ async function subscribe(formsAppId: number): Promise<boolean> {
     const permission = await Notification.requestPermission()
     // If the user accepts, create subscription
     if (permission !== 'granted') {
-      throw new Error('Permission denied!')
+      throw new OneBlinkAppsError(
+        'It looks like you may have denied this app permission to send you push notifications. Please grant this app the notifications permission and try again.',
+        {
+          title: 'Permission Required',
+        },
+      )
     }
 
     console.log('User has granted notifications permission')
@@ -155,11 +160,11 @@ async function subscribe(formsAppId: number): Promise<boolean> {
       )
     }
 
-    Sentry.captureException(error)
-
     if (error instanceof OneBlinkAppsError) {
       throw error
     }
+
+    Sentry.captureException(error)
 
     throw new OneBlinkAppsError(
       'We were unable to subscribe you to push notifications, please try again and contact support if the problem persists.',

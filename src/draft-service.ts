@@ -158,9 +158,12 @@ export async function addDraft(
 
   const username = getUsername()
   if (!username) {
-    throw new OneBlinkAppsError('Must be logged in to manage drafts', {
-      requiresLogin: true,
-    })
+    throw new OneBlinkAppsError(
+      'You cannot add drafts until you have logged in. Please login and try again.',
+      {
+        requiresLogin: true,
+      },
+    )
   }
   // Push draft data to s3 (should also update local storage draft data)
   // add drafts to array in local storage
@@ -239,9 +242,12 @@ export async function updateDraft(
 
   const username = getUsername()
   if (!username) {
-    throw new OneBlinkAppsError('Must be logged in to manage drafts', {
-      requiresLogin: true,
-    })
+    throw new OneBlinkAppsError(
+      'You cannot update drafts until you have logged in. Please login and try again.',
+      {
+        requiresLogin: true,
+      },
+    )
   }
   return getDraftsData()
     .then((draftsData) => {
@@ -383,9 +389,12 @@ export async function deleteDraft(
 ): Promise<void> {
   const username = getUsername()
   if (!username) {
-    throw new OneBlinkAppsError('Must be logged in to manage drafts', {
-      requiresLogin: true,
-    })
+    throw new OneBlinkAppsError(
+      'You cannot delete drafts until you have logged in. Please login and try again.',
+      {
+        requiresLogin: true,
+      },
+    )
   }
   return getDraftsData()
     .then((draftsData) => {
@@ -421,9 +430,12 @@ export async function deleteDraft(
 async function setDrafts(draftsData: PutDraftsPayload): Promise<void> {
   const username = getUsername()
   if (!username) {
-    throw new OneBlinkAppsError('Must be logged in to manage drafts', {
-      requiresLogin: true,
-    })
+    throw new OneBlinkAppsError(
+      'You cannot set your drafts until you have logged in. Please login and try again.',
+      {
+        requiresLogin: true,
+      },
+    )
   }
   await utilsService.localForage.setItem(`DRAFTS_${username}`, draftsData)
   executeDraftsListeners(draftsData)
@@ -503,12 +515,14 @@ export async function syncDrafts({
     console.log('Finished syncing drafts.')
     _isSyncingDrafts = false
   } catch (error) {
-    Sentry.captureException(error)
     _isSyncingDrafts = false
     console.warn(
       'Error while attempting to sync and update local drafts',
       error,
     )
+    if (!(error instanceof OneBlinkAppsError)) {
+      Sentry.captureException(error)
+    }
     if (throwError) {
       throw error
     }

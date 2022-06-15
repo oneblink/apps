@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- nested `options` to Freshdesk options
+
 ## [1.2.0] - 2022-06-02
 
 ### Added

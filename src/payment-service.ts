@@ -343,7 +343,7 @@ export async function handlePaymentSubmissionEvent({
       break
     }
     case 'CP_PAY': {
-      payload.integrationEnvironmentId =
+      payload.integrationGatewayId =
         paymentSubmissionEvent.configuration.gatewayId
       break
     }

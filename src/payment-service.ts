@@ -15,157 +15,144 @@ const KEY = 'PAYMENT_SUBMISSION_RESULT'
 
 export { HandlePaymentResult }
 
-function verifyCPPayPayment(
+async function verifyCPPayPayment(
   query: Record<string, unknown>,
   submissionResult: FormSubmissionResult,
+  cpPaymentSubmissionEvent: SubmissionEventTypes.CPPaySubmissionEvent,
 ): Promise<HandlePaymentResult> {
-  return Promise.resolve()
-    .then(() => {
-      const { transactionToken, orderNumber: submissionId } = query
-      if (!transactionToken || !submissionId) {
-        throw new OneBlinkAppsError(
-          'Transactions can not be verified unless navigating here directly after a payment.',
-        )
-      }
+  const { transactionToken, orderNumber: submissionId } = query
+  if (!transactionToken || !submissionId) {
+    throw new OneBlinkAppsError(
+      'Transactions can not be verified unless navigating here directly after a payment.',
+    )
+  }
+  if (submissionResult.submissionId !== submissionId) {
+    throw new OneBlinkAppsError(
+      'It looks like you are attempting to view a receipt for the incorrect payment.',
+    )
+  }
 
-      if (submissionResult.submissionId !== submissionId) {
-        throw new OneBlinkAppsError(
-          'It looks like you are attempting to view a receipt for the incorrect payment.',
-        )
-      }
-
-      return verifyPaymentTransaction<{
-        resultCode: number
-        errorMessage: string
-        transactionId: string
-        lastFour: string
-        amount: number
-      }>(`/forms/${submissionResult.definition.id}/cp-pay-verification`, {
-        transactionToken,
-      })
-    })
-    .then((transaction) => {
-      // Asynchronously acknowledge receipt
-      acknowledgeCPPayTransaction(submissionResult.definition.id, {
-        transactionId: transaction.transactionId,
-      }).catch((error) => {
-        console.warn(
-          'Error while attempting to acknowledge CP Pay transaction',
-          error,
-        )
-      })
-
-      return {
-        transaction: {
-          isSuccess: transaction.resultCode === 1,
-          errorMessage: transaction.errorMessage,
-          id: transaction.transactionId,
-          creditCardMask: transaction.lastFour
-            ? `xxxx xxxx xxxx ${transaction.lastFour}`
-            : null,
-          amount: transaction.amount,
-        },
-        submissionResult,
-      }
-    })
-}
-
-function verifyBpointPayment(
-  query: Record<string, unknown>,
-  submissionResult: FormSubmissionResult,
-): Promise<HandlePaymentResult> {
-  return Promise.resolve()
-    .then(() => {
-      const { ResultKey: transactionToken } = query
-      if (!transactionToken) {
-        throw new OneBlinkAppsError(
-          'Transactions can not be verified unless navigating here directly after a payment.',
-        )
-      }
-
-      return verifyPaymentTransaction<{
-        ResponseCode: string
-        ResponseText: string
-        ReceiptNumber: string
-        CardDetails?: {
-          MaskedCardNumber?: string
-        }
-        Amount: number
-        Crn1: string | null
-      }>(`/forms/${submissionResult.definition.id}/bpoint-verification`, {
-        transactionToken,
-      })
-    })
-    .then((transaction) => {
-      if (submissionResult.submissionId !== transaction.Crn1) {
-        throw new OneBlinkAppsError(
-          'It looks like you are attempting to view a receipt for the incorrect payment.',
-        )
-      }
-
-      return {
-        transaction: {
-          isSuccess: transaction.ResponseCode === '0',
-          errorMessage: transaction.ResponseText,
-          id: transaction.ReceiptNumber,
-          creditCardMask: transaction.CardDetails?.MaskedCardNumber || null,
-          amount: transaction.Amount / 100,
-        },
-        submissionResult,
-      }
-    })
-}
-
-function verifyWestpacQuickWebPayment(
-  query: Record<string, unknown>,
-  submissionResult: FormSubmissionResult,
-): Promise<HandlePaymentResult> {
-  return Promise.resolve().then(() => {
-    const {
-      paymentReference,
-      receiptNumber,
-      maskedCardNumber,
-      summaryCode,
-      responseDescription,
-      paymentAmount,
-    } = query as {
-      paymentReference?: string
-      receiptNumber?: string
-      maskedCardNumber?: string
-      summaryCode?: string
-      responseDescription?: string
-      paymentAmount?: string
-    }
-    if (
-      !query ||
-      !paymentReference ||
-      !receiptNumber ||
-      !summaryCode ||
-      !responseDescription ||
-      !paymentAmount
-    ) {
-      throw new OneBlinkAppsError(
-        'Transactions can not be verified unless navigating here directly after a payment.',
-      )
-    }
-
-    if (submissionResult.submissionId !== paymentReference) {
-      throw new OneBlinkAppsError(
-        'It looks like you are attempting to view a receipt for the incorrect payment.',
-      )
-    }
-
-    return {
-      transaction: {
-        isSuccess: summaryCode === '0',
-        errorMessage: responseDescription,
-        id: receiptNumber,
-        creditCardMask: maskedCardNumber || null,
-        amount: parseFloat(paymentAmount),
-      },
-      submissionResult,
-    }
+  const transaction = await verifyPaymentTransaction<{
+    resultCode: number
+    errorMessage: string
+    transactionId: string
+    lastFour: string
+    amount: number
+  }>(`/forms/${submissionResult.definition.id}/cp-pay-verification`, {
+    transactionToken,
+    integrationGatewayId: cpPaymentSubmissionEvent.configuration.gatewayId,
   })
+  // Asynchronously acknowledge receipt
+  acknowledgeCPPayTransaction(submissionResult.definition.id, {
+    transactionId: transaction.transactionId,
+    integrationGatewayId: cpPaymentSubmissionEvent.configuration.gatewayId,
+  }).catch((error) => {
+    console.warn(
+      'Error while attempting to acknowledge CP Pay transaction',
+      error,
+    )
+  })
+  return {
+    transaction: {
+      isSuccess: transaction.resultCode === 1,
+      errorMessage: transaction.errorMessage,
+      id: transaction.transactionId,
+      creditCardMask: transaction.lastFour
+        ? `xxxx xxxx xxxx ${transaction.lastFour}`
+        : null,
+      amount: transaction.amount,
+    },
+    submissionResult,
+  }
+}
+
+async function verifyBpointPayment(
+  query: Record<string, unknown>,
+  submissionResult: FormSubmissionResult,
+  bpointSubmissionEvent: SubmissionEventTypes.BPOINTSubmissionEvent,
+): Promise<HandlePaymentResult> {
+  const { ResultKey: transactionToken } = query
+  if (!transactionToken) {
+    throw new OneBlinkAppsError(
+      'Transactions can not be verified unless navigating here directly after a payment.',
+    )
+  }
+  const transaction = await verifyPaymentTransaction<{
+    ResponseCode: string
+    ResponseText: string
+    ReceiptNumber: string
+    CardDetails?: {
+      MaskedCardNumber?: string
+    }
+    Amount: number
+    Crn1: string | null
+  }>(`/forms/${submissionResult.definition.id}/bpoint-verification`, {
+    transactionToken,
+    integrationEnvironmentId: bpointSubmissionEvent.configuration.environmentId,
+  })
+  if (submissionResult.submissionId !== transaction.Crn1) {
+    throw new OneBlinkAppsError(
+      'It looks like you are attempting to view a receipt for the incorrect payment.',
+    )
+  }
+  return {
+    transaction: {
+      isSuccess: transaction.ResponseCode === '0',
+      errorMessage: transaction.ResponseText,
+      id: transaction.ReceiptNumber,
+      creditCardMask: transaction.CardDetails?.MaskedCardNumber || null,
+      amount: transaction.Amount / 100,
+    },
+    submissionResult,
+  }
+}
+
+async function verifyWestpacQuickWebPayment(
+  query: Record<string, unknown>,
+  submissionResult: FormSubmissionResult,
+): Promise<HandlePaymentResult> {
+  const {
+    paymentReference,
+    receiptNumber,
+    maskedCardNumber,
+    summaryCode,
+    responseDescription,
+    paymentAmount,
+  } = query as {
+    paymentReference?: string
+    receiptNumber?: string
+    maskedCardNumber?: string
+    summaryCode?: string
+    responseDescription?: string
+    paymentAmount?: string
+  }
+  if (
+    !query ||
+    !paymentReference ||
+    !receiptNumber ||
+    !summaryCode ||
+    !responseDescription ||
+    !paymentAmount
+  ) {
+    throw new OneBlinkAppsError(
+      'Transactions can not be verified unless navigating here directly after a payment.',
+    )
+  }
+  if (submissionResult.submissionId !== paymentReference) {
+    throw new OneBlinkAppsError(
+      'It looks like you are attempting to view a receipt for the incorrect payment.',
+    )
+  }
+  return {
+    transaction: {
+      isSuccess: summaryCode === '0',
+      errorMessage: responseDescription,
+      id: receiptNumber,
+      creditCardMask: maskedCardNumber || null,
+      amount: parseFloat(paymentAmount),
+    },
+    submissionResult,
+  }
 }
 
 /**
@@ -213,10 +200,18 @@ export async function handlePaymentQuerystring(
 
       switch (submissionResult.payment.submissionEvent.type) {
         case 'CP_PAY': {
-          return verifyCPPayPayment(query, submissionResult)
+          return verifyCPPayPayment(
+            query,
+            submissionResult,
+            submissionResult.payment.submissionEvent,
+          )
         }
         case 'BPOINT': {
-          return verifyBpointPayment(query, submissionResult)
+          return verifyBpointPayment(
+            query,
+            submissionResult,
+            submissionResult.payment.submissionEvent,
+          )
         }
         case 'WESTPAC_QUICK_WEB': {
           return verifyWestpacQuickWebPayment(query, submissionResult)
@@ -310,32 +305,47 @@ export async function handlePaymentSubmissionEvent({
     crn2?: string
     crn3?: string
     customerReferenceNumber?: string
+    integrationEnvironmentId?: string
+    integrationGatewayId?: string
   } = {
     amount,
     redirectUrl: paymentReceiptUrl,
     submissionId: formSubmissionResult.submissionId,
   }
 
-  if (paymentSubmissionEvent.type === 'BPOINT') {
-    if (paymentSubmissionEvent.configuration.crn2) {
-      payload.crn2 = replaceCustomValues(
-        paymentSubmissionEvent.configuration.crn2,
-        formSubmissionResult,
-      )
+  switch (paymentSubmissionEvent.type) {
+    case 'BPOINT': {
+      payload.integrationEnvironmentId =
+        paymentSubmissionEvent.configuration.environmentId
+      if (paymentSubmissionEvent.configuration.crn2) {
+        payload.crn2 = replaceCustomValues(
+          paymentSubmissionEvent.configuration.crn2,
+          formSubmissionResult,
+        )
+      }
+      if (paymentSubmissionEvent.configuration.crn3) {
+        payload.crn3 = replaceCustomValues(
+          paymentSubmissionEvent.configuration.crn3,
+          formSubmissionResult,
+        )
+      }
+      break
     }
-    if (paymentSubmissionEvent.configuration.crn3) {
-      payload.crn3 = replaceCustomValues(
-        paymentSubmissionEvent.configuration.crn3,
-        formSubmissionResult,
-      )
+    case 'WESTPAC_QUICK_WEB': {
+      payload.integrationEnvironmentId =
+        paymentSubmissionEvent.configuration.environmentId
+      if (paymentSubmissionEvent.configuration.customerReferenceNumber) {
+        payload.customerReferenceNumber = replaceCustomValues(
+          paymentSubmissionEvent.configuration.customerReferenceNumber,
+          formSubmissionResult,
+        )
+      }
+      break
     }
-  }
-  if (paymentSubmissionEvent.type === 'WESTPAC_QUICK_WEB') {
-    if (paymentSubmissionEvent.configuration.customerReferenceNumber) {
-      payload.customerReferenceNumber = replaceCustomValues(
-        paymentSubmissionEvent.configuration.customerReferenceNumber,
-        formSubmissionResult,
-      )
+    case 'CP_PAY': {
+      payload.integrationEnvironmentId =
+        paymentSubmissionEvent.configuration.gatewayId
+      break
     }
   }
 

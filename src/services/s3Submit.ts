@@ -115,7 +115,7 @@ async function uploadToS3(
 
     await managedUpload.promise()
   } catch (err) {
-    if ((err as Error).name !== 'AbortError') {
+    if (!abortSignal?.aborted) {
       Sentry.captureException(err)
       // handle storing in s3 errors here
       if (/Network Failure/.test((err as Error).message)) {

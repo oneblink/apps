@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `approvalsService.createApprovalAdditionalNote()`
+- `approvalsService.updateApprovalAdditionalNote()`
+- `approvalsService.deleteApprovalAdditionalNote()`
+
 ## [1.2.2] - 2022-06-23
 
 ### Added

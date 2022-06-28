@@ -1,3 +1,4 @@
+import { MiscTypes } from '@oneblink/types'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import {
   getIdToken,
@@ -113,22 +114,7 @@ export function init({ oAuthClientId }: { oAuthClientId: string }) {
  * @returns
  */
 export async function isAuthorised(formsAppId: number): Promise<boolean> {
-  if (getFormsKeyId()) {
-    return true
-  }
-
-  const userProfile = getUserProfile()
-
-  if (!userProfile) {
-    return false
-  }
-
-  if (userProfile.isSAMLUser) {
-    return true
-  }
-
-  const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/my-forms-app-user`
-  return getRequest(url)
+  return getCurrentFormsAppUser(formsAppId)
     .then(() => true)
     .catch((error) => {
       if (error.status >= 400 && error.status < 500) {
@@ -142,6 +128,65 @@ export async function isAuthorised(formsAppId: number): Promise<boolean> {
         return false
       }
     })
+}
+
+/**
+ * Get the current user's App User details for a OneBlink Forms App. Returns
+ * `undefined` if the current user is not logged in.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formsAppId = 1
+ * const formsAppUserDetails = await authService.getCurrentFormsAppUser(
+ *   formsAppId,
+ * )
+ * if (!formsAppUserDetails) {
+ *   // handle unauthorised user
+ * }
+ * ```
+ *
+ * @param formsAppId
+ * @returns
+ */
+export async function getCurrentFormsAppUser(
+  formsAppId: number,
+  abortSignal?: AbortSignal,
+): Promise<
+  | {
+      userProfile?: MiscTypes.UserProfile
+      formsAppId: number
+      groups: string[]
+    }
+  | undefined
+> {
+  if (getFormsKeyId()) {
+    return {
+      formsAppId,
+      groups: [],
+    }
+  }
+
+  const userProfile = getUserProfile()
+
+  if (!userProfile) {
+    return undefined
+  }
+
+  if (userProfile.isSAMLUser) {
+    return {
+      userProfile,
+      formsAppId,
+      groups: [],
+    }
+  }
+
+  const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/my-forms-app-user`
+  return getRequest<{
+    userProfile?: MiscTypes.UserProfile
+    formsAppId: number
+    groups: string[]
+  }>(url, abortSignal)
 }
 
 /**
@@ -202,10 +247,13 @@ export async function requestAccess(formsAppId: number): Promise<void> {
  * ```
  *
  * @param formsAppId
+ * @param abortSignal
  * @returns
  */
-export async function isAdministrator(formsAppId: number): Promise<boolean> {
-  const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/my-forms-app-user`
-  const appUser = await getRequest<{ groups: string[] }>(url)
-  return appUser.groups.some((group) => group === 'oneblink:administrator')
+export async function isAdministrator(
+  formsAppId: number,
+  abortSignal: AbortSignal,
+): Promise<boolean> {
+  const appUser = await getCurrentFormsAppUser(formsAppId, abortSignal)
+  return !!appUser?.groups.some((group) => group === 'oneblink:administrator')
 }

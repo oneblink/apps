@@ -223,9 +223,6 @@ export async function handlePaymentQuerystring(
         }
       }
     })
-    .then((result) =>
-      utilsService.removeLocalForageItem(KEY).then(() => result),
-    )
 }
 
 export function checkForPaymentSubmissionEvent(formSubmission: FormSubmission):

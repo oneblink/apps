@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- form submission result being removed from local storage when handling payment query string
+
 ## [1.2.3] - 2022-06-29
 
 ### Added

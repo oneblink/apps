@@ -6,6 +6,8 @@ import {
 import { isOffline } from './offline-service'
 import tenants from './tenants'
 import Sentry from './Sentry'
+import { FormsAppsTypes } from '@oneblink/types'
+import { getRequest, HTTPError, putRequest } from './services/fetch'
 
 function urlB64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
@@ -236,6 +238,175 @@ async function unsubscribe(formsAppId: number): Promise<void> {
         originalError: error as Error,
       },
     )
+  }
+}
+
+/**
+ * Get the current users email subscriptions for a single forms app.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formsAppId = 1
+ * const emailSubscriptions = await approvalsService.getEmailSubscriptions(
+ *   formsAppId,
+ * )
+ * ```
+ *
+ * @param formsAppId
+ * @param abortSignal
+ * @returns
+ */
+export async function getEmailSubscriptions(
+  formsAppId: number,
+  abortSignal?: AbortSignal,
+): Promise<FormsAppsTypes.FormsAppUserSubscription['emailSubscriptions']> {
+  try {
+    const { emailSubscriptions } =
+      await getRequest<FormsAppsTypes.FormsAppUserSubscription>(
+        `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/my-preferences`,
+        abortSignal,
+      )
+    return emailSubscriptions
+  } catch (err) {
+    console.error('Error retrieving preferences for current user', err)
+    Sentry.captureException(err)
+
+    const error = err as HTTPError
+    if (isOffline()) {
+      throw new OneBlinkAppsError(
+        'You are currently offline, please connect to the internet and try again',
+        {
+          originalError: error,
+          isOffline: true,
+        },
+      )
+    }
+    switch (error.status) {
+      case 401: {
+        throw new OneBlinkAppsError(
+          'You cannot access your email subscriptions without first logging in. Please login and try again.',
+          {
+            originalError: error,
+            requiresLogin: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 403: {
+        throw new OneBlinkAppsError(
+          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
+          {
+            originalError: error,
+            requiresAccessRequest: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 400:
+      case 404: {
+        throw new OneBlinkAppsError(error.message, {
+          title: 'Invalid Request',
+          httpStatusCode: error.status,
+        })
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  }
+}
+
+/**
+ * Update the current users email subscriptions for a single forms app.
+ *
+ * #### Example
+ *
+ * ```js
+ * const emailSubscriptions = {
+ *   newApproval: true,
+ *   clarificationReceived: true,
+ * }
+ * const savedFormsAppUserSubscription =
+ *   await approvalsService.updateFormsAppUserSubscription(
+ *     emailSubscriptions,
+ *   )
+ * ```
+ *
+ * @param formsAppId
+ * @param emailSubscriptions
+ * @param abortSignal
+ * @returns
+ */
+export async function updateEmailSubscriptions(
+  formsAppId: number,
+  emailSubscriptions: FormsAppsTypes.FormsAppUserSubscription['emailSubscriptions'],
+  abortSignal?: AbortSignal,
+): Promise<void> {
+  try {
+    await putRequest<FormsAppsTypes.FormsAppUserSubscription>(
+      `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/my-preferences`,
+      { emailSubscriptions },
+      abortSignal,
+    )
+  } catch (err) {
+    console.error('Error retrieving preferences for current user', err)
+    Sentry.captureException(err)
+
+    const error = err as HTTPError
+    if (isOffline()) {
+      throw new OneBlinkAppsError(
+        'You are currently offline, please connect to the internet and try again',
+        {
+          originalError: error,
+          isOffline: true,
+        },
+      )
+    }
+    switch (error.status) {
+      case 401: {
+        throw new OneBlinkAppsError(
+          'You cannot update your email subscriptions without first logging in. Please login and try again.',
+          {
+            originalError: error,
+            requiresLogin: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 403: {
+        throw new OneBlinkAppsError(
+          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
+          {
+            originalError: error,
+            requiresAccessRequest: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 400:
+      case 404: {
+        throw new OneBlinkAppsError(error.message, {
+          title: 'Invalid Request',
+          httpStatusCode: error.status,
+        })
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
   }
 }
 

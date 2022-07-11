@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `notificationService.getEmailSubscriptions()`
+- `notificationService.updateEmailSubscriptions()`
+
 ## [1.2.4] - 2022-07-04
 
 ### Changed

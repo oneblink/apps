@@ -94,7 +94,10 @@ async function loginUsernamePassword(username: string, password: string) {
     )
   }
   console.log('Attempting sign using username', username)
-  return awsCognitoClient.loginUsernamePassword(username, password)
+  return awsCognitoClient.loginUsernamePassword(
+    username.toLowerCase(),
+    password,
+  )
 }
 
 /**
@@ -219,7 +222,7 @@ async function forgotPassword(username: string) {
     )
   }
 
-  return await awsCognitoClient.forgotPassword(username)
+  return await awsCognitoClient.forgotPassword(username.toLowerCase())
 }
 
 /**

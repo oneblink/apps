@@ -57,7 +57,7 @@ export type FormSubmissionResult = FormSubmission & {
     /** The URL to redirect the user to to complete the payment process */
     hostedFormUrl: string
     /** The payment submission event */
-    submissionEvent: SubmissionEventTypes.PaymentSubmissionEvent
+    submissionEvent: SubmissionEventTypes.FormPaymentEvent
   } | null
   /** `null` if the form submission does not require a booking */
   scheduling: {

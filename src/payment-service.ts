@@ -227,7 +227,7 @@ export async function handlePaymentQuerystring(
 
 export function checkForPaymentSubmissionEvent(formSubmission: FormSubmission):
   | {
-      paymentSubmissionEvent: SubmissionEventTypes.PaymentSubmissionEvent
+      paymentSubmissionEvent: SubmissionEventTypes.FormPaymentEvent
       amount: number
     }
   | undefined {
@@ -292,7 +292,7 @@ export async function handlePaymentSubmissionEvent({
 }: {
   amount: number
   formSubmissionResult: FormSubmissionResult
-  paymentSubmissionEvent: SubmissionEventTypes.PaymentSubmissionEvent
+  paymentSubmissionEvent: SubmissionEventTypes.FormPaymentEvent
   paymentReceiptUrl: string
 }): Promise<FormSubmissionResult['payment']> {
   const payload: {

@@ -6,7 +6,7 @@ import Sentry from '../../Sentry'
 
 const generatePaymentConfiguration = (
   form: FormTypes.Form,
-  paymentSubmissionEvent: SubmissionEventTypes.PaymentSubmissionEvent,
+  paymentSubmissionEvent: SubmissionEventTypes.FormPaymentEvent,
   payload: {
     amount: number
     redirectUrl: string

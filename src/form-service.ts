@@ -416,7 +416,7 @@ async function getFormElementDynamicOptions(
   const formsAppEnvironmentId = forms[0].formsAppEnvironmentId
   const staticOptionSets: Array<{
     formElementOptionsSetId: number
-    formElementDynamicOptionSetEnvironment: FormTypes.FormElementOptionSetEnvironmentStatic
+    formElementDynamicOptionSetEnvironment?: FormTypes.FormElementOptionSetEnvironmentStatic
   }> = []
   const formElementOptionsSetUrls = formElementOptionsSets.reduce<
     Array<{
@@ -427,17 +427,22 @@ async function getFormElementDynamicOptions(
   >((memo, formElementOptionsSet) => {
     const formElementOptionsSetId = formElementOptionsSet.id
     if (formElementOptionsSetId) {
-      const formElementDynamicOptionSetEnvironment =
-        formElementOptionsSet.environments.find(
-          (environment) =>
-            environment.formsAppEnvironmentId === formsAppEnvironmentId,
-        )
       if (formElementOptionsSet.type === 'STATIC') {
+        const formElementDynamicOptionSetEnvironment =
+          formElementOptionsSet.environments.find(
+            (environment: FormTypes.FormElementOptionSetEnvironmentStatic) =>
+              environment.formsAppEnvironmentId === formsAppEnvironmentId,
+          )
         staticOptionSets.push({
           formElementOptionsSetId,
           formElementDynamicOptionSetEnvironment,
         })
       } else {
+        const formElementDynamicOptionSetEnvironment =
+          formElementOptionsSet.environments.find(
+            (environment: FormTypes.FormElementOptionSetEnvironmentUrl) =>
+              environment.formsAppEnvironmentId === formsAppEnvironmentId,
+          )
         memo.push({
           formElementOptionsSetId,
           formElementOptionsSetName: formElementOptionsSet.name,
@@ -552,7 +557,7 @@ async function getFormElementDynamicOptions(
     results.push({
       ok: true,
       formElementOptionsSetId,
-      options: formElementDynamicOptionSetEnvironment.options,
+      options: formElementDynamicOptionSetEnvironment?.options,
     })
   }
 

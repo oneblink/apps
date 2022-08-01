@@ -315,7 +315,7 @@ async function getFormElementLookupById(
 async function getFormElementOptionsSets(
   organisationId: string,
   abortSignal?: AbortSignal,
-): Promise<Array<FormTypes.FormElementDynamicOptionSet>> {
+): Promise<Array<FormTypes.FormElementOptionSet>> {
   const { formElementDynamicOptionSets } = await searchRequest(
     `${tenants.current.apiOrigin}/form-element-options/dynamic`,
     {
@@ -414,6 +414,10 @@ async function getFormElementDynamicOptions(
   }
 
   const formsAppEnvironmentId = forms[0].formsAppEnvironmentId
+  const staticOptionSets: Array<{
+    formElementOptionsSetId: number
+    formElementDynamicOptionSetEnvironment: FormTypes.FormElementOptionSetEnvironmentStatic
+  }> = []
   const formElementOptionsSetUrls = formElementOptionsSets.reduce<
     Array<{
       formElementOptionsSetId: number
@@ -428,12 +432,18 @@ async function getFormElementDynamicOptions(
           (environment) =>
             environment.formsAppEnvironmentId === formsAppEnvironmentId,
         )
-
-      memo.push({
-        formElementOptionsSetId,
-        formElementOptionsSetName: formElementOptionsSet.name,
-        formElementOptionsSetUrl: formElementDynamicOptionSetEnvironment?.url,
-      })
+      if (formElementOptionsSet.type === 'STATIC') {
+        staticOptionSets.push({
+          formElementOptionsSetId,
+          formElementDynamicOptionSetEnvironment,
+        })
+      } else {
+        memo.push({
+          formElementOptionsSetId,
+          formElementOptionsSetName: formElementOptionsSet.name,
+          formElementOptionsSetUrl: formElementDynamicOptionSetEnvironment?.url,
+        })
+      }
     }
 
     return memo
@@ -533,6 +543,18 @@ async function getFormElementDynamicOptions(
       },
     ),
   )
+
+  // merge the static options with the URL option results
+  for (const {
+    formElementOptionsSetId,
+    formElementDynamicOptionSetEnvironment,
+  } of staticOptionSets) {
+    results.push({
+      ok: true,
+      formElementOptionsSetId,
+      options: formElementDynamicOptionSetEnvironment.options,
+    })
+  }
 
   return forms.reduce<Array<LoadFormElementOptionsResult>>(
     (optionsForElementId, form) => {

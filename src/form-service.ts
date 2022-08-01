@@ -315,7 +315,7 @@ async function getFormElementLookupById(
 async function getFormElementOptionsSets(
   organisationId: string,
   abortSignal?: AbortSignal,
-): Promise<Array<FormTypes.FormElementDynamicOptionSet>> {
+): Promise<Array<FormTypes.FormElementOptionSet>> {
   const { formElementDynamicOptionSets } = await searchRequest(
     `${tenants.current.apiOrigin}/form-element-options/dynamic`,
     {
@@ -414,6 +414,11 @@ async function getFormElementDynamicOptions(
   }
 
   const formsAppEnvironmentId = forms[0].formsAppEnvironmentId
+  const staticOptionSets: Array<{
+    formElementOptionsSetId: number
+    formElementOptionsSetName: string
+    formElementDynamicOptionSetEnvironment?: FormTypes.FormElementOptionSetEnvironmentStatic
+  }> = []
   const formElementOptionsSetUrls = formElementOptionsSets.reduce<
     Array<{
       formElementOptionsSetId: number
@@ -423,17 +428,29 @@ async function getFormElementDynamicOptions(
   >((memo, formElementOptionsSet) => {
     const formElementOptionsSetId = formElementOptionsSet.id
     if (formElementOptionsSetId) {
-      const formElementDynamicOptionSetEnvironment =
-        formElementOptionsSet.environments.find(
-          (environment) =>
-            environment.formsAppEnvironmentId === formsAppEnvironmentId,
-        )
-
-      memo.push({
-        formElementOptionsSetId,
-        formElementOptionsSetName: formElementOptionsSet.name,
-        formElementOptionsSetUrl: formElementDynamicOptionSetEnvironment?.url,
-      })
+      if (formElementOptionsSet.type === 'STATIC') {
+        const formElementDynamicOptionSetEnvironment =
+          formElementOptionsSet.environments.find(
+            (environment: FormTypes.FormElementOptionSetEnvironmentStatic) =>
+              environment.formsAppEnvironmentId === formsAppEnvironmentId,
+          )
+        staticOptionSets.push({
+          formElementOptionsSetId,
+          formElementOptionsSetName: formElementOptionsSet.name,
+          formElementDynamicOptionSetEnvironment,
+        })
+      } else {
+        const formElementDynamicOptionSetEnvironment =
+          formElementOptionsSet.environments.find(
+            (environment: FormTypes.FormElementOptionSetEnvironmentUrl) =>
+              environment.formsAppEnvironmentId === formsAppEnvironmentId,
+          )
+        memo.push({
+          formElementOptionsSetId,
+          formElementOptionsSetName: formElementOptionsSet.name,
+          formElementOptionsSetUrl: formElementDynamicOptionSetEnvironment?.url,
+        })
+      }
     }
 
     return memo
@@ -533,6 +550,43 @@ async function getFormElementDynamicOptions(
       },
     ),
   )
+
+  // merge the static options with the URL option results
+  for (const {
+    formElementOptionsSetId,
+    formElementDynamicOptionSetEnvironment,
+    formElementOptionsSetName,
+  } of staticOptionSets) {
+    if (formElementDynamicOptionSetEnvironment) {
+      results.push({
+        ok: true,
+        formElementOptionsSetId,
+        options: formElementDynamicOptionSetEnvironment.options,
+      })
+    } else {
+      results.push({
+        ok: false,
+        formElementOptionsSetId,
+        error: new OneBlinkAppsError(
+          `Options set environment configuration has not been completed yet. Please contact your administrator to rectify the issue.`,
+          {
+            title: 'Misconfigured Options Set',
+            originalError: new Error(
+              JSON.stringify(
+                {
+                  formElementOptionsSetId,
+                  formElementOptionsSetName,
+                  formsAppEnvironmentId,
+                },
+                null,
+                2,
+              ),
+            ),
+          },
+        ),
+      })
+    }
+  }
 
   return forms.reduce<Array<LoadFormElementOptionsResult>>(
     (optionsForElementId, form) => {

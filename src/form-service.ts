@@ -416,6 +416,7 @@ async function getFormElementDynamicOptions(
   const formsAppEnvironmentId = forms[0].formsAppEnvironmentId
   const staticOptionSets: Array<{
     formElementOptionsSetId: number
+    formElementOptionsSetName: string
     formElementDynamicOptionSetEnvironment?: FormTypes.FormElementOptionSetEnvironmentStatic
   }> = []
   const formElementOptionsSetUrls = formElementOptionsSets.reduce<
@@ -435,6 +436,7 @@ async function getFormElementDynamicOptions(
           )
         staticOptionSets.push({
           formElementOptionsSetId,
+          formElementOptionsSetName: formElementOptionsSet.name,
           formElementDynamicOptionSetEnvironment,
         })
       } else {
@@ -553,12 +555,37 @@ async function getFormElementDynamicOptions(
   for (const {
     formElementOptionsSetId,
     formElementDynamicOptionSetEnvironment,
+    formElementOptionsSetName,
   } of staticOptionSets) {
-    results.push({
-      ok: true,
-      formElementOptionsSetId,
-      options: formElementDynamicOptionSetEnvironment?.options,
-    })
+    if (formElementDynamicOptionSetEnvironment) {
+      results.push({
+        ok: true,
+        formElementOptionsSetId,
+        options: formElementDynamicOptionSetEnvironment.options,
+      })
+    } else {
+      results.push({
+        ok: false,
+        formElementOptionsSetId,
+        error: new OneBlinkAppsError(
+          `Options set environment configuration has not been completed yet. Please contact your administrator to rectify the issue.`,
+          {
+            title: 'Misconfigured Options Set',
+            originalError: new Error(
+              JSON.stringify(
+                {
+                  formElementOptionsSetId,
+                  formElementOptionsSetName,
+                  formsAppEnvironmentId,
+                },
+                null,
+                2,
+              ),
+            ),
+          },
+        ),
+      })
+    }
   }
 
   return forms.reduce<Array<LoadFormElementOptionsResult>>(

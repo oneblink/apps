@@ -27,7 +27,7 @@ async function maybeUploadAttachment(
         formId,
         fileName: record.fileName,
         contentType: record.data.type,
-        isPrivate: formElement.storageType === 'private',
+        isPrivate: formElement.storageType !== 'public',
         data: record.data,
       })
   }

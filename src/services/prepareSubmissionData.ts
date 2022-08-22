@@ -27,7 +27,7 @@ async function maybeUploadAttachment(
         formId,
         fileName: record.fileName,
         contentType: record.data.type,
-        isPrivate: formElement.storageType === 'private',
+        isPrivate: formElement.storageType !== 'public',
         data: record.data,
       })
   }
@@ -72,10 +72,6 @@ async function uploadAttachments(
       case 'draw':
       case 'compliance':
       case 'files': {
-        if (!formElement.storageType || formElement.storageType === 'legacy') {
-          break
-        }
-
         const value = submission[formElement.name]
         if (!value) {
           break

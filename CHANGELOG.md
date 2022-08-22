@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Removed
+
+- `legacy` storage type for form elements
+
 ## [1.2.6] - 2022-08-16
 
 ### Changed

@@ -72,10 +72,6 @@ async function uploadAttachments(
       case 'draw':
       case 'compliance':
       case 'files': {
-        if (!formElement.storageType || formElement.storageType === 'legacy') {
-          break
-        }
-
         const value = submission[formElement.name]
         if (!value) {
           break

@@ -319,12 +319,18 @@ export async function updateFormSubmissionApproval(
 }
 
 /**
- * As an administrator, reopen a submission that has been approved or denied .
+ * @deprecated Use "reopenFormApprovalFlowInstance()" instead
+ * @internal
+ */
+export const reopenFormSubmissionApproval = reopenFormApprovalFlowInstance
+
+/**
+ * As an administrator, reopen a submission that has been approved or denied.
  *
  * #### Example
  *
  * ```js
- * await approvalsService.updateFormSubmissionApproval({
+ * await approvalsService.reopenFormApprovalFlowInstance({
  *   formApprovalFlowInstanceId: 1,
  *   notificationEmailAddress: 'email@example.com',
  *   notes: 'Great work!!!',
@@ -336,7 +342,7 @@ export async function updateFormSubmissionApproval(
  * @param abortSignal
  * @returns
  */
-export async function reopenFormSubmissionApproval(
+export async function reopenFormApprovalFlowInstance(
   {
     formApprovalFlowInstanceId,
     ...payload
@@ -348,7 +354,7 @@ export async function reopenFormSubmissionApproval(
   },
   abortSignal?: AbortSignal,
 ): Promise<ApprovalTypes.FormSubmissionApproval> {
-  console.log('Reopening form submission approval', {
+  console.log('Reopening form approval flow instance', {
     formApprovalFlowInstanceId,
     ...payload,
   })
@@ -359,7 +365,7 @@ export async function reopenFormSubmissionApproval(
       abortSignal,
     )
   } catch (err) {
-    console.error('Error reopening form submission approval', err)
+    console.error('Error reopening form approval flow instance', err)
     Sentry.captureException(err)
 
     const error = err as HTTPError

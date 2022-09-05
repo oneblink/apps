@@ -415,6 +415,102 @@ export async function reopenFormSubmissionApproval(
 }
 
 /**
+ * As an administrator, close a submission that has been approved.
+ *
+ * #### Example
+ *
+ * ```js
+ * await approvalsService.closeFormApprovalFlowInstance({
+ *   formApprovalFlowInstanceId: 1,
+ *   notificationEmailAddress: ['email@example.com'],
+ *   notes: 'Great work!!!',
+ *   internalNotes: 'It was not really that great...',
+ * })
+ * ```
+ *
+ * @param options
+ * @param abortSignal
+ * @returns
+ */
+export async function closeFormApprovalFlowInstance(
+  {
+    formApprovalFlowInstanceId,
+    ...payload
+  }: {
+    formApprovalFlowInstanceId: number
+    notificationEmailAddress?: string
+    notes?: string
+    internalNotes?: string
+  },
+  abortSignal?: AbortSignal,
+): Promise<ApprovalTypes.FormSubmissionApproval> {
+  console.log('Closing form approval flow instance', {
+    formApprovalFlowInstanceId,
+    ...payload,
+  })
+  try {
+    return await postRequest<ApprovalTypes.FormSubmissionApproval>(
+      `${tenants.current.apiOrigin}/form-approval-flow-instances/${formApprovalFlowInstanceId}/close`,
+      payload,
+      abortSignal,
+    )
+  } catch (err) {
+    console.log('Error closing form approval flow instance', err)
+    Sentry.captureException(err)
+
+    const error = err as HTTPError
+    if (isOffline()) {
+      throw new OneBlinkAppsError(
+        'You are currently offline, please connect to the internet and try again',
+        {
+          originalError: error,
+          isOffline: true,
+        },
+      )
+    }
+    switch (error.status) {
+      case 401: {
+        throw new OneBlinkAppsError(
+          'You cannot close this approval without first logging in. Please login and try again.',
+          {
+            originalError: error,
+            requiresLogin: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 403: {
+        throw new OneBlinkAppsError(
+          'You do not have access to this approval. Please contact your administrator to gain the correct level of access.',
+          {
+            originalError: error,
+            requiresAccessRequest: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 400:
+      case 404:
+      case 409: {
+        throw new OneBlinkAppsError(error.message, {
+          title: 'Invalid Request',
+          httpStatusCode: error.status,
+        })
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  }
+}
+
+/**
  * Retrieve the submission data associated with a FormApprovalFlowInstance.
  *
  * #### Example

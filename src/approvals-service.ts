@@ -444,7 +444,7 @@ export async function closeFormApprovalFlowInstance(
     ...payload
   }: {
     formApprovalFlowInstanceId: number
-    notificationEmailAddress?: string
+    notificationEmailAddress?: string[]
     notes?: string
     internalNotes?: string
   },

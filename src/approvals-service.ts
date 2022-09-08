@@ -239,6 +239,7 @@ export async function getFormSubmissionApproval(
  *   notificationEmailAddress: 'email@example.com',
  *   notes: 'Great work!!!',
  *   internalNotes: 'It was not really that great...',
+ *   cannedResponseKey: 'my_canned_response_key',
  *   createdAt: '2021-02-21T22:57:56.257Z',
  *   updatedAt: '2021-02-21T22:57:56.257Z',
  * }
@@ -335,6 +336,7 @@ export const reopenFormSubmissionApproval = reopenFormApprovalFlowInstance
  *   notificationEmailAddress: 'email@example.com',
  *   notes: 'Great work!!!',
  *   internalNotes: 'It was not really that great...',
+ *   cannedResponseKey: 'my_canned_response_key',
  * })
  * ```
  *
@@ -351,6 +353,7 @@ export async function reopenFormApprovalFlowInstance(
     notificationEmailAddress: string
     notes: string
     internalNotes?: string
+    cannedResponseKey?: string
   },
   abortSignal?: AbortSignal,
 ): Promise<ApprovalTypes.FormSubmissionApproval> {
@@ -431,6 +434,7 @@ export async function reopenFormApprovalFlowInstance(
  *   notificationEmailAddress: ['email@example.com'],
  *   notes: 'Great work!!!',
  *   internalNotes: 'It was not really that great...',
+ *   cannedResponseKey: 'my_canned_response_key',
  * })
  * ```
  *
@@ -447,6 +451,7 @@ export async function closeFormApprovalFlowInstance(
     notificationEmailAddress?: string[]
     notes?: string
     internalNotes?: string
+    cannedResponseKey?: string
   },
   abortSignal?: AbortSignal,
 ): Promise<ApprovalTypes.FormSubmissionApproval> {

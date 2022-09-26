@@ -107,10 +107,31 @@ async function uploadToS3({
 }) {
   try {
     const s3Client = getS3Client(s3Configuration)
+    let queueSize = 1 // default to 1 as the lowest common denominator
+    if (
+      window.navigator &&
+      window.navigator.connection &&
+      // @ts-expect-error effectiveType prop is still in draft
+      window.navigator.connection.effectiveType
+    ) {
+      // @ts-expect-error effectiveType prop is still in draft
+      switch (window.navigator.connection.effectiveType) {
+        case 'slow-2g':
+        case '2g':
+          queueSize = 1
+          break
+        case '3g':
+          queueSize = 2
+          break
+        case '4g':
+          queueSize = 10
+          break
+      }
+    }
 
     const managedUpload = s3Client.upload(putObjectRequest, {
       partSize: 5 * 1024 * 1024,
-      queueSize: 10,
+      queueSize,
     })
 
     managedUpload.on('httpUploadProgress', (progress) => {

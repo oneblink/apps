@@ -1,7 +1,11 @@
 import { AWSTypes, FormsAppsTypes, SubmissionTypes } from '@oneblink/types'
 import { postRequest, putRequest, HTTPError } from '../fetch'
 import { isLoggedIn } from '../../auth-service'
-import { uploadFormSubmission, downloadDraftS3Data } from '../s3Submit'
+import {
+  uploadFormSubmission,
+  downloadDraftS3Data,
+  OnProgress,
+} from '../s3Submit'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 import { getUserToken } from '../user-token'
@@ -15,6 +19,7 @@ import {
 const uploadDraftData = async (
   draft: SubmissionTypes.FormsAppDraft,
   draftSubmission: DraftSubmission,
+  onProgress?: OnProgress,
 ): Promise<string> => {
   const url = `${tenants.current.apiOrigin}/forms/${draft.formId}/upload-draft-data-credentials`
   console.log('Attempting to get Credentials to upload draft data', url)
@@ -24,16 +29,16 @@ const uploadDraftData = async (
     const data = await postRequest<S3DraftUploadCredentials>(url)
     const userToken = getUserToken()
     console.log('Attempting to upload draft data:', data)
-    await uploadFormSubmission(
-      data,
-      {
+    await uploadFormSubmission({
+      s3Configuration: data,
+      formJson: {
         definition: draftSubmission.definition,
         submission,
         submissionTimestamp: data.submissionTimestamp,
         keyId: draftSubmission.keyId,
         formsAppId: draftSubmission.formsAppId,
       },
-      {
+      tags: {
         externalId: draft.externalId || undefined,
         jobId: draft.jobId || undefined,
         userToken: userToken || undefined,
@@ -41,7 +46,8 @@ const uploadDraftData = async (
         previousFormSubmissionApprovalId:
           draft.previousFormSubmissionApprovalId,
       },
-    )
+      onProgress,
+    })
     return data.draftDataId
   } catch (error) {
     Sentry.captureException(error)

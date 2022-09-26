@@ -2,6 +2,7 @@ import { generateUploadAttachmentCredentials } from './api/submissions'
 import {
   UploadAttachmentConfiguration,
   uploadAttachment as uploadAttachmentToS3,
+  OnProgress,
 } from './s3Submit'
 import tenants from '../tenants'
 import { SubmissionTypes } from '@oneblink/types'
@@ -54,8 +55,10 @@ export default async function uploadAttachment(
     contentType,
     isPrivate,
     data,
+    onProgress,
   }: UploadAttachmentConfiguration & {
     formId: number
+    onProgress?: OnProgress
   },
   abortSignal?: AbortSignal,
 ): Promise<SubmissionTypes.FormSubmissionAttachment> {
@@ -63,16 +66,17 @@ export default async function uploadAttachment(
     formId,
     abortSignal,
   )
-  await uploadAttachmentToS3(
-    formAttachmentS3Credentials,
-    {
+  await uploadAttachmentToS3({
+    s3Configuration: formAttachmentS3Credentials,
+    fileConfiguration: {
       fileName,
       contentType,
       isPrivate,
       data,
     },
     abortSignal,
-  )
+    onProgress,
+  })
   return {
     s3: formAttachmentS3Credentials.s3,
     url: `${tenants.current.apiOrigin}/${formAttachmentS3Credentials.s3.key}`,

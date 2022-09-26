@@ -25,6 +25,7 @@ import {
   DraftSubmission,
 } from './types/submissions'
 import { deleteAutoSaveData } from './auto-save-service'
+import { OnProgress } from './services/s3Submit'
 
 let _isProcessingPendingQueue = false
 
@@ -201,6 +202,7 @@ async function submit({
   ...params
 }: SubmissionParams & {
   autoSaveKey?: string
+  onProgress?: OnProgress
 }): Promise<FormSubmissionResult> {
   const formSubmissionResult = await submitForm({
     ...params,

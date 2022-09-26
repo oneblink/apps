@@ -111,8 +111,10 @@ async function uploadToS3({
     if (
       window.navigator &&
       window.navigator.connection &&
+      // @ts-expect-error effectiveType prop is still in draft
       window.navigator.connection.effectiveType
     ) {
+      // @ts-expect-error effectiveType prop is still in draft
       switch (window.navigator.connection.effectiveType) {
         case 'slow-2g':
         case '2g':

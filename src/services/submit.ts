@@ -5,7 +5,7 @@ import {
   checkForPaymentSubmissionEvent,
   handlePaymentSubmissionEvent,
 } from '../payment-service'
-import { uploadFormSubmission } from './s3Submit'
+import { OnProgress, uploadFormSubmission } from './s3Submit'
 import { deleteDraft } from '../draft-service'
 import { removePrefillFormData } from '../prefill-service'
 import recentlySubmittedJobsService from './recently-submitted-jobs'
@@ -36,10 +36,12 @@ export default async function submit({
   paymentReceiptUrl,
   schedulingUrlConfiguration,
   generateCredentials,
+  onProgress,
 }: SubmissionParams & {
   generateCredentials: (
     formSubmission: FormSubmission,
   ) => Promise<S3UploadCredentials>
+  onProgress?: OnProgress
 }): Promise<FormSubmissionResult> {
   formSubmission.keyId = getFormsKeyId() || undefined
   const paymentSubmissionEventConfiguration =
@@ -104,9 +106,9 @@ export default async function submit({
   }
   const userToken = getUserToken()
 
-  await uploadFormSubmission(
-    data,
-    {
+  await uploadFormSubmission({
+    s3Configuration: data,
+    formJson: {
       formsAppId: formSubmission.formsAppId,
       definition: formSubmission.definition,
       submission: formSubmission.submission,
@@ -115,7 +117,7 @@ export default async function submit({
       ipAddress: data.ipAddress,
       user: data.userProfile,
     },
-    {
+    tags: {
       externalId: formSubmission.externalId || undefined,
       jobId: formSubmission.jobId || undefined,
       userToken: userToken || undefined,
@@ -123,7 +125,8 @@ export default async function submit({
       previousFormSubmissionApprovalId:
         formSubmissionResult.previousFormSubmissionApprovalId,
     },
-  )
+    onProgress,
+  })
   if (formSubmission.draftId) {
     await deleteDraft(formSubmission.draftId, formSubmission.formsAppId)
   }

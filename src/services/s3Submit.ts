@@ -29,6 +29,8 @@ export type UploadAttachmentConfiguration = {
   data: PutObjectRequest['Body']
 }
 
+export type OnProgress = (options: { progress: number; total: number }) => void
+
 function getDeviceInformation(): SubmissionTypes.S3SubmissionDataDevice {
   if (window.cordova) {
     const deviceInformation: SubmissionTypes.S3SubmissionDataDevice = {
@@ -92,11 +94,17 @@ const getObjectMeta = (
   ACL: 'private',
 })
 
-async function uploadToS3(
-  s3Configuration: AWSTypes.S3ObjectCredentials,
-  putObjectRequest: PutObjectRequest,
-  abortSignal?: AbortSignal,
-) {
+async function uploadToS3({
+  s3Configuration,
+  putObjectRequest,
+  abortSignal,
+  onProgress,
+}: {
+  s3Configuration: AWSTypes.S3ObjectCredentials
+  putObjectRequest: PutObjectRequest
+  abortSignal?: AbortSignal
+  onProgress?: OnProgress
+}) {
   try {
     const s3Client = getS3Client(s3Configuration)
 
@@ -107,6 +115,11 @@ async function uploadToS3(
 
     managedUpload.on('httpUploadProgress', (progress) => {
       console.log('Upload to S3 part:', progress)
+      if (onProgress) {
+        const onePercent = progress.total / 100
+        const percent = progress.loaded / onePercent
+        onProgress({ progress: percent, total: 100 })
+      }
     })
 
     abortSignal?.addEventListener('abort', () => {
@@ -134,11 +147,17 @@ async function uploadToS3(
   }
 }
 
-async function uploadFormSubmission(
-  s3Configuration: AWSTypes.S3ObjectCredentials,
-  formJson: SubmissionTypes.S3SubmissionData,
-  tags: Record<string, string | undefined>,
-) {
+async function uploadFormSubmission({
+  s3Configuration,
+  formJson,
+  tags,
+  onProgress,
+}: {
+  s3Configuration: AWSTypes.S3ObjectCredentials
+  formJson: SubmissionTypes.S3SubmissionData
+  tags: Record<string, string | undefined>
+  onProgress?: OnProgress
+}) {
   console.log('Uploading submission')
 
   const putObjectRequest = getObjectMeta(s3Configuration.s3)
@@ -153,14 +172,20 @@ async function uploadFormSubmission(
     }) || undefined
   putObjectRequest.ContentType = 'application/json'
 
-  await uploadToS3(s3Configuration, putObjectRequest, undefined)
+  await uploadToS3({ s3Configuration, putObjectRequest, onProgress })
 }
 
-async function uploadAttachment(
-  s3Configuration: AWSTypes.S3ObjectCredentials,
-  fileConfiguration: UploadAttachmentConfiguration,
-  abortSignal: AbortSignal | undefined,
-) {
+async function uploadAttachment({
+  s3Configuration,
+  fileConfiguration,
+  abortSignal,
+  onProgress,
+}: {
+  s3Configuration: AWSTypes.S3ObjectCredentials
+  fileConfiguration: UploadAttachmentConfiguration
+  abortSignal: AbortSignal | undefined
+  onProgress?: OnProgress
+}) {
   const putObjectRequest = getObjectMeta(s3Configuration.s3)
   putObjectRequest.Body = fileConfiguration.data
   putObjectRequest.ContentType = fileConfiguration.contentType
@@ -171,7 +196,12 @@ async function uploadAttachment(
     putObjectRequest.ACL = 'public-read'
   }
 
-  await uploadToS3(s3Configuration, putObjectRequest, abortSignal)
+  await uploadToS3({
+    s3Configuration,
+    putObjectRequest,
+    abortSignal,
+    onProgress,
+  })
 }
 
 async function downloadS3Data<T>(

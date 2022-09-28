@@ -99,11 +99,13 @@ async function uploadToS3({
   putObjectRequest,
   abortSignal,
   onProgress,
+  retryAttempt,
 }: {
   s3Configuration: AWSTypes.S3ObjectCredentials
   putObjectRequest: PutObjectRequest
   abortSignal?: AbortSignal
   onProgress?: OnProgress
+  retryAttempt?: number
 }) {
   try {
     const s3Client = getS3Client(s3Configuration)
@@ -128,7 +130,7 @@ async function uploadToS3({
           break
       }
     }
-
+    console.log('Starting managedUpload with queueSize ', queueSize)
     const managedUpload = s3Client.upload(putObjectRequest, {
       partSize: 5 * 1024 * 1024,
       queueSize,
@@ -152,8 +154,27 @@ async function uploadToS3({
     if (!abortSignal?.aborted) {
       Sentry.captureException(err)
       // handle storing in s3 errors here
-      if (/Network Failure/.test((err as Error).message)) {
+      console.log(
+        `Upload failed for attempt ${retryAttempt} with error ${
+          (err as Error).message
+        }`,
+      )
+      if (
+        /Network Failure/.test((err as Error).message) ||
+        /Timeout/.test((err as Error).message)
+      ) {
         console.warn('Network error uploading to S3:', err)
+        if (!retryAttempt || retryAttempt < 3) {
+          retryAttempt = retryAttempt ? retryAttempt + 1 : 1
+          await uploadToS3({
+            s3Configuration,
+            putObjectRequest,
+            abortSignal,
+            onProgress,
+            retryAttempt,
+          })
+          return
+        }
         throw new OneBlinkAppsError(
           'There was an error saving the file. Please try again. If the problem persists, contact your administrator',
           {

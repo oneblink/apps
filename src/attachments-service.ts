@@ -63,13 +63,13 @@ export function getSubmissionAttachmentDetails(
   formElements: FormTypes.FormElement[],
   submission: FormSubmissionModel,
 ): Array<SubmissionAttachmentDetail> {
-  const attachmentsToMaybeUpload: SubmissionAttachmentDetail[] = []
+  const submissionAttachmentDetails: SubmissionAttachmentDetail[] = []
 
   for (const formElement of formElements) {
     switch (formElement.type) {
       case 'page':
       case 'section': {
-        attachmentsToMaybeUpload.push(
+        submissionAttachmentDetails.push(
           ...getSubmissionAttachmentDetails(formElement.elements, submission),
         )
         break
@@ -79,7 +79,7 @@ export function getSubmissionAttachmentDetails(
         if (!nestedSubmission || typeof nestedSubmission !== 'object') {
           break
         }
-        attachmentsToMaybeUpload.push(
+        submissionAttachmentDetails.push(
           ...getSubmissionAttachmentDetails(
             formElement.elements || [],
             nestedSubmission as FormSubmissionModel,
@@ -94,7 +94,7 @@ export function getSubmissionAttachmentDetails(
           break
         }
         for (const entry of entries) {
-          attachmentsToMaybeUpload.push(
+          submissionAttachmentDetails.push(
             ...getSubmissionAttachmentDetails(formElement.elements, entry),
           )
         }
@@ -114,7 +114,7 @@ export function getSubmissionAttachmentDetails(
           case 'draw': {
             const attachment = asSubmissionAttachmentDetail(value)
             if (attachment) {
-              attachmentsToMaybeUpload.push(attachment)
+              submissionAttachmentDetails.push(attachment)
             }
             break
           }
@@ -124,7 +124,7 @@ export function getSubmissionAttachmentDetails(
               for (let index = 0; index < files.length; index++) {
                 const attachment = asSubmissionAttachmentDetail(files[index])
                 if (attachment) {
-                  attachmentsToMaybeUpload.push(attachment)
+                  submissionAttachmentDetails.push(attachment)
                 }
               }
             }
@@ -135,7 +135,7 @@ export function getSubmissionAttachmentDetails(
               for (let index = 0; index < value.length; index++) {
                 const attachment = asSubmissionAttachmentDetail(value[index])
                 if (attachment) {
-                  attachmentsToMaybeUpload.push(attachment)
+                  submissionAttachmentDetails.push(attachment)
                 }
               }
             }
@@ -146,7 +146,7 @@ export function getSubmissionAttachmentDetails(
     }
   }
 
-  return attachmentsToMaybeUpload
+  return submissionAttachmentDetails
 }
 
 const asSubmissionAttachmentDetail = (

@@ -127,16 +127,31 @@ export function formatDateLong(value: Date): string {
  * @returns
  */
 export function formatTime(value: Date): string {
-  const iosVersion = Number.parseFloat(navigator.userAgent.split(' ')[5].replace("_", "."))
-  if(iosVersion <= 12.4) {
-    const time =  new Intl.DateTimeFormat('en-AU', {
-      hour: "numeric",
-      minute: "numeric",
-      second: "numeric",
-      timeZone: 'Australia/Sydney',
-    }).format(value)
-    const timeArray = time.split(':')
-    return `${timeArray[0]}:${timeArray[1]} ${timeArray[2].slice(-2)}`
+  console.log(navigator.userAgent)
+  const agents = navigator.userAgent.split(' ')
+  const deviceType = agents[3]
+  const iosVersion = Number.parseFloat(agents[5].replace("_", "."))
+  if(iosVersion <= 12.4 && (deviceType === 'iPhone' || deviceType === 'iPad')){
+    switch(tenants.tenant) {
+      case "oneblink":
+        const timeOB =  new Intl.DateTimeFormat('en-AU', {
+          hour: "numeric",
+          minute: "numeric",
+          second: "numeric",
+          timeZone: 'Australia/Sydney',
+        }).format(value)
+        const timeArrayOB = timeOB.split(':')
+        return `${timeArrayOB[0]}:${timeArrayOB[1]} ${timeArrayOB[2].slice(-2)}`
+        case "civicplus":
+          const timeCP =  new Intl.DateTimeFormat('en-US', {
+            hour: "numeric",
+            minute: "numeric",
+            second: "numeric",
+            timeZone: 'America/Texas?',
+          }).format(value)
+          const timeArrayCP = timeCP.split(':')
+          return `${timeArrayCP[0]}:${timeArrayCP[1]} ${timeArrayCP[2].slice(-2)}`
+    }
   }
   return tenants.current.intlFormats.time.format(value)
 }

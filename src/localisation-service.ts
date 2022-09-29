@@ -127,6 +127,17 @@ export function formatDateLong(value: Date): string {
  * @returns
  */
 export function formatTime(value: Date): string {
+  const iosVersion = Number.parseFloat(navigator.userAgent.split(' ')[5].replace("_", "."))
+  if(iosVersion <= 12.4) {
+    const time =  new Intl.DateTimeFormat('en-AU', {
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      timeZone: 'Australia/Sydney',
+    }).format(value)
+    const timeArray = time.split(':')
+    return `${timeArray[0]}:${timeArray[1]} ${timeArray[2].slice(-2)}`
+  }
   return tenants.current.intlFormats.time.format(value)
 }
 

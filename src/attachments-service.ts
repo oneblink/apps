@@ -98,7 +98,7 @@ function checkIfAttachmentsAreUploadingForFormElements(
   })
 }
 
-export default function checkIfAttachmentsAreUploading(
+export function checkIfAttachmentsAreUploading(
   form: FormTypes.Form,
   submission: FormSubmissionModel,
 ): boolean {

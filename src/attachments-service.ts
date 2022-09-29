@@ -1,4 +1,4 @@
-import { FormTypes, SubmissionTypes } from '@oneblink/types'
+import { FormTypes } from '@oneblink/types'
 import {
   AttachmentError,
   AttachmentNew,
@@ -172,7 +172,7 @@ const asSubmissionAttachmentDetail = (
     // Already uploaded
     return {
       needsToUpload: false,
-      value: value as SubmissionTypes.FormSubmissionAttachment,
+      value: value as AttachmentSaved,
     }
   }
 }

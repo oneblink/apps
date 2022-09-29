@@ -1,4 +1,4 @@
-type AttachmentSaved =
+export type AttachmentSaved =
   import('@oneblink/types').SubmissionTypes.FormSubmissionAttachment & {
     type?: undefined
   }

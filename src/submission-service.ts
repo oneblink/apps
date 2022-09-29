@@ -6,6 +6,7 @@ import {
   getFormSubmission,
   updatePendingQueueSubmission,
   deletePendingQueueSubmission,
+  registerPendingQueueAttachmentProgressListener,
 } from './services/pending-queue'
 import uploadAttachment, {
   UploadAttachmentConfiguration,
@@ -443,4 +444,5 @@ export {
   PendingFormSubmission,
   SubmissionParams,
   UploadAttachmentConfiguration,
+  registerPendingQueueAttachmentProgressListener,
 }

@@ -123,8 +123,9 @@ export default async function submit({
       })
     }
     console.log(
-      'Attachments still uploading - saving submission to pending queue...',
+      'Attachments still uploading - saving submission to pending queue..',
     )
+    await addFormSubmissionToPendingQueue(formSubmission)
     return Object.assign({}, formSubmission, {
       isOffline: false,
       isInPendingQueue: true,

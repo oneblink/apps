@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Extended formatTime function to handle error (duplicated date) in iOS version 12.4
+
 ### Added
 
 - An `onProgress` handler option to attachment upload and submission functions

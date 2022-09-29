@@ -1,5 +1,4 @@
 import { FormTypes, SubmissionTypes } from '@oneblink/types'
-import { NewDraftSubmission } from './submission-service'
 import {
   AttachmentError,
   AttachmentNew,
@@ -83,7 +82,7 @@ export function getSubmissionAttachmentDetails(
         attachmentsToMaybeUpload.push(
           ...getSubmissionAttachmentDetails(
             formElement.elements || [],
-            nestedSubmission as NewDraftSubmission['submission'],
+            nestedSubmission as FormSubmissionModel,
           ),
         )
 

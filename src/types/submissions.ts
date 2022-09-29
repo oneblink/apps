@@ -72,6 +72,8 @@ export type FormSubmissionResult = FormSubmission & {
   isOffline: boolean
   /** The ipAddress of the client submitting */
   ipAddress?: string
+  /** True if the submission was attempted whilst attachments were uploading */
+  isUploadingAttachments: boolean
 }
 
 export type PendingFormSubmission = Omit<FormSubmission, 'submission'> & {

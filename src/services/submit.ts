@@ -19,6 +19,7 @@ import {
   FormSubmissionResult,
   S3UploadCredentials,
 } from '../types/submissions'
+import { checkIfAttachmentsAreUploading } from '../attachments-service'
 
 type SubmissionParams = {
   formSubmission: FormSubmission
@@ -27,6 +28,7 @@ type SubmissionParams = {
     schedulingReceiptUrl: string
     schedulingCancelUrl: string
   }
+  continueWithUploadingAttachments?: boolean
 }
 
 export { SubmissionParams }
@@ -37,6 +39,7 @@ export default async function submit({
   schedulingUrlConfiguration,
   generateCredentials,
   onProgress,
+  continueWithUploadingAttachments,
 }: SubmissionParams & {
   generateCredentials: (
     formSubmission: FormSubmission,
@@ -63,6 +66,7 @@ export default async function submit({
         submissionId: null,
         payment: null,
         scheduling: null,
+        isUploadingAttachments: false,
       })
     }
 
@@ -75,6 +79,60 @@ export default async function submit({
       submissionId: null,
       payment: null,
       scheduling: null,
+      isUploadingAttachments: false,
+    })
+  }
+
+  const attachmentsStillUploading = checkIfAttachmentsAreUploading(
+    formSubmission.definition,
+    formSubmission,
+  )
+
+  if (attachmentsStillUploading) {
+    if (!continueWithUploadingAttachments) {
+      console.log(
+        'Attachments still uploading and continueWithUploadingAttachments is false or undefined, return isUploadingAttachments',
+        {
+          paymentSubmissionEventConfiguration,
+          schedulingSubmissionEvent,
+        },
+      )
+      return Object.assign({}, formSubmission, {
+        isOffline: false,
+        isInPendingQueue: false,
+        submissionTimestamp: null,
+        submissionId: null,
+        payment: null,
+        scheduling: null,
+        isUploadingAttachments: true,
+      })
+    }
+    if (paymentSubmissionEventConfiguration || schedulingSubmissionEvent) {
+      console.log(
+        'Attachments still uploading - form has a payment/scheduling submission event that has not been processed yet, return isUploading',
+        { paymentSubmissionEventConfiguration, schedulingSubmissionEvent },
+      )
+      return Object.assign({}, formSubmission, {
+        isOffline: false,
+        isInPendingQueue: false,
+        submissionTimestamp: null,
+        submissionId: null,
+        payment: null,
+        scheduling: null,
+        isUploadingAttachments: true,
+      })
+    }
+    console.log(
+      'Attachments still uploading - saving submission to pending queue...',
+    )
+    return Object.assign({}, formSubmission, {
+      isOffline: false,
+      isInPendingQueue: true,
+      submissionTimestamp: null,
+      submissionId: null,
+      payment: null,
+      scheduling: null,
+      isUploadingAttachments: true,
     })
   }
 
@@ -88,6 +146,7 @@ export default async function submit({
     isInPendingQueue: false,
     submissionTimestamp: data.submissionTimestamp,
     submissionId: data.submissionId,
+    isUploadingAttachments: false,
   }
 
   if (schedulingSubmissionEvent && schedulingUrlConfiguration) {

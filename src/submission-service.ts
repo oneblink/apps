@@ -316,6 +316,7 @@ async function executeCancelAction(
     scheduling: null,
     submissionId: null,
     submissionTimestamp: null,
+    isUploadingAttachments: false,
   }
 
   await executeAction(

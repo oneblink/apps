@@ -132,8 +132,7 @@ export function formatTime(value: Date): string {
   const deviceType = agents[3]
   const iosVersion = Number.parseFloat(agents[5].replace("_", "."))
   if(iosVersion <= 12.4 && (deviceType === 'iPhone' || deviceType === 'iPad')){
-    switch(tenants.tenant) {
-      case "oneblink":
+    if(tenants.tenant === "oneblink") {
         const timeOB =  new Intl.DateTimeFormat('en-AU', {
           hour: "numeric",
           minute: "numeric",
@@ -142,7 +141,7 @@ export function formatTime(value: Date): string {
         }).format(value)
         const timeArrayOB = timeOB.split(':')
         return `${timeArrayOB[0]}:${timeArrayOB[1]} ${timeArrayOB[2].slice(-2)}`
-        case "civicplus":
+      }else if (tenants.tenant ==="civicplus") {
           const timeCP =  new Intl.DateTimeFormat('en-US', {
             hour: "numeric",
             minute: "numeric",

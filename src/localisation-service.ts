@@ -112,6 +112,14 @@ export function formatDateLong(value: Date): string {
   return tenants.current.intlFormats.dateLong.format(value)
 }
 
+/**
+ * If the user agent is either iPhone or iPad and the version is 12.4 a new time
+ * string is contructed to prevent the date from repeating
+ *
+ * @param dateFormat
+ * @param date
+ * @returns
+ */
 const handleIOS12DateTime = (dateFormat: string, date: Date) => {
   const time = new Intl.DateTimeFormat(dateFormat, {
     hour: 'numeric',

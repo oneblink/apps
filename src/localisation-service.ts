@@ -112,6 +112,16 @@ export function formatDateLong(value: Date): string {
   return tenants.current.intlFormats.dateLong.format(value)
 }
 
+const handleIOS12DateTime = (dateFormat: string, date: Date) => {
+  const time = new Intl.DateTimeFormat(dateFormat, {
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+  }).format(date)
+  const newTime = time.split(':')
+  return `${newTime[0]}:${newTime[1]} ${newTime[2].slice(-2)}`
+}
+
 /**
  * Format a `Date` as a `string` that just contains the time portion e.g. _5:31 pm_
  *
@@ -127,29 +137,17 @@ export function formatDateLong(value: Date): string {
  * @returns
  */
 export function formatTime(value: Date): string {
-
   const agents = navigator.userAgent.split(' ')
   const deviceType = agents[3]
-  const iosVersion = Number.parseFloat(agents[5].replace("_", "."))
-  if(iosVersion <= 12.4 && (deviceType === 'iPhone' || deviceType === 'iPad')){
-    if(tenants.tenant === "oneblink") {
-        const timeOB =  new Intl.DateTimeFormat('en-AU', {
-          hour: "numeric",
-          minute: "numeric",
-          second: "numeric",
-          timeZone: 'Australia/Sydney',
-        }).format(value)
-        const timeArrayOB = timeOB.split(':')
-        return `${timeArrayOB[0]}:${timeArrayOB[1]} ${timeArrayOB[2].slice(-2)}`
-      }else if (tenants.tenant ==="civicplus") {
-          const timeCP =  new Intl.DateTimeFormat('en-US', {
-            hour: "numeric",
-            minute: "numeric",
-            second: "numeric",
-            timeZone: 'America/Texas?',
-          }).format(value)
-          const timeArrayCP = timeCP.split(':')
-          return `${timeArrayCP[0]}:${timeArrayCP[1]} ${timeArrayCP[2].slice(-2)}`
+  const iosVersion = Number.parseFloat(agents[5].replace('_', '.'))
+  if (
+    iosVersion <= 12.4 &&
+    (deviceType === 'iPhone' || deviceType === 'iPad')
+  ) {
+    if (tenants.tenant === 'oneblink') {
+      return handleIOS12DateTime('en-AU', value)
+    } else if (tenants.tenant === 'civicplus') {
+      return handleIOS12DateTime('en-US', value)
     }
   }
   return tenants.current.intlFormats.time.format(value)

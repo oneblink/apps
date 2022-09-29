@@ -127,7 +127,7 @@ export function formatDateLong(value: Date): string {
  * @returns
  */
 export function formatTime(value: Date): string {
-  console.log(navigator.userAgent)
+
   const agents = navigator.userAgent.split(' ')
   const deviceType = agents[3]
   const iosVersion = Number.parseFloat(agents[5].replace("_", "."))

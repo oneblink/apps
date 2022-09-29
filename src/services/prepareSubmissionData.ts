@@ -1,5 +1,6 @@
 import { FormTypes } from '@oneblink/types'
 import { NewDraftSubmission } from '../types/submissions'
+import { executePendingQueueAttachmentProgressListeners } from './pending-queue'
 import uploadAttachment from './uploadAttachment'
 
 export default async function prepareSubmissionData({
@@ -21,15 +22,23 @@ async function maybeUploadAttachment(
     if (
       typeof record.type === 'string' &&
       typeof record.fileName === 'string' &&
+      typeof record._id === 'string' &&
       record.data instanceof Blob
-    )
+    ) {
+      const _id = record._id
       return await uploadAttachment({
         formId,
         fileName: record.fileName,
         contentType: record.data.type,
         isPrivate: formElement.storageType !== 'public',
         data: record.data,
+        onProgress: (progress) =>
+          executePendingQueueAttachmentProgressListeners({
+            ...progress,
+            _id,
+          }),
       })
+    }
   }
   return value
 }

@@ -2,6 +2,7 @@ import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import utilsService from './utils'
 import Sentry from '../Sentry'
 import { FormSubmission, PendingFormSubmission } from '../types/submissions'
+import { OnProgressArg } from './s3Submit'
 
 function errorHandler(error: Error): Error {
   Sentry.captureException(error)
@@ -78,6 +79,7 @@ export async function addFormSubmissionToPendingQueue(
       ...formSubmission,
       pendingTimestamp,
       submission: undefined,
+      progress: 0,
     } as PendingFormSubmission)
     await utilsService.localForage.setItem('submissions', submissions)
     executePendingQueueListeners(submissions)
@@ -157,5 +159,33 @@ export async function deletePendingQueueSubmission(pendingTimestamp: string) {
   } catch (error) {
     Sentry.captureException(error)
     throw error instanceof Error ? errorHandler(error) : error
+  }
+}
+
+type AttachmentOnProgressArg = OnProgressArg & {
+  _id: string
+}
+type AttachmentOnProgress = (progress: AttachmentOnProgressArg) => unknown
+
+const pendingQueueAttachmentProgressListeners: Array<AttachmentOnProgress> = []
+
+export function registerPendingQueueAttachmentProgressListener(
+  listener: AttachmentOnProgress,
+): () => void {
+  pendingQueueAttachmentProgressListeners.push(listener)
+
+  return () => {
+    const index = pendingQueueAttachmentProgressListeners.indexOf(listener)
+    if (index !== -1) {
+      pendingQueueAttachmentProgressListeners.splice(index, 1)
+    }
+  }
+}
+
+export function executePendingQueueAttachmentProgressListeners(
+  progress: AttachmentOnProgressArg,
+) {
+  for (const pendingQueueAttachmentProgressListener of pendingQueueAttachmentProgressListeners) {
+    pendingQueueAttachmentProgressListener(progress)
   }
 }

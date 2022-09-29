@@ -29,7 +29,8 @@ export type UploadAttachmentConfiguration = {
   data: PutObjectRequest['Body']
 }
 
-export type OnProgress = (options: { progress: number; total: number }) => void
+export type OnProgressArg = { progress: number; total: number }
+export type OnProgress = (progress: OnProgressArg) => void
 
 function getDeviceInformation(): SubmissionTypes.S3SubmissionDataDevice {
   if (window.cordova) {

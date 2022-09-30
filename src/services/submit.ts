@@ -28,7 +28,6 @@ type SubmissionParams = {
     schedulingReceiptUrl: string
     schedulingCancelUrl: string
   }
-  continueWithUploadingAttachments?: boolean
 }
 
 export { SubmissionParams }
@@ -39,7 +38,6 @@ export default async function submit({
   schedulingUrlConfiguration,
   generateCredentials,
   onProgress,
-  continueWithUploadingAttachments,
 }: SubmissionParams & {
   generateCredentials: (
     formSubmission: FormSubmission,
@@ -89,24 +87,6 @@ export default async function submit({
   )
 
   if (attachmentsStillUploading) {
-    if (!continueWithUploadingAttachments) {
-      console.log(
-        'Attachments still uploading and continueWithUploadingAttachments is false or undefined, return isUploadingAttachments',
-        {
-          paymentSubmissionEventConfiguration,
-          schedulingSubmissionEvent,
-        },
-      )
-      return Object.assign({}, formSubmission, {
-        isOffline: false,
-        isInPendingQueue: false,
-        submissionTimestamp: null,
-        submissionId: null,
-        payment: null,
-        scheduling: null,
-        isUploadingAttachments: true,
-      })
-    }
     if (paymentSubmissionEventConfiguration || schedulingSubmissionEvent) {
       console.log(
         'Attachments still uploading - form has a payment/scheduling submission event that has not been processed yet, return isUploading',

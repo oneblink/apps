@@ -83,7 +83,7 @@ export default async function submit({
 
   const attachmentsStillUploading = checkIfAttachmentsAreUploading(
     formSubmission.definition,
-    formSubmission,
+    formSubmission.submission,
   )
 
   if (attachmentsStillUploading) {

@@ -29,8 +29,8 @@ export type UploadAttachmentConfiguration = {
   data: PutObjectRequest['Body']
 }
 
-export type OnProgressArg = { progress: number; total: number }
-export type OnProgress = (progress: OnProgressArg) => void
+export type ProgressListenerEvent = { progress: number; total: number }
+export type ProgressListener = (progress: ProgressListenerEvent) => void
 
 function getDeviceInformation(): SubmissionTypes.S3SubmissionDataDevice {
   if (window.cordova) {
@@ -105,7 +105,7 @@ async function uploadToS3({
   s3Configuration: AWSTypes.S3ObjectCredentials
   putObjectRequest: PutObjectRequest
   abortSignal?: AbortSignal
-  onProgress?: OnProgress
+  onProgress?: ProgressListener
   retryAttempt?: number
 }) {
   try {
@@ -198,7 +198,7 @@ async function uploadFormSubmission({
   s3Configuration: AWSTypes.S3ObjectCredentials
   formJson: SubmissionTypes.S3SubmissionData
   tags: Record<string, string | undefined>
-  onProgress?: OnProgress
+  onProgress?: ProgressListener
 }) {
   console.log('Uploading submission')
 
@@ -226,7 +226,7 @@ async function uploadAttachment({
   s3Configuration: AWSTypes.S3ObjectCredentials
   fileConfiguration: UploadAttachmentConfiguration
   abortSignal: AbortSignal | undefined
-  onProgress?: OnProgress
+  onProgress?: ProgressListener
 }) {
   const putObjectRequest = getObjectMeta(s3Configuration.s3)
   putObjectRequest.Body = fileConfiguration.data

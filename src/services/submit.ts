@@ -5,7 +5,11 @@ import {
   checkForPaymentSubmissionEvent,
   handlePaymentSubmissionEvent,
 } from '../payment-service'
-import { OnProgress, OnProgressArg, uploadFormSubmission } from './s3Submit'
+import {
+  ProgressListener,
+  ProgressListenerEvent,
+  uploadFormSubmission,
+} from './s3Submit'
 import { deleteDraft } from '../draft-service'
 import { removePrefillFormData } from '../prefill-service'
 import recentlySubmittedJobsService from './recently-submitted-jobs'
@@ -30,7 +34,7 @@ type SubmissionParams = {
   }
 }
 
-export { SubmissionParams, OnProgress, OnProgressArg }
+export { SubmissionParams, ProgressListener, ProgressListenerEvent }
 
 export default async function submit({
   formSubmission,
@@ -42,7 +46,7 @@ export default async function submit({
   generateCredentials: (
     formSubmission: FormSubmission,
   ) => Promise<S3UploadCredentials>
-  onProgress?: OnProgress
+  onProgress?: ProgressListener
 }): Promise<FormSubmissionResult> {
   formSubmission.keyId = getFormsKeyId() || undefined
   const paymentSubmissionEventConfiguration =

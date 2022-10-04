@@ -7,8 +7,8 @@ import {
   updatePendingQueueSubmission,
   deletePendingQueueSubmission,
   registerPendingQueueAttachmentProgressListener,
-  PendingQueueAttachmentOnProgress,
-  PendingQueueAttachmentOnProgressArg,
+  registerPendingQueueProgressListener,
+  executePendingQueueProgressListeners,
 } from './services/pending-queue'
 import { generateSubmissionCredentials } from './services/api/submissions'
 import replaceCustomValues from './services/replace-custom-values'
@@ -17,8 +17,8 @@ import Sentry from './Sentry'
 import prepareSubmissionData from './services/prepareSubmissionData'
 import submitForm, {
   SubmissionParams,
-  OnProgress,
-  OnProgressArg,
+  ProgressListener,
+  ProgressListenerEvent,
 } from './services/submit'
 import {
   PendingFormSubmission,
@@ -98,7 +98,15 @@ async function processPendingQueue(): Promise<void> {
       )
 
       const submission = await prepareSubmissionData(formSubmission)
-      await submit({ formSubmission: { ...formSubmission, submission } })
+      await submit({
+        formSubmission: { ...formSubmission, submission },
+        onProgress: (event) => {
+          executePendingQueueProgressListeners({
+            ...event,
+            pendingTimestamp: pendingQueueSubmission.pendingTimestamp,
+          })
+        },
+      })
 
       await deletePendingQueueSubmission(
         pendingQueueSubmission.pendingTimestamp,
@@ -205,7 +213,7 @@ async function submit({
   ...params
 }: SubmissionParams & {
   autoSaveKey?: string
-  onProgress?: OnProgress
+  onProgress?: ProgressListener
 }): Promise<FormSubmissionResult> {
   const formSubmissionResult = await submitForm({
     ...params,
@@ -445,8 +453,7 @@ export {
   PendingFormSubmission,
   SubmissionParams,
   registerPendingQueueAttachmentProgressListener,
-  OnProgress,
-  OnProgressArg,
-  PendingQueueAttachmentOnProgress,
-  PendingQueueAttachmentOnProgressArg,
+  registerPendingQueueProgressListener,
+  ProgressListener,
+  ProgressListenerEvent,
 }

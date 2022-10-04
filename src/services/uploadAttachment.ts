@@ -2,7 +2,7 @@ import { generateUploadAttachmentCredentials } from './api/submissions'
 import {
   UploadAttachmentConfiguration,
   uploadAttachment as uploadAttachmentToS3,
-  OnProgress,
+  ProgressListener,
 } from './s3Submit'
 import tenants from '../tenants'
 import { SubmissionTypes } from '@oneblink/types'
@@ -58,7 +58,7 @@ export default async function uploadAttachment(
     onProgress,
   }: UploadAttachmentConfiguration & {
     formId: number
-    onProgress?: OnProgress
+    onProgress?: ProgressListener
   },
   abortSignal?: AbortSignal,
 ): Promise<SubmissionTypes.FormSubmissionAttachment> {

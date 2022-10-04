@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Reduced default `queueSize` for S3 uploads to cater for slower internet connections, set dynamically if connection type is available
 
+### Removed
+
+- **[BREAKING]** `submissionService.uploadAttachment()` function. Replaced by `attachmentsService.uploadAttachment()`
+
 ## [2.1.0] - 2022-09-13
 
 ### Added

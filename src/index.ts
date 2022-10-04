@@ -213,7 +213,7 @@ export * as formStoreService from './form-store-service'
  * import { localisationService } from '@oneblink/apps'
  * ```
  */
-
+export * as localisationService from './localisation-service'
 /**
  * ## Attachments Service
  *
@@ -224,7 +224,7 @@ export * as formStoreService from './form-store-service'
  * ```
  */
 export * as attachmentsService from './attachments-service'
-export * as localisationService from './localisation-service'
+
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import tenants from './tenants'
 import Sentry from './Sentry'

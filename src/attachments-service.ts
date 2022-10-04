@@ -1,12 +1,41 @@
 import { FormTypes } from '@oneblink/types'
-import {
+import { FormSubmissionModel, FormElementKey } from './types/form'
+import uploadAttachment, {
+  UploadAttachmentConfiguration,
+} from './services/uploadAttachment'
+
+type AttachmentSaved =
+  import('@oneblink/types').SubmissionTypes.FormSubmissionAttachment & {
+    type?: undefined
+  }
+
+interface AttachmentBase {
+  _id: string
+  data?: Blob
+  fileName: string
+  isPrivate: boolean
+}
+
+type AttachmentNew = AttachmentBase & {
+  type: 'NEW'
+}
+type AttachmentError = AttachmentBase & {
+  type: 'ERROR'
+  errorMessage: string
+}
+
+type Attachment = AttachmentSaved | AttachmentNew | AttachmentError
+
+export {
+  Attachment,
   AttachmentError,
   AttachmentNew,
   AttachmentSaved,
-} from './types/attachments'
-import { FormSubmissionModel, FormElementKey } from './types/form'
-
-export { FormSubmissionModel, FormElementKey }
+  FormSubmissionModel,
+  FormElementKey,
+  uploadAttachment,
+  UploadAttachmentConfiguration,
+}
 
 /**
  * Check if the submission has attachments that are still uploading
@@ -26,7 +55,6 @@ export { FormSubmissionModel, FormElementKey }
  * @param submission
  * @returns
  */
-
 function checkIfAttachmentsAreUploadingForFormElements(
   formElements: FormTypes.FormElement[],
   submission: FormSubmissionModel,

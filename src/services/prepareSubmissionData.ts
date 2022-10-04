@@ -25,17 +25,17 @@ async function maybeUploadAttachment(
       typeof record._id === 'string' &&
       record.data instanceof Blob
     ) {
-      const _id = record._id
+      const attachmentId = record._id
       return await uploadAttachment({
         formId,
         fileName: record.fileName,
         contentType: record.data.type,
         isPrivate: formElement.storageType !== 'public',
         data: record.data,
-        onProgress: (progress) =>
+        onProgress: (event) =>
           executePendingQueueAttachmentProgressListeners({
-            ...progress,
-            _id,
+            ...event,
+            attachmentId,
           }),
       })
     }

@@ -2,7 +2,7 @@ import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import utilsService from './utils'
 import Sentry from '../Sentry'
 import { FormSubmission, PendingFormSubmission } from '../types/submissions'
-import { OnProgressArg } from './s3Submit'
+import { ProgressListener, ProgressListenerEvent } from './s3Submit'
 
 function errorHandler(error: Error): Error {
   Sentry.captureException(error)
@@ -79,7 +79,6 @@ export async function addFormSubmissionToPendingQueue(
       ...formSubmission,
       pendingTimestamp,
       submission: undefined,
-      progress: 0,
     } as PendingFormSubmission)
     await utilsService.localForage.setItem('submissions', submissions)
     executePendingQueueListeners(submissions)
@@ -162,23 +161,44 @@ export async function deletePendingQueueSubmission(pendingTimestamp: string) {
   }
 }
 
-export type PendingQueueAttachmentOnProgressArg = OnProgressArg & {
-  _id: string
-}
-export type PendingQueueAttachmentOnProgress = (
-  progress: PendingQueueAttachmentOnProgressArg,
-) => unknown
+const pendingQueueAttachmentProgressListeners: Array<{
+  attachmentId: string
+  listener: ProgressListener
+}> = []
 
-const pendingQueueAttachmentProgressListeners: Array<PendingQueueAttachmentOnProgress> =
-  []
-
+/**
+ * Register a lister function that will be passed a progress event when an
+ * attachment for an item in the pending queue is being processed.
+ *
+ * ### Example
+ *
+ * ```js
+ * const listener = async ({ progress }) => {
+ *   // update the UI to reflect the progress here...
+ * }
+ * const deregister =
+ *   await submissionService.registerPendingQueueAttachmentProgressListener(
+ *     attachment.id,
+ *     listener,
+ *   )
+ *
+ * // When no longer needed, remember to deregister the listener
+ * deregister()
+ * ```
+ *
+ * @param attachmentId
+ * @param listener
+ * @returns
+ */
 export function registerPendingQueueAttachmentProgressListener(
-  listener: PendingQueueAttachmentOnProgress,
+  attachmentId: string,
+  listener: ProgressListener,
 ): () => void {
-  pendingQueueAttachmentProgressListeners.push(listener)
+  const item = { attachmentId, listener }
+  pendingQueueAttachmentProgressListeners.push(item)
 
   return () => {
-    const index = pendingQueueAttachmentProgressListeners.indexOf(listener)
+    const index = pendingQueueAttachmentProgressListeners.indexOf(item)
     if (index !== -1) {
       pendingQueueAttachmentProgressListeners.splice(index, 1)
     }
@@ -186,9 +206,72 @@ export function registerPendingQueueAttachmentProgressListener(
 }
 
 export function executePendingQueueAttachmentProgressListeners(
-  progress: PendingQueueAttachmentOnProgressArg,
+  event: ProgressListenerEvent & {
+    attachmentId: string
+  },
 ) {
   for (const pendingQueueAttachmentProgressListener of pendingQueueAttachmentProgressListeners) {
-    pendingQueueAttachmentProgressListener(progress)
+    if (
+      event.attachmentId === pendingQueueAttachmentProgressListener.attachmentId
+    ) {
+      pendingQueueAttachmentProgressListener.listener(event)
+    }
+  }
+}
+
+const pendingQueueProgressListeners: Array<{
+  pendingTimestamp: string
+  listener: ProgressListener
+}> = []
+
+/**
+ * Register a lister function that will be passed a progress event when an item
+ * in the pending queue is being processed.
+ *
+ * ### Example
+ *
+ * ```js
+ * const listener = async ({ progress }) => {
+ *   // update the UI to reflect the progress here...
+ * }
+ * const deregister =
+ *   await submissionService.registerPendingQueueProgressListener(
+ *     pendingQueueItem.pendingTimestamp,
+ *     listener,
+ *   )
+ *
+ * // When no longer needed, remember to deregister the listener
+ * deregister()
+ * ```
+ *
+ * @param listener
+ * @returns
+ */
+export function registerPendingQueueProgressListener(
+  pendingTimestamp: string,
+  listener: ProgressListener,
+): () => void {
+  const item = { pendingTimestamp, listener }
+  pendingQueueProgressListeners.push(item)
+
+  return () => {
+    const index = pendingQueueProgressListeners.indexOf(item)
+    if (index !== -1) {
+      pendingQueueProgressListeners.splice(index, 1)
+    }
+  }
+}
+
+export function executePendingQueueProgressListeners(
+  event: ProgressListenerEvent & {
+    pendingTimestamp: string
+  },
+) {
+  for (const pendingQueueProgressListener of pendingQueueProgressListeners) {
+    if (
+      event.pendingTimestamp === pendingQueueProgressListener.pendingTimestamp
+    ) {
+      pendingQueueProgressListener.listener(event)
+    }
   }
 }

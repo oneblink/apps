@@ -4,7 +4,7 @@ import { isLoggedIn } from '../../auth-service'
 import {
   uploadFormSubmission,
   downloadDraftS3Data,
-  OnProgress,
+  ProgressListener,
 } from '../s3Submit'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
@@ -19,7 +19,7 @@ import {
 const uploadDraftData = async (
   draft: SubmissionTypes.FormsAppDraft,
   draftSubmission: DraftSubmission,
-  onProgress?: OnProgress,
+  onProgress?: ProgressListener,
 ): Promise<string> => {
   const url = `${tenants.current.apiOrigin}/forms/${draft.formId}/upload-draft-data-credentials`
   console.log('Attempting to get Credentials to upload draft data', url)

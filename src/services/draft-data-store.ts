@@ -9,7 +9,7 @@ import { MiscTypes, SubmissionTypes } from '@oneblink/types'
 import Sentry from '../Sentry'
 import { DraftSubmission } from '../types/submissions'
 import { deleteAutoSaveData } from '../auto-save-service'
-import { OnProgress } from './s3Submit'
+import { ProgressListener } from './s3Submit'
 function getDraftDataKey(draftDataId: string) {
   return `DRAFT_DATA_${draftDataId}`
 }
@@ -51,7 +51,7 @@ export async function saveDraftData({
   draft: SubmissionTypes.FormsAppDraft
   draftSubmission: DraftSubmission
   autoSaveKey: string | undefined
-  onProgress?: OnProgress
+  onProgress?: ProgressListener
 }): Promise<string> {
   let draftDataId: string
   const defaultDraftDataId = draft.draftId

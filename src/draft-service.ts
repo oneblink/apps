@@ -22,7 +22,7 @@ import {
 import { MiscTypes, SubmissionTypes } from '@oneblink/types'
 import Sentry from './Sentry'
 import { DraftSubmission } from './types/submissions'
-import { OnProgress } from './services/s3Submit'
+import { ProgressListener } from './services/s3Submit'
 
 interface DraftsData {
   createdAt?: string
@@ -149,7 +149,7 @@ export async function addDraft({
   newDraft: SubmissionTypes.NewFormsAppDraft
   draftSubmission: DraftSubmission
   autoSaveKey?: string
-  onProgress?: OnProgress
+  onProgress?: ProgressListener
 }): Promise<void> {
   const draft: SubmissionTypes.FormsAppDraft = {
     ...newDraft,
@@ -240,7 +240,7 @@ export async function updateDraft({
   draft: SubmissionTypes.FormsAppDraft
   draftSubmission: DraftSubmission
   autoSaveKey?: string
-  onProgress?: OnProgress
+  onProgress?: ProgressListener
 }): Promise<void> {
   const now = new Date().toISOString()
   draftSubmission.keyId = getFormsKeyId() || undefined

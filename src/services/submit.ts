@@ -5,7 +5,7 @@ import {
   checkForPaymentSubmissionEvent,
   handlePaymentSubmissionEvent,
 } from '../payment-service'
-import { OnProgress, uploadFormSubmission } from './s3Submit'
+import { OnProgress, OnProgressArg, uploadFormSubmission } from './s3Submit'
 import { deleteDraft } from '../draft-service'
 import { removePrefillFormData } from '../prefill-service'
 import recentlySubmittedJobsService from './recently-submitted-jobs'
@@ -30,7 +30,7 @@ type SubmissionParams = {
   }
 }
 
-export { SubmissionParams }
+export { SubmissionParams, OnProgress, OnProgressArg }
 
 export default async function submit({
   formSubmission,

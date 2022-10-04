@@ -9,7 +9,7 @@ type AttachmentSaved =
     type?: undefined
   }
 
-interface AttachmentBase {
+type AttachmentBase = {
   _id: string
   data?: Blob
   fileName: string
@@ -24,13 +24,16 @@ type AttachmentError = AttachmentBase & {
   errorMessage: string
 }
 
-type Attachment = AttachmentSaved | AttachmentNew | AttachmentError
+type AttachmentUnsaved = AttachmentNew | AttachmentError
+type Attachment = AttachmentSaved | AttachmentUnsaved
 
 export {
   Attachment,
+  AttachmentBase,
   AttachmentError,
   AttachmentNew,
   AttachmentSaved,
+  AttachmentUnsaved,
   FormSubmissionModel,
   FormElementKey,
   uploadAttachment,
@@ -76,11 +79,10 @@ export function checkIfAttachmentsAreUploading(
   )
 }
 
-type UnuploadedAttachment = AttachmentNew | AttachmentError
 export type SubmissionAttachmentDetail =
   | {
       needsToUpload: true
-      value: UnuploadedAttachment
+      value: AttachmentUnsaved
     }
   | {
       needsToUpload: false
@@ -194,7 +196,7 @@ const asSubmissionAttachmentDetail = (
   ) {
     return {
       needsToUpload: true,
-      value: record as unknown as UnuploadedAttachment,
+      value: record as unknown as AttachmentUnsaved,
     }
   } else {
     // Already uploaded

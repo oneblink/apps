@@ -31,7 +31,7 @@ function init(cognitoServiceData: CognitoServiceData) {
 }
 
 /**
- * Register a lister function that will be call when authentication tokens are
+ * Register a listener function that will be call when authentication tokens are
  * updated or removed.
  *
  * #### Example

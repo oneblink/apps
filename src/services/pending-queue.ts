@@ -24,7 +24,7 @@ const pendingQueueListeners: Array<
 > = []
 
 /**
- * Register a lister function that will be passed an array of
+ * Register a listener function that will be passed an array of
  * PendingFormSubmissions when the pending queue is modified.
  *
  * ### Example
@@ -167,7 +167,7 @@ const pendingQueueAttachmentProgressListeners: Array<{
 }> = []
 
 /**
- * Register a lister function that will be passed a progress event when an
+ * Register a listener function that will be passed a progress event when an
  * attachment for an item in the pending queue is being processed.
  *
  * ### Example
@@ -225,8 +225,8 @@ const pendingQueueProgressListeners: Array<{
 }> = []
 
 /**
- * Register a lister function that will be passed a progress event when an item
- * in the pending queue is being processed.
+ * Register a listener function that will be passed a progress event when an
+ * item in the pending queue is being processed.
  *
  * ### Example
  *
@@ -244,6 +244,7 @@ const pendingQueueProgressListeners: Array<{
  * deregister()
  * ```
  *
+ * @param pendingTimestamp
  * @param listener
  * @returns
  */

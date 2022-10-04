@@ -49,7 +49,7 @@ const draftsListeners: Array<
 > = []
 
 /**
- * Register a lister function that will be passed an array of Drafts when a
+ * Register a listener function that will be passed an array of Drafts when a
  * draft is added, updated or deleted.
  *
  * #### Example

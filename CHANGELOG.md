@@ -9,12 +9,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-- An `onProgress` handler option to attachment upload and submission functions
+- An `onProgress` handler option to attachment upload, draft and submission functions
 - `attachmentsService`
 
 ### Changed
 
 - Reduced default `queueSize` for S3 uploads to cater for slower internet connections, set dynamically if connection type is available
+- **[BREAKING]** `draftService.addDraft()` function to single argument
+- **[BREAKING]** `draftService.updateDraft()` function to single argument
 
 ### Removed
 

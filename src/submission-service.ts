@@ -7,13 +7,19 @@ import {
   updatePendingQueueSubmission,
   deletePendingQueueSubmission,
   registerPendingQueueAttachmentProgressListener,
+  PendingQueueAttachmentOnProgress,
+  PendingQueueAttachmentOnProgressArg,
 } from './services/pending-queue'
 import { generateSubmissionCredentials } from './services/api/submissions'
 import replaceCustomValues from './services/replace-custom-values'
 import { FormTypes } from '@oneblink/types'
 import Sentry from './Sentry'
 import prepareSubmissionData from './services/prepareSubmissionData'
-import submitForm, { SubmissionParams } from './services/submit'
+import submitForm, {
+  SubmissionParams,
+  OnProgress,
+  OnProgressArg,
+} from './services/submit'
 import {
   PendingFormSubmission,
   FormSubmission,
@@ -23,7 +29,6 @@ import {
   DraftSubmission,
 } from './types/submissions'
 import { deleteAutoSaveData } from './auto-save-service'
-import { OnProgress } from './services/s3Submit'
 
 let _isProcessingPendingQueue = false
 
@@ -440,4 +445,8 @@ export {
   PendingFormSubmission,
   SubmissionParams,
   registerPendingQueueAttachmentProgressListener,
+  OnProgress,
+  OnProgressArg,
+  PendingQueueAttachmentOnProgress,
+  PendingQueueAttachmentOnProgressArg,
 }

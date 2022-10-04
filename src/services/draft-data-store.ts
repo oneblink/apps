@@ -9,6 +9,7 @@ import { MiscTypes, SubmissionTypes } from '@oneblink/types'
 import Sentry from '../Sentry'
 import { DraftSubmission } from '../types/submissions'
 import { deleteAutoSaveData } from '../auto-save-service'
+import { OnProgress } from './s3Submit'
 function getDraftDataKey(draftDataId: string) {
   return `DRAFT_DATA_${draftDataId}`
 }
@@ -41,15 +42,21 @@ export async function removeDraftData(
   return utilsService.removeLocalForageItem(key)
 }
 
-export async function saveDraftData(
-  draft: SubmissionTypes.FormsAppDraft,
-  draftSubmission: DraftSubmission,
-  defaultDraftDataId: string,
-  autoSaveKey: string | undefined,
-): Promise<string> {
+export async function saveDraftData({
+  draft,
+  draftSubmission,
+  autoSaveKey,
+  onProgress,
+}: {
+  draft: SubmissionTypes.FormsAppDraft
+  draftSubmission: DraftSubmission
+  autoSaveKey: string | undefined
+  onProgress?: OnProgress
+}): Promise<string> {
   let draftDataId: string
+  const defaultDraftDataId = draft.draftId
   try {
-    draftDataId = await uploadDraftData(draft, draftSubmission)
+    draftDataId = await uploadDraftData(draft, draftSubmission, onProgress)
 
     if (typeof autoSaveKey === 'string') {
       try {
@@ -129,12 +136,11 @@ export async function ensureDraftsDataIsUploaded(draftsData: PutDraftsPayload) {
     }
 
     console.log('Uploading draft data that was saved while offline', draft)
-    const newDraftDataId = await saveDraftData(
+    const newDraftDataId = await saveDraftData({
       draft,
       draftSubmission,
-      draft.draftId,
-      undefined,
-    )
+      autoSaveKey: undefined,
+    })
     newDrafts.push(
       Object.assign({}, draft, {
         draftDataId: newDraftDataId,

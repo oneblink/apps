@@ -162,15 +162,18 @@ export async function deletePendingQueueSubmission(pendingTimestamp: string) {
   }
 }
 
-type AttachmentOnProgressArg = OnProgressArg & {
+export type PendingQueueAttachmentOnProgressArg = OnProgressArg & {
   _id: string
 }
-type AttachmentOnProgress = (progress: AttachmentOnProgressArg) => unknown
+export type PendingQueueAttachmentOnProgress = (
+  progress: PendingQueueAttachmentOnProgressArg,
+) => unknown
 
-const pendingQueueAttachmentProgressListeners: Array<AttachmentOnProgress> = []
+const pendingQueueAttachmentProgressListeners: Array<PendingQueueAttachmentOnProgress> =
+  []
 
 export function registerPendingQueueAttachmentProgressListener(
-  listener: AttachmentOnProgress,
+  listener: PendingQueueAttachmentOnProgress,
 ): () => void {
   pendingQueueAttachmentProgressListeners.push(listener)
 
@@ -183,7 +186,7 @@ export function registerPendingQueueAttachmentProgressListener(
 }
 
 export function executePendingQueueAttachmentProgressListeners(
-  progress: AttachmentOnProgressArg,
+  progress: PendingQueueAttachmentOnProgressArg,
 ) {
   for (const pendingQueueAttachmentProgressListener of pendingQueueAttachmentProgressListeners) {
     pendingQueueAttachmentProgressListener(progress)

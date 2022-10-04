@@ -138,7 +138,6 @@ async function uploadToS3({
     })
 
     managedUpload.on('httpUploadProgress', (progress) => {
-      console.log('Upload to S3 part:', progress)
       if (onProgress) {
         const onePercent = progress.total / 100
         const percent = progress.loaded / onePercent

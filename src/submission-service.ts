@@ -8,9 +8,6 @@ import {
   deletePendingQueueSubmission,
   registerPendingQueueAttachmentProgressListener,
 } from './services/pending-queue'
-import uploadAttachment, {
-  UploadAttachmentConfiguration,
-} from './services/uploadAttachment'
 import { generateSubmissionCredentials } from './services/api/submissions'
 import replaceCustomValues from './services/replace-custom-values'
 import { FormTypes } from '@oneblink/types'
@@ -435,7 +432,6 @@ export {
   deletePendingQueueSubmission,
   registerPendingQueueListener,
   processPendingQueue,
-  uploadAttachment,
   NewDraftSubmission,
   NewFormSubmission,
   DraftSubmission,
@@ -443,6 +439,5 @@ export {
   FormSubmissionResult,
   PendingFormSubmission,
   SubmissionParams,
-  UploadAttachmentConfiguration,
   registerPendingQueueAttachmentProgressListener,
 }

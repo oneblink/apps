@@ -20,12 +20,16 @@ const uploadDraftData = async (
   draft: SubmissionTypes.FormsAppDraft,
   draftSubmission: DraftSubmission,
   onProgress?: ProgressListener,
+  continueWhilstAttachmentsAreUploading?: boolean,
 ): Promise<string> => {
   const url = `${tenants.current.apiOrigin}/forms/${draft.formId}/upload-draft-data-credentials`
   console.log('Attempting to get Credentials to upload draft data', url)
 
   try {
-    const submission = await prepareSubmissionData(draftSubmission)
+    const submission = await prepareSubmissionData(
+      draftSubmission,
+      continueWhilstAttachmentsAreUploading,
+    )
     const data = await postRequest<S3DraftUploadCredentials>(url)
     const userToken = getUserToken()
     console.log('Attempting to upload draft data:', data)

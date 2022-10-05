@@ -47,16 +47,23 @@ export async function saveDraftData({
   draftSubmission,
   autoSaveKey,
   onProgress,
+  continueWhilstAttachmentsAreUploading,
 }: {
   draft: SubmissionTypes.FormsAppDraft
   draftSubmission: DraftSubmission
   autoSaveKey: string | undefined
   onProgress?: ProgressListener
+  continueWhilstAttachmentsAreUploading?: boolean
 }): Promise<string> {
   let draftDataId: string
   const defaultDraftDataId = draft.draftId
   try {
-    draftDataId = await uploadDraftData(draft, draftSubmission, onProgress)
+    draftDataId = await uploadDraftData(
+      draft,
+      draftSubmission,
+      onProgress,
+      continueWhilstAttachmentsAreUploading,
+    )
 
     if (typeof autoSaveKey === 'string') {
       try {

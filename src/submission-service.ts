@@ -9,6 +9,9 @@ import {
   registerPendingQueueAttachmentProgressListener,
   registerPendingQueueProgressListener,
   executePendingQueueProgressListeners,
+  removePendingQueueSubmission,
+  PendingQueueListener,
+  PendingQueueAction,
 } from './services/pending-queue'
 import { generateSubmissionCredentials } from './services/api/submissions'
 import replaceCustomValues from './services/replace-custom-values'
@@ -95,6 +98,7 @@ async function processPendingQueue(): Promise<void> {
       await updatePendingQueueSubmission(
         pendingQueueSubmission.pendingTimestamp,
         pendingQueueSubmission,
+        'SUBMIT_STARTED',
       )
 
       const submission = await prepareSubmissionData(formSubmission)
@@ -108,8 +112,9 @@ async function processPendingQueue(): Promise<void> {
         },
       })
 
-      await deletePendingQueueSubmission(
+      await removePendingQueueSubmission(
         pendingQueueSubmission.pendingTimestamp,
+        'SUBMIT_SUCCEEDED',
       )
 
       console.log(
@@ -129,6 +134,7 @@ async function processPendingQueue(): Promise<void> {
       await updatePendingQueueSubmission(
         pendingQueueSubmission.pendingTimestamp,
         pendingQueueSubmission,
+        'SUBMIT_FAILED',
       )
     }
   }
@@ -456,4 +462,6 @@ export {
   registerPendingQueueProgressListener,
   ProgressListener,
   ProgressListenerEvent,
+  PendingQueueListener,
+  PendingQueueAction,
 }

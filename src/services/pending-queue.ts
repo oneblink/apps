@@ -19,9 +19,17 @@ function errorHandler(error: Error): Error {
   return error
 }
 
-const pendingQueueListeners: Array<
-  (results: PendingFormSubmission[]) => unknown
-> = []
+export type PendingQueueAction =
+  | 'SUBMIT_STARTED'
+  | 'SUBMIT_FAILED'
+  | 'SUBMIT_SUCCEEDED'
+  | 'ADDITION'
+  | 'DELETION'
+export type PendingQueueListener = (
+  results: PendingFormSubmission[],
+  action: PendingQueueAction,
+) => unknown
+const pendingQueueListeners: Array<PendingQueueListener> = []
 
 /**
  * Register a listener function that will be passed an array of
@@ -45,7 +53,7 @@ const pendingQueueListeners: Array<
  * @returns
  */
 export function registerPendingQueueListener(
-  listener: (results: PendingFormSubmission[]) => unknown,
+  listener: PendingQueueListener,
 ): () => void {
   pendingQueueListeners.push(listener)
 
@@ -57,10 +65,17 @@ export function registerPendingQueueListener(
   }
 }
 
-function executePendingQueueListeners(newSubmissions: PendingFormSubmission[]) {
-  console.log('Pending Queue submissions have been updated', newSubmissions)
+function executePendingQueueListeners(
+  newSubmissions: PendingFormSubmission[],
+  action: PendingQueueAction,
+) {
+  console.log(
+    'Pending Queue submissions have been updated',
+    action,
+    newSubmissions,
+  )
   for (const pendingQueueListener of pendingQueueListeners) {
-    pendingQueueListener(newSubmissions)
+    pendingQueueListener(newSubmissions, action)
   }
 }
 
@@ -81,7 +96,7 @@ export async function addFormSubmissionToPendingQueue(
       submission: undefined,
     } as PendingFormSubmission)
     await utilsService.localForage.setItem('submissions', submissions)
-    executePendingQueueListeners(submissions)
+    executePendingQueueListeners(submissions, 'ADDITION')
   } catch (error) {
     Sentry.captureException(error)
     throw error instanceof Error ? errorHandler(error) : error
@@ -91,6 +106,7 @@ export async function addFormSubmissionToPendingQueue(
 export async function updatePendingQueueSubmission(
   pendingTimestamp: string,
   newSubmission: PendingFormSubmission,
+  action: 'SUBMIT_FAILED' | 'SUBMIT_STARTED',
 ) {
   try {
     const submissions = await getPendingQueueSubmissions()
@@ -101,7 +117,7 @@ export async function updatePendingQueueSubmission(
       return submission
     })
     await utilsService.localForage.setItem('submissions', newSubmissions)
-    executePendingQueueListeners(newSubmissions)
+    executePendingQueueListeners(newSubmissions, action)
   } catch (error) {
     Sentry.captureException(error)
     throw error instanceof Error ? errorHandler(error) : error
@@ -147,6 +163,13 @@ export function getFormSubmission(
  * @param pendingTimestamp
  */
 export async function deletePendingQueueSubmission(pendingTimestamp: string) {
+  await removePendingQueueSubmission(pendingTimestamp, 'DELETION')
+}
+
+export async function removePendingQueueSubmission(
+  pendingTimestamp: string,
+  action: 'SUBMIT_SUCCEEDED' | 'DELETION',
+) {
   try {
     await utilsService.removeLocalForageItem(`SUBMISSION_${pendingTimestamp}`)
     const submissions = await getPendingQueueSubmissions()
@@ -154,7 +177,7 @@ export async function deletePendingQueueSubmission(pendingTimestamp: string) {
       (submission) => submission.pendingTimestamp !== pendingTimestamp,
     )
     await utilsService.localForage.setItem('submissions', newSubmissions)
-    executePendingQueueListeners(newSubmissions)
+    executePendingQueueListeners(newSubmissions, action)
   } catch (error) {
     Sentry.captureException(error)
     throw error instanceof Error ? errorHandler(error) : error

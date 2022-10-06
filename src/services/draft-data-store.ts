@@ -47,16 +47,14 @@ export async function saveDraftData({
   draftSubmission,
   autoSaveKey,
   onProgress,
-  syncRemotely,
 }: {
   draft: SubmissionTypes.FormsAppDraft
   draftSubmission: DraftSubmission
   autoSaveKey: string | undefined
   onProgress?: ProgressListener
-  syncRemotely: boolean
 }): Promise<string> {
   let draftDataId = draft.draftId
-  if (syncRemotely) {
+  if (!draftSubmission.backgroundUpload) {
     try {
       draftDataId = await uploadDraftData(draft, draftSubmission, onProgress)
 
@@ -138,11 +136,11 @@ export async function ensureDraftsDataIsUploaded(draftsData: PutDraftsPayload) {
     }
 
     console.log('Uploading draft data that was saved while offline', draft)
+    draftSubmission.backgroundUpload = false
     const newDraftDataId = await saveDraftData({
       draft,
       draftSubmission,
       autoSaveKey: undefined,
-      syncRemotely: true,
     })
     newDrafts.push(
       Object.assign({}, draft, {

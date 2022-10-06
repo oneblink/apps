@@ -151,7 +151,7 @@ export async function addDraft({
   draftSubmission: DraftSubmission
   autoSaveKey?: string
   onProgress?: ProgressListener
-  backgroundUpload: boolean
+  backgroundUpload?: boolean
 }): Promise<void> {
   const draft: SubmissionTypes.FormsAppDraft = {
     ...newDraft,
@@ -245,7 +245,7 @@ export async function updateDraft({
   draftSubmission: DraftSubmission
   autoSaveKey?: string
   onProgress?: ProgressListener
-  backgroundUpload: boolean
+  backgroundUpload?: boolean
 }): Promise<void> {
   const now = new Date().toISOString()
   draftSubmission.keyId = getFormsKeyId() || undefined

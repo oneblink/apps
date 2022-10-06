@@ -241,7 +241,6 @@ export async function updateDraft({
   draftSubmission: DraftSubmission
   autoSaveKey?: string
   onProgress?: ProgressListener
-  backgroundUpload?: boolean
 }): Promise<void> {
   const now = new Date().toISOString()
   draftSubmission.keyId = getFormsKeyId() || undefined

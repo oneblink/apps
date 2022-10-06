@@ -3,16 +3,11 @@ import { NewDraftSubmission } from '../types/submissions'
 import { executePendingQueueAttachmentProgressListeners } from './pending-queue'
 import uploadAttachment from './uploadAttachment'
 
-export default async function prepareSubmissionData(
-  { definition, submission }: NewDraftSubmission,
-  continueWhilstAttachmentsAreUploading?: boolean,
-): Promise<NewDraftSubmission['submission']> {
-  return uploadAttachments(
-    definition.id,
-    definition.elements,
-    submission,
-    continueWhilstAttachmentsAreUploading,
-  )
+export default async function prepareSubmissionData({
+  definition,
+  submission,
+}: NewDraftSubmission): Promise<NewDraftSubmission['submission']> {
+  return await uploadAttachments(definition.id, definition.elements, submission)
 }
 
 async function maybeUploadAttachment(
@@ -52,15 +47,12 @@ async function uploadAttachments(
   formId: number,
   formElements: FormTypes.FormElement[],
   submission: NewDraftSubmission['submission'],
-  continueWhilstAttachmentsAreUploading?: boolean,
 ): Promise<NewDraftSubmission['submission']> {
   for (const formElement of formElements) {
     switch (formElement.type) {
       case 'page':
       case 'section': {
-        if (!continueWhilstAttachmentsAreUploading) {
-          await uploadAttachments(formId, formElement.elements, submission)
-        }
+        await uploadAttachments(formId, formElement.elements, submission)
         break
       }
       case 'form': {
@@ -68,13 +60,11 @@ async function uploadAttachments(
         if (!nestedSubmission || typeof nestedSubmission !== 'object') {
           break
         }
-        if (!continueWhilstAttachmentsAreUploading) {
-          await uploadAttachments(
-            formId,
-            formElement.elements || [],
-            nestedSubmission as NewDraftSubmission['submission'],
-          )
-        }
+        await uploadAttachments(
+          formId,
+          formElement.elements || [],
+          nestedSubmission as NewDraftSubmission['submission'],
+        )
         break
       }
       case 'repeatableSet': {
@@ -83,9 +73,7 @@ async function uploadAttachments(
           break
         }
         for (const entry of entries) {
-          if (!continueWhilstAttachmentsAreUploading) {
-            await uploadAttachments(formId, formElement.elements, entry)
-          }
+          await uploadAttachments(formId, formElement.elements, entry)
         }
         break
       }
@@ -101,22 +89,17 @@ async function uploadAttachments(
         switch (formElement.type) {
           case 'camera':
           case 'draw': {
-            if (!continueWhilstAttachmentsAreUploading) {
-              const newValue = await maybeUploadAttachment(
-                formId,
-                formElement,
-                value,
-              )
-              submission[formElement.name] = newValue
-            }
+            const newValue = await maybeUploadAttachment(
+              formId,
+              formElement,
+              value,
+            )
+            submission[formElement.name] = newValue
             break
           }
           case 'compliance': {
             const files = (value as Record<string, unknown> | undefined)?.files
-            if (
-              Array.isArray(files) &&
-              !continueWhilstAttachmentsAreUploading
-            ) {
+            if (Array.isArray(files)) {
               for (let index = 0; index < files.length; index++) {
                 files[index] = await maybeUploadAttachment(
                   formId,
@@ -128,10 +111,7 @@ async function uploadAttachments(
             break
           }
           case 'files': {
-            if (
-              Array.isArray(value) &&
-              !continueWhilstAttachmentsAreUploading
-            ) {
+            if (Array.isArray(value)) {
               for (let index = 0; index < value.length; index++) {
                 value[index] = await maybeUploadAttachment(
                   formId,

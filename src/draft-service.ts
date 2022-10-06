@@ -145,13 +145,13 @@ export async function addDraft({
   draftSubmission,
   autoSaveKey,
   onProgress,
-  continueWhilstAttachmentsAreUploading,
+  backgroundUpload,
 }: {
   newDraft: SubmissionTypes.NewFormsAppDraft
   draftSubmission: DraftSubmission
   autoSaveKey?: string
   onProgress?: ProgressListener
-  continueWhilstAttachmentsAreUploading?: boolean
+  backgroundUpload: boolean
 }): Promise<void> {
   const draft: SubmissionTypes.FormsAppDraft = {
     ...newDraft,
@@ -183,7 +183,7 @@ export async function addDraft({
       draftSubmission,
       autoSaveKey,
       onProgress,
-      continueWhilstAttachmentsAreUploading,
+      syncRemotely: !backgroundUpload,
     })
     const draftsData = await getDraftsData()
     draftsData.drafts.push({
@@ -239,13 +239,13 @@ export async function updateDraft({
   draftSubmission,
   autoSaveKey,
   onProgress,
-  continueWhilstAttachmentsAreUploading,
+  backgroundUpload,
 }: {
   draft: SubmissionTypes.FormsAppDraft
   draftSubmission: DraftSubmission
   autoSaveKey?: string
   onProgress?: ProgressListener
-  continueWhilstAttachmentsAreUploading?: boolean
+  backgroundUpload: boolean
 }): Promise<void> {
   const now = new Date().toISOString()
   draftSubmission.keyId = getFormsKeyId() || undefined
@@ -283,7 +283,7 @@ export async function updateDraft({
         draftSubmission,
         autoSaveKey,
         onProgress,
-        continueWhilstAttachmentsAreUploading,
+        syncRemotely: !backgroundUpload,
       })
       existingDraft.draftDataId = draftDataId
       existingDraft.title = draft.title

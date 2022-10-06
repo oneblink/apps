@@ -11,6 +11,10 @@ export type NewDraftSubmission = {
   submission: SubmissionTypes.S3SubmissionData['submission']
   /** The form definition when the draft was saved */
   definition: FormTypes.Form
+  /**
+   * Set to true if the submission should be uploaded in the background, false
+   * or undefined if the submission should be uploaded immediately
+   */
   backgroundUpload?: boolean
 }
 

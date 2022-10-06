@@ -7,7 +7,7 @@ export default async function prepareSubmissionData({
   definition,
   submission,
 }: NewDraftSubmission): Promise<NewDraftSubmission['submission']> {
-  return uploadAttachments(definition.id, definition.elements, submission)
+  return await uploadAttachments(definition.id, definition.elements, submission)
 }
 
 async function maybeUploadAttachment(

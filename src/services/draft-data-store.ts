@@ -47,31 +47,33 @@ export async function saveDraftData({
   draftSubmission,
   autoSaveKey,
   onProgress,
+  syncRemotely,
 }: {
   draft: SubmissionTypes.FormsAppDraft
   draftSubmission: DraftSubmission
   autoSaveKey: string | undefined
   onProgress?: ProgressListener
+  syncRemotely: boolean
 }): Promise<string> {
-  let draftDataId: string
-  const defaultDraftDataId = draft.draftId
-  try {
-    draftDataId = await uploadDraftData(draft, draftSubmission, onProgress)
+  let draftDataId = draft.draftId
+  if (syncRemotely) {
+    try {
+      draftDataId = await uploadDraftData(draft, draftSubmission, onProgress)
 
-    if (typeof autoSaveKey === 'string') {
-      try {
-        await deleteAutoSaveData(draftSubmission.definition.id, autoSaveKey)
-      } catch (error) {
-        console.warn('Error removing auto save data: ', error)
-        Sentry.captureException(error)
+      if (typeof autoSaveKey === 'string') {
+        try {
+          await deleteAutoSaveData(draftSubmission.definition.id, autoSaveKey)
+        } catch (error) {
+          console.warn('Error removing auto save data: ', error)
+          Sentry.captureException(error)
+        }
       }
+    } catch (error) {
+      Sentry.captureException(error)
+      // Ignoring all errors here as we don't want draft submission data
+      // being saved to the cloud to prevent drafts from being saved on the device
+      console.warn('Could not upload Draft Data as JSON', error)
     }
-  } catch (error) {
-    Sentry.captureException(error)
-    // Ignoring all errors here as we don't want draft submission data
-    // being saved to the cloud to prevent drafts from being saved on the device
-    console.warn('Could not upload Draft Data as JSON', error)
-    draftDataId = defaultDraftDataId
   }
   await setLocalDraftData(draftDataId, draftSubmission)
   return draftDataId
@@ -140,6 +142,7 @@ export async function ensureDraftsDataIsUploaded(draftsData: PutDraftsPayload) {
       draft,
       draftSubmission,
       autoSaveKey: undefined,
+      syncRemotely: true,
     })
     newDrafts.push(
       Object.assign({}, draft, {

@@ -192,7 +192,7 @@ export async function addDraft({
     })
     await utilsService.localForage.setItem(`DRAFTS_${username}`, draftsData)
     executeDraftsListeners(draftsData)
-    await syncDrafts({
+    syncDrafts({
       throwError: false,
       formsAppId: draftSubmission.formsAppId,
     })
@@ -294,8 +294,7 @@ export async function updateDraft({
       await utilsService.localForage.setItem(`DRAFTS_${username}`, draftsData)
       executeDraftsListeners(draftsData)
     }
-
-    await syncDrafts({
+    syncDrafts({
       throwError: false,
       formsAppId: draftSubmission.formsAppId,
     })

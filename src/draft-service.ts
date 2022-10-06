@@ -192,10 +192,17 @@ export async function addDraft({
     })
     await utilsService.localForage.setItem(`DRAFTS_${username}`, draftsData)
     executeDraftsListeners(draftsData)
-    await syncDrafts({
-      throwError: false,
-      formsAppId: draftSubmission.formsAppId,
-    })
+    if (backgroundUpload) {
+      syncDrafts({
+        throwError: false,
+        formsAppId: draftSubmission.formsAppId,
+      })
+    } else {
+      await syncDrafts({
+        throwError: false,
+        formsAppId: draftSubmission.formsAppId,
+      })
+    }
   } catch (err) {
     Sentry.captureException(err)
     throw errorHandler(err as Error)
@@ -294,11 +301,17 @@ export async function updateDraft({
       await utilsService.localForage.setItem(`DRAFTS_${username}`, draftsData)
       executeDraftsListeners(draftsData)
     }
-
-    await syncDrafts({
-      throwError: false,
-      formsAppId: draftSubmission.formsAppId,
-    })
+    if (backgroundUpload) {
+      syncDrafts({
+        throwError: false,
+        formsAppId: draftSubmission.formsAppId,
+      })
+    } else {
+      await syncDrafts({
+        throwError: false,
+        formsAppId: draftSubmission.formsAppId,
+      })
+    }
   } catch (err) {
     Sentry.captureException(err)
     throw errorHandler(err as Error)

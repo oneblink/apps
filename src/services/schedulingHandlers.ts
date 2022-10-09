@@ -2,7 +2,7 @@ import { generateSchedulingConfiguration } from './api/scheduling'
 import utilsService from './utils'
 import { SubmissionEventTypes } from '@oneblink/types'
 import { schedulingService } from '@oneblink/sdk-core'
-import { FormSubmissionResult, NewDraftSubmission } from '../types/submissions'
+import { FormSubmissionResult, BaseFormSubmission } from '../types/submissions'
 const KEY = 'SCHEDULING_SUBMISSION_RESULT'
 
 type SchedulingBooking = {
@@ -12,11 +12,11 @@ type SchedulingBooking = {
 }
 
 function checkForSchedulingSubmissionEvent(
-  newDraftSubmission: NewDraftSubmission,
+  baseFormSubmission: BaseFormSubmission,
 ): SubmissionEventTypes.SchedulingSubmissionEvent | undefined {
   const schedulingSubmissionEvent = schedulingService.checkForSchedulingEvent(
-    newDraftSubmission.definition,
-    newDraftSubmission.submission,
+    baseFormSubmission.definition,
+    baseFormSubmission.submission,
   )
   if (schedulingSubmissionEvent) {
     console.log(

@@ -112,7 +112,7 @@ export async function updatePendingQueueSubmission(
     const submissions = await getPendingQueueSubmissions()
     const newSubmissions = submissions.map((submission) => {
       if (submission.pendingTimestamp === pendingTimestamp) {
-        return newSubmission
+        return { ...newSubmission }
       }
       return submission
     })

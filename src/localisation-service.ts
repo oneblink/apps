@@ -131,7 +131,7 @@ export function formatTime(value: Date): string {
   const iDeviceOSVersion = parseFloat(
     parser(window.navigator.userAgent).os.version || '',
   )
-  if (iDeviceOSVersion < 13) {
+  if (iDeviceOSVersion < 13.0) {
     const time = tenants.current.intlFormats.olderIOSTime.format(value)
     const newTime = time.split(':')
     return `${newTime[0]}:${newTime[1]} ${newTime[2].slice(-2)}`

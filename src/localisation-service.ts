@@ -1,4 +1,5 @@
 import tenants from './tenants'
+import parser from 'ua-parser-js'
 
 /**
  * Get the locale (e.g. `en-AU`) for the current tenant.
@@ -127,6 +128,14 @@ export function formatDateLong(value: Date): string {
  * @returns
  */
 export function formatTime(value: Date): string {
+  const iDeviceOSVersion = parseFloat(
+    parser(window.navigator.userAgent).os.version || '',
+  )
+  if (iDeviceOSVersion < 13) {
+    const time = tenants.current.intlFormats.olderIOSTime.format(value)
+    const newTime = time.split(':')
+    return `${newTime[0]}:${newTime[1]} ${newTime[2].slice(-2)}`
+  }
   return tenants.current.intlFormats.time.format(value)
 }
 

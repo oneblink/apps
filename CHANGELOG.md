@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+- time formatting for older iOS devices. Prevents date from repeating.
+- added `ua-parser-js` package to help determine the iOS version used by an apple device
+
+### Added
+
 - An `onProgress` handler option to attachment upload and submission functions
 
 ### Changed

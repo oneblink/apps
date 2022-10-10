@@ -9,6 +9,7 @@ interface OneBlinkAppsTenant {
     date: Intl.DateTimeFormat
     dateLong: Intl.DateTimeFormat
     time: Intl.DateTimeFormat
+    olderIOSTime: Intl.DateTimeFormat
   }
 }
 type Locale = 'en-AU' | 'en-US'
@@ -42,6 +43,11 @@ const generateFormatters = (locale: Locale) => {
     }),
     time: new Intl.DateTimeFormat(locale, {
       timeStyle: 'short',
+    }),
+    olderIOSTime: new Intl.DateTimeFormat(locale, {
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
     }),
   }
 }

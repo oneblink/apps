@@ -176,7 +176,7 @@ async function uploadToS3({
           return
         }
         throw new OneBlinkAppsError(
-          'There was an error saving the file. Please try again. If the problem persists, contact your administrator',
+          'We encountered a network related issue. Please ensure you are connected to the internet before trying again. If the problem persists, contact your administrator.',
           {
             title: 'Connectivity Issues',
             originalError: err as Error,

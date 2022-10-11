@@ -1,4 +1,5 @@
 import * as queryString from 'query-string'
+import OneBlinkAppsError from './errors/oneBlinkAppsError'
 
 import { getIdToken } from './forms-key'
 import { getUserToken } from './user-token'
@@ -31,8 +32,22 @@ export class HTTPError extends Error {
   }
 }
 
+async function fetchWithError(url: string, options?: RequestInit) {
+  try {
+    return await fetch(url, options)
+  } catch (error) {
+    throw new OneBlinkAppsError(
+      'We encountered a network related issue. Please ensure you are connected to the internet before trying again. If the problem persists, contact your administrator.',
+      {
+        title: 'Connectivity Issues',
+        originalError: error as Error,
+      },
+    )
+  }
+}
+
 async function fetchJSON<T>(url: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(url, options)
+  const response = await fetchWithError(url, options)
 
   if (response.status === 204) {
     // @ts-expect-error
@@ -110,7 +125,7 @@ export async function deleteRequest(
     signal: abortSignal,
   }
 
-  const res = await fetch(url, opts)
+  const res = await fetchWithError(url, opts)
   if (!res.ok) {
     const errorPayload = await res.json()
     throw new HTTPError(res.status, errorPayload.message)

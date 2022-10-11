@@ -56,6 +56,9 @@ const getDefaultError = (error: HTTPError) => {
 }
 
 const handleError = (error: HTTPError) => {
+  if (error instanceof OneBlinkAppsError) {
+    throw error
+  }
   switch (error.status) {
     case 400: {
       return getBadRequestError(error)
@@ -201,7 +204,7 @@ export const generateUploadAttachmentCredentials = async (
     abortSignal,
   ).catch((error) => {
     // Cancelling will throw an error.
-    if (!abortSignal?.aborted) {
+    if (abortSignal?.aborted) {
       throw error
     }
 

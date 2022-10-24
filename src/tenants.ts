@@ -50,16 +50,16 @@ const tenants = {
   test: {
     oneblink: {
       awsRegion: 'ap-southeast-2',
-      loginDomain: 'login-test.oneblink.io',
-      apiOrigin: 'https://auth-api-test.blinkm.io',
+      loginDomain: 'login.test.oneblink.io',
+      apiOrigin: 'https://auth-api.test.blinkm.io',
       vapidPublicKey:
         'BE5wtYdaQW3z7DWc08rzNlOwPuituVWFRLW_lUMD78ZJatFOjio8fYDHaIpQCRyeKsJ5j4kLaFU374J4dM90iUc',
       intlFormats: generateFormatters('en-AU'),
     },
     civicplus: {
       awsRegion: 'us-east-2',
-      loginDomain: 'login-test.transform.civicplus.com',
-      apiOrigin: 'https://auth-api-test.transform.civicplus.com',
+      loginDomain: 'login.test.transform.civicplus.com',
+      apiOrigin: 'https://auth-api.test.transform.civicplus.com',
       vapidPublicKey:
         'BLg2Dn9sYj1a0I3AcS22Fg71uubdMLwoemG8zfnPOljgFKB-5MR3FIxc2Mtt0AzM3zk2QWl3YzEy6EEwIUmz19k',
       intlFormats: generateFormatters('en-US'),

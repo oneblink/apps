@@ -6,26 +6,33 @@ import {
   getFormSubmission,
   updatePendingQueueSubmission,
   deletePendingQueueSubmission,
+  registerPendingQueueAttachmentProgressListener,
+  registerPendingQueueProgressListener,
+  executePendingQueueProgressListeners,
+  removePendingQueueSubmission,
+  PendingQueueListener,
+  PendingQueueAction,
 } from './services/pending-queue'
-import uploadAttachment, {
-  UploadAttachmentConfiguration,
-} from './services/uploadAttachment'
 import { generateSubmissionCredentials } from './services/api/submissions'
 import replaceCustomValues from './services/replace-custom-values'
 import { FormTypes } from '@oneblink/types'
 import Sentry from './Sentry'
 import prepareSubmissionData from './services/prepareSubmissionData'
-import submitForm, { SubmissionParams } from './services/submit'
+import submitForm, {
+  SubmissionParams,
+  ProgressListener,
+  ProgressListenerEvent,
+} from './services/submit'
 import {
   PendingFormSubmission,
   FormSubmission,
   FormSubmissionResult,
+  BaseFormSubmission,
   NewDraftSubmission,
   NewFormSubmission,
   DraftSubmission,
 } from './types/submissions'
 import { deleteAutoSaveData } from './auto-save-service'
-import { OnProgress } from './services/s3Submit'
 
 let _isProcessingPendingQueue = false
 
@@ -92,13 +99,23 @@ async function processPendingQueue(): Promise<void> {
       await updatePendingQueueSubmission(
         pendingQueueSubmission.pendingTimestamp,
         pendingQueueSubmission,
+        'SUBMIT_STARTED',
       )
 
       const submission = await prepareSubmissionData(formSubmission)
-      await submit({ formSubmission: { ...formSubmission, submission } })
+      await submit({
+        formSubmission: { ...formSubmission, submission },
+        onProgress: (event) => {
+          executePendingQueueProgressListeners({
+            ...event,
+            pendingTimestamp: pendingQueueSubmission.pendingTimestamp,
+          })
+        },
+      })
 
-      await deletePendingQueueSubmission(
+      await removePendingQueueSubmission(
         pendingQueueSubmission.pendingTimestamp,
+        'SUBMIT_SUCCEEDED',
       )
 
       console.log(
@@ -118,6 +135,7 @@ async function processPendingQueue(): Promise<void> {
       await updatePendingQueueSubmission(
         pendingQueueSubmission.pendingTimestamp,
         pendingQueueSubmission,
+        'SUBMIT_FAILED',
       )
     }
   }
@@ -202,7 +220,7 @@ async function submit({
   ...params
 }: SubmissionParams & {
   autoSaveKey?: string
-  onProgress?: OnProgress
+  onProgress?: ProgressListener
 }): Promise<FormSubmissionResult> {
   const formSubmissionResult = await submitForm({
     ...params,
@@ -316,6 +334,7 @@ async function executeCancelAction(
     scheduling: null,
     submissionId: null,
     submissionTimestamp: null,
+    isUploadingAttachments: false,
   }
 
   await executeAction(
@@ -433,7 +452,7 @@ export {
   deletePendingQueueSubmission,
   registerPendingQueueListener,
   processPendingQueue,
-  uploadAttachment,
+  BaseFormSubmission,
   NewDraftSubmission,
   NewFormSubmission,
   DraftSubmission,
@@ -441,5 +460,10 @@ export {
   FormSubmissionResult,
   PendingFormSubmission,
   SubmissionParams,
-  UploadAttachmentConfiguration,
+  registerPendingQueueAttachmentProgressListener,
+  registerPendingQueueProgressListener,
+  ProgressListener,
+  ProgressListenerEvent,
+  PendingQueueListener,
+  PendingQueueAction,
 }

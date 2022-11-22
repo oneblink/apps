@@ -29,7 +29,8 @@ export type UploadAttachmentConfiguration = {
   data: PutObjectRequest['Body']
 }
 
-export type OnProgress = (options: { progress: number; total: number }) => void
+export type ProgressListenerEvent = { progress: number; total: number }
+export type ProgressListener = (progress: ProgressListenerEvent) => void
 
 function getDeviceInformation(): SubmissionTypes.S3SubmissionDataDevice {
   if (window.cordova) {
@@ -104,7 +105,7 @@ async function uploadToS3({
   s3Configuration: AWSTypes.S3ObjectCredentials
   putObjectRequest: PutObjectRequest
   abortSignal?: AbortSignal
-  onProgress?: OnProgress
+  onProgress?: ProgressListener
   retryAttempt?: number
 }) {
   try {
@@ -137,7 +138,6 @@ async function uploadToS3({
     })
 
     managedUpload.on('httpUploadProgress', (progress) => {
-      console.log('Upload to S3 part:', progress)
       if (onProgress) {
         const onePercent = progress.total / 100
         const percent = progress.loaded / onePercent
@@ -176,7 +176,7 @@ async function uploadToS3({
           return
         }
         throw new OneBlinkAppsError(
-          'There was an error saving the file. Please try again. If the problem persists, contact your administrator',
+          'We encountered a network related issue. Please ensure you are connected to the internet before trying again. If the problem persists, contact your administrator.',
           {
             title: 'Connectivity Issues',
             originalError: err as Error,
@@ -198,7 +198,7 @@ async function uploadFormSubmission({
   s3Configuration: AWSTypes.S3ObjectCredentials
   formJson: SubmissionTypes.S3SubmissionData
   tags: Record<string, string | undefined>
-  onProgress?: OnProgress
+  onProgress?: ProgressListener
 }) {
   console.log('Uploading submission')
 
@@ -226,7 +226,7 @@ async function uploadAttachment({
   s3Configuration: AWSTypes.S3ObjectCredentials
   fileConfiguration: UploadAttachmentConfiguration
   abortSignal: AbortSignal | undefined
-  onProgress?: OnProgress
+  onProgress?: ProgressListener
 }) {
   const putObjectRequest = getObjectMeta(s3Configuration.s3)
   putObjectRequest.Body = fileConfiguration.data

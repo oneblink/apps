@@ -22,6 +22,7 @@ import {
 import { MiscTypes, SubmissionTypes } from '@oneblink/types'
 import Sentry from './Sentry'
 import { DraftSubmission } from './types/submissions'
+import { ProgressListener } from './services/s3Submit'
 
 interface DraftsData {
   createdAt?: string
@@ -48,7 +49,7 @@ const draftsListeners: Array<
 > = []
 
 /**
- * Register a lister function that will be passed an array of Drafts when a
+ * Register a listener function that will be passed an array of Drafts when a
  * draft is added, updated or deleted.
  *
  * #### Example
@@ -136,15 +137,20 @@ async function upsertDraftByKey(
  * )
  * ```
  *
- * @param newDraft The draft
- * @param draftSubmission The draft data
+ * @param options
  * @returns
  */
-export async function addDraft(
-  newDraft: SubmissionTypes.NewFormsAppDraft,
-  draftSubmission: DraftSubmission,
-  autoSaveKey?: string,
-): Promise<void> {
+export async function addDraft({
+  newDraft,
+  draftSubmission,
+  autoSaveKey,
+  onProgress,
+}: {
+  newDraft: SubmissionTypes.NewFormsAppDraft
+  draftSubmission: DraftSubmission
+  autoSaveKey?: string
+  onProgress?: ProgressListener
+}): Promise<void> {
   const draft: SubmissionTypes.FormsAppDraft = {
     ...newDraft,
     draftId: uuidv4(),
@@ -165,32 +171,32 @@ export async function addDraft(
       },
     )
   }
-  // Push draft data to s3 (should also update local storage draft data)
-  // add drafts to array in local storage
-  // sync local storage drafts with server
-  // draftId will be set as draftDataId if data cannot be uploaded
-  return saveDraftData(draft, draftSubmission, draft.draftId, autoSaveKey)
-    .then((draftDataId) => {
-      return getDraftsData().then((draftsData) => {
-        draftsData.drafts.push({
-          ...draft,
-          draftDataId,
-        })
-        return utilsService.localForage
-          .setItem(`DRAFTS_${username}`, draftsData)
-          .then(() => executeDraftsListeners(draftsData))
-      })
+  try {
+    // Push draft data to s3 (should also update local storage draft data)
+    // add drafts to array in local storage
+    // sync local storage drafts with server
+    // draftId will be set as draftDataId if data cannot be uploaded
+    const draftDataId = await saveDraftData({
+      draft,
+      draftSubmission,
+      autoSaveKey,
+      onProgress,
     })
-    .then(() =>
-      syncDrafts({
-        throwError: false,
-        formsAppId: draftSubmission.formsAppId,
-      }),
-    )
-    .catch((err) => {
-      Sentry.captureException(err)
-      throw errorHandler(err)
+    const draftsData = await getDraftsData()
+    draftsData.drafts.push({
+      ...draft,
+      draftDataId,
     })
+    await utilsService.localForage.setItem(`DRAFTS_${username}`, draftsData)
+    executeDraftsListeners(draftsData)
+    syncDrafts({
+      throwError: false,
+      formsAppId: draftSubmission.formsAppId,
+    })
+  } catch (err) {
+    Sentry.captureException(err)
+    throw errorHandler(err as Error)
+  }
 }
 
 /**
@@ -222,15 +228,20 @@ export async function addDraft(
  * )
  * ```
  *
- * @param draft
- * @param draftSubmission
+ * @param options
  * @returns
  */
-export async function updateDraft(
-  draft: SubmissionTypes.FormsAppDraft,
-  draftSubmission: DraftSubmission,
-  autoSaveKey?: string,
-): Promise<void> {
+export async function updateDraft({
+  draft,
+  draftSubmission,
+  autoSaveKey,
+  onProgress,
+}: {
+  draft: SubmissionTypes.FormsAppDraft
+  draftSubmission: DraftSubmission
+  autoSaveKey?: string
+  onProgress?: ProgressListener
+}): Promise<void> {
   const now = new Date().toISOString()
   draftSubmission.keyId = getFormsKeyId() || undefined
   draft.createdAt = now
@@ -249,46 +260,42 @@ export async function updateDraft(
       },
     )
   }
-  return getDraftsData()
-    .then((draftsData) => {
-      const existingDraft = draftsData.drafts.find(
-        (d) => d.draftId === draft.draftId,
-      )
-      if (!existingDraft) {
-        console.log('Could not find existing draft to update in drafts', {
-          draft,
-          draftsData,
-        })
-        return
-      }
-
-      return removeDraftData(existingDraft.draftDataId)
-        .then(() =>
-          // draftId will be set as draftDataId if data cannot be uploaded
-          saveDraftData(draft, draftSubmission, draft.draftId, autoSaveKey),
-        )
-        .then((draftDataId) => {
-          existingDraft.draftDataId = draftDataId
-          existingDraft.title = draft.title
-          if (existingDraft.updatedAt) {
-            existingDraft.updatedAt = now
-          }
-          existingDraft.createdAt = now
-          return utilsService.localForage
-            .setItem(`DRAFTS_${username}`, draftsData)
-            .then(() => executeDraftsListeners(draftsData))
-        })
-    })
-    .then(() =>
-      syncDrafts({
-        throwError: false,
-        formsAppId: draftSubmission.formsAppId,
-      }),
+  try {
+    const draftsData = await getDraftsData()
+    const existingDraft = draftsData.drafts.find(
+      (d) => d.draftId === draft.draftId,
     )
-    .catch((err) => {
-      Sentry.captureException(err)
-      throw errorHandler(err)
+    if (!existingDraft) {
+      console.log('Could not find existing draft to update in drafts', {
+        draft,
+        draftsData,
+      })
+    } else {
+      await removeDraftData(existingDraft.draftDataId)
+      // draftId will be set as draftDataId if data cannot be uploaded
+      const draftDataId = await saveDraftData({
+        draft,
+        draftSubmission,
+        autoSaveKey,
+        onProgress,
+      })
+      existingDraft.draftDataId = draftDataId
+      existingDraft.title = draft.title
+      if (existingDraft.updatedAt) {
+        existingDraft.updatedAt = now
+      }
+      existingDraft.createdAt = now
+      await utilsService.localForage.setItem(`DRAFTS_${username}`, draftsData)
+      executeDraftsListeners(draftsData)
+    }
+    syncDrafts({
+      throwError: false,
+      formsAppId: draftSubmission.formsAppId,
     })
+  } catch (err) {
+    Sentry.captureException(err)
+    throw errorHandler(err as Error)
+  }
 }
 
 async function getDraftsData(): Promise<DraftsData> {

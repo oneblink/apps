@@ -16,13 +16,28 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - time formatting for older iOS devices. Prevents date from repeating.
 - added `ua-parser-js` package to help determine the iOS version used by an apple device
 
+## [3.0.1] - 2022-10-26
+
+### Changed
+
+- test environment domains to .test.
+
+## [3.0.0] - 2022-10-12
+
 ### Added
 
-- An `onProgress` handler option to attachment upload and submission functions
+- An `onProgress` handler option to attachment upload, draft and submission functions
+- `attachmentsService`
 
 ### Changed
 
 - Reduced default `queueSize` for S3 uploads to cater for slower internet connections, set dynamically if connection type is available
+- **[BREAKING]** `draftService.addDraft()` function to single argument
+- **[BREAKING]** `draftService.updateDraft()` function to single argument
+
+### Removed
+
+- **[BREAKING]** `submissionService.uploadAttachment()` function. Replaced by `attachmentsService.uploadAttachment()`
 
 ## [2.1.0] - 2022-09-13
 

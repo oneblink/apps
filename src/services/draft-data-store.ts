@@ -9,6 +9,7 @@ import { MiscTypes, SubmissionTypes } from '@oneblink/types'
 import Sentry from '../Sentry'
 import { DraftSubmission } from '../types/submissions'
 import { deleteAutoSaveData } from '../auto-save-service'
+import { ProgressListener } from './s3Submit'
 function getDraftDataKey(draftDataId: string) {
   return `DRAFT_DATA_${draftDataId}`
 }
@@ -41,30 +42,36 @@ export async function removeDraftData(
   return utilsService.removeLocalForageItem(key)
 }
 
-export async function saveDraftData(
-  draft: SubmissionTypes.FormsAppDraft,
-  draftSubmission: DraftSubmission,
-  defaultDraftDataId: string,
-  autoSaveKey: string | undefined,
-): Promise<string> {
-  let draftDataId: string
-  try {
-    draftDataId = await uploadDraftData(draft, draftSubmission)
+export async function saveDraftData({
+  draft,
+  draftSubmission,
+  autoSaveKey,
+  onProgress,
+}: {
+  draft: SubmissionTypes.FormsAppDraft
+  draftSubmission: DraftSubmission
+  autoSaveKey: string | undefined
+  onProgress?: ProgressListener
+}): Promise<string> {
+  let draftDataId = draft.draftId
+  if (!draftSubmission.backgroundUpload) {
+    try {
+      draftDataId = await uploadDraftData(draft, draftSubmission, onProgress)
 
-    if (typeof autoSaveKey === 'string') {
-      try {
-        await deleteAutoSaveData(draftSubmission.definition.id, autoSaveKey)
-      } catch (error) {
-        console.warn('Error removing auto save data: ', error)
-        Sentry.captureException(error)
+      if (typeof autoSaveKey === 'string') {
+        try {
+          await deleteAutoSaveData(draftSubmission.definition.id, autoSaveKey)
+        } catch (error) {
+          console.warn('Error removing auto save data: ', error)
+          Sentry.captureException(error)
+        }
       }
+    } catch (error) {
+      Sentry.captureException(error)
+      // Ignoring all errors here as we don't want draft submission data
+      // being saved to the cloud to prevent drafts from being saved on the device
+      console.warn('Could not upload Draft Data as JSON', error)
     }
-  } catch (error) {
-    Sentry.captureException(error)
-    // Ignoring all errors here as we don't want draft submission data
-    // being saved to the cloud to prevent drafts from being saved on the device
-    console.warn('Could not upload Draft Data as JSON', error)
-    draftDataId = defaultDraftDataId
   }
   await setLocalDraftData(draftDataId, draftSubmission)
   return draftDataId
@@ -129,12 +136,12 @@ export async function ensureDraftsDataIsUploaded(draftsData: PutDraftsPayload) {
     }
 
     console.log('Uploading draft data that was saved while offline', draft)
-    const newDraftDataId = await saveDraftData(
+    draftSubmission.backgroundUpload = false
+    const newDraftDataId = await saveDraftData({
       draft,
       draftSubmission,
-      draft.draftId,
-      undefined,
-    )
+      autoSaveKey: undefined,
+    })
     newDrafts.push(
       Object.assign({}, draft, {
         draftDataId: newDraftDataId,

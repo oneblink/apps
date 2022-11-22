@@ -1,12 +1,13 @@
 import { FormTypes } from '@oneblink/types'
-import { NewDraftSubmission } from '../types/submissions'
+import { BaseFormSubmission } from '../types/submissions'
+import { executePendingQueueAttachmentProgressListeners } from './pending-queue'
 import uploadAttachment from './uploadAttachment'
 
 export default async function prepareSubmissionData({
   definition,
   submission,
-}: NewDraftSubmission): Promise<NewDraftSubmission['submission']> {
-  return uploadAttachments(definition.id, definition.elements, submission)
+}: BaseFormSubmission): Promise<BaseFormSubmission['submission']> {
+  return await uploadAttachments(definition.id, definition.elements, submission)
 }
 
 async function maybeUploadAttachment(
@@ -21,15 +22,23 @@ async function maybeUploadAttachment(
     if (
       typeof record.type === 'string' &&
       typeof record.fileName === 'string' &&
+      typeof record._id === 'string' &&
       record.data instanceof Blob
-    )
+    ) {
+      const attachmentId = record._id
       return await uploadAttachment({
         formId,
         fileName: record.fileName,
         contentType: record.data.type,
         isPrivate: formElement.storageType !== 'public',
         data: record.data,
+        onProgress: (event) =>
+          executePendingQueueAttachmentProgressListeners({
+            ...event,
+            attachmentId,
+          }),
       })
+    }
   }
   return value
 }
@@ -37,8 +46,8 @@ async function maybeUploadAttachment(
 async function uploadAttachments(
   formId: number,
   formElements: FormTypes.FormElement[],
-  submission: NewDraftSubmission['submission'],
-): Promise<NewDraftSubmission['submission']> {
+  submission: BaseFormSubmission['submission'],
+): Promise<BaseFormSubmission['submission']> {
   for (const formElement of formElements) {
     switch (formElement.type) {
       case 'page':
@@ -54,7 +63,7 @@ async function uploadAttachments(
         await uploadAttachments(
           formId,
           formElement.elements || [],
-          nestedSubmission as NewDraftSubmission['submission'],
+          nestedSubmission as BaseFormSubmission['submission'],
         )
         break
       }

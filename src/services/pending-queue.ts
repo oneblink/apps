@@ -2,6 +2,7 @@ import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import utilsService from './utils'
 import Sentry from '../Sentry'
 import { FormSubmission, PendingFormSubmission } from '../types/submissions'
+import { ProgressListener, ProgressListenerEvent } from './s3Submit'
 
 function errorHandler(error: Error): Error {
   Sentry.captureException(error)
@@ -18,12 +19,20 @@ function errorHandler(error: Error): Error {
   return error
 }
 
-const pendingQueueListeners: Array<
-  (results: PendingFormSubmission[]) => unknown
-> = []
+export type PendingQueueAction =
+  | 'SUBMIT_STARTED'
+  | 'SUBMIT_FAILED'
+  | 'SUBMIT_SUCCEEDED'
+  | 'ADDITION'
+  | 'DELETION'
+export type PendingQueueListener = (
+  results: PendingFormSubmission[],
+  action: PendingQueueAction,
+) => unknown
+const pendingQueueListeners: Array<PendingQueueListener> = []
 
 /**
- * Register a lister function that will be passed an array of
+ * Register a listener function that will be passed an array of
  * PendingFormSubmissions when the pending queue is modified.
  *
  * ### Example
@@ -44,7 +53,7 @@ const pendingQueueListeners: Array<
  * @returns
  */
 export function registerPendingQueueListener(
-  listener: (results: PendingFormSubmission[]) => unknown,
+  listener: PendingQueueListener,
 ): () => void {
   pendingQueueListeners.push(listener)
 
@@ -56,10 +65,17 @@ export function registerPendingQueueListener(
   }
 }
 
-function executePendingQueueListeners(newSubmissions: PendingFormSubmission[]) {
-  console.log('Pending Queue submissions have been updated', newSubmissions)
+function executePendingQueueListeners(
+  newSubmissions: PendingFormSubmission[],
+  action: PendingQueueAction,
+) {
+  console.log(
+    'Pending Queue submissions have been updated',
+    action,
+    newSubmissions,
+  )
   for (const pendingQueueListener of pendingQueueListeners) {
-    pendingQueueListener(newSubmissions)
+    pendingQueueListener(newSubmissions, action)
   }
 }
 
@@ -80,7 +96,7 @@ export async function addFormSubmissionToPendingQueue(
       submission: undefined,
     } as PendingFormSubmission)
     await utilsService.localForage.setItem('submissions', submissions)
-    executePendingQueueListeners(submissions)
+    executePendingQueueListeners(submissions, 'ADDITION')
   } catch (error) {
     Sentry.captureException(error)
     throw error instanceof Error ? errorHandler(error) : error
@@ -90,17 +106,18 @@ export async function addFormSubmissionToPendingQueue(
 export async function updatePendingQueueSubmission(
   pendingTimestamp: string,
   newSubmission: PendingFormSubmission,
+  action: 'SUBMIT_FAILED' | 'SUBMIT_STARTED',
 ) {
   try {
     const submissions = await getPendingQueueSubmissions()
     const newSubmissions = submissions.map((submission) => {
       if (submission.pendingTimestamp === pendingTimestamp) {
-        return newSubmission
+        return { ...newSubmission }
       }
       return submission
     })
     await utilsService.localForage.setItem('submissions', newSubmissions)
-    executePendingQueueListeners(newSubmissions)
+    executePendingQueueListeners(newSubmissions, action)
   } catch (error) {
     Sentry.captureException(error)
     throw error instanceof Error ? errorHandler(error) : error
@@ -146,6 +163,13 @@ export function getFormSubmission(
  * @param pendingTimestamp
  */
 export async function deletePendingQueueSubmission(pendingTimestamp: string) {
+  await removePendingQueueSubmission(pendingTimestamp, 'DELETION')
+}
+
+export async function removePendingQueueSubmission(
+  pendingTimestamp: string,
+  action: 'SUBMIT_SUCCEEDED' | 'DELETION',
+) {
   try {
     await utilsService.removeLocalForageItem(`SUBMISSION_${pendingTimestamp}`)
     const submissions = await getPendingQueueSubmissions()
@@ -153,9 +177,125 @@ export async function deletePendingQueueSubmission(pendingTimestamp: string) {
       (submission) => submission.pendingTimestamp !== pendingTimestamp,
     )
     await utilsService.localForage.setItem('submissions', newSubmissions)
-    executePendingQueueListeners(newSubmissions)
+    executePendingQueueListeners(newSubmissions, action)
   } catch (error) {
     Sentry.captureException(error)
     throw error instanceof Error ? errorHandler(error) : error
+  }
+}
+
+const pendingQueueAttachmentProgressListeners: Array<{
+  attachmentId: string
+  listener: ProgressListener
+}> = []
+
+/**
+ * Register a listener function that will be passed a progress event when an
+ * attachment for an item in the pending queue is being processed.
+ *
+ * ### Example
+ *
+ * ```js
+ * const listener = async ({ progress }) => {
+ *   // update the UI to reflect the progress here...
+ * }
+ * const deregister =
+ *   await submissionService.registerPendingQueueAttachmentProgressListener(
+ *     attachment.id,
+ *     listener,
+ *   )
+ *
+ * // When no longer needed, remember to deregister the listener
+ * deregister()
+ * ```
+ *
+ * @param attachmentId
+ * @param listener
+ * @returns
+ */
+export function registerPendingQueueAttachmentProgressListener(
+  attachmentId: string,
+  listener: ProgressListener,
+): () => void {
+  const item = { attachmentId, listener }
+  pendingQueueAttachmentProgressListeners.push(item)
+
+  return () => {
+    const index = pendingQueueAttachmentProgressListeners.indexOf(item)
+    if (index !== -1) {
+      pendingQueueAttachmentProgressListeners.splice(index, 1)
+    }
+  }
+}
+
+export function executePendingQueueAttachmentProgressListeners(
+  event: ProgressListenerEvent & {
+    attachmentId: string
+  },
+) {
+  for (const pendingQueueAttachmentProgressListener of pendingQueueAttachmentProgressListeners) {
+    if (
+      event.attachmentId === pendingQueueAttachmentProgressListener.attachmentId
+    ) {
+      pendingQueueAttachmentProgressListener.listener(event)
+    }
+  }
+}
+
+const pendingQueueProgressListeners: Array<{
+  pendingTimestamp: string
+  listener: ProgressListener
+}> = []
+
+/**
+ * Register a listener function that will be passed a progress event when an
+ * item in the pending queue is being processed.
+ *
+ * ### Example
+ *
+ * ```js
+ * const listener = async ({ progress }) => {
+ *   // update the UI to reflect the progress here...
+ * }
+ * const deregister =
+ *   await submissionService.registerPendingQueueProgressListener(
+ *     pendingQueueItem.pendingTimestamp,
+ *     listener,
+ *   )
+ *
+ * // When no longer needed, remember to deregister the listener
+ * deregister()
+ * ```
+ *
+ * @param pendingTimestamp
+ * @param listener
+ * @returns
+ */
+export function registerPendingQueueProgressListener(
+  pendingTimestamp: string,
+  listener: ProgressListener,
+): () => void {
+  const item = { pendingTimestamp, listener }
+  pendingQueueProgressListeners.push(item)
+
+  return () => {
+    const index = pendingQueueProgressListeners.indexOf(item)
+    if (index !== -1) {
+      pendingQueueProgressListeners.splice(index, 1)
+    }
+  }
+}
+
+export function executePendingQueueProgressListeners(
+  event: ProgressListenerEvent & {
+    pendingTimestamp: string
+  },
+) {
+  for (const pendingQueueProgressListener of pendingQueueProgressListeners) {
+    if (
+      event.pendingTimestamp === pendingQueueProgressListener.pendingTimestamp
+    ) {
+      pendingQueueProgressListener.listener(event)
+    }
   }
 }

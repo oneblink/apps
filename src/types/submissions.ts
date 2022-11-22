@@ -6,14 +6,22 @@ import {
 } from '@oneblink/types'
 import { S3ObjectCredentials } from '@oneblink/types/typescript/aws'
 
-export type NewDraftSubmission = {
+export type BaseFormSubmission = {
   /** The submission data */
   submission: SubmissionTypes.S3SubmissionData['submission']
   /** The form definition when the draft was saved */
   definition: FormTypes.Form
 }
 
-export type NewFormSubmission = NewDraftSubmission & {
+export type NewDraftSubmission = BaseFormSubmission & {
+  /**
+   * Set to true if the submission should be uploaded in the background, false
+   * or undefined if the submission should be uploaded immediately
+   */
+  backgroundUpload?: boolean
+}
+
+export type NewFormSubmission = BaseFormSubmission & {
   /** Captcha tokens gathered by a `captcha` Form Element */
   captchaTokens: string[]
 }
@@ -72,6 +80,8 @@ export type FormSubmissionResult = FormSubmission & {
   isOffline: boolean
   /** The ipAddress of the client submitting */
   ipAddress?: string
+  /** True if the submission was attempted whilst attachments were uploading */
+  isUploadingAttachments: boolean
 }
 
 export type PendingFormSubmission = Omit<FormSubmission, 'submission'> & {

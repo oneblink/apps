@@ -128,14 +128,26 @@ export function formatDateLong(value: Date): string {
  * @returns
  */
 export function formatTime(value: Date): string {
-  const iDeviceOSVersion = parseFloat(
-    parser(window.navigator.userAgent).os.version || '',
-  )
-  if (iDeviceOSVersion < 13.0) {
-    const time = tenants.current.intlFormats.olderIOSTime.formatToParts(value)
-    const newTime = time.map((t) => t.value).join('')
-    console.log(newTime)
-    return `${newTime}`
+  let iDeviceOSVersion = 0
+  const parsedUserAgent: parser.IResult = parser(window.navigator.userAgent)
+  if (parsedUserAgent.os.name === 'iOS') {
+    if (
+      !isNaN(parseFloat(parser(window.navigator.userAgent).os.version || ''))
+    ) {
+      iDeviceOSVersion = parseFloat(
+        parser(window.navigator.userAgent).os.version || '',
+      )
+      /*
+       * Time formatting for older iOS devices. Prevents date from repeating.
+       * Example: Last sync time: 24/11/2022 24/11/2022
+       */
+      if (iDeviceOSVersion < 13.0) {
+        const time =
+          tenants.current.intlFormats.olderIOSTime.formatToParts(value)
+        const newTime = time.map((t) => t.value).join('')
+        return `${newTime}`
+      }
+    }
   }
   return tenants.current.intlFormats.time.format(value)
 }

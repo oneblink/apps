@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
-- Extended formatTime function to handle error (duplicated date) in iOS version 12.4
+- Extended formatTime function to handle error (duplicated date) in iOS version < 13
 
 ### Added
 

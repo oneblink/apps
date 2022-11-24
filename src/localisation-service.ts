@@ -128,13 +128,12 @@ export function formatDateLong(value: Date): string {
  * @returns
  */
 export function formatTime(value: Date): string {
-  let iDeviceOSVersion = 0
   const parsedUserAgent: parser.IResult = parser(window.navigator.userAgent)
   if (parsedUserAgent.os.name === 'iOS') {
     if (
       !isNaN(parseFloat(parser(window.navigator.userAgent).os.version || ''))
     ) {
-      iDeviceOSVersion = parseFloat(
+      const iDeviceOSVersion = parseFloat(
         parser(window.navigator.userAgent).os.version || '',
       )
       /*

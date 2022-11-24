@@ -132,9 +132,10 @@ export function formatTime(value: Date): string {
     parser(window.navigator.userAgent).os.version || '',
   )
   if (iDeviceOSVersion < 13.0) {
-    const time = tenants.current.intlFormats.olderIOSTime.format(value)
-    const newTime = time.split(':')
-    return `${newTime[0]}:${newTime[1]} ${newTime[2].slice(-2)}`
+    const time = tenants.current.intlFormats.olderIOSTime.formatToParts(value)
+    const newTime = time.map((t) => t.value).join('')
+    console.log(newTime)
+    return `${newTime}`
   }
   return tenants.current.intlFormats.time.format(value)
 }

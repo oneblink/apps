@@ -7,14 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-### Changed
-
-- Extended formatTime function to handle error (duplicated date) in iOS version < 13
-
-### Added
+### Fixed
 
 - time formatting for older iOS devices. Prevents date from repeating.
-- added `ua-parser-js` package to help determine the iOS version used by an apple device
 
 ## [3.0.1] - 2022-10-26
 

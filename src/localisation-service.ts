@@ -130,12 +130,8 @@ export function formatDateLong(value: Date): string {
 export function formatTime(value: Date): string {
   const parsedUserAgent: parser.IResult = parser(window.navigator.userAgent)
   if (parsedUserAgent.os.name === 'iOS') {
-    if (
-      !isNaN(parseFloat(parser(window.navigator.userAgent).os.version || ''))
-    ) {
-      const iDeviceOSVersion = parseFloat(
-        parser(window.navigator.userAgent).os.version || '',
-      )
+    if (!isNaN(parseFloat(parsedUserAgent.os.version || ''))) {
+      const iDeviceOSVersion = parseFloat(parsedUserAgent.os.version || '')
       /*
        * Time formatting for older iOS devices. Prevents date from repeating.
        * Example: Last sync time: 24/11/2022 24/11/2022

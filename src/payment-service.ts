@@ -10,6 +10,7 @@ import replaceCustomValues from './services/replace-custom-values'
 import { SubmissionEventTypes } from '@oneblink/types'
 import { FormSubmission, FormSubmissionResult } from './types/submissions'
 import { HandlePaymentResult } from './types/payments'
+import { components } from '@oneblink/types/typescript/cp-pay/swagger.v2'
 
 const KEY = 'PAYMENT_SUBMISSION_RESULT'
 
@@ -20,8 +21,8 @@ async function verifyCPPayPayment(
   submissionResult: FormSubmissionResult,
   cpPaymentSubmissionEvent: SubmissionEventTypes.CPPaySubmissionEvent,
 ): Promise<HandlePaymentResult> {
-  const { transactionToken, orderNumber: submissionId } = query
-  if (!transactionToken || !submissionId) {
+  const { transactionId, externalReferenceId: submissionId } = query
+  if (!transactionId || !submissionId) {
     throw new OneBlinkAppsError(
       'Transactions can not be verified unless navigating here directly after a payment.',
     )
@@ -32,19 +33,15 @@ async function verifyCPPayPayment(
     )
   }
 
-  const transaction = await verifyPaymentTransaction<{
-    resultCode: number
-    errorMessage: string
-    transactionId: string
-    lastFour: string
-    amount: number
-  }>(`/forms/${submissionResult.definition.id}/cp-pay-verification`, {
-    transactionToken,
+  const transaction = await verifyPaymentTransaction<
+    components['schemas']['TransactionDetailsViewModelResponseEnvelope']
+  >(`/forms/${submissionResult.definition.id}/cp-pay-verification`, {
+    transactionId,
     integrationGatewayId: cpPaymentSubmissionEvent.configuration.gatewayId,
   })
   // Asynchronously acknowledge receipt
   acknowledgeCPPayTransaction(submissionResult.definition.id, {
-    transactionId: transaction.transactionId,
+    transactionId,
     integrationGatewayId: cpPaymentSubmissionEvent.configuration.gatewayId,
   }).catch((error) => {
     console.warn(
@@ -54,13 +51,13 @@ async function verifyCPPayPayment(
   })
   return {
     transaction: {
-      isSuccess: transaction.resultCode === 1,
-      errorMessage: transaction.errorMessage,
-      id: transaction.transactionId,
-      creditCardMask: transaction.lastFour
-        ? `xxxx xxxx xxxx ${transaction.lastFour}`
+      isSuccess: !!transaction.isSuccess,
+      errorMessage: transaction.error?.message,
+      id: transactionId as string,
+      creditCardMask: transaction.result?.lastFour
+        ? `xxxx xxxx xxxx ${transaction.result.lastFour}`
         : null,
-      amount: transaction.amount,
+      amount: transaction.result?.amount,
     },
     submissionResult,
   }

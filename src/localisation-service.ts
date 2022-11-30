@@ -1,4 +1,5 @@
 import tenants from './tenants'
+import parser from 'ua-parser-js'
 
 /**
  * Get the locale (e.g. `en-AU`) for the current tenant.
@@ -127,6 +128,22 @@ export function formatDateLong(value: Date): string {
  * @returns
  */
 export function formatTime(value: Date): string {
+  const parsedUserAgent: parser.IResult = parser(window.navigator.userAgent)
+  if (parsedUserAgent.os.name === 'iOS') {
+    if (!isNaN(parseFloat(parsedUserAgent.os.version || ''))) {
+      const iDeviceOSVersion = parseFloat(parsedUserAgent.os.version || '')
+      /*
+       * Time formatting for older iOS devices. Prevents date from repeating.
+       * Example: Last sync time: 24/11/2022 24/11/2022
+       */
+      if (iDeviceOSVersion < 13.0) {
+        const time =
+          tenants.current.intlFormats.olderIOSTime.formatToParts(value)
+        const newTime = time.map((t) => t.value).join('')
+        return `${newTime}`
+      }
+    }
+  }
   return tenants.current.intlFormats.time.format(value)
 }
 

@@ -1,7 +1,7 @@
 {
   "name": "@oneblink/apps",
   "description": "Helper functions for OneBlink apps in JavaScript.",
-  "version": "3.0.1",
+  "version": "3.0.2-beta.1",
   "author": "OneBlink <developers@oneblink.io> (https://oneblink.io)",
   "bugs": {
     "url": "https://github.com/oneblink/apps/issues"
@@ -19,6 +19,7 @@
     "lodash.differenceby": "^4.8.0",
     "lodash.orderby": "^4.6.0",
     "query-string": "^7.1.1",
+    "ua-parser-js": "^1.0.2",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
@@ -30,6 +31,7 @@
     "@types/lodash.clonedeep": "^4.5.7",
     "@types/lodash.differenceby": "^4.8.7",
     "@types/lodash.orderby": "^4.6.7",
+    "@types/ua-parser-js": "^0.7.36",
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.22.0",
     "@typescript-eslint/parser": "^5.22.0",

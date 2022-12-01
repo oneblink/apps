@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - CP Pay redirect to handle v2 query parameters
 
+### Fixed
+
+- time formatting for older iOS devices. Prevents date from repeating.
+
 ## [3.0.1] - 2022-10-26
 
 ### Changed

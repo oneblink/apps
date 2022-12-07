@@ -1,6 +1,18 @@
 import tenants from './tenants'
 import parser from 'ua-parser-js'
 
+let iosVersion: number | undefined
+const parsedUserAgent: parser.IResult = parser(window.navigator.userAgent)
+if (
+  parsedUserAgent.os.name === 'iOS' &&
+  typeof parsedUserAgent.os.version === 'string'
+) {
+  const iosVersion = parseFloat(parsedUserAgent.os.version)
+  if (!Number.isNaN(iosVersion)) {
+    iosVersion
+  }
+}
+
 /**
  * Get the locale (e.g. `en-AU`) for the current tenant.
  *
@@ -128,21 +140,14 @@ export function formatDateLong(value: Date): string {
  * @returns
  */
 export function formatTime(value: Date): string {
-  const parsedUserAgent: parser.IResult = parser(window.navigator.userAgent)
-  if (parsedUserAgent.os.name === 'iOS') {
-    if (!isNaN(parseFloat(parsedUserAgent.os.version || ''))) {
-      const iDeviceOSVersion = parseFloat(parsedUserAgent.os.version || '')
-      /*
-       * Time formatting for older iOS devices. Prevents date from repeating.
-       * Example: Last sync time: 24/11/2022 24/11/2022
-       */
-      if (iDeviceOSVersion < 13.0) {
-        const time =
-          tenants.current.intlFormats.olderIOSTime.formatToParts(value)
-        const newTime = time.map((t) => t.value).join('')
-        return `${newTime}`
-      }
-    }
+  /*
+   * Time formatting for older iOS devices. Prevents date from repeating.
+   * Example: Last sync time: 24/11/2022 24/11/2022
+   */
+  if (typeof iosVersion === 'number' && iosVersion < 13.0) {
+    const time = tenants.current.intlFormats.olderIOSTime.formatToParts(value)
+    const newTime = time.map((t) => t.value).join('')
+    return `${newTime}`
   }
   return tenants.current.intlFormats.time.format(value)
 }
@@ -219,4 +224,25 @@ export function formatNumber(value: number): string {
  */
 export function formatCurrency(value: number): string {
   return tenants.current.intlFormats.currency.format(value)
+}
+
+/**
+ * Get the version of iOS if the current device is running the iOS operating system
+ *
+ * #### Example
+ *
+ * ```js
+ * const iosVersion = localisationService.getIOSVersion()
+ * if (typeof iosVersion === 'number') {
+ *   // do something specific for iOS
+ *   if (iosVersion < 16 && iosVersion >= 15) {
+ *     // do something specific for iOS 15.x
+ *   }
+ * }
+ * ```
+ *
+ * @returns
+ */
+export function getIOSVersion(): number | undefined {
+  return iosVersion
 }

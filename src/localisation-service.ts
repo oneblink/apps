@@ -225,24 +225,3 @@ export function formatNumber(value: number): string {
 export function formatCurrency(value: number): string {
   return tenants.current.intlFormats.currency.format(value)
 }
-
-/**
- * Get the version of iOS if the current device is running the iOS operating system
- *
- * #### Example
- *
- * ```js
- * const iosVersion = localisationService.getIOSVersion()
- * if (typeof iosVersion === 'number') {
- *   // do something specific for iOS
- *   if (iosVersion < 16 && iosVersion >= 15) {
- *     // do something specific for iOS 15.x
- *   }
- * }
- * ```
- *
- * @returns
- */
-export function getIOSVersion(): number | undefined {
-  return iosVersion
-}

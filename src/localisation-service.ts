@@ -7,9 +7,9 @@ if (
   parsedUserAgent.os.name === 'iOS' &&
   typeof parsedUserAgent.os.version === 'string'
 ) {
-  const iosVersion = parseFloat(parsedUserAgent.os.version)
-  if (!Number.isNaN(iosVersion)) {
-    iosVersion
+  iosVersion = parseFloat(parsedUserAgent.os.version)
+  if (Number.isNaN(iosVersion)) {
+    iosVersion = undefined
   }
 }
 

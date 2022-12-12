@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.0.2] - 2022-12-12
+
 ### Changed
 
 - CP Pay redirect to handle v2 query parameters
@@ -14,6 +16,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 - time formatting for older iOS devices. Prevents date from repeating.
+
+### Dependencies
+
+- depend upon [ua-parser-js](https://www.npmjs.com/package/ua-parser-js) 1.0.2
 
 ## [3.0.1] - 2022-10-26
 

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.0.3] - 2022-12-13
+
 ### Fixed
 
 - checking incorrect property for successful CP Pay transactions

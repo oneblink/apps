@@ -51,8 +51,8 @@ async function verifyCPPayPayment(
   })
   return {
     transaction: {
-      isSuccess: !!transaction.isSuccess,
-      errorMessage: transaction.error?.message,
+      isSuccess: transaction.result?.responseType === 'Success',
+      errorMessage: transaction.result?.errorCode,
       id: transactionId as string,
       creditCardMask: transaction.result?.lastFour
         ? `xxxx xxxx xxxx ${transaction.result.lastFour}`

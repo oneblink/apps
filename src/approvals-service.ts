@@ -682,6 +682,7 @@ export async function getFormSubmissionAdministrationApprovals(
     formId?: number
     externalId?: string
     submissionId?: string
+    formApprovalFlowInstanceId?: number
     submittedAfterDateTime?: string
     submittedBeforeDateTime?: string
     limit: number

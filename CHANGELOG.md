@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `generateExternalId` to `formService`
+
 ## [3.0.4] - 2023-03-03
 
 ### Added

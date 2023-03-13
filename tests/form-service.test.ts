@@ -71,7 +71,7 @@ describe('Form Service', () => {
 
       const externalId = generateExternalId(config)
 
-      expect(externalId).toMatch(new RegExp('^ABC$'))
+      expect(externalId).toBe('ABC')
     })
   })
 })

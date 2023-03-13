@@ -1,4 +1,7 @@
 import { formElementsService } from '@oneblink/sdk-core'
+import { FormTypes, FreshdeskTypes } from '@oneblink/types'
+import { customAlphabet } from 'nanoid/non-secure'
+import { format } from 'date-fns'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { isOffline } from './offline-service'
 import { isLoggedIn } from './services/cognito'
@@ -9,8 +12,9 @@ import {
   getRequest,
 } from './services/fetch'
 import tenants from './tenants'
-import { FormTypes, FreshdeskTypes } from '@oneblink/types'
+
 import Sentry from './Sentry'
+import { ReceiptDateFormat } from '@oneblink/types/typescript/forms'
 export * from './services/integration-elements'
 
 /**
@@ -843,6 +847,56 @@ const mapNestedOptions = (
   }))
 }
 
+const dateFormatMap: Record<ReceiptDateFormat, string> = {
+  dayOfMonth: 'dd',
+  monthNumber: 'MM',
+  yearShort: 'yy',
+  year: 'yyyy',
+}
+
+function buildAlphabet(alphabetConfig: FormTypes.ReceiptRandomComponent) {
+  let alphabet = ''
+  // all letters except i o and l
+  const allowedLetters = 'abcdefghjkmnpqrstuvwxyz'
+  if (alphabetConfig.lowercase) {
+    alphabet += allowedLetters
+  }
+  if (alphabetConfig.uppercase) {
+    alphabet += allowedLetters.toUpperCase()
+  }
+  if (alphabetConfig.numbers) {
+    // all numbers except 0
+    alphabet += '123456789'
+  }
+  return alphabet
+}
+
+function generateExternalId(receiptComponents: FormTypes.ReceiptComponent[]) {
+  const date = new Date()
+  return receiptComponents.reduce((id: string, component) => {
+    switch (component.type) {
+      case 'text':
+        return id + component.value
+      case 'date': {
+        const dateFormat = dateFormatMap[component.format]
+        if (dateFormat) {
+          return id + format(date, dateFormat)
+        }
+        break
+      }
+      case 'random': {
+        const alphabet = buildAlphabet(component)
+        if (alphabet) {
+          const randomFunc = customAlphabet(alphabet, component.length)
+          return id + randomFunc()
+        }
+        break
+      }
+    }
+    return id
+  }, '')
+}
+
 export {
   LoadFormElementOptionsResult,
   getForms,
@@ -850,4 +904,5 @@ export {
   getFormElementLookups,
   getFormElementLookupById,
   getFormElementDynamicOptions,
+  generateExternalId,
 }

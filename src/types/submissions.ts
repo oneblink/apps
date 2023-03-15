@@ -5,6 +5,7 @@ import {
   SubmissionTypes,
 } from '@oneblink/types'
 import { S3ObjectCredentials } from '@oneblink/types/typescript/aws'
+import { FormElement } from '@oneblink/types/typescript/forms'
 
 export type BaseFormSubmission = {
   /** The submission data */
@@ -19,6 +20,8 @@ export type NewDraftSubmission = BaseFormSubmission & {
    * or undefined if the submission should be uploaded immediately
    */
   backgroundUpload?: boolean
+  /** The element that was last updated before the draft was saved */
+  lastElementUpdated?: FormElement
 }
 
 export type NewFormSubmission = BaseFormSubmission & {

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - `generateExternalId` to `formService`
+- `lastElementUpdated` to `NewDraftSubmission`
 
 ## [3.0.4] - 2023-03-03
 

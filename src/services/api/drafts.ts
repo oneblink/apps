@@ -37,6 +37,7 @@ const uploadDraftData = async (
         submissionTimestamp: data.submissionTimestamp,
         keyId: draftSubmission.keyId,
         formsAppId: draftSubmission.formsAppId,
+        lastElementUpdated: draftSubmission.lastElementUpdated,
       },
       tags: {
         externalId: draft.externalId || undefined,

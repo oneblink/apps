@@ -85,6 +85,8 @@ export type FormSubmissionResult = FormSubmission & {
   ipAddress?: string
   /** True if the submission was attempted whilst attachments were uploading */
   isUploadingAttachments: boolean
+  /** Exists if the form allows PDF download */
+  downloadSubmissionPdfUrl?: string
 }
 
 export type PendingFormSubmission = Omit<FormSubmission, 'submission'> & {
@@ -108,6 +110,7 @@ export type S3UploadCredentials = _S3UploadCredentials & {
   submissionId: string
   ipAddress?: string
   userProfile?: MiscTypes.UserProfile
+  pdfAccessToken?: string
 }
 
 export type S3DraftUploadCredentials = _S3UploadCredentials & {

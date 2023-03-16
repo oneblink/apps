@@ -24,6 +24,7 @@ import {
   S3UploadCredentials,
 } from '../types/submissions'
 import { checkIfAttachmentsAreUploading } from '../attachments-service'
+import tenants from '../tenants'
 
 type SubmissionParams = {
   formSubmission: FormSubmission
@@ -132,6 +133,9 @@ export default async function submit({
     submissionTimestamp: data.submissionTimestamp,
     submissionId: data.submissionId,
     isUploadingAttachments: false,
+    downloadSubmissionPdfUrl: !data.pdfAccessToken
+      ? undefined
+      : `${tenants.current.apiOrigin}/forms/${formSubmission.definition.id}/submission/${data.submissionId}/pdf-document/?accessToken=${data.pdfAccessToken}`,
   }
 
   if (schedulingSubmissionEvent && schedulingUrlConfiguration) {

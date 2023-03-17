@@ -320,7 +320,9 @@ async function getFormElementOptionsSets(
   organisationId: string,
   abortSignal?: AbortSignal,
 ): Promise<Array<FormTypes.FormElementOptionSet>> {
-  const { formElementDynamicOptionSets } = await searchRequest(
+  const { formElementDynamicOptionSets } = await searchRequest<{
+    formElementDynamicOptionSets: Array<FormTypes.FormElementOptionSet>
+  }>(
     `${tenants.current.apiOrigin}/form-element-options/dynamic`,
     {
       organisationId,

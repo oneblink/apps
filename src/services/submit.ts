@@ -135,7 +135,7 @@ export default async function submit({
     isUploadingAttachments: false,
     downloadSubmissionPdfUrl: !data.pdfAccessToken
       ? undefined
-      : `${tenants.current.apiOrigin}/forms/${formSubmission.definition.id}/submission/${data.submissionId}/pdf-document/?accessToken=${data.pdfAccessToken}`,
+      : `${tenants.current.apiOrigin}/forms/${formSubmission.definition.id}/submissions/${data.submissionId}/pdf-document?accessToken=${data.pdfAccessToken}`,
   }
 
   if (schedulingSubmissionEvent && schedulingUrlConfiguration) {

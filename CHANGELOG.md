@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `lastElementUpdated` to `NewDraftSubmission`
 - `lastElementUpdated` to `draftService.getDraftAndData()`
 
+### Changed
+
+- `externalId` to be stored in S3 object instead of S3 tags
+
 ## [3.0.4] - 2023-03-03
 
 ### Added

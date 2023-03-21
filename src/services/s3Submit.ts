@@ -2,7 +2,11 @@ import S3, { PutObjectRequest } from 'aws-sdk/clients/s3'
 import { fileUploadService } from '@oneblink/sdk-core'
 import queryString from 'query-string'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
-import { AWSTypes, SubmissionTypes } from '@oneblink/types'
+import {
+  AWSTypes,
+  SubmissionEventTypes,
+  SubmissionTypes,
+} from '@oneblink/types'
 import Sentry from '../Sentry'
 import { HTTPError } from './fetch'
 
@@ -197,7 +201,7 @@ async function uploadFormSubmission({
 }: {
   s3Configuration: AWSTypes.S3ObjectCredentials
   formJson: SubmissionTypes.S3SubmissionData
-  tags: Record<string, string | undefined>
+  tags: SubmissionEventTypes.S3SubmissionTags
   onProgress?: ProgressListener
 }) {
   console.log('Uploading submission')

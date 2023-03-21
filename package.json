@@ -27,7 +27,6 @@
   "devDependencies": {
     "@oneblink/release-cli": "^1.2.0",
     "@oneblink/types": "github:oneblink/types",
-    "@types/content-disposition": "^0.5.4",
     "@types/file-saver": "^2.0.5",
     "@types/jest": "^27.5.0",
     "@types/lodash.clonedeep": "^4.5.7",

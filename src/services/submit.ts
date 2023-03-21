@@ -164,9 +164,9 @@ export default async function submit({
       keyId: formSubmission.keyId,
       ipAddress: data.ipAddress,
       user: data.userProfile,
+      externalId: formSubmission.externalId || undefined,
     },
     tags: {
-      externalId: formSubmission.externalId || undefined,
       jobId: formSubmission.jobId || undefined,
       userToken: userToken || undefined,
       usernameToken: data.usernameToken,

@@ -38,9 +38,9 @@ const uploadDraftData = async (
         keyId: draftSubmission.keyId,
         formsAppId: draftSubmission.formsAppId,
         lastElementUpdated: draftSubmission.lastElementUpdated,
+        externalId: draft.externalId || undefined,
       },
       tags: {
-        externalId: draft.externalId || undefined,
         jobId: draft.jobId || undefined,
         userToken: userToken || undefined,
         usernameToken: data.usernameToken,

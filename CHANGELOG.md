@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.1.0] - 2023-03-26
+
 ### Added
 
 - `downloadSubmissionPdfUrl` to return type of `submissionService.submit`
@@ -17,6 +19,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 
 - `externalId` to be stored in S3 object instead of S3 tags
+
+### Dependencies
+
+- depend upon [date-fns](https://www.npmjs.com/package/date-fns) [2.29.3](https://github.com/date-fns/date-fns/releases/tag/v2.29.3)
+
+- depend upon [nanoid](https://www.npmjs.com/package/nanoid) [4.0.1](https://github.com/ai/nanoid/blob/master/CHANGELOG.md)
 
 ## [3.0.4] - 2023-03-03
 

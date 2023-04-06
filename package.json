@@ -1,7 +1,7 @@
 {
   "name": "@oneblink/apps",
   "description": "Helper functions for OneBlink apps in JavaScript.",
-  "version": "3.1.0",
+  "version": "3.1.1-beta.1",
   "author": "OneBlink <developers@oneblink.io> (https://oneblink.io)",
   "bugs": {
     "url": "https://github.com/oneblink/apps/issues"
@@ -25,7 +25,7 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@oneblink/release-cli": "^1.2.0",
+    "@oneblink/release-cli": "^2.0.3",
     "@oneblink/types": "github:oneblink/types",
     "@types/file-saver": "^2.0.5",
     "@types/jest": "^27.5.0",
@@ -78,7 +78,7 @@
     "format": "prettier --write .",
     "prepare": "npm run build",
     "pretest": "npm run fixpack && npm run eslint",
-    "release": "typedoc && oneblink-release",
+    "release": "typedoc && oneblink-release --no-name",
     "start": "tsc-watch",
     "test": "jest",
     "types": "npm i --save-dev github:oneblink/types",

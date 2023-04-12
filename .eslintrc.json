@@ -6,11 +6,13 @@
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
+    "plugin:@microsoft/eslint-plugin-sdl/recommended",
     "prettier"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "ecmaVersion": 2021
+    "ecmaVersion": 2021,
+    "project": "./tsconfig.json"
   },
   "plugins": ["prettier"],
   "rules": {

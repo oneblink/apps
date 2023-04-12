@@ -2,5 +2,6 @@
   "extends": ["../.eslintrc.json"],
   "env": {
     "jest": true
-  }
+  },
+  "parserOptions": { "project": "./tests/tsconfig.json" }
 }

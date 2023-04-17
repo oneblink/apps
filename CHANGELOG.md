@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `@microsoft/eslint-plugin-sdl` eslint plugin
+
 ## [3.1.1] - 2023-04-14
 
 ### Dependencies
@@ -21,7 +25,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `generateExternalId` to `formService`
 - `lastElementUpdated` to `NewDraftSubmission`
 - `lastElementUpdated` to `draftService.getDraftAndData()`
-- `@microsoft/eslint-plugin-sdl` eslint plugin
 
 ### Changed
 

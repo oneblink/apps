@@ -291,7 +291,17 @@ export function generateDate({
 
 const replaceSubmissionFormatters: submissionService.ReplaceSubmissionFormatters =
   {
-    formatDate: (value) => formatDate(new Date(value)),
+    formatDate: (v) => {
+      const date = generateDate({
+        value: v,
+        dateOnly: true,
+        daysOffset: undefined,
+      })
+      if (date) {
+        return formatDate(date)
+      }
+      return ''
+    },
     formatDateTime: (value) => formatDatetime(new Date(value)),
     formatTime: (value) => formatTime(new Date(value)),
     formatCurrency: (value) => formatCurrency(value),

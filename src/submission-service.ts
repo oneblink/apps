@@ -14,7 +14,7 @@ import {
   PendingQueueAction,
 } from './services/pending-queue'
 import { generateSubmissionCredentials } from './services/api/submissions'
-import replaceCustomValues from './services/replace-custom-values'
+import replaceSubmissionResultValues from './services/replaceSubmissionResultValues'
 import { FormTypes } from '@oneblink/types'
 import Sentry from './Sentry'
 import prepareSubmissionData from './services/prepareSubmissionData'
@@ -415,7 +415,10 @@ async function executeAction(
       push('/')
       break
     case 'URL': {
-      const newUrl = replaceCustomValues(redirectUrl || '/', submissionResult)
+      const newUrl = replaceSubmissionResultValues(
+        redirectUrl || '/',
+        submissionResult,
+      )
       // Relative URLs can be navigated to internally
       if (newUrl[0] === '/') {
         push(newUrl)

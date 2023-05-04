@@ -1,3 +1,4 @@
+import { submissionService } from '@oneblink/sdk-core'
 import tenants from './tenants'
 import parser from 'ua-parser-js'
 
@@ -286,4 +287,58 @@ export function generateDate({
       return date
     }
   }
+}
+
+const replaceSubmissionFormatters: submissionService.ReplaceSubmissionFormatters =
+  {
+    formatDate: (value) => formatDate(new Date(value)),
+    formatDateTime: (value) => formatDatetime(new Date(value)),
+    formatTime: (value) => formatTime(new Date(value)),
+    formatCurrency: (value) => formatCurrency(value),
+    formatNumber: (value) => value.toString(),
+  }
+
+/**
+ * Replace the `{ELEMENT:<elementName>}` values in text after a successful form
+ * submission as well as other replaceable parameters e.g. `submissionId`. The
+ * replacements are suppose to be user friendly and for display purposes, e.g.
+ * dates should be displayed in the user's desired format and timezone.
+ *
+ * @param text
+ * @param options
+ * @returns
+ */
+export function replaceSubmissionResultValues(
+  text: string,
+  options: Omit<
+    Parameters<typeof submissionService.replaceSubmissionResultValues>[1],
+    keyof submissionService.ReplaceSubmissionFormatters
+  >,
+): string {
+  return submissionService.replaceSubmissionResultValues(text, {
+    ...options,
+    ...replaceSubmissionFormatters,
+  })
+}
+
+/**
+ * Replace the `{ELEMENT:<elementName>}` values in text while a form is being
+ * filled out. The replacements are suppose to be user friendly and for display
+ * purposes, e.g. dates should be displayed in the user's desired format and timezone.
+ *
+ * @param text
+ * @param options
+ * @returns
+ */
+export function replaceSubmissionValues(
+  text: string,
+  options: Omit<
+    Parameters<typeof submissionService.replaceSubmissionValues>[1],
+    keyof submissionService.ReplaceSubmissionFormatters
+  >,
+): string {
+  return submissionService.replaceSubmissionValues(text, {
+    ...options,
+    ...replaceSubmissionFormatters,
+  })
 }

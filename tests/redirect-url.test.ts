@@ -1,5 +1,5 @@
 import { FormTypes } from '@oneblink/types'
-import replaceElementValues from '../src/services/replace-custom-values'
+import replaceSubmissionResultValues from '../src/services/replaceSubmissionResultValues'
 
 describe('Form redirect URL', () => {
   const definition: FormTypes.Form = {
@@ -12,7 +12,6 @@ describe('Form redirect URL', () => {
     elements: [],
     isAuthenticated: false,
     isMultiPage: false,
-    isInfoPage: false,
     postSubmissionAction: 'FORMS_LIBRARY',
     cancelAction: 'FORMS_LIBRARY',
     submissionEvents: [],
@@ -34,6 +33,7 @@ describe('Form redirect URL', () => {
     captchaTokens: [],
     isInPendingQueue: false,
     isOffline: false,
+    isUploadingAttachments: false,
   }
 
   test('should replace all instances of {ELEMENT} with correct property value', () => {
@@ -47,7 +47,7 @@ describe('Form redirect URL', () => {
       },
     }
 
-    const result = replaceElementValues(url, submissionResult)
+    const result = replaceSubmissionResultValues(url, submissionResult)
 
     expect(result).toEqual('https://some-url.com?name=blinkybill&home=gosford')
   })
@@ -63,7 +63,7 @@ describe('Form redirect URL', () => {
       },
     }
 
-    const result = replaceElementValues(url, submissionResult)
+    const result = replaceSubmissionResultValues(url, submissionResult)
 
     expect(result).toEqual(
       'https://some-url.com?name=blinkybill&koala=blinkybill',
@@ -81,7 +81,7 @@ describe('Form redirect URL', () => {
       },
     }
 
-    const result = replaceElementValues(url, submissionResult)
+    const result = replaceSubmissionResultValues(url, submissionResult)
 
     expect(result).toEqual('https://some-url.com?name=blinkybill')
   })

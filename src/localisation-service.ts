@@ -225,3 +225,65 @@ export function formatNumber(value: number): string {
 export function formatCurrency(value: number): string {
   return tenants.current.intlFormats.currency.format(value)
 }
+
+/**
+ * Generate a `Date` based a `string` while adding/subtracting a number of days.
+ * Use this function to generate a date with the correct time if only the date
+ * part is required to be formatted for display purposes. Also supports passing
+ * `'NOW'` as the value to get the current date with an offset.
+ *
+ * #### Example
+ *
+ * ```js
+ * const dateOnly = localisationService.generateDate({
+ *   value: '2023-05-04',
+ *   dateOnly: true,
+ *   daysOffset: undefined,
+ * })
+ *
+ * const date = localisationService.generateDate({
+ *   value: '2023-05-04T02:49:23.616Z',
+ *   dateOnly: false,
+ *   daysOffset: undefined,
+ * })
+ *
+ * const now = localisationService.generateDate({
+ *   value: 'NOW',
+ *   dateOnly: false,
+ *   daysOffset: undefined,
+ * })
+ * ```
+ *
+ * @param options
+ * @returns
+ */
+export function generateDate({
+  daysOffset,
+  value,
+  dateOnly,
+}: {
+  daysOffset: number | undefined
+  value: string
+  dateOnly: boolean
+}): Date | undefined {
+  if (value === 'NOW') {
+    const date = new Date()
+    if (daysOffset !== undefined) {
+      date.setDate(date.getDate() + daysOffset)
+    }
+    return date
+  } else {
+    const timestamp = Date.parse(value)
+    if (!Number.isNaN(timestamp)) {
+      const date = new Date(timestamp)
+      if (daysOffset !== undefined) {
+        date.setDate(date.getDate() + daysOffset)
+      }
+      if (dateOnly) {
+        const offset = date.getTimezoneOffset()
+        return new Date(date.getTime() + offset * 60000)
+      }
+      return date
+    }
+  }
+}

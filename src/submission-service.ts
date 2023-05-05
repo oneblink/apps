@@ -14,7 +14,7 @@ import {
   PendingQueueAction,
 } from './services/pending-queue'
 import { generateSubmissionCredentials } from './services/api/submissions'
-import replaceSubmissionResultValues from './services/replaceSubmissionResultValues'
+import replaceInjectablesWithSubmissionValues from './services/replaceInjectablesWithSubmissionValues'
 import { FormTypes } from '@oneblink/types'
 import Sentry from './Sentry'
 import prepareSubmissionData from './services/prepareSubmissionData'
@@ -415,7 +415,7 @@ async function executeAction(
       push('/')
       break
     case 'URL': {
-      const newUrl = replaceSubmissionResultValues(
+      const newUrl = replaceInjectablesWithSubmissionValues(
         redirectUrl || '/',
         submissionResult,
       )

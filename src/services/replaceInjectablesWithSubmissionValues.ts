@@ -1,11 +1,11 @@
 import { FormSubmissionResult } from '../types/submissions'
 import * as localisationService from '../localisation-service'
 
-export default function replaceSubmissionResultValues(
+export default function replaceInjectablesWithSubmissionValues(
   text: string,
   submissionResult: FormSubmissionResult,
 ): string {
-  return localisationService.replaceSubmissionResultValues(text, {
+  return localisationService.replaceInjectablesWithSubmissionValues(text, {
     previousApprovalId: submissionResult.previousFormSubmissionApprovalId,
     form: submissionResult.definition,
     submission: submissionResult.submission,

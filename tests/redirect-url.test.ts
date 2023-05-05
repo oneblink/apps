@@ -1,5 +1,5 @@
 import { FormTypes } from '@oneblink/types'
-import replaceSubmissionResultValues from '../src/services/replaceSubmissionResultValues'
+import replaceInjectablesWithSubmissionValues from '../src/services/replaceInjectablesWithSubmissionValues'
 
 describe('Form redirect URL', () => {
   const definition: FormTypes.Form = {
@@ -47,7 +47,7 @@ describe('Form redirect URL', () => {
       },
     }
 
-    const result = replaceSubmissionResultValues(url, submissionResult)
+    const result = replaceInjectablesWithSubmissionValues(url, submissionResult)
 
     expect(result).toEqual('https://some-url.com?name=blinkybill&home=gosford')
   })
@@ -63,7 +63,7 @@ describe('Form redirect URL', () => {
       },
     }
 
-    const result = replaceSubmissionResultValues(url, submissionResult)
+    const result = replaceInjectablesWithSubmissionValues(url, submissionResult)
 
     expect(result).toEqual(
       'https://some-url.com?name=blinkybill&koala=blinkybill',
@@ -81,7 +81,7 @@ describe('Form redirect URL', () => {
       },
     }
 
-    const result = replaceSubmissionResultValues(url, submissionResult)
+    const result = replaceInjectablesWithSubmissionValues(url, submissionResult)
 
     expect(result).toEqual('https://some-url.com?name=blinkybill')
   })

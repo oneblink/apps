@@ -289,7 +289,7 @@ export function generateDate({
   }
 }
 
-const replaceSubmissionFormatters: submissionService.ReplaceSubmissionFormatters =
+const replaceSubmissionFormatters: submissionService.ReplaceInjectablesFormatters =
   {
     formatDate: (v) => {
       const date = generateDate({
@@ -318,14 +318,16 @@ const replaceSubmissionFormatters: submissionService.ReplaceSubmissionFormatters
  * @param options
  * @returns
  */
-export function replaceSubmissionResultValues(
+export function replaceInjectablesWithSubmissionValues(
   text: string,
   options: Omit<
-    Parameters<typeof submissionService.replaceSubmissionResultValues>[1],
-    keyof submissionService.ReplaceSubmissionFormatters
+    Parameters<
+      typeof submissionService.replaceInjectablesWithSubmissionValues
+    >[1],
+    keyof submissionService.ReplaceInjectablesFormatters
   >,
 ): string {
-  return submissionService.replaceSubmissionResultValues(text, {
+  return submissionService.replaceInjectablesWithSubmissionValues(text, {
     ...options,
     ...replaceSubmissionFormatters,
   })
@@ -340,14 +342,14 @@ export function replaceSubmissionResultValues(
  * @param options
  * @returns
  */
-export function replaceSubmissionValues(
+export function replaceInjectablesWithElementValues(
   text: string,
   options: Omit<
-    Parameters<typeof submissionService.replaceSubmissionValues>[1],
-    keyof submissionService.ReplaceSubmissionFormatters
+    Parameters<typeof submissionService.replaceInjectablesWithElementValues>[1],
+    keyof submissionService.ReplaceInjectablesFormatters
   >,
 ): string {
-  return submissionService.replaceSubmissionValues(text, {
+  return submissionService.replaceInjectablesWithElementValues(text, {
     ...options,
     ...replaceSubmissionFormatters,
   })

@@ -6,7 +6,7 @@ import {
   generatePaymentConfiguration,
 } from './services/api/payment'
 import utilsService from './services/utils'
-import replaceSubmissionResultValues from './services/replaceSubmissionResultValues'
+import replaceInjectablesWithSubmissionValues from './services/replaceInjectablesWithSubmissionValues'
 import { SubmissionEventTypes } from '@oneblink/types'
 import { FormSubmission, FormSubmissionResult } from './types/submissions'
 import { HandlePaymentResult } from './types/payments'
@@ -312,13 +312,13 @@ export async function handlePaymentSubmissionEvent({
       payload.integrationEnvironmentId =
         paymentSubmissionEvent.configuration.environmentId
       if (paymentSubmissionEvent.configuration.crn2) {
-        payload.crn2 = replaceSubmissionResultValues(
+        payload.crn2 = replaceInjectablesWithSubmissionValues(
           paymentSubmissionEvent.configuration.crn2,
           formSubmissionResult,
         )
       }
       if (paymentSubmissionEvent.configuration.crn3) {
-        payload.crn3 = replaceSubmissionResultValues(
+        payload.crn3 = replaceInjectablesWithSubmissionValues(
           paymentSubmissionEvent.configuration.crn3,
           formSubmissionResult,
         )
@@ -329,10 +329,11 @@ export async function handlePaymentSubmissionEvent({
       payload.integrationEnvironmentId =
         paymentSubmissionEvent.configuration.environmentId
       if (paymentSubmissionEvent.configuration.customerReferenceNumber) {
-        payload.customerReferenceNumber = replaceSubmissionResultValues(
-          paymentSubmissionEvent.configuration.customerReferenceNumber,
-          formSubmissionResult,
-        )
+        payload.customerReferenceNumber =
+          replaceInjectablesWithSubmissionValues(
+            paymentSubmissionEvent.configuration.customerReferenceNumber,
+            formSubmissionResult,
+          )
       }
       break
     }

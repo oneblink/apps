@@ -336,11 +336,16 @@ type LoadFormElementOptionsResult = {
   elementId: string
 } & (
   | {
-      ok: true
+      type: 'OPTIONS'
       options: FormTypes.ChoiceElementOption[]
     }
   | {
-      ok: false
+      type: 'SEARCH'
+      url: string
+      searchQuerystringParameter: string
+    }
+  | {
+      type: 'ERROR'
       error: OneBlinkAppsError
     }
 )
@@ -379,12 +384,13 @@ async function getFormElementDynamicOptions(
   input: FormTypes.Form | FormTypes.Form[],
   abortSignal?: AbortSignal,
 ): Promise<Array<LoadFormElementOptionsResult>> {
-  const freshdeskFieldOptionsResults =
-    await getFormElementFreshdeskFieldOptions(input, abortSignal)
   const forms = Array.isArray(input) ? input : [input]
   if (!forms.length) {
-    return freshdeskFieldOptionsResults
+    return []
   }
+
+  const freshdeskFieldOptionsResults =
+    await getFormElementFreshdeskFieldOptions(forms, abortSignal)
 
   // Get the options sets id for each element
   const formElementOptionsSetIds = forms.reduce((ids: number[], form) => {
@@ -415,7 +421,7 @@ async function getFormElementDynamicOptions(
   const formElementOptionsSets = allFormElementOptionsSets.filter(({ id }) =>
     formElementOptionsSetIds.includes(id || 0),
   )
-  if (!formElementOptionsSetIds.length) {
+  if (!formElementOptionsSets.length) {
     return freshdeskFieldOptionsResults
   }
 
@@ -430,6 +436,7 @@ async function getFormElementDynamicOptions(
       formElementOptionsSetId: number
       formElementOptionsSetName: string
       formElementOptionsSetUrl?: string
+      searchQuerystringParameter: string | undefined
     }>
   >((memo, formElementOptionsSet) => {
     const formElementOptionsSetId = formElementOptionsSet.id
@@ -455,6 +462,8 @@ async function getFormElementDynamicOptions(
           formElementOptionsSetId,
           formElementOptionsSetName: formElementOptionsSet.name,
           formElementOptionsSetUrl: formElementDynamicOptionSetEnvironment?.url,
+          searchQuerystringParameter:
+            formElementDynamicOptionSetEnvironment?.searchQuerystringParameter,
         })
       }
     }
@@ -466,26 +475,34 @@ async function getFormElementDynamicOptions(
   const results = await Promise.all(
     formElementOptionsSetUrls.map<
       Promise<
-        | {
-            ok: true
-            formElementOptionsSetId: number
-            options: unknown
-          }
-        | {
-            ok: false
-            error: OneBlinkAppsError
-            formElementOptionsSetId: number
-          }
+        {
+          formElementOptionsSetId: number
+        } & (
+          | {
+              type: 'OPTIONS'
+              options: unknown
+            }
+          | {
+              type: 'SEARCH'
+              url: string
+              searchQuerystringParameter: string
+            }
+          | {
+              type: 'ERROR'
+              error: OneBlinkAppsError
+            }
+        )
       >
     >(
       async ({
         formElementOptionsSetId,
         formElementOptionsSetName,
         formElementOptionsSetUrl,
+        searchQuerystringParameter,
       }) => {
         if (!formElementOptionsSetUrl) {
           return {
-            ok: false,
+            type: 'ERROR',
             formElementOptionsSetId,
             error: new OneBlinkAppsError(
               `Options set configuration has not been completed yet. Please contact your administrator to rectify the issue.`,
@@ -506,6 +523,16 @@ async function getFormElementDynamicOptions(
             ),
           }
         }
+
+        if (searchQuerystringParameter) {
+          return {
+            type: 'SEARCH',
+            formElementOptionsSetId,
+            url: formElementOptionsSetUrl,
+            searchQuerystringParameter,
+          }
+        }
+
         try {
           const headers = await generateHeaders()
           const response = await fetch(formElementOptionsSetUrl, {
@@ -520,14 +547,14 @@ async function getFormElementDynamicOptions(
 
           const options = await response.json()
           return {
-            ok: true,
+            type: 'OPTIONS',
             formElementOptionsSetId,
             options,
           }
         } catch (error) {
           Sentry.captureException(error)
           return {
-            ok: false,
+            type: 'ERROR',
             formElementOptionsSetId,
             error: new OneBlinkAppsError(
               `Options could not be loaded. Please contact your administrator to rectify the issue.`,
@@ -565,13 +592,13 @@ async function getFormElementDynamicOptions(
   } of staticOptionSets) {
     if (formElementDynamicOptionSetEnvironment) {
       results.push({
-        ok: true,
+        type: 'OPTIONS',
         formElementOptionsSetId,
         options: formElementDynamicOptionSetEnvironment.options,
       })
     } else {
       results.push({
-        ok: false,
+        type: 'ERROR',
         formElementOptionsSetId,
         error: new OneBlinkAppsError(
           `Options set environment configuration has not been completed yet. Please contact your administrator to rectify the issue.`,
@@ -613,7 +640,7 @@ async function getFormElementDynamicOptions(
           )
           if (!result) {
             optionsForElementId.push({
-              ok: false,
+              type: 'ERROR',
               elementId: element.id,
               error: new OneBlinkAppsError(
                 `Options set does not exist. Please contact your administrator to rectify the issue.`,
@@ -635,11 +662,21 @@ async function getFormElementDynamicOptions(
             return
           }
 
-          if (!result.ok) {
+          if (result.type === 'ERROR') {
             optionsForElementId.push({
-              ok: false,
+              type: 'ERROR',
               elementId: element.id,
               error: result.error,
+            })
+            return
+          }
+
+          if (result.type === 'SEARCH') {
+            optionsForElementId.push({
+              type: 'SEARCH',
+              elementId: element.id,
+              url: result.url,
+              searchQuerystringParameter: result.searchQuerystringParameter,
             })
             return
           }
@@ -727,7 +764,7 @@ async function getFormElementDynamicOptions(
             }
           })
           optionsForElementId.push({
-            ok: true,
+            type: 'OPTIONS',
             options,
             elementId: element.id,
           })
@@ -741,11 +778,9 @@ async function getFormElementDynamicOptions(
 }
 
 async function getFormElementFreshdeskFieldOptions(
-  input: FormTypes.Form | FormTypes.Form[],
+  forms: FormTypes.Form[],
   abortSignal?: AbortSignal,
 ): Promise<Array<LoadFormElementOptionsResult>> {
-  const forms = Array.isArray(input) ? input : [input]
-
   const freshdeskFieldNames = forms.reduce<string[]>((names, form) => {
     formElementsService.forEachFormElementWithOptions(form.elements, (el) => {
       if (
@@ -794,7 +829,7 @@ async function getFormElementFreshdeskFieldOptions(
           )
           if (!freshdeskField) {
             optionsForElementId.push({
-              ok: false,
+              type: 'ERROR',
               elementId: element.id,
               error: new OneBlinkAppsError(
                 `Freshdesk Field does not exist. Please contact your administrator to rectify the issue.`,
@@ -809,7 +844,7 @@ async function getFormElementFreshdeskFieldOptions(
           const options = freshdeskField.options
           if (!Array.isArray(options)) {
             optionsForElementId.push({
-              ok: false,
+              type: 'ERROR',
               elementId: element.id,
               error: new OneBlinkAppsError(
                 `Freshdesk Field does not have options. Please contact your administrator to rectify the issue.`,
@@ -825,7 +860,7 @@ async function getFormElementFreshdeskFieldOptions(
           }
 
           optionsForElementId.push({
-            ok: true,
+            type: 'OPTIONS',
             elementId: element.id,
             options: mapNestedOptions(options) || [],
           })

@@ -1,36 +1,27 @@
-import { EventListeners, CognitoIdentityServiceProvider } from 'aws-sdk'
+import {
+  AWSError,
+  CognitoIdentityServiceProvider,
+  EventListeners,
+  Request,
+} from 'aws-sdk'
 import { parseQueryString } from './query-string'
 import Sentry from '../Sentry'
 import { OneBlinkAppsError } from '..'
 
-interface AWSAuthenticationResult {
-  AccessToken: string
-  ExpiresIn: number
-  IdToken: string
-  TokenType: string
-  RefreshToken?: string
-}
-
-export type AWSCognitoAuthChallenge = {
-  ChallengeName:
-    | 'SMS_MFA'
-    | 'PASSWORD_VERIFIER'
-    | 'CUSTOM_CHALLENGE'
-    | 'DEVICE_SRP_AUTH'
-    | 'DEVICE_PASSWORD_VERIFIER'
-    | 'NEW_PASSWORD_REQUIRED'
-  Session: string
-  ChallengeParameters: { [key: string]: string }
-  AuthenticationResult?: AWSAuthenticationResult
-}
-
-// @ts-expect-error
-const unsignedAWSRequest = async (request) => {
+async function unsignedAWSRequest<T>(
+  request: Request<T, AWSError>,
+): Promise<T> {
+  // @ts-expect-error
   request.removeListener('validate', EventListeners.Core.VALIDATE_CREDENTIALS)
   // @ts-expect-error
   request.removeListener('sign', EventListeners.Core.SIGN)
 
   return request.promise()
+}
+
+export type LoginAttemptResponse = {
+  resetPasswordCallback?: (newPassword: string) => Promise<LoginAttemptResponse>
+  mfaCodeCallback?: (code: string) => Promise<LoginAttemptResponse>
 }
 
 export default class AWSCognitoClient {
@@ -103,12 +94,18 @@ export default class AWSCognitoClient {
     }
   }
 
-  _storeAuthenticationResult(authenticationResult: AWSAuthenticationResult) {
+  _storeAuthenticationResult(
+    authenticationResult: CognitoIdentityServiceProvider.AuthenticationResultType,
+  ) {
     // Take off 5 seconds to ensure a request does not become unauthenticated mid request
-    const expiresAt = authenticationResult.ExpiresIn * 1000 + Date.now() - 5000
+    const expiresAt =
+      (authenticationResult.ExpiresIn as number) * 1000 + Date.now() - 5000
     localStorage.setItem(this.EXPIRES_AT, expiresAt.toString())
-    localStorage.setItem(this.ACCESS_TOKEN, authenticationResult.AccessToken)
-    localStorage.setItem(this.ID_TOKEN, authenticationResult.IdToken)
+    localStorage.setItem(
+      this.ACCESS_TOKEN,
+      authenticationResult.AccessToken as string,
+    )
+    localStorage.setItem(this.ID_TOKEN, authenticationResult.IdToken as string)
     if (authenticationResult.RefreshToken) {
       localStorage.setItem(
         this.REFRESH_TOKEN,
@@ -168,7 +165,9 @@ export default class AWSCognitoClient {
           },
         }),
       )
-      this._storeAuthenticationResult(result.AuthenticationResult)
+      if (result.AuthenticationResult) {
+        this._storeAuthenticationResult(result.AuthenticationResult)
+      }
     } catch (error) {
       console.warn('Error while attempting to refresh session', error)
       this._removeAuthenticationResult()
@@ -193,10 +192,74 @@ export default class AWSCognitoClient {
     }
   }
 
+  async responseToAuthChallenge(
+    username: string,
+    initiateAuthResponse: CognitoIdentityServiceProvider.InitiateAuthResponse,
+  ): Promise<LoginAttemptResponse> {
+    if (initiateAuthResponse.AuthenticationResult) {
+      this._storeAuthenticationResult(initiateAuthResponse.AuthenticationResult)
+      return {}
+    }
+
+    const ChallengeName = initiateAuthResponse.ChallengeName
+    switch (ChallengeName) {
+      case 'NEW_PASSWORD_REQUIRED': {
+        return {
+          resetPasswordCallback: async (newPassword) => {
+            const resetPasswordResult = await unsignedAWSRequest(
+              this.cognitoIdentityServiceProvider.respondToAuthChallenge({
+                ChallengeName,
+                ClientId: this.clientId,
+                Session: initiateAuthResponse.Session,
+                ChallengeResponses: {
+                  USERNAME: username,
+                  NEW_PASSWORD: newPassword,
+                },
+              }),
+            )
+            return await this.responseToAuthChallenge(
+              username,
+              resetPasswordResult,
+            )
+          },
+        }
+      }
+      case 'SOFTWARE_TOKEN_MFA': {
+        return {
+          mfaCodeCallback: async (code) => {
+            const resetPasswordResult = await unsignedAWSRequest(
+              this.cognitoIdentityServiceProvider.respondToAuthChallenge({
+                ChallengeName,
+                ClientId: this.clientId,
+                Session: initiateAuthResponse.Session,
+                ChallengeResponses: {
+                  USERNAME: username,
+                  SOFTWARE_TOKEN_MFA_CODE: code,
+                },
+              }),
+            )
+            return await this.responseToAuthChallenge(
+              username,
+              resetPasswordResult,
+            )
+          },
+        }
+      }
+    }
+
+    console.warn(
+      '"CognitoIdentityServiceProvider.InitiateAuthResponse" challenge has not been catered.',
+      initiateAuthResponse,
+    )
+    throw new Error(
+      'An unexpected error occurred while attempting to process your login. Please try again or contact support if the problem persists.',
+    )
+  }
+
   async loginUsernamePassword(
     username: string,
     password: string,
-  ): Promise<((newPassword: string) => Promise<void>) | void> {
+  ): Promise<LoginAttemptResponse> {
     const loginResult = await unsignedAWSRequest(
       this.cognitoIdentityServiceProvider.initiateAuth({
         AuthFlow: 'USER_PASSWORD_AUTH',
@@ -208,32 +271,7 @@ export default class AWSCognitoClient {
       }),
     )
 
-    if (loginResult.AuthenticationResult) {
-      this._storeAuthenticationResult(loginResult.AuthenticationResult)
-      return
-    }
-
-    if (loginResult.ChallengeName === 'NEW_PASSWORD_REQUIRED') {
-      return async (newPassword) => {
-        const resetPasswordResult = await unsignedAWSRequest(
-          this.cognitoIdentityServiceProvider.respondToAuthChallenge({
-            ChallengeName: loginResult.ChallengeName,
-            ClientId: this.clientId,
-            Session: loginResult.Session,
-            ChallengeResponses: {
-              USERNAME: username,
-              NEW_PASSWORD: newPassword,
-            },
-          }),
-        )
-
-        this._storeAuthenticationResult(
-          resetPasswordResult.AuthenticationResult,
-        )
-      }
-    }
-
-    throw new Error('Could not authenticate user.')
+    return await this.responseToAuthChallenge(username, loginResult)
   }
 
   async loginHostedUI(identityProviderName?: string): Promise<void> {
@@ -437,6 +475,22 @@ export default class AWSCognitoClient {
     await this._refreshSession()
 
     return this._getAccessToken()
+  }
+
+  async setupMfa(): Promise<string | undefined> {
+    const accessToken = await this.getAccessToken()
+    if (!accessToken) {
+      return
+    }
+    await unsignedAWSRequest(
+      this.cognitoIdentityServiceProvider.setUserMFAPreference({
+        SoftwareTokenMfaSettings: {
+          Enabled: true,
+          PreferredMfa: true,
+        },
+        AccessToken: accessToken,
+      }),
+    )
   }
 }
 

@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - **[BREAKING]** `formService.getFormElementDynamicOptions()` function result has changed to accommodate options sets that support passing a querystring parameter to filter options server side
 
+### Added
+
+- support for MFA to cognito logins
+
 ## [3.2.0] - 2023-05-08
 
 ### Added

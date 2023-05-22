@@ -20,6 +20,9 @@ import {
   getUsername,
   getUserFriendlyName,
   LoginAttemptResponse,
+  checkIsMfaEnabled,
+  disableMfa,
+  setupMfa,
 } from './services/cognito'
 import { getRequest, postRequest, HTTPError } from './services/fetch'
 import tenants from './tenants'
@@ -43,6 +46,9 @@ export {
   setUserToken,
   getUserFriendlyName,
   LoginAttemptResponse,
+  checkIsMfaEnabled,
+  disableMfa,
+  setupMfa,
 }
 import Sentry from './Sentry'
 

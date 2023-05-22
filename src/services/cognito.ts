@@ -367,6 +367,79 @@ function getUserFriendlyName(): string | undefined {
   return userService.getUserFriendlyName(profile)
 }
 
+/**
+ * Check if MFA is enabled for this current user.
+ *
+ * #### Example
+ *
+ * ```js
+ * const isMfaEnabled = await authService.checkIsMfaEnabled()
+ * if (isMfaEnabled) {
+ *   // Allow disabling MFA
+ * } else {
+ *   // Allow enabling MFA
+ * }
+ * ```
+ *
+ * @returns
+ */
+async function checkIsMfaEnabled() {
+  if (!awsCognitoClient) {
+    throw new Error(
+      '"authService" has not been initiated. You must call the init() function before checking if the current user has MFA enabled.',
+    )
+  }
+
+  return await awsCognitoClient.checkIsMfaEnabled()
+}
+
+/**
+ * Disable MFA for the current user.
+ *
+ * #### Example
+ *
+ * ```js
+ * await authService.disableMfa()
+ * ```
+ *
+ * @returns
+ */
+async function disableMfa() {
+  if (!awsCognitoClient) {
+    throw new Error(
+      '"authService" has not been initiated. You must call the init() function before attempting to disable MFA.',
+    )
+  }
+
+  return await awsCognitoClient.disableMfa()
+}
+/**
+ * Setup MFA for the current user. The result will include a callback that
+ * should be called with the valid TOTP from an authenticator app.
+ *
+ * #### Example
+ *
+ * ```js
+ * const { secretCode, mfaCodeCallback } = await authService.setupMfa()
+ * // Prompt the user to enter an MFA code
+ * const code = prompt(
+ *   `Please enter a one-time code from your MFA app after creating a new entry with secret: ${secretCode}.`,
+ * )
+ * await mfaCodeCallback(code)
+ * ```
+ *
+ * @returns
+ */
+async function setupMfa() {
+  if (!awsCognitoClient) {
+    throw new Error(
+      '"authService" has not been initiated. You must call the init() function before attempting to setup MFA.',
+    )
+  }
+
+  return await awsCognitoClient.setupMfa()
+}
+
 export {
   init,
   registerAuthListener,
@@ -382,4 +455,7 @@ export {
   getUserProfile,
   getUserFriendlyName,
   LoginAttemptResponse,
+  checkIsMfaEnabled,
+  disableMfa,
+  setupMfa,
 }

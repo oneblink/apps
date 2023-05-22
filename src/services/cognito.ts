@@ -367,6 +367,15 @@ function getUserFriendlyName(): string | undefined {
   return userService.getUserFriendlyName(profile)
 }
 
+function getAWSCognitoClient() {
+  if (!awsCognitoClient) {
+    throw new Error(
+      '"authService" has not been initiated. You must call the init() function before you can do this.',
+    )
+  }
+  return awsCognitoClient
+}
+
 export {
   init,
   registerAuthListener,
@@ -382,4 +391,5 @@ export {
   getUserProfile,
   getUserFriendlyName,
   LoginAttemptResponse,
+  getAWSCognitoClient,
 }

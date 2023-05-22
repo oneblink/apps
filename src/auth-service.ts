@@ -20,6 +20,7 @@ import {
   getUsername,
   getUserFriendlyName,
   LoginAttemptResponse,
+  getAWSCognitoClient,
 } from './services/cognito'
 import { getRequest, postRequest, HTTPError } from './services/fetch'
 import tenants from './tenants'
@@ -47,7 +48,7 @@ export {
 import Sentry from './Sentry'
 
 /**
- * Log the current user out and remove an data stored locally by the user e.g. drafts.
+ * Log the current user out and remove any data stored locally by the user e.g. drafts.
  *
  * #### Example
  *
@@ -258,4 +259,20 @@ export async function isAdministrator(
 ): Promise<boolean> {
   const appUser = await getCurrentFormsAppUser(formsAppId, abortSignal)
   return !!appUser?.groups.some((group) => group === 'oneblink:administrator')
+}
+
+export async function configureMFA() {
+  const cognitoClient = getAWSCognitoClient()
+  const accessToken = await cognitoClient.getAccessToken()
+  if (!accessToken) {
+    throw new Error('Failed to retreive access token.')
+  }
+  const result = await cognitoClient.cognitoIdentityServiceProvider
+    .associateSoftwareToken({
+      AccessToken: accessToken,
+    })
+    .promise()
+
+  const secret = result.SecretCode
+  console.log(secret)
 }

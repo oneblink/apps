@@ -477,20 +477,70 @@ export default class AWSCognitoClient {
     return this._getAccessToken()
   }
 
-  async setupMfa(): Promise<string | undefined> {
+  async checkIsMfaEnabled() {
+    const accessToken = await this.getAccessToken()
+    if (!accessToken) {
+      return false
+    }
+
+    const user = await unsignedAWSRequest(
+      this.cognitoIdentityServiceProvider.getUser({
+        AccessToken: accessToken,
+      }),
+    )
+
+    return !!user.UserMFASettingList?.length
+  }
+
+  async disableMfa() {
     const accessToken = await this.getAccessToken()
     if (!accessToken) {
       return
     }
+
     await unsignedAWSRequest(
       this.cognitoIdentityServiceProvider.setUserMFAPreference({
         SoftwareTokenMfaSettings: {
-          Enabled: true,
-          PreferredMfa: true,
+          Enabled: false,
+          PreferredMfa: false,
         },
         AccessToken: accessToken,
       }),
     )
+  }
+
+  async setupMfa() {
+    const accessToken = await this.getAccessToken()
+    if (!accessToken) {
+      return
+    }
+
+    const { SecretCode } = await unsignedAWSRequest(
+      this.cognitoIdentityServiceProvider.associateSoftwareToken({
+        AccessToken: accessToken,
+      }),
+    )
+
+    return {
+      secretCode: SecretCode,
+      mfaCodeCallback: async (code: string) => {
+        await unsignedAWSRequest(
+          this.cognitoIdentityServiceProvider.verifySoftwareToken({
+            AccessToken: accessToken,
+            UserCode: code,
+          }),
+        )
+        await unsignedAWSRequest(
+          this.cognitoIdentityServiceProvider.setUserMFAPreference({
+            SoftwareTokenMfaSettings: {
+              Enabled: true,
+              PreferredMfa: true,
+            },
+            AccessToken: accessToken,
+          }),
+        )
+      },
+    }
   }
 }
 

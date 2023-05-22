@@ -19,6 +19,7 @@ import {
   getUserProfile,
   getUsername,
   getUserFriendlyName,
+  LoginAttemptResponse,
 } from './services/cognito'
 import { getRequest, postRequest, HTTPError } from './services/fetch'
 import tenants from './tenants'
@@ -41,6 +42,7 @@ export {
   getUserToken,
   setUserToken,
   getUserFriendlyName,
+  LoginAttemptResponse,
 }
 import Sentry from './Sentry'
 

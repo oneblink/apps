@@ -1,6 +1,6 @@
 import jwtDecode from 'jwt-decode'
 
-import AWSCognitoClient from './AWSCognitoClient'
+import AWSCognitoClient, { LoginAttemptResponse } from './AWSCognitoClient'
 
 import * as offlineService from '../offline-service'
 import { userService } from '@oneblink/sdk-core'
@@ -61,26 +61,54 @@ function registerAuthListener(listener: () => unknown): () => void {
 
 /**
  * Create a session for a user by entering a username and password. If the user
- * requires a password reset, a function will be returned. This function should
- * be called with the new password once entered by the user.
+ * requires a password reset, the "resetPasswordCallback" property will be
+ * returned. This function should be called with the new password once entered
+ * by the user. If the user requires an MFA token, the "mfaCodeCallback"
+ * property will be returned. This function should be called with a one-time
+ * token generated from an authenticator app. The functions returned are
+ * recursive and the result from each of them is the same result from the
+ * loginUsernamePassword() function. Each time the response includes a callback,
+ * you will need to begin the process again until all callbacks are handled.
  *
  * #### Example
  *
  * ```js
+ * async function handleLoginAttemptResponse({
+ *   resetPasswordCallback,
+ *   mfaCodeCallback,
+ * }) {
+ *   // "resetPasswordCallback" will be undefined if a password reset was not required.
+ *   if (resetPasswordCallback) {
+ *     // Prompt the user to enter a new password
+ *     const newPassword = prompt(
+ *       'The password you entered was only temporary, and must be reset for security purposes. Please enter your new password below to continue.',
+ *     )
+ *     const resetPasswordResponse = await resetPasswordCallback(
+ *       newPassword,
+ *     )
+ *     return await handleLoginAttemptResponse(resetPasswordResponse)
+ *   }
+ *
+ *   // "mfaCodeCallback" will be undefined if MFA is not setup.
+ *   if (mfaCodeCallback) {
+ *     // Prompt the user to enter an MFA code
+ *     const code = prompt(
+ *       'Please enter a one-time code from your MFA app.',
+ *     )
+ *     const mfaCodeResponse = await mfaCodeCallback(code)
+ *     return await handleLoginAttemptResponse(mfaCodeResponse)
+ *   }
+ * }
+ *
  * const username = 'user@email.io'
  * const password = 'P@$5w0rd'
- * const resetPassword = await authService.loginUsernamePassword(
+ *
+ * const loginAttemptResponse = await authService.loginUsernamePassword(
  *   username,
  *   password,
  * )
- * // "resetPassword" will be undefined if the login was successful
- * if (resetPassword) {
- *   // Prompt the user to enter a new password
- *   const newPassword = prompt(
- *     'The password you entered was only temporary, and must be reset for security purposes. Please enter your new password below to continue.',
- *   )
- *   await resetPassword(newPassword)
- * }
+ *
+ * await handleLoginAttemptResponse(loginAttemptResponse)
  * ```
  *
  * @param username
@@ -353,4 +381,5 @@ export {
   getCognitoIdToken,
   getUserProfile,
   getUserFriendlyName,
+  LoginAttemptResponse,
 }

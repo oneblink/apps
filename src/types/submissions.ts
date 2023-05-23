@@ -6,6 +6,7 @@ import {
 } from '@oneblink/types'
 import { S3ObjectCredentials } from '@oneblink/types/typescript/aws'
 import { FormElement } from '@oneblink/types/typescript/forms'
+import { FormSubmissionMeta } from '@oneblink/types/typescript/submissions'
 
 export type BaseFormSubmission = {
   /** The submission data */
@@ -111,6 +112,7 @@ export type S3UploadCredentials = _S3UploadCredentials & {
   ipAddress?: string
   userProfile?: MiscTypes.UserProfile
   pdfAccessToken?: string
+  formSubmissionMeta: FormSubmissionMeta
 }
 
 export type S3DraftUploadCredentials = _S3UploadCredentials & {

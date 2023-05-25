@@ -682,87 +682,93 @@ async function getFormElementDynamicOptions(
           }
 
           const choiceElementOptions =
-            formElementsService.parseFormElementOptionsSet(result.options)
-          const options = choiceElementOptions.map((option) => {
-            const optionsMap = (option.attributes || []).reduce(
-              (
-                memo: Record<
-                  string,
-                  {
-                    elementId: string
-                    optionIds: string[]
-                  }
-                >,
-                { label, value },
-              ) => {
-                if (
-                  !element.attributesMapping ||
-                  !Array.isArray(element.attributesMapping)
-                ) {
-                  return memo
-                }
-                const attribute = element.attributesMapping.find(
-                  (map) => map.attribute === label,
-                )
-                if (!attribute) return memo
+            formElementsService.parseFormElementOptionsSet(
+              result.options,
+            ) as FormTypes.DynamicChoiceElementOption[]
+          const options =
+            choiceElementOptions.map<FormTypes.ChoiceElementOption>(
+              (option) => {
+                const optionsMap = (option.attributes || []).reduce(
+                  (
+                    memo: Record<
+                      string,
+                      {
+                        elementId: string
+                        optionIds: string[]
+                      }
+                    >,
+                    { label, value },
+                  ) => {
+                    if (
+                      !element.attributesMapping ||
+                      !Array.isArray(element.attributesMapping)
+                    ) {
+                      return memo
+                    }
+                    const attribute = element.attributesMapping.find(
+                      (map) => map.attribute === label,
+                    )
+                    if (!attribute) return memo
 
-                const elementId = attribute.elementId
-                const predicateElement = formElementsService.findFormElement(
-                  form.elements,
-                  (el) => el.id === elementId,
-                )
-                if (
-                  !predicateElement ||
-                  (predicateElement.type !== 'select' &&
-                    predicateElement.type !== 'autocomplete' &&
-                    predicateElement.type !== 'checkboxes' &&
-                    predicateElement.type !== 'radio' &&
-                    predicateElement.type !== 'compliance')
-                ) {
-                  return memo
-                }
+                    const elementId = attribute.elementId
+                    const predicateElement =
+                      formElementsService.findFormElement(
+                        form.elements,
+                        (el) => el.id === elementId,
+                      )
+                    if (
+                      !predicateElement ||
+                      (predicateElement.type !== 'select' &&
+                        predicateElement.type !== 'autocomplete' &&
+                        predicateElement.type !== 'checkboxes' &&
+                        predicateElement.type !== 'radio' &&
+                        predicateElement.type !== 'compliance')
+                    ) {
+                      return memo
+                    }
 
-                let predicateElementOptions = predicateElement.options
-                if (!predicateElementOptions) {
-                  const predicateElementResult = results.find(
-                    (result) =>
-                      result &&
-                      predicateElement.dynamicOptionSetId ===
-                        result.formElementOptionsSetId,
-                  )
-                  if (predicateElementResult) {
-                    // @ts-expect-error
-                    predicateElementOptions = predicateElementResult.options
-                  } else {
-                    predicateElementOptions = []
-                  }
-                }
+                    let predicateElementOptions = predicateElement.options
+                    if (!predicateElementOptions) {
+                      const predicateElementResult = results.find(
+                        (result) =>
+                          result &&
+                          predicateElement.dynamicOptionSetId ===
+                            result.formElementOptionsSetId,
+                      )
+                      if (predicateElementResult) {
+                        // @ts-expect-error
+                        predicateElementOptions = predicateElementResult.options
+                      } else {
+                        predicateElementOptions = []
+                      }
+                    }
 
-                const predicateOption = predicateElementOptions?.find(
-                  (option) => option.value === value,
+                    const predicateOption = predicateElementOptions?.find(
+                      (option) => option.value === value,
+                    )
+                    memo[elementId] = memo[elementId] || {
+                      elementId,
+                      optionIds: [],
+                    }
+                    memo[elementId].optionIds.push(
+                      predicateOption?.id || predicateOption?.value || value,
+                    )
+                    element.conditionallyShowOptionsElementIds =
+                      element.conditionallyShowOptionsElementIds || []
+                    element.conditionallyShowOptionsElementIds.push(elementId)
+                    return memo
+                  },
+                  {},
                 )
-                if (elementId && predicateOption) {
-                  memo[elementId] = memo[elementId] || {
-                    elementId,
-                    optionIds: [],
-                  }
-                  memo[elementId].optionIds.push(
-                    predicateOption.id || predicateOption.value,
-                  )
-                  element.conditionallyShowOptionsElementIds =
-                    element.conditionallyShowOptionsElementIds || []
-                  element.conditionallyShowOptionsElementIds.push(elementId)
-                }
-                return memo
+
+                return {
+                  ...option,
+                  attributes: Object.keys(optionsMap).map(
+                    (key) => optionsMap[key],
+                  ),
+                } as FormTypes.ChoiceElementOption
               },
-              {},
             )
-
-            return {
-              ...option,
-              attributes: Object.keys(optionsMap).map((key) => optionsMap[key]),
-            }
-          })
           optionsForElementId.push({
             type: 'OPTIONS',
             options,
@@ -876,12 +882,16 @@ async function getFormElementFreshdeskFieldOptions(
 const mapNestedOptions = (
   options: FreshdeskTypes.FreshdeskFieldOption[] | undefined,
 ): FormTypes.ChoiceElementOption[] | undefined => {
-  return options?.map(({ value, label, options: nestedOptions }) => ({
-    id: value.toString(),
-    value: value.toString(),
-    label,
-    options: mapNestedOptions(nestedOptions),
-  }))
+  return options?.map<FormTypes.ChoiceElementOption>(
+    ({ value, label, options: nestedOptions }) => ({
+      id: value.toString(),
+      value: value.toString(),
+      label,
+      options: mapNestedOptions(
+        nestedOptions,
+      ) as FormTypes.DynamicChoiceElementOption[],
+    }),
+  )
 }
 
 const dateFormatMap: Record<ReceiptDateFormat, string> = {

@@ -265,3 +265,58 @@ export async function isAdministrator(
   const appUser = await getCurrentFormsAppUser(formsAppId, abortSignal)
   return !!appUser?.groups.some((group) => group === 'oneblink:administrator')
 }
+
+/**
+ * Allow a user to sign up to a forms app
+ *
+ * #### Example
+ *
+ * ```js
+ * await authService.signUp({
+ *   formsAppId: 1,
+ *   email: 'test@oneblink.io',
+ *   generatePassword: true,
+ *   firstName: 'first',
+ *   lastName: 'last',
+ * })
+ * ```
+ *
+ * @param {formsAppId, email, generatePassword, firstName, lastName}
+ * @returns
+ */
+
+export async function signUp({
+  formsAppId,
+  email,
+  generatePassword,
+  firstName,
+  lastName,
+}: {
+  formsAppId: number
+  email: string
+  generatePassword: boolean
+  firstName?: string
+  lastName?: string
+}): Promise<void> {
+  try {
+    const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/sign-up`
+    await postRequest(url, {
+      email,
+      generatePassword,
+      firstName,
+      lastName,
+    })
+  } catch (error) {
+    Sentry.captureException(error)
+    console.warn('Error while calling sign-up to forms app', error)
+
+    throw new OneBlinkAppsError(
+      'Sorry, we could not create you a account right now, please try again. If the problem persists, please contact your administrator yourself.',
+      {
+        originalError: error as Error,
+        title: 'Error Signing up',
+        httpStatusCode: (error as HTTPError).status,
+      },
+    )
+  }
+}

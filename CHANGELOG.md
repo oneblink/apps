@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `authService.setupMfa()`
 - `authService.disableMfa()`
 
+### Fixed
+
+- optionIds not being set for dynamic options set filtering
+
 ## [3.2.0] - 2023-05-08
 
 ### Added

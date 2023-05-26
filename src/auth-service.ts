@@ -1,4 +1,5 @@
 import { MiscTypes } from '@oneblink/types'
+import { FormsAppUser } from '@oneblink/types/typescript/formsApps'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import {
   getIdToken,
@@ -297,15 +298,16 @@ export async function signUp({
   generatePassword: boolean
   firstName?: string
   lastName?: string
-}): Promise<void> {
+}): Promise<FormsAppUser> {
   try {
     const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/sign-up`
-    await postRequest(url, {
+    const appUser = await postRequest<FormsAppUser>(url, {
       email,
       generatePassword,
       firstName,
       lastName,
     })
+    return appUser
   } catch (error) {
     Sentry.captureException(error)
     console.warn('Error while calling sign-up to forms app', error)

@@ -289,13 +289,11 @@ export async function isAdministrator(
 export async function signUp({
   formsAppId,
   email,
-  generatePassword,
   firstName,
   lastName,
 }: {
   formsAppId: number
   email: string
-  generatePassword: boolean
   firstName?: string
   lastName?: string
 }): Promise<FormsAppUser> {
@@ -303,7 +301,6 @@ export async function signUp({
     const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/sign-up`
     const appUser = await postRequest<FormsAppUser>(url, {
       email,
-      generatePassword,
       firstName,
       lastName,
     })

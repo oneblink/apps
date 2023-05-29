@@ -267,7 +267,7 @@ export async function isAdministrator(
 }
 
 /**
- * Allow a user to sign up to a forms app. Returns 'true' if sign up successful.
+ * Allow a user to sign up to a forms app.
  *
  * #### Example
  *
@@ -294,15 +294,14 @@ export async function signUp({
   email: string
   firstName?: string
   lastName?: string
-}): Promise<boolean> {
+}): Promise<void> {
   try {
     const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/sign-up`
-    const response = await postRequest(url, {
+    return await postRequest(url, {
       email,
       firstName,
       lastName,
     })
-    return !response // sign up success on 204 No Content
   } catch (error) {
     Sentry.captureException(error)
     console.warn('Error while calling sign-up to forms app', error)

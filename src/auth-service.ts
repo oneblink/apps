@@ -1,5 +1,4 @@
 import { MiscTypes } from '@oneblink/types'
-import { FormsAppUser } from '@oneblink/types/typescript/formsApps'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import {
   getIdToken,
@@ -268,7 +267,7 @@ export async function isAdministrator(
 }
 
 /**
- * Allow a user to sign up to a forms app
+ * Allow a user to sign up to a forms app.
  *
  * #### Example
  *
@@ -276,7 +275,6 @@ export async function isAdministrator(
  * await authService.signUp({
  *   formsAppId: 1,
  *   email: 'test@oneblink.io',
- *   generatePassword: true,
  *   firstName: 'first',
  *   lastName: 'last',
  * })
@@ -296,15 +294,14 @@ export async function signUp({
   email: string
   firstName?: string
   lastName?: string
-}): Promise<FormsAppUser> {
+}): Promise<void> {
   try {
     const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/sign-up`
-    const appUser = await postRequest<FormsAppUser>(url, {
+    return await postRequest(url, {
       email,
       firstName,
       lastName,
     })
-    return appUser
   } catch (error) {
     Sentry.captureException(error)
     console.warn('Error while calling sign-up to forms app', error)

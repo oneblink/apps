@@ -1,5 +1,6 @@
 import { FormSubmissionResult } from '../types/submissions'
 import * as localisationService from '../localisation-service'
+import { getUserProfile } from '../auth-service'
 
 export default function replaceInjectablesWithSubmissionValues(
   text: string,
@@ -12,5 +13,6 @@ export default function replaceInjectablesWithSubmissionValues(
     submissionId: submissionResult.submissionId || '',
     submissionTimestamp: submissionResult.submissionTimestamp || '',
     externalId: submissionResult.externalId || undefined,
+    userProfile: getUserProfile() || undefined,
   })
 }

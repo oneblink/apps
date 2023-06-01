@@ -1,6 +1,12 @@
 import { FormTypes } from '@oneblink/types'
 import replaceInjectablesWithSubmissionValues from '../src/services/replaceInjectablesWithSubmissionValues'
 
+jest.mock('nanoid/non-secure', () => {
+  return {
+    customAlphabet: () => () => 'abCD5678',
+  }
+})
+
 describe('Form redirect URL', () => {
   const definition: FormTypes.Form = {
     id: 1,

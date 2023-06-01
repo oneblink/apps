@@ -7,7 +7,7 @@
     "url": "https://github.com/oneblink/apps/issues"
   },
   "dependencies": {
-    "@oneblink/sdk-core": "^2.0.1-beta.1",
+    "@oneblink/sdk-core": "^2.0.1-beta.2",
     "@sentry/browser": "^6.19.7",
     "@sentry/tracing": "^6.19.7",
     "aws-sdk": "^2.1126.0",
@@ -79,7 +79,7 @@
     "fixpack": "fixpack",
     "format": "prettier --write .",
     "prepare": "npm run build",
-    "pretest": "npm run fixpack && npm run eslint",
+    "pretest": "npm run fixpack && npm run eslint && npm run typescript",
     "release": "typedoc && oneblink-release --no-name",
     "start": "tsc-watch",
     "test": "jest",

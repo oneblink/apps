@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `STATIC_DATA` form element lookup type
+
 ## [4.1.0] - 2023-06-05
 
 ### Added

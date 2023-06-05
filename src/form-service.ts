@@ -238,7 +238,14 @@ async function getFormElementLookups(
   organisationId: string,
   formsAppEnvironmentId: number,
   abortSignal?: AbortSignal,
-): Promise<Array<FormTypes.FormElementLookup & { url: string | null }>> {
+): Promise<
+  Array<
+    FormTypes.FormElementLookup & {
+      url: string | null
+      records: FormTypes.FormElementLookupStaticDataRecord[] | null
+    }
+  >
+> {
   return searchRequest<{ formElementLookups: FormTypes.FormElementLookup[] }>(
     `${tenants.current.apiOrigin}/form-element-lookups`,
     {
@@ -250,6 +257,10 @@ async function getFormElementLookups(
       data.formElementLookups.map((formElementLookup) => ({
         ...formElementLookup,
         url: getFormElementLookupUrl(formElementLookup, formsAppEnvironmentId),
+        records: gotFormElementLookupRecords(
+          formElementLookup,
+          formsAppEnvironmentId,
+        ),
       })),
     )
     .catch((error) => {
@@ -279,6 +290,31 @@ function getFormElementLookupUrl(
         return formElementLookupEnvironment.url
       }
       return url
+    },
+    null,
+  )
+}
+function gotFormElementLookupRecords(
+  formElementLookup: FormTypes.FormElementLookup,
+  formsAppEnvironmentId: number,
+) {
+  if (formElementLookup.type !== 'STATIC_DATA') {
+    return null
+  }
+
+  return formElementLookup.environments.reduce(
+    (
+      records: null | FormTypes.FormElementLookupStaticDataRecord[],
+      formElementLookupEnvironment,
+    ) => {
+      if (
+        !records &&
+        formElementLookupEnvironment.formsAppEnvironmentId ===
+          formsAppEnvironmentId
+      ) {
+        return formElementLookupEnvironment.records
+      }
+      return records
     },
     null,
   )

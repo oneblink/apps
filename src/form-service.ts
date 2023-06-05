@@ -249,19 +249,7 @@ async function getFormElementLookups(
     .then((data) =>
       data.formElementLookups.map((formElementLookup) => ({
         ...formElementLookup,
-        url: formElementLookup.environments.reduce(
-          (url: null | string, formElementLookupEnvironment) => {
-            if (
-              !url &&
-              formElementLookupEnvironment.formsAppEnvironmentId ===
-                formsAppEnvironmentId
-            ) {
-              return formElementLookupEnvironment.url
-            }
-            return url
-          },
-          null,
-        ),
+        url: getFormElementLookupUrl(formElementLookup, formsAppEnvironmentId),
       })),
     )
     .catch((error) => {
@@ -272,6 +260,28 @@ async function getFormElementLookups(
       )
       throw error
     })
+}
+function getFormElementLookupUrl(
+  formElementLookup: FormTypes.FormElementLookup,
+  formsAppEnvironmentId: number,
+) {
+  if (formElementLookup.type === 'STATIC_DATA') {
+    return null
+  }
+
+  return formElementLookup.environments.reduce(
+    (url: null | string, formElementLookupEnvironment) => {
+      if (
+        !url &&
+        formElementLookupEnvironment.formsAppEnvironmentId ===
+          formsAppEnvironmentId
+      ) {
+        return formElementLookupEnvironment.url
+      }
+      return url
+    },
+    null,
+  )
 }
 
 /**

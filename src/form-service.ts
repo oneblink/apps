@@ -350,7 +350,13 @@ async function getFormElementLookupById(
   formsAppEnvironmentId: number,
   formElementLookupId: number,
   abortSignal?: AbortSignal,
-): Promise<(FormTypes.FormElementLookup & { url: string | null }) | void> {
+): Promise<
+  | (FormTypes.FormElementLookup & {
+      url: string | null
+      records: FormTypes.FormElementLookupStaticDataRecord[] | null
+    })
+  | void
+> {
   return getFormElementLookups(
     organisationId,
     formsAppEnvironmentId,

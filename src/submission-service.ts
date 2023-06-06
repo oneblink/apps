@@ -33,6 +33,8 @@ import {
   DraftSubmission,
 } from './types/submissions'
 import { deleteAutoSaveData } from './auto-save-service'
+import serverRequest from './services/serverRequest'
+import externalIdGeneration from './services/external-id-generation'
 
 let _isProcessingPendingQueue = false
 
@@ -111,6 +113,10 @@ async function processPendingQueue(): Promise<void> {
             pendingTimestamp: pendingQueueSubmission.pendingTimestamp,
           })
         },
+        shouldRunExternalIdGeneration: true,
+        shouldRunServerValidation: true,
+        externalIdGenerationOnSubmission: undefined,
+        serverValidationEndpoint: undefined,
       })
 
       await removePendingQueueSubmission(
@@ -222,13 +228,41 @@ async function submit({
   autoSaveKey?: string
   onProgress?: ProgressListener
 }): Promise<FormSubmissionResult> {
+  const {
+    serverValidationEndpoint,
+    formSubmission,
+    externalIdGenerationOnSubmission,
+    shouldRunServerValidation,
+    shouldRunExternalIdGeneration,
+  } = params
+  if (shouldRunServerValidation) {
+    await serverRequest(serverValidationEndpoint, formSubmission.submission)
+  }
+  if (shouldRunExternalIdGeneration) {
+    const externalIdResult = await externalIdGeneration(
+      externalIdGenerationOnSubmission,
+      {
+        externalIdUrlSearchParam: formSubmission.externalId,
+        formsAppId: formSubmission.formsAppId,
+        formId: formSubmission.definition.id,
+        draftId: formSubmission.draftId ? formSubmission.draftId : null,
+        preFillFormDataId: formSubmission.preFillFormDataId,
+        jobId: formSubmission.jobId,
+        previousFormSubmissionApprovalId:
+          formSubmission.previousFormSubmissionApprovalId ?? null,
+      },
+    )
+    if (externalIdResult.externalId) {
+      formSubmission.externalId = externalIdResult.externalId
+    }
+  }
   const formSubmissionResult = await submitForm({
     ...params,
     generateCredentials: generateSubmissionCredentials,
   })
   if (typeof autoSaveKey === 'string') {
     try {
-      await deleteAutoSaveData(params.formSubmission.definition.id, autoSaveKey)
+      await deleteAutoSaveData(formSubmission.definition.id, autoSaveKey)
     } catch (error) {
       console.warn('Error removing auto save data: ', error)
       Sentry.captureException(error)

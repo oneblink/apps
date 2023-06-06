@@ -28,6 +28,7 @@ import tenants from '../tenants'
 
 type SubmissionParams = {
   formSubmission: FormSubmission
+  isPendingQueueEnabled: boolean
   paymentReceiptUrl?: string
   schedulingUrlConfiguration?: {
     schedulingReceiptUrl: string
@@ -39,6 +40,7 @@ export { SubmissionParams, ProgressListener, ProgressListenerEvent }
 
 export default async function submit({
   formSubmission,
+  isPendingQueueEnabled,
   paymentReceiptUrl,
   schedulingUrlConfiguration,
   generateCredentials,
@@ -61,6 +63,21 @@ export default async function submit({
       console.log(
         'Offline - form has a payment/scheduling submission event that has not been processed yet, return offline',
         { paymentSubmissionEventConfiguration, schedulingSubmissionEvent },
+      )
+      return Object.assign({}, formSubmission, {
+        isOffline: true,
+        isInPendingQueue: false,
+        submissionTimestamp: null,
+        submissionId: null,
+        payment: null,
+        scheduling: null,
+        isUploadingAttachments: false,
+      })
+    }
+
+    if (!isPendingQueueEnabled) {
+      console.log(
+        'Offline - app does not support pending queue, return offline',
       )
       return Object.assign({}, formSubmission, {
         isOffline: true,

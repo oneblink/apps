@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - `STATIC_DATA` form element lookup type
 
+### Changed
+
+- **[BREAKING]** `submissionService.submit()` now requires a `isPendingQueueEnabled` to have submissions added to the pending queue
+
 ## [4.1.0] - 2023-06-05
 
 ### Added

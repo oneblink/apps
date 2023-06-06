@@ -1,19 +1,20 @@
-import { FormTypes } from '@oneblink/types'
 import serverRequest from './serverRequest'
 import { FormSubmission } from '../submission-service'
 import Sentry from '../Sentry'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 
 export default async function serverValidateForm(
-  endpoint: FormTypes.Form['serverValidation'],
   formSubmission: FormSubmission,
 ) {
-  const result = await serverRequest(endpoint, {
-    ...formSubmission,
-    captchaTokens: undefined,
-    definition: undefined,
-    formId: formSubmission.definition.id,
-  })
+  const result = await serverRequest(
+    formSubmission.definition.serverValidation,
+    {
+      ...formSubmission,
+      captchaTokens: undefined,
+      definition: undefined,
+      formId: formSubmission.definition.id,
+    },
+  )
   if (!result) return
   const { url, response } = result
 

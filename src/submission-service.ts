@@ -33,8 +33,6 @@ import {
   DraftSubmission,
 } from './types/submissions'
 import { deleteAutoSaveData } from './auto-save-service'
-import externalIdGeneration from './services/external-id-generation'
-import serverValidateForm from './services/server-validation'
 
 let _isProcessingPendingQueue = false
 
@@ -228,47 +226,18 @@ async function processPendingQueue({
  */
 async function submit({
   autoSaveKey,
-  shouldRunExternalIdGeneration,
-  shouldRunServerValidation,
   ...params
 }: SubmissionParams & {
-  shouldRunServerValidation: boolean
-  shouldRunExternalIdGeneration: boolean
   autoSaveKey?: string
   onProgress?: ProgressListener
 }): Promise<FormSubmissionResult> {
-  const { formSubmission } = params
-  if (shouldRunServerValidation) {
-    await serverValidateForm(
-      formSubmission.definition.serverValidation,
-      formSubmission,
-    )
-  }
-  if (shouldRunExternalIdGeneration) {
-    const externalIdResult = await externalIdGeneration(
-      formSubmission.definition.externalIdGenerationOnSubmit,
-      {
-        externalIdUrlSearchParam: formSubmission.externalId,
-        formsAppId: formSubmission.formsAppId,
-        formId: formSubmission.definition.id,
-        draftId: formSubmission.draftId ? formSubmission.draftId : null,
-        preFillFormDataId: formSubmission.preFillFormDataId,
-        jobId: formSubmission.jobId,
-        previousFormSubmissionApprovalId:
-          formSubmission.previousFormSubmissionApprovalId ?? null,
-      },
-    )
-    if (externalIdResult.externalId) {
-      formSubmission.externalId = externalIdResult.externalId
-    }
-  }
   const formSubmissionResult = await submitForm({
     ...params,
     generateCredentials: generateSubmissionCredentials,
   })
   if (typeof autoSaveKey === 'string') {
     try {
-      await deleteAutoSaveData(formSubmission.definition.id, autoSaveKey)
+      await deleteAutoSaveData(params.formSubmission.definition.id, autoSaveKey)
     } catch (error) {
       console.warn('Error removing auto save data: ', error)
       Sentry.captureException(error)

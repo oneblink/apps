@@ -50,7 +50,10 @@ let _isProcessingPendingQueue = false
  *
  * @returns
  */
-async function processPendingQueue(): Promise<void> {
+async function processPendingQueue(
+  shouldRunExternalIdGeneration: boolean,
+  shouldRunServerValidation: boolean,
+): Promise<void> {
   if (_isProcessingPendingQueue) {
     return
   }
@@ -113,10 +116,8 @@ async function processPendingQueue(): Promise<void> {
             pendingTimestamp: pendingQueueSubmission.pendingTimestamp,
           })
         },
-        shouldRunExternalIdGeneration: true,
-        shouldRunServerValidation: true,
-        externalIdGenerationOnSubmission: undefined,
-        serverValidationEndpoint: undefined,
+        shouldRunExternalIdGeneration,
+        shouldRunServerValidation,
       })
 
       await removePendingQueueSubmission(
@@ -229,18 +230,19 @@ async function submit({
   onProgress?: ProgressListener
 }): Promise<FormSubmissionResult> {
   const {
-    serverValidationEndpoint,
     formSubmission,
-    externalIdGenerationOnSubmission,
     shouldRunServerValidation,
     shouldRunExternalIdGeneration,
   } = params
   if (shouldRunServerValidation) {
-    await serverRequest(serverValidationEndpoint, formSubmission.submission)
+    await serverRequest(
+      formSubmission.definition.serverValidation,
+      formSubmission.submission,
+    )
   }
   if (shouldRunExternalIdGeneration) {
     const externalIdResult = await externalIdGeneration(
-      externalIdGenerationOnSubmission,
+      formSubmission.definition.externalIdGenerationOnSubmit,
       {
         externalIdUrlSearchParam: formSubmission.externalId,
         formsAppId: formSubmission.formsAppId,

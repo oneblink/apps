@@ -1,4 +1,4 @@
-import { FormTypes, SubmissionTypes } from '@oneblink/types'
+import { FormTypes } from '@oneblink/types'
 import serverRequest from './serverRequest'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import { generateExternalId } from '../form-service'
@@ -16,8 +16,6 @@ export default async function externalIdGeneration(
   },
 ): Promise<{
   externalId: string | null
-  submission?: SubmissionTypes.S3SubmissionData['submission']
-  elements?: FormTypes.FormElement[]
 }> {
   if (endpoint?.type === 'RECEIPT_ID') {
     return {

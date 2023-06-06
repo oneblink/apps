@@ -25,7 +25,6 @@ import {
 } from '../types/submissions'
 import { checkIfAttachmentsAreUploading } from '../attachments-service'
 import tenants from '../tenants'
-import { FormTypes } from '@oneblink/types'
 
 type SubmissionParams = {
   formSubmission: FormSubmission
@@ -34,8 +33,6 @@ type SubmissionParams = {
     schedulingReceiptUrl: string
     schedulingCancelUrl: string
   }
-  serverValidationEndpoint: FormTypes.Form['serverValidation']
-  externalIdGenerationOnSubmission: FormTypes.Form['externalIdGenerationOnSubmit']
   shouldRunServerValidation: boolean
   shouldRunExternalIdGeneration: boolean
 }

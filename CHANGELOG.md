@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - `STATIC_DATA` form element lookup type
 
-### Updated
+### Changed
 
 - **[BREAKING]** `submissionService.submit()` function requires more parameters to handle server validation and external ID generation within the function
 

@@ -112,6 +112,7 @@ async function processPendingQueue({
 
       const submission = await prepareSubmissionData(formSubmission)
       await submit({
+        isPendingQueueEnabled: true,
         formSubmission: { ...formSubmission, submission },
         onProgress: (event) => {
           executePendingQueueProgressListeners({

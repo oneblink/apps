@@ -1,37 +1,54 @@
-import { FormTypes } from '@oneblink/types'
+import { FormSubmission } from '../types/submissions'
 import serverRequest from './serverRequest'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import { generateExternalId } from '../form-service'
 
 export default async function externalIdGeneration(
-  endpoint: FormTypes.Form['externalIdGeneration'],
-  payload: {
-    formsAppId: number
-    formId: number
-    externalIdUrlSearchParam: string | null
-    draftId: string | null
-    preFillFormDataId: string | null
-    jobId: string | null
-    previousFormSubmissionApprovalId: string | null
-  },
+  formSubmission: FormSubmission,
 ): Promise<{
   externalId: string | null
 }> {
-  if (endpoint?.type === 'RECEIPT_ID') {
+  if (
+    formSubmission.definition.externalIdGenerationOnSubmit?.type ===
+    'RECEIPT_ID'
+  ) {
+    if (formSubmission.externalId) {
+      console.log(
+        'Skipping generating an externalId based on receipt components and using',
+        formSubmission.externalId,
+      )
+      return {
+        externalId: formSubmission.externalId,
+      }
+    }
     return {
-      externalId:
-        payload.externalIdUrlSearchParam ||
-        generateExternalId(endpoint.configuration.receiptComponents),
+      externalId: generateExternalId(
+        formSubmission.definition.externalIdGenerationOnSubmit.configuration
+          .receiptComponents,
+      ),
     }
   }
-  const result = await serverRequest(endpoint, payload)
+
+  const result = await serverRequest(
+    formSubmission.definition.externalIdGenerationOnSubmit,
+    {
+      externalIdUrlSearchParam: formSubmission.externalId,
+      formsAppId: formSubmission.formsAppId,
+      formId: formSubmission.definition.id,
+      draftId: formSubmission.draftId ? formSubmission.draftId : null,
+      preFillFormDataId: formSubmission.preFillFormDataId,
+      jobId: formSubmission.jobId,
+      previousFormSubmissionApprovalId:
+        formSubmission.previousFormSubmissionApprovalId ?? null,
+    },
+  )
   if (!result) {
     console.log(
-      'Skipping generating an externalId and using',
-      payload.externalIdUrlSearchParam,
+      'Skipping generating an externalId based on URL and using',
+      formSubmission.externalId,
     )
     return {
-      externalId: payload.externalIdUrlSearchParam,
+      externalId: formSubmission.externalId,
     }
   }
   const { url, response } = result

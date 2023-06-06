@@ -25,10 +25,14 @@ import {
 } from '../types/submissions'
 import { checkIfAttachmentsAreUploading } from '../attachments-service'
 import tenants from '../tenants'
+import externalIdGeneration from './external-id-generation'
+import serverValidateForm from './server-validation'
 
 type SubmissionParams = {
   formSubmission: FormSubmission
   isPendingQueueEnabled: boolean
+  shouldRunServerValidation: boolean
+  shouldRunExternalIdGeneration: boolean
   paymentReceiptUrl?: string
   schedulingUrlConfiguration?: {
     schedulingReceiptUrl: string
@@ -45,12 +49,23 @@ export default async function submit({
   schedulingUrlConfiguration,
   generateCredentials,
   onProgress,
+  shouldRunServerValidation,
+  shouldRunExternalIdGeneration,
 }: SubmissionParams & {
   generateCredentials: (
     formSubmission: FormSubmission,
   ) => Promise<S3UploadCredentials>
   onProgress?: ProgressListener
 }): Promise<FormSubmissionResult> {
+  if (shouldRunServerValidation) {
+    await serverValidateForm(formSubmission)
+  }
+  if (shouldRunExternalIdGeneration) {
+    const externalIdResult = await externalIdGeneration(formSubmission)
+    if (externalIdResult.externalId) {
+      formSubmission.externalId = externalIdResult.externalId
+    }
+  }
   formSubmission.keyId = getFormsKeyId() || undefined
   const paymentSubmissionEventConfiguration =
     checkForPaymentSubmissionEvent(formSubmission)

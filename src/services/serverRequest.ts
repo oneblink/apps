@@ -11,7 +11,7 @@ function getOBApi(apiId: string, apiEnv: string): string {
 }
 
 export default async function serverRequest(
-  endpoint: FormTypes.Form['serverValidation'],
+  endpoint: FormTypes.EndpointConfiguration | undefined,
   payload: Record<string, unknown>,
 ): Promise<{ response: Response; url: string } | void> {
   if (!endpoint) return

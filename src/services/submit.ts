@@ -33,8 +33,6 @@ type SubmissionParams = {
     schedulingReceiptUrl: string
     schedulingCancelUrl: string
   }
-  shouldRunServerValidation: boolean
-  shouldRunExternalIdGeneration: boolean
 }
 
 export { SubmissionParams, ProgressListener, ProgressListenerEvent }

@@ -33,8 +33,8 @@ import {
   DraftSubmission,
 } from './types/submissions'
 import { deleteAutoSaveData } from './auto-save-service'
-import serverRequest from './services/serverRequest'
 import externalIdGeneration from './services/external-id-generation'
+import serverValidateForm from './services/server-validation'
 
 let _isProcessingPendingQueue = false
 
@@ -227,20 +227,20 @@ async function processPendingQueue({
  */
 async function submit({
   autoSaveKey,
+  shouldRunExternalIdGeneration,
+  shouldRunServerValidation,
   ...params
 }: SubmissionParams & {
+  shouldRunServerValidation: boolean
+  shouldRunExternalIdGeneration: boolean
   autoSaveKey?: string
   onProgress?: ProgressListener
 }): Promise<FormSubmissionResult> {
-  const {
-    formSubmission,
-    shouldRunServerValidation,
-    shouldRunExternalIdGeneration,
-  } = params
+  const { formSubmission } = params
   if (shouldRunServerValidation) {
-    await serverRequest(
+    await serverValidateForm(
       formSubmission.definition.serverValidation,
-      formSubmission.submission,
+      formSubmission,
     )
   }
   if (shouldRunExternalIdGeneration) {

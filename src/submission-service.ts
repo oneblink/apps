@@ -50,10 +50,13 @@ let _isProcessingPendingQueue = false
  *
  * @returns
  */
-async function processPendingQueue(
-  shouldRunExternalIdGeneration: boolean,
-  shouldRunServerValidation: boolean,
-): Promise<void> {
+async function processPendingQueue({
+  shouldRunExternalIdGeneration,
+  shouldRunServerValidation,
+}: {
+  shouldRunExternalIdGeneration: boolean
+  shouldRunServerValidation: boolean
+}): Promise<void> {
   if (_isProcessingPendingQueue) {
     return
   }

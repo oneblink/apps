@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - **[BREAKING]** `submissionService.submit()` function requires more parameters to handle server validation and external ID generation within the function
 - **[BREAKING]** `submissionService.submit()` now requires a `isPendingQueueEnabled` to have submissions added to the pending queue
+- options set to list
 
 ## [4.1.0] - 2023-06-05
 

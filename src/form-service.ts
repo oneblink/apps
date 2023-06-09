@@ -404,7 +404,7 @@ type LoadFormElementOptionsResult = {
 
 /**
  * Get a the options for a single Form or an array of Forms for Form Elements
- * that are using a OneBlink Form Element Options Set.
+ * that are using a OneBlink List.
  *
  * #### Example
  *
@@ -419,7 +419,7 @@ type LoadFormElementOptionsResult = {
  *   // BEWARE
  *   // this example does not accommodate for
  *   // nested elements in pages and repeatable sets
- *   // or for options sets that fail to load
+ *   // or for Lists that fail to load
  *   for (const formElement of form.elements) {
  *     if (formElement.id === elementId) {
  *       formElement.options = options
@@ -444,7 +444,7 @@ async function getFormElementDynamicOptions(
   const freshdeskFieldOptionsResults =
     await getFormElementFreshdeskFieldOptions(forms, abortSignal)
 
-  // Get the options sets id for each element
+  // Get the lists id for each element
   const formElementOptionsSetIds = forms.reduce((ids: number[], form) => {
     formElementsService.forEachFormElementWithOptions(form.elements, (el) => {
       if (
@@ -463,7 +463,7 @@ async function getFormElementDynamicOptions(
     return freshdeskFieldOptionsResults
   }
 
-  // Get the options sets for all the ids
+  // Get the lists for all the ids
   const organisationId = forms[0].organisationId
   const allFormElementOptionsSets = await getFormElementOptionsSets(
     organisationId,
@@ -523,7 +523,7 @@ async function getFormElementDynamicOptions(
     return memo
   }, [])
 
-  // Get the options for all the options sets
+  // Get the options for all the lists
   const results = await Promise.all(
     formElementOptionsSetUrls.map<
       Promise<
@@ -557,9 +557,9 @@ async function getFormElementDynamicOptions(
             type: 'ERROR',
             formElementOptionsSetId,
             error: new OneBlinkAppsError(
-              `Options set configuration has not been completed yet. Please contact your administrator to rectify the issue.`,
+              `Lists configuration has not been completed yet. Please contact your administrator to rectify the issue.`,
               {
-                title: 'Misconfigured Options Set',
+                title: 'Misconfigured List',
                 originalError: new Error(
                   JSON.stringify(
                     {
@@ -611,7 +611,7 @@ async function getFormElementDynamicOptions(
             error: new OneBlinkAppsError(
               `Options could not be loaded. Please contact your administrator to rectify the issue.`,
               {
-                title: 'Invalid Options Set Response',
+                title: 'Invalid List Response',
                 httpStatusCode: (error as HTTPError).status,
                 originalError: new OneBlinkAppsError(
                   JSON.stringify(
@@ -653,9 +653,9 @@ async function getFormElementDynamicOptions(
         type: 'ERROR',
         formElementOptionsSetId,
         error: new OneBlinkAppsError(
-          `Options set environment configuration has not been completed yet. Please contact your administrator to rectify the issue.`,
+          `List environment configuration has not been completed yet. Please contact your administrator to rectify the issue.`,
           {
-            title: 'Misconfigured Options Set',
+            title: 'Misconfigured List',
             originalError: new Error(
               JSON.stringify(
                 {
@@ -695,9 +695,9 @@ async function getFormElementDynamicOptions(
               type: 'ERROR',
               elementId: element.id,
               error: new OneBlinkAppsError(
-                `Options set does not exist. Please contact your administrator to rectify the issue.`,
+                `List does not exist. Please contact your administrator to rectify the issue.`,
                 {
-                  title: 'Missing Options Set',
+                  title: 'Missing List',
                   originalError: new Error(
                     JSON.stringify(
                       {

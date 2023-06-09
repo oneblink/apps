@@ -557,7 +557,7 @@ async function getFormElementDynamicOptions(
             type: 'ERROR',
             formElementOptionsSetId,
             error: new OneBlinkAppsError(
-              `Lists configuration has not been completed yet. Please contact your administrator to rectify the issue.`,
+              `List configuration has not been completed yet. Please contact your administrator to rectify the issue.`,
               {
                 title: 'Misconfigured List',
                 originalError: new Error(

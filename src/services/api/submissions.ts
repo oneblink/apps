@@ -80,6 +80,7 @@ const handleError = (error: HTTPError) => {
 
 const generateSubmissionCredentialsBody = (formSubmission: FormSubmission) => ({
   formsAppId: formSubmission.formsAppId,
+  externalId: formSubmission.externalId || undefined,
   recaptchas: (formSubmission.captchaTokens || []).map((token: string) => ({
     token,
   })),

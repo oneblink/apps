@@ -57,16 +57,6 @@ export default async function submit({
   ) => Promise<S3UploadCredentials>
   onProgress?: ProgressListener
 }): Promise<FormSubmissionResult> {
-  if (shouldRunServerValidation) {
-    await serverValidateForm(formSubmission)
-  }
-  if (shouldRunExternalIdGeneration) {
-    const externalIdResult = await externalIdGeneration(formSubmission)
-    if (externalIdResult.externalId) {
-      formSubmission.externalId = externalIdResult.externalId
-    }
-  }
-  formSubmission.keyId = getFormsKeyId() || undefined
   const paymentSubmissionEventConfiguration =
     checkForPaymentSubmissionEvent(formSubmission)
 
@@ -153,6 +143,17 @@ export default async function submit({
       isUploadingAttachments: true,
     })
   }
+
+  if (shouldRunServerValidation) {
+    await serverValidateForm(formSubmission)
+  }
+  if (shouldRunExternalIdGeneration) {
+    const externalIdResult = await externalIdGeneration(formSubmission)
+    if (externalIdResult.externalId) {
+      formSubmission.externalId = externalIdResult.externalId
+    }
+  }
+  formSubmission.keyId = getFormsKeyId() || undefined
 
   const data = await generateCredentials(formSubmission)
 

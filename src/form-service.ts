@@ -242,7 +242,9 @@ async function getFormElementLookups(
   Array<
     FormTypes.FormElementLookup & {
       url: string | null
-      records: FormTypes.FormElementLookupStaticDataRecord[] | null
+      records:
+        | FormTypes.FormElementLookupStaticDataEnvironment['records']
+        | null
     }
   >
 > {
@@ -304,7 +306,9 @@ function gotFormElementLookupRecords(
 
   return formElementLookup.environments.reduce(
     (
-      records: null | FormTypes.FormElementLookupStaticDataRecord[],
+      records:
+        | FormTypes.FormElementLookupStaticDataEnvironment['records']
+        | null,
       formElementLookupEnvironment,
     ) => {
       if (
@@ -353,7 +357,9 @@ async function getFormElementLookupById(
 ): Promise<
   | (FormTypes.FormElementLookup & {
       url: string | null
-      records: FormTypes.FormElementLookupStaticDataRecord[] | null
+      records:
+        | FormTypes.FormElementLookupStaticDataEnvironment['records']
+        | null
     })
   | void
 > {

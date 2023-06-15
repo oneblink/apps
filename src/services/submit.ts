@@ -178,7 +178,11 @@ export default async function submit({
       schedulingUrlConfiguration,
       paymentReceiptUrl,
     })
-  } else if (paymentSubmissionEventConfiguration && paymentReceiptUrl) {
+  } else if (
+    paymentSubmissionEventConfiguration &&
+    paymentReceiptUrl &&
+    !data.preventPayment
+  ) {
     formSubmissionResult.payment = await handlePaymentSubmissionEvent({
       ...paymentSubmissionEventConfiguration,
       formSubmissionResult,

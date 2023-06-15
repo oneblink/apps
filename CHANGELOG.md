@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - `STATIC_DATA` form element lookup type
+- payment prevention based on approval clarification request
 
 ### Changed
 

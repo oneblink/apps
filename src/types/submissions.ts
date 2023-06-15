@@ -113,6 +113,7 @@ export type S3UploadCredentials = _S3UploadCredentials & {
   userProfile?: MiscTypes.UserProfile
   pdfAccessToken?: string
   formSubmissionMeta: FormSubmissionMeta
+  preventPayment?: boolean
 }
 
 export type S3DraftUploadCredentials = _S3UploadCredentials & {

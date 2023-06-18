@@ -152,6 +152,61 @@ async function verifyWestpacQuickWebPayment(
   }
 }
 
+async function verifyGovPayPayment(
+  query: Record<string, unknown>,
+  submissionResult: FormSubmissionResult,
+) {
+  const {
+    submissionId,
+    isSuccess,
+    errorMessage,
+    id,
+    creditCardMask,
+    amount,
+    isBpay,
+  } = query as {
+    submissionId?: string
+    isSuccess?: string
+    errorMessage?: string
+    id?: string
+    creditCardMask?: string
+    amount?: string
+    isBpay?: string
+  }
+
+  if (
+    !query ||
+    !submissionId ||
+    !isSuccess ||
+    !errorMessage ||
+    !id ||
+    !amount ||
+    !isBpay
+  ) {
+    throw new OneBlinkAppsError(
+      'Transactions can not be verified unless navigating here directly after a payment.',
+    )
+  }
+
+  if (submissionResult.submissionId !== submissionId) {
+    throw new OneBlinkAppsError(
+      'It looks like you are attempting to view a receipt for the incorrect payment.',
+    )
+  }
+
+  return {
+    transaction: {
+      isSuccess: isSuccess === 'true',
+      errorMessage,
+      id,
+      creditCardMask: creditCardMask || null,
+      amount: parseFloat(amount),
+      isBpay,
+    },
+    submissionResult,
+  }
+}
+
 /**
  * Pass in query string parameters after a redirect back to your app after a
  * payment is processed. This function will handle all payment submission events
@@ -212,6 +267,9 @@ export async function handlePaymentQuerystring(
         }
         case 'WESTPAC_QUICK_WEB': {
           return verifyWestpacQuickWebPayment(query, submissionResult)
+        }
+        case 'GOV_PAY': {
+          return verifyGovPayPayment(query, submissionResult)
         }
         default: {
           throw new OneBlinkAppsError(

@@ -268,7 +268,7 @@ export async function handlePaymentQuerystring(
         case 'WESTPAC_QUICK_WEB': {
           return verifyWestpacQuickWebPayment(query, submissionResult)
         }
-        case 'GOV_PAY': {
+        case 'NSW_GOV_PAY': {
           return verifyGovPayPayment(query, submissionResult)
         }
         default: {

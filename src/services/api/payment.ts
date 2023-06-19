@@ -4,15 +4,31 @@ import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 import Sentry from '../../Sentry'
 
+interface PaymentPayload {
+  amount: number
+  redirectUrl: string
+  submissionId: string | null
+  crn2?: string
+  crn3?: string
+  integrationPrimaryAgencyId?: string
+  productDescription?: string
+  subAgencyCode?: string
+  customerReference?: string
+}
+
 const generatePaymentConfiguration = (
   form: FormTypes.Form,
   paymentSubmissionEvent: SubmissionEventTypes.FormPaymentEvent,
-  payload: {
+  data: {
     amount: number
     redirectUrl: string
     submissionId: string | null
     crn2?: string
     crn3?: string
+    integrationPrimaryAgencyId?: string
+    transformedProductDescription?: string
+    subAgencyCode?: string
+    transformedCustomerReference?: string
   },
 ): Promise<{ hostedFormUrl: string }> => {
   let path
@@ -29,8 +45,8 @@ const generatePaymentConfiguration = (
       path = `/forms/${form.id}/westpac-quick-web-payment`
       break
     }
-    case 'GOV_PAY': {
-      path = `/forms/${form.id}/gov-pay-payment`
+    case 'NSW_GOV_PAY': {
+      path = `/forms/${form.id}/nsw-gov-pay-payment`
       break
     }
     default: {
@@ -41,6 +57,11 @@ const generatePaymentConfiguration = (
   }
   const url = `${tenants.current.apiOrigin}${path}`
   console.log('Attempting to generate payment configuration', url)
+  const payload: PaymentPayload = {
+    ...data,
+    productDescription: data.transformedProductDescription,
+    customerReference: data.transformedCustomerReference,
+  }
   return postRequest<{ hostedFormUrl: string }>(url, payload).catch((error) => {
     Sentry.captureException(error)
     console.warn(

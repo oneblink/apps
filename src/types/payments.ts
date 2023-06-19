@@ -1,4 +1,4 @@
-import { MiscTypes } from '@oneblink/types'
+import { MiscTypes, SubmissionEventTypes } from '@oneblink/types'
 import { FormSubmissionResult } from './submissions'
 
 export type HandlePaymentResult = {
@@ -15,4 +15,27 @@ export type HandlePaymentResult = {
     amount: number | MiscTypes.NoU
   }
   submissionResult: FormSubmissionResult
+}
+
+export type BasePaymentConfigurationPayload = {
+  amount: number
+  redirectUrl: string
+  submissionId: string | null
+}
+
+export interface PaymentProvider<T extends SubmissionEventTypes.FormEventBase> {
+  paymentSubmissionEvent: T
+
+  preparePaymentConfiguration(
+    basePayload: BasePaymentConfigurationPayload,
+    formSubmissionResult: FormSubmissionResult,
+  ): {
+    path: string
+    payload: BasePaymentConfigurationPayload
+  }
+
+  verifyPaymentTransaction(
+    query: Record<string, unknown>,
+    formSubmissionResult: FormSubmissionResult,
+  ): Promise<HandlePaymentResult>
 }

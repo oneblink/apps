@@ -1,67 +1,25 @@
-import { FormTypes, SubmissionEventTypes } from '@oneblink/types'
+import { SubmissionEventTypes } from '@oneblink/types'
 import { postRequest } from '../fetch'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 import Sentry from '../../Sentry'
+import {
+  BasePaymentConfigurationPayload,
+  PaymentProvider,
+} from '../../types/payments'
+import { FormSubmissionResult } from '../../types/submissions'
 
-interface PaymentPayload {
-  amount: number
-  redirectUrl: string
-  submissionId: string | null
-  crn2?: string
-  crn3?: string
-  integrationPrimaryAgencyId?: string
-  productDescription?: string
-  subAgencyCode?: string
-  customerReference?: string
-}
-
-const generatePaymentConfiguration = (
-  form: FormTypes.Form,
-  paymentSubmissionEvent: SubmissionEventTypes.FormPaymentEvent,
-  data: {
-    amount: number
-    redirectUrl: string
-    submissionId: string | null
-    crn2?: string
-    crn3?: string
-    integrationPrimaryAgencyId?: string
-    transformedProductDescription?: string
-    subAgencyCode?: string
-    transformedCustomerReference?: string
-  },
-): Promise<{ hostedFormUrl: string }> => {
-  let path
-  switch (paymentSubmissionEvent.type) {
-    case 'CP_PAY': {
-      path = `/forms/${form.id}/cp-pay-payment`
-      break
-    }
-    case 'BPOINT': {
-      path = `/forms/${form.id}/bpoint-payment`
-      break
-    }
-    case 'WESTPAC_QUICK_WEB': {
-      path = `/forms/${form.id}/westpac-quick-web-payment`
-      break
-    }
-    case 'NSW_GOV_PAY': {
-      path = `/forms/${form.id}/nsw-gov-pay-payment`
-      break
-    }
-    default: {
-      throw new OneBlinkAppsError(
-        'It looks like you are attempting to make a payment using an unsupported payment method.',
-      )
-    }
-  }
+function generatePaymentConfiguration(
+  paymentProvider: PaymentProvider<SubmissionEventTypes.FormPaymentEvent>,
+  formSubmissionResult: FormSubmissionResult,
+  basePayload: BasePaymentConfigurationPayload,
+): Promise<{ hostedFormUrl: string }> {
+  const { path, payload } = paymentProvider.preparePaymentConfiguration(
+    basePayload,
+    formSubmissionResult,
+  )
   const url = `${tenants.current.apiOrigin}${path}`
   console.log('Attempting to generate payment configuration', url)
-  const payload: PaymentPayload = {
-    ...data,
-    productDescription: data.transformedProductDescription,
-    customerReference: data.transformedCustomerReference,
-  }
   return postRequest<{ hostedFormUrl: string }>(url, payload).catch((error) => {
     Sentry.captureException(error)
     console.warn(

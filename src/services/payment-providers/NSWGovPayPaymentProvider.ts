@@ -70,15 +70,7 @@ class NSWGovPayPaymentProvider
       isBpay?: string
     }
 
-    if (
-      !query ||
-      !submissionId ||
-      !isSuccess ||
-      !errorMessage ||
-      !id ||
-      !amount ||
-      !isBpay
-    ) {
+    if (!submissionId || !isSuccess || !id || !isBpay) {
       throw new OneBlinkAppsError(
         'Transactions can not be verified unless navigating here directly after a payment.',
       )
@@ -98,7 +90,7 @@ class NSWGovPayPaymentProvider
         creditCardMask: creditCardMask
           ? `xxxx xxxx xxxx ${creditCardMask}`
           : null,
-        amount: parseFloat(amount),
+        amount: typeof amount === 'string' ? parseFloat(amount) : undefined,
         isBpay: isBpay === 'true',
       },
       submissionResult,

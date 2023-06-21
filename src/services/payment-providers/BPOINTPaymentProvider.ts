@@ -7,6 +7,12 @@ import { FormSubmissionResult } from '../../types/submissions'
 import replaceInjectablesWithSubmissionValues from '../replaceInjectablesWithSubmissionValues'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import { verifyPaymentTransaction } from '../api/payment'
+import {
+  generateAmountReceiptItem,
+  generateCreditCardMaskReceiptItem,
+  generateSubmissionIdReceiptItem,
+  prepareReceiptItems,
+} from './receipt-items'
 
 class BPOINTPaymentProvider
   implements PaymentProvider<SubmissionEventTypes.BPOINTSubmissionEvent>
@@ -75,12 +81,24 @@ class BPOINTPaymentProvider
       )
     }
     return {
+      receiptItems: prepareReceiptItems([
+        generateSubmissionIdReceiptItem(formSubmissionResult.submissionId),
+        {
+          className: 'ob-payment-receipt__transaction-id',
+          valueClassName: 'cypress-payment-receipt-transaction-id',
+          icon: 'shopping_cart',
+          label: 'Receipt Number',
+          value: transaction.ReceiptNumber,
+          allowCopyToClipboard: true,
+        },
+        generateCreditCardMaskReceiptItem(
+          transaction.CardDetails?.MaskedCardNumber,
+        ),
+        generateAmountReceiptItem(transaction.Amount / 100),
+      ]),
       transaction: {
         isSuccess: transaction.ResponseCode === '0',
         errorMessage: transaction.ResponseText,
-        id: transaction.ReceiptNumber,
-        creditCardMask: transaction.CardDetails?.MaskedCardNumber || null,
-        amount: transaction.Amount / 100,
       },
       submissionResult: formSubmissionResult,
     }

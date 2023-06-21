@@ -6,6 +6,12 @@ import {
 import { FormSubmissionResult } from '../../types/submissions'
 import replaceInjectablesWithSubmissionValues from '../replaceInjectablesWithSubmissionValues'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
+import {
+  generateAmountReceiptItem,
+  generateCreditCardMaskReceiptItem,
+  generateSubmissionIdReceiptItem,
+  prepareReceiptItems,
+} from './receipt-items'
 
 class WestpacQuickWebPaymentProvider
   implements
@@ -75,13 +81,24 @@ class WestpacQuickWebPaymentProvider
         'It looks like you are attempting to view a receipt for the incorrect payment.',
       )
     }
+
     return {
+      receiptItems: prepareReceiptItems([
+        generateSubmissionIdReceiptItem(submissionResult.submissionId),
+        {
+          className: 'ob-payment-receipt__transaction-id',
+          valueClassName: 'cypress-payment-receipt-transaction-id',
+          icon: 'shopping_cart',
+          label: 'Receipt Number',
+          value: receiptNumber,
+          allowCopyToClipboard: true,
+        },
+        generateCreditCardMaskReceiptItem(maskedCardNumber),
+        generateAmountReceiptItem(parseFloat(paymentAmount)),
+      ]),
       transaction: {
         isSuccess: summaryCode === '0',
         errorMessage: responseDescription,
-        id: receiptNumber,
-        creditCardMask: maskedCardNumber || null,
-        amount: parseFloat(paymentAmount),
       },
       submissionResult,
     }

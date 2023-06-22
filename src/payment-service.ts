@@ -4,7 +4,11 @@ import { generatePaymentConfiguration } from './services/api/payment'
 import utilsService from './services/utils'
 import { SubmissionEventTypes } from '@oneblink/types'
 import { FormSubmission, FormSubmissionResult } from './types/submissions'
-import { HandlePaymentResult, PaymentProvider } from './types/payments'
+import {
+  HandlePaymentResult,
+  PaymentProvider,
+  PaymentReceiptItem,
+} from './types/payments'
 import BPOINTPaymentProvider from './services/payment-providers/BPOINTPaymentProvider'
 import CPPayPaymentProvider from './services/payment-providers/CPPayPaymentProvider'
 import NSWGovPayPaymentProvider from './services/payment-providers/NSWGovPayPaymentProvider'
@@ -12,7 +16,7 @@ import WestpacQuickWebPaymentProvider from './services/payment-providers/Westpac
 
 const KEY = 'PAYMENT_SUBMISSION_RESULT'
 
-export { HandlePaymentResult }
+export { HandlePaymentResult, PaymentReceiptItem }
 
 function getPaymentProvider(
   paymentSubmissionEvent: SubmissionEventTypes.FormPaymentEvent,

@@ -154,7 +154,7 @@ class NSWGovPayPaymentProvider
           className: 'ob-payment-receipt__surcharge-gst',
           valueClassName: 'cypress-payment-receipt-surcharge-gst',
           icon: 'price_check',
-          label: 'Surcharge Amount',
+          label: 'Surcharge GST',
           value:
             typeof surchargeGst === 'string'
               ? localisationService.formatCurrency(parseFloat(surchargeGst))

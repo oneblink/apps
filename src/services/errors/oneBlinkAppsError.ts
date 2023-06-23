@@ -1,7 +1,7 @@
 /** An error class that extends `Error` */
 export default class OneBlinkAppsError extends Error {
   /** The title of the error */
-  title: string
+  title?: string
   /** Whether the application state is offline */
   isOffline: boolean
   /** Whether the attempted action required access */
@@ -47,8 +47,6 @@ export default class OneBlinkAppsError extends Error {
         title = 'Login Required'
       } else if (options.isOffline) {
         title = 'Offline'
-      } else {
-        title = 'Whoops'
       }
     }
 

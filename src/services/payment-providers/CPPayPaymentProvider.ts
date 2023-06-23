@@ -10,6 +10,12 @@ import {
   verifyPaymentTransaction,
 } from '../api/payment'
 import { components } from '@oneblink/types/typescript/cp-pay/swagger.v2'
+import {
+  generateAmountReceiptItem,
+  generateCreditCardMaskReceiptItem,
+  generateSubmissionIdReceiptItem,
+  prepareReceiptItems,
+} from './receipt-items'
 
 class CPPayPaymentProvider
   implements PaymentProvider<SubmissionEventTypes.CPPaySubmissionEvent>
@@ -41,7 +47,7 @@ class CPPayPaymentProvider
     submissionResult: FormSubmissionResult,
   ) {
     const { transactionId, externalReferenceId: submissionId } = query
-    if (!transactionId || !submissionId) {
+    if (typeof transactionId !== 'string' || !submissionId) {
       throw new OneBlinkAppsError(
         'Transactions can not be verified unless navigating here directly after a payment.',
       )
@@ -68,15 +74,28 @@ class CPPayPaymentProvider
         error,
       )
     })
+
     return {
+      receiptItems: prepareReceiptItems([
+        generateSubmissionIdReceiptItem(submissionResult.submissionId),
+        {
+          className: 'ob-payment-receipt__transaction-id',
+          valueClassName: 'cypress-payment-receipt-transaction-id',
+          icon: 'shopping_cart',
+          label: 'Transaction Id',
+          value: transactionId,
+          allowCopyToClipboard: true,
+        },
+        generateCreditCardMaskReceiptItem(
+          transaction.result?.lastFour
+            ? `xxxx xxxx xxxx ${transaction.result.lastFour}`
+            : null,
+        ),
+        generateAmountReceiptItem(transaction.result?.amount),
+      ]),
       transaction: {
         isSuccess: transaction.result?.responseType === 'Success',
         errorMessage: transaction.result?.errorCode,
-        id: transactionId as string,
-        creditCardMask: transaction.result?.lastFour
-          ? `xxxx xxxx xxxx ${transaction.result.lastFour}`
-          : null,
-        amount: transaction.result?.amount,
       },
       submissionResult,
     }

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [5.0.0] - 2023-06-23
+
 ### Added
 
 - `STATIC_DATA` form element lookup type
@@ -15,10 +17,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+- **[BREAKING]** `paymentService.handlePaymentQuerystring()` return object has changed to support `receiptItems`
 - **[BREAKING]** `submissionService.submit()` function requires more parameters to handle server validation and external ID generation within the function
 - **[BREAKING]** `submissionService.submit()` now requires a `isPendingQueueEnabled` to have submissions added to the pending queue
 - options set to list
 - Make `title` optional in `OneBlinkAppsError` and remove default of `Whoops`
+
+### Dependencies
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [3.1.0-beta.4](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [3.0.0-beta.2](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
 
 ## [4.1.0] - 2023-06-05
 

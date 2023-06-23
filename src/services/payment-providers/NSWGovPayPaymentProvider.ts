@@ -175,7 +175,7 @@ function getPaymentMethodLabel(paymentMethod: string | undefined) {
   switch (
     paymentMethod as NonNullable<
       NonNullable<
-        SubmissionTypes.NSWGovPayPayment['paymentTransaction']['transaction']
+        SubmissionTypes.NSWGovPayPayment['paymentTransaction']
       >['agencyCompletionPayment']
     >['paymentMethod']
   ) {

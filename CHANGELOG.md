@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+- Error handling when retrieving pre-fill credentials
 - Make `title` optional in `OneBlinkAppsError` and remove default of `Whoops`
 
 ## [5.0.0] - 2023-06-23

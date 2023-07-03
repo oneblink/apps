@@ -1,4 +1,5 @@
-import S3, { PutObjectRequest } from 'aws-sdk/clients/s3'
+import { Upload } from '@aws-sdk/lib-storage'
+import { PutObjectCommandInput, S3 } from '@aws-sdk/client-s3'
 import { fileUploadService } from '@oneblink/sdk-core'
 import queryString from 'query-string'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
@@ -30,7 +31,7 @@ export type UploadAttachmentConfiguration = {
   fileName: string
   contentType: string
   isPrivate: boolean
-  data: PutObjectRequest['Body']
+  data: PutObjectCommandInput['Body']
 }
 
 export type ProgressListenerEvent = { progress: number; total: number }
@@ -85,12 +86,11 @@ const getS3Client = (s3ObjectCredentials: AWSTypes.S3ObjectCredentials) => {
       secretAccessKey: s3ObjectCredentials.credentials.SecretAccessKey,
       sessionToken: s3ObjectCredentials.credentials.SessionToken,
     },
-    correctClockSkew: true,
   })
 }
 const getObjectMeta = (
   s3Meta: AWSTypes.S3ObjectCredentials['s3'],
-): PutObjectRequest => ({
+): PutObjectCommandInput => ({
   ServerSideEncryption: 'AES256',
   Expires: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // Max 1 year
   CacheControl: 'max-age=31536000', // Max 1 year(365 days),
@@ -107,7 +107,7 @@ async function uploadToS3({
   retryAttempt,
 }: {
   s3Configuration: AWSTypes.S3ObjectCredentials
-  putObjectRequest: PutObjectRequest
+  putObjectRequest: PutObjectCommandInput
   abortSignal?: AbortSignal
   onProgress?: ProgressListener
   retryAttempt?: number
@@ -136,15 +136,17 @@ async function uploadToS3({
       }
     }
     console.log('Starting managedUpload with queueSize ', queueSize)
-    const managedUpload = s3Client.upload(putObjectRequest, {
+    const managedUpload = new Upload({
+      client: s3Client,
+      params: putObjectRequest,
       partSize: 5 * 1024 * 1024,
       queueSize,
     })
 
     managedUpload.on('httpUploadProgress', (progress) => {
       if (onProgress) {
-        const onePercent = progress.total / 100
-        const percent = progress.loaded / onePercent
+        const onePercent = progress.total || 0 / 100
+        const percent = progress.loaded || 0 / onePercent
         onProgress({ progress: percent, total: 100 })
       }
     })
@@ -153,7 +155,7 @@ async function uploadToS3({
       managedUpload.abort()
     })
 
-    await managedUpload.promise()
+    await managedUpload.done()
   } catch (err) {
     if (!abortSignal?.aborted) {
       Sentry.captureException(err)
@@ -255,12 +257,10 @@ async function downloadS3Data<T>(
 ): Promise<T> {
   const s3 = getS3Client(s3ObjectCredentials)
 
-  const s3Data = await s3
-    .getObject({
-      Bucket: s3ObjectCredentials.s3.bucket,
-      Key: s3ObjectCredentials.s3.key,
-    })
-    .promise()
+  const s3Data = await s3.getObject({
+    Bucket: s3ObjectCredentials.s3.bucket,
+    Key: s3ObjectCredentials.s3.key,
+  })
 
   // @ts-expect-error
   const blob = new Blob([s3Data.Body])

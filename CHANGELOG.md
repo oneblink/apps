@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Error handling when retrieving pre-fill credentials
 - Make `title` optional in `OneBlinkAppsError` and remove default of `Whoops`
+- Use AWS SDK V3 for `s3Submit` service
 
 ## [5.0.0] - 2023-06-23
 

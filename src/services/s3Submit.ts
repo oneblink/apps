@@ -144,10 +144,9 @@ async function uploadToS3({
     })
 
     managedUpload.on('httpUploadProgress', (progress) => {
-      if (onProgress) {
-        const onePercent = progress.total || 0 / 100
-        const percent = progress.loaded || 0 / onePercent
-        onProgress({ progress: percent, total: 100 })
+      if (onProgress && progress.total) {
+        const percent = ((progress.loaded || 0) / progress.total) * 100
+        onProgress({ progress: Math.floor(percent), total: 100 })
       }
     })
 

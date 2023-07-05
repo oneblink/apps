@@ -261,29 +261,11 @@ async function downloadS3Data<T>(
     Key: s3ObjectCredentials.s3.key,
   })
 
-  // @ts-expect-error
-  const blob = new Blob([s3Data.Body])
-  const fileReader = new FileReader()
-  return new Promise<T>((resolve, reject) => {
-    fileReader.onload = function (event) {
-      try {
-        if (typeof event.target?.result !== 'string') {
-          throw new TypeError('Unable to read Blob result from S3')
-        }
-        const preFillData = JSON.parse(event.target.result)
-        resolve(preFillData)
-      } catch (error) {
-        reject(error)
-      }
-    }
-
-    fileReader.onerror = function () {
-      fileReader.abort()
-      reject(fileReader.error)
-    }
-
-    fileReader.readAsText(blob)
-  })
+  const s3DataString = await s3Data.Body?.transformToString()
+  if (!s3DataString) {
+    throw new Error('Unable to read data from S3')
+  }
+  return JSON.parse(s3DataString)
 }
 
 async function downloadPreFillS3Data<T>(

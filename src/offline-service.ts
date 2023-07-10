@@ -21,7 +21,9 @@ export function isOffline(): boolean {
     return false
   }
 
-  if (window.cordova) {
+  // [Capacitor](capacitorjs.com) is mostly compatible with Cordova so it returns
+  // `true` for `window.cordova`, but `window.navigator.connection` is `undefined`.
+  if (window.cordova && window.navigator.hasOwnProperty('connection')) {
     return window.navigator.connection.type === 'none'
   } else {
     return !window.navigator.onLine

@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+- Submission Error handling to place submissions in pending queue if user has gone offline
+
+### Changed
+
 - Use AWS SDK V3 for `s3Submit` service
 
 ## [5.1.0] - 2023-07-03

@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [5.2.0] - 2023-07-12
+
 ### Changed
 
 - Use AWS SDK V3 for `s3Submit` service
+
+### Dependencies
+
+- depend upon [@aws-sdk/client-s3](https://www.npmjs.com/package/@aws-sdk/client-s3) [3.363.0](https://github.com/aws/aws-sdk-js-v3/releases/tag/v3.363.0)
+
+- depend upon [@aws-sdk/lib-storage](https://www.npmjs.com/package/@aws-sdk/lib-storage) [3.363.0](https://github.com/aws/aws-sdk-js-v3/releases/tag/v3.363.0)
 
 ## [5.1.0] - 2023-07-03
 

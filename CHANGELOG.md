@@ -7,9 +7,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `formService.FormElementOptionsSetResult` type
+- `formService.parseFormElementOptions()`
+- `formService.getFormElementOptionsSets()`
+- `formService.getFreshdeskFields()`
+- `formService.parseFreshdeskFieldFormElementOptions()`
+- `formService.getFormElementOptionsSetOptions()`
+- `formService.loadFormElementDynamicOptions()`
+
 ### Changed
 
 - Submission Error handling to place submissions in pending queue if user has gone offline
+
+### Removed
+
+- **[BREAKING]** `formService.getFormElementDynamicOptions()`
+- **[BREAKING]** `formService.LoadFormElementOptionsResult` type
 
 ## [5.2.0] - 2023-07-12
 

@@ -1,7 +1,7 @@
 {
   "name": "@oneblink/apps",
   "description": "Helper functions for OneBlink apps in JavaScript.",
-  "version": "5.2.0",
+  "version": "6.0.0-beta.1",
   "author": "OneBlink <developers@oneblink.io> (https://oneblink.io)",
   "bugs": {
     "url": "https://github.com/oneblink/apps/issues"
@@ -9,7 +9,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.363.0",
     "@aws-sdk/lib-storage": "^3.363.0",
-    "@oneblink/sdk-core": "^3.1.0-beta.4",
+    "@oneblink/sdk-core": "^4.0.0-beta.1",
     "@sentry/browser": "^6.19.7",
     "@sentry/tracing": "^6.19.7",
     "aws-sdk": "^2.1126.0",

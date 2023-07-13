@@ -1,4 +1,4 @@
-import { formElementsService } from '@oneblink/sdk-core'
+import { formElementsService, typeCastService } from '@oneblink/sdk-core'
 import { FormTypes, FreshdeskTypes } from '@oneblink/types'
 import { customAlphabet } from 'nanoid/non-secure'
 import { format } from 'date-fns'
@@ -337,9 +337,16 @@ async function getFormElementLookupById(
   )
 }
 
+/**
+ * Get a list of options sets for an organisation.
+ *
+ * @param organisationId The identifier for the organisation to fetch options sets for
+ * @param abortSignal A signal to abort any asynchronous processing
+ * @returns An array of options sets
+ */
 async function getFormElementOptionsSets(
   organisationId: string,
-  abortSignal?: AbortSignal,
+  abortSignal: AbortSignal,
 ): Promise<Array<FormTypes.FormElementOptionSet>> {
   const { formElementDynamicOptionSets } = await searchRequest<{
     formElementDynamicOptionSets: Array<FormTypes.FormElementOptionSet>
@@ -353,12 +360,10 @@ async function getFormElementOptionsSets(
   return formElementDynamicOptionSets
 }
 
-type LoadFormElementOptionsResult = {
-  elementId: string
-} & (
+type FormElementOptionsSetResult =
   | {
       type: 'OPTIONS'
-      options: FormTypes.ChoiceElementOption[]
+      options: unknown
     }
   | {
       type: 'SEARCH'
@@ -369,56 +374,248 @@ type LoadFormElementOptionsResult = {
       type: 'ERROR'
       error: OneBlinkAppsError
     }
-)
 
 /**
- * Get a the options for a single Form or an array of Forms for Form Elements
- * that are using a OneBlink List.
+ * Get the options for an options set.
  *
- * #### Example
+ * @param formElementOptionsSet The form element options set to generate options from
+ * @param formsAppEnvironmentId The environment to pull options from
+ * @param abortSignal A signal to abort any asynchronous processing
+ * @returns A result object containing potential options or a predictable error
+ */
+async function getFormElementOptionsSetOptions(
+  formElementOptionsSet: FormTypes.FormElementOptionSet,
+  formsAppEnvironmentId: number,
+  abortSignal: AbortSignal,
+): Promise<FormElementOptionsSetResult> {
+  if (formElementOptionsSet.type === 'STATIC') {
+    const formElementOptionsSetEnvironment =
+      formElementOptionsSet.environments.find(
+        (environment: FormTypes.FormElementOptionSetEnvironmentStatic) =>
+          environment.formsAppEnvironmentId === formsAppEnvironmentId,
+      )
+    if (formElementOptionsSetEnvironment) {
+      return {
+        type: 'OPTIONS',
+        options: formElementOptionsSetEnvironment.options,
+      }
+    }
+    return {
+      type: 'ERROR',
+      error: new OneBlinkAppsError(
+        `List environment configuration has not been completed yet. Please contact your administrator to rectify the issue.`,
+        {
+          title: 'Misconfigured List',
+          originalError: new Error(
+            JSON.stringify(
+              {
+                formElementOptionsSetId: formElementOptionsSet.id,
+                formElementOptionsSetName: formElementOptionsSet.name,
+                formsAppEnvironmentId,
+              },
+              null,
+              2,
+            ),
+          ),
+        },
+      ),
+    }
+  }
+
+  const formElementOptionsSetEnvironment =
+    formElementOptionsSet.environments.find(
+      (environment: FormTypes.FormElementOptionSetEnvironmentUrl) =>
+        environment.formsAppEnvironmentId === formsAppEnvironmentId,
+    )
+  if (!formElementOptionsSetEnvironment) {
+    return {
+      type: 'ERROR',
+      error: new OneBlinkAppsError(
+        `Dynamic list configuration has not been completed yet. Please contact your administrator to rectify the issue.`,
+        {
+          title: 'Misconfigured Dynamic List',
+          originalError: new Error(
+            JSON.stringify(
+              {
+                formElementOptionsSetId: formElementOptionsSet.id,
+                formElementOptionsSetName: formElementOptionsSet.name,
+                formsAppEnvironmentId,
+              },
+              null,
+              2,
+            ),
+          ),
+        },
+      ),
+    }
+  }
+
+  if (formElementOptionsSetEnvironment.searchQuerystringParameter) {
+    return {
+      type: 'SEARCH',
+      url: formElementOptionsSetEnvironment.url,
+      searchQuerystringParameter:
+        formElementOptionsSetEnvironment.searchQuerystringParameter,
+    }
+  }
+
+  try {
+    const headers = await generateHeaders()
+    const response = await fetch(formElementOptionsSetEnvironment.url, {
+      headers,
+      signal: abortSignal,
+    })
+
+    if (!response.ok) {
+      const text = await response.text()
+      throw new Error(text)
+    }
+
+    const options = await response.json()
+    return {
+      type: 'OPTIONS',
+      options,
+    }
+  } catch (error) {
+    Sentry.captureException(error)
+    return {
+      type: 'ERROR',
+      error: new OneBlinkAppsError(
+        `Options could not be loaded. Please contact your administrator to rectify the issue.`,
+        {
+          title: 'Invalid List Response',
+          httpStatusCode: (error as HTTPError).status,
+          originalError: new OneBlinkAppsError(
+            JSON.stringify(
+              {
+                formElementOptionsSetId: formElementOptionsSet.id,
+                formElementOptionsSetName: formElementOptionsSet.name,
+                formElementOptionsSetUrl: formElementOptionsSetEnvironment.url,
+                formsAppEnvironmentId,
+              },
+              null,
+              2,
+            ),
+            {
+              originalError: error as HTTPError,
+            },
+          ),
+        },
+      ),
+    }
+  }
+}
+
+/**
+ * @param form The form definition the form element is in. Used to generate
+ *   conditional logic for the
+ * @param element The form element to have options appended to
+ * @param data The untrusted options that need to be parsed.
+ * @returns A new form element. The element passed in is not mutated.
+ */
+function parseFormElementOptions(
+  form: FormTypes.Form,
+  element: FormTypes.FormElementWithOptions,
+  options: unknown,
+): FormTypes.FormElementWithOptions {
+  const dynamicOptions =
+    formElementsService.parseDynamicFormElementOptions(options)
+  const conditionallyShowOptionsElementIds: string[] = []
+  const formElementOptions = dynamicOptions.map<FormTypes.ChoiceElementOption>(
+    (option) => {
+      const optionsMap = (option.attributes || []).reduce<
+        Record<string, FormTypes.ChoiceElementOptionAttribute>
+      >((memo, { label, value }) => {
+        if (
+          !element.attributesMapping ||
+          !Array.isArray(element.attributesMapping)
+        ) {
+          return memo
+        }
+        const attribute = element.attributesMapping.find(
+          (map) => map.attribute === label,
+        )
+        if (!attribute) return memo
+
+        const elementId = attribute.elementId
+        const predicateElement = formElementsService.findFormElement(
+          form.elements,
+          (el) => el.id === elementId,
+        )
+        if (!predicateElement) {
+          return memo
+        }
+
+        const predicateElementWithOptions =
+          typeCastService.formElements.toOptionsElement(predicateElement)
+        if (!predicateElementWithOptions) {
+          return memo
+        }
+
+        const predicateOption = predicateElementWithOptions.options?.find(
+          (option) => option.value === value,
+        )
+        memo[elementId] = memo[elementId] || {
+          elementId,
+          optionIds: [],
+        }
+        memo[elementId].optionIds.push(
+          predicateOption?.id || predicateOption?.value || value,
+        )
+
+        conditionallyShowOptionsElementIds.push(elementId)
+        return memo
+      }, {})
+
+      return {
+        ...option,
+        id: option.value,
+        attributes: Object.keys(optionsMap).map((key) => optionsMap[key]),
+      }
+    },
+  )
+
+  return {
+    ...element,
+    options: formElementOptions,
+    conditionallyShowOptionsElementIds,
+  }
+}
+
+/**
+ * Load the options for Form Elements that are using a OneBlink List. Useful to
+ * cache all the dynamic options when first opening an application.
  *
- * ```js
- * const optionsForElementId =
- *   await formService.getFormElementDynamicOptions(form)
- *
- * // Set all the options for the required elements
- * for (const { elementId, options } of optionsForElementId.filter(
- *   ({ ok }) => ok,
- * )) {
- *   // BEWARE
- *   // this example does not accommodate for
- *   // nested elements in pages and repeatable sets
- *   // or for Lists that fail to load
- *   for (const formElement of form.elements) {
- *     if (formElement.id === elementId) {
- *       formElement.options = options
- *     }
- *   }
- * }
- * ```
- *
- * @param input
+ * @param forms
  * @param abortSignal
  * @returns
  */
-async function getFormElementDynamicOptions(
-  input: FormTypes.Form | FormTypes.Form[],
-  abortSignal?: AbortSignal,
-): Promise<Array<LoadFormElementOptionsResult>> {
-  const forms = Array.isArray(input) ? input : [input]
+async function loadFormElementDynamicOptions(
+  forms: FormTypes.Form[],
+  abortSignal: AbortSignal,
+): Promise<void> {
   if (!forms.length) {
-    return []
+    return
   }
 
-  const freshdeskFieldOptionsResults =
-    await getFormElementFreshdeskFieldOptions(forms, abortSignal)
+  const formWithFreshdeskFields = forms.find((form) => {
+    return formElementsService.findFormElement(form.elements, (el) => {
+      const formElementWithOptions =
+        typeCastService.formElements.toOptionsElement(el)
+      return (
+        formElementWithOptions?.optionsType === 'FRESHDESK_FIELD' &&
+        !!formElementWithOptions.freshdeskFieldName
+      )
+    })
+  }, [])
+  if (formWithFreshdeskFields) {
+    await getFreshdeskFields(formWithFreshdeskFields.id, abortSignal)
+  }
 
   // Get the lists id for each element
   const formElementOptionsSetIds = forms.reduce((ids: number[], form) => {
     formElementsService.forEachFormElementWithOptions(form.elements, (el) => {
       if (
-        // Ignore elements that have options as we don't need to fetch these again
-        !Array.isArray(el.options) &&
         el.optionsType === 'DYNAMIC' &&
         typeof el.dynamicOptionSetId === 'number'
       ) {
@@ -429,7 +626,7 @@ async function getFormElementDynamicOptions(
   }, [])
 
   if (!formElementOptionsSetIds.length) {
-    return freshdeskFieldOptionsResults
+    return
   }
 
   // Get the lists for all the ids
@@ -442,462 +639,90 @@ async function getFormElementDynamicOptions(
   const formElementOptionsSets = allFormElementOptionsSets.filter(({ id }) =>
     formElementOptionsSetIds.includes(id || 0),
   )
-  if (!formElementOptionsSets.length) {
-    return freshdeskFieldOptionsResults
-  }
-
-  const formsAppEnvironmentId = forms[0].formsAppEnvironmentId
-  const staticOptionSets: Array<{
-    formElementOptionsSetId: number
-    formElementOptionsSetName: string
-    formElementDynamicOptionSetEnvironment?: FormTypes.FormElementOptionSetEnvironmentStatic
-  }> = []
-  const formElementOptionsSetUrls = formElementOptionsSets.reduce<
-    Array<{
-      formElementOptionsSetId: number
-      formElementOptionsSetName: string
-      formElementOptionsSetUrl?: string
-      searchQuerystringParameter: string | undefined
-    }>
-  >((memo, formElementOptionsSet) => {
-    const formElementOptionsSetId = formElementOptionsSet.id
-    if (formElementOptionsSetId) {
-      if (formElementOptionsSet.type === 'STATIC') {
-        const formElementDynamicOptionSetEnvironment =
-          formElementOptionsSet.environments.find(
-            (environment: FormTypes.FormElementOptionSetEnvironmentStatic) =>
-              environment.formsAppEnvironmentId === formsAppEnvironmentId,
-          )
-        staticOptionSets.push({
-          formElementOptionsSetId,
-          formElementOptionsSetName: formElementOptionsSet.name,
-          formElementDynamicOptionSetEnvironment,
-        })
-      } else {
-        const formElementDynamicOptionSetEnvironment =
-          formElementOptionsSet.environments.find(
-            (environment: FormTypes.FormElementOptionSetEnvironmentUrl) =>
-              environment.formsAppEnvironmentId === formsAppEnvironmentId,
-          )
-        memo.push({
-          formElementOptionsSetId,
-          formElementOptionsSetName: formElementOptionsSet.name,
-          formElementOptionsSetUrl: formElementDynamicOptionSetEnvironment?.url,
-          searchQuerystringParameter:
-            formElementDynamicOptionSetEnvironment?.searchQuerystringParameter,
-        })
-      }
-    }
-
-    return memo
-  }, [])
 
   // Get the options for all the lists
-  const results = await Promise.all(
-    formElementOptionsSetUrls.map<
-      Promise<
-        {
-          formElementOptionsSetId: number
-        } & (
-          | {
-              type: 'OPTIONS'
-              options: unknown
-            }
-          | {
-              type: 'SEARCH'
-              url: string
-              searchQuerystringParameter: string
-            }
-          | {
-              type: 'ERROR'
-              error: OneBlinkAppsError
-            }
-        )
-      >
-    >(
-      async ({
-        formElementOptionsSetId,
-        formElementOptionsSetName,
-        formElementOptionsSetUrl,
-        searchQuerystringParameter,
-      }) => {
-        if (!formElementOptionsSetUrl) {
-          return {
-            type: 'ERROR',
-            formElementOptionsSetId,
-            error: new OneBlinkAppsError(
-              `List configuration has not been completed yet. Please contact your administrator to rectify the issue.`,
-              {
-                title: 'Misconfigured List',
-                originalError: new Error(
-                  JSON.stringify(
-                    {
-                      formElementOptionsSetId,
-                      formElementOptionsSetName,
-                      formsAppEnvironmentId,
-                    },
-                    null,
-                    2,
-                  ),
-                ),
-              },
-            ),
-          }
-        }
-
-        if (searchQuerystringParameter) {
-          return {
-            type: 'SEARCH',
-            formElementOptionsSetId,
-            url: formElementOptionsSetUrl,
-            searchQuerystringParameter,
-          }
-        }
-
-        try {
-          const headers = await generateHeaders()
-          const response = await fetch(formElementOptionsSetUrl, {
-            headers,
-            signal: abortSignal,
-          })
-
-          if (!response.ok) {
-            const text = await response.text()
-            throw new Error(text)
-          }
-
-          const options = await response.json()
-          return {
-            type: 'OPTIONS',
-            formElementOptionsSetId,
-            options,
-          }
-        } catch (error) {
-          Sentry.captureException(error)
-          return {
-            type: 'ERROR',
-            formElementOptionsSetId,
-            error: new OneBlinkAppsError(
-              `Options could not be loaded. Please contact your administrator to rectify the issue.`,
-              {
-                title: 'Invalid List Response',
-                httpStatusCode: (error as HTTPError).status,
-                originalError: new OneBlinkAppsError(
-                  JSON.stringify(
-                    {
-                      formElementOptionsSetId,
-                      formElementOptionsSetName,
-                      formElementOptionsSetUrl,
-                      formsAppEnvironmentId,
-                    },
-                    null,
-                    2,
-                  ),
-                  {
-                    originalError: error as HTTPError,
-                  },
-                ),
-              },
-            ),
-          }
-        }
-      },
-    ),
-  )
-
-  // merge the static options with the URL option results
-  for (const {
-    formElementOptionsSetId,
-    formElementDynamicOptionSetEnvironment,
-    formElementOptionsSetName,
-  } of staticOptionSets) {
-    if (formElementDynamicOptionSetEnvironment) {
-      results.push({
-        type: 'OPTIONS',
-        formElementOptionsSetId,
-        options: formElementDynamicOptionSetEnvironment.options,
-      })
-    } else {
-      results.push({
-        type: 'ERROR',
-        formElementOptionsSetId,
-        error: new OneBlinkAppsError(
-          `List environment configuration has not been completed yet. Please contact your administrator to rectify the issue.`,
-          {
-            title: 'Misconfigured List',
-            originalError: new Error(
-              JSON.stringify(
-                {
-                  formElementOptionsSetId,
-                  formElementOptionsSetName,
-                  formsAppEnvironmentId,
-                },
-                null,
-                2,
-              ),
-            ),
-          },
-        ),
-      })
-    }
-  }
-
-  return forms.reduce<Array<LoadFormElementOptionsResult>>(
-    (optionsForElementId, form) => {
-      formElementsService.forEachFormElementWithOptions(
-        form.elements,
-        (element) => {
-          // Elements with options already can be ignored
-          if (
-            element.optionsType !== 'DYNAMIC' ||
-            Array.isArray(element.options)
-          ) {
-            return
-          }
-
-          const result = results.find(
-            (result) =>
-              element.dynamicOptionSetId === result.formElementOptionsSetId,
-          )
-          if (!result) {
-            optionsForElementId.push({
-              type: 'ERROR',
-              elementId: element.id,
-              error: new OneBlinkAppsError(
-                `List does not exist. Please contact your administrator to rectify the issue.`,
-                {
-                  title: 'Missing List',
-                  originalError: new Error(
-                    JSON.stringify(
-                      {
-                        formsAppEnvironmentId,
-                        element,
-                      },
-                      null,
-                      2,
-                    ),
-                  ),
-                },
-              ),
-            })
-            return
-          }
-
-          if (result.type === 'ERROR') {
-            optionsForElementId.push({
-              type: 'ERROR',
-              elementId: element.id,
-              error: result.error,
-            })
-            return
-          }
-
-          if (result.type === 'SEARCH') {
-            optionsForElementId.push({
-              type: 'SEARCH',
-              elementId: element.id,
-              url: result.url,
-              searchQuerystringParameter: result.searchQuerystringParameter,
-            })
-            return
-          }
-
-          const choiceElementOptions =
-            formElementsService.parseFormElementOptionsSet(
-              result.options,
-            ) as FormTypes.DynamicChoiceElementOption[]
-          const options =
-            choiceElementOptions.map<FormTypes.ChoiceElementOption>(
-              (option) => {
-                const optionsMap = (option.attributes || []).reduce(
-                  (
-                    memo: Record<
-                      string,
-                      {
-                        elementId: string
-                        optionIds: string[]
-                      }
-                    >,
-                    { label, value },
-                  ) => {
-                    if (
-                      !element.attributesMapping ||
-                      !Array.isArray(element.attributesMapping)
-                    ) {
-                      return memo
-                    }
-                    const attribute = element.attributesMapping.find(
-                      (map) => map.attribute === label,
-                    )
-                    if (!attribute) return memo
-
-                    const elementId = attribute.elementId
-                    const predicateElement =
-                      formElementsService.findFormElement(
-                        form.elements,
-                        (el) => el.id === elementId,
-                      )
-                    if (
-                      !predicateElement ||
-                      (predicateElement.type !== 'select' &&
-                        predicateElement.type !== 'autocomplete' &&
-                        predicateElement.type !== 'checkboxes' &&
-                        predicateElement.type !== 'radio' &&
-                        predicateElement.type !== 'compliance')
-                    ) {
-                      return memo
-                    }
-
-                    let predicateElementOptions = predicateElement.options
-                    if (!predicateElementOptions) {
-                      const predicateElementResult = results.find(
-                        (result) =>
-                          result &&
-                          predicateElement.dynamicOptionSetId ===
-                            result.formElementOptionsSetId,
-                      )
-                      if (predicateElementResult) {
-                        // @ts-expect-error
-                        predicateElementOptions = predicateElementResult.options
-                      } else {
-                        predicateElementOptions = []
-                      }
-                    }
-
-                    const predicateOption = predicateElementOptions?.find(
-                      (option) => option.value === value,
-                    )
-                    memo[elementId] = memo[elementId] || {
-                      elementId,
-                      optionIds: [],
-                    }
-                    memo[elementId].optionIds.push(
-                      predicateOption?.id || predicateOption?.value || value,
-                    )
-                    element.conditionallyShowOptionsElementIds =
-                      element.conditionallyShowOptionsElementIds || []
-                    element.conditionallyShowOptionsElementIds.push(elementId)
-                    return memo
-                  },
-                  {},
-                )
-
-                return {
-                  ...option,
-                  attributes: Object.keys(optionsMap).map(
-                    (key) => optionsMap[key],
-                  ),
-                } as FormTypes.ChoiceElementOption
-              },
-            )
-          optionsForElementId.push({
-            type: 'OPTIONS',
-            options,
-            elementId: element.id,
-          })
-        },
+  await Promise.all(
+    formElementOptionsSets.map(async (formElementOptionsSet) => {
+      await getFormElementOptionsSetOptions(
+        formElementOptionsSet,
+        forms[0].formsAppEnvironmentId,
+        abortSignal,
       )
-
-      return optionsForElementId
-    },
-    freshdeskFieldOptionsResults,
+    }),
   )
 }
 
-async function getFormElementFreshdeskFieldOptions(
-  forms: FormTypes.Form[],
-  abortSignal?: AbortSignal,
-): Promise<Array<LoadFormElementOptionsResult>> {
-  const freshdeskFieldNames = forms.reduce<string[]>((names, form) => {
-    formElementsService.forEachFormElementWithOptions(form.elements, (el) => {
-      if (
-        // Ignore elements that have options as we don't need to fetch these again
-        !Array.isArray(el.options) &&
-        el.optionsType === 'FRESHDESK_FIELD' &&
-        el.freshdeskFieldName
-      ) {
-        names.push(el.freshdeskFieldName)
-      }
-    })
-    return names
-  }, [])
-
-  if (!freshdeskFieldNames.length) {
-    return []
-  }
-
-  const allFreshdeskFields = await getRequest<FreshdeskTypes.FreshdeskField[]>(
-    `${tenants.current.apiOrigin}/forms/${forms[0].id}/freshdesk-fields`,
+/**
+ * Get the Freshdesk Fields associated with a form
+ *
+ * @param formId The identifier for the form to fetch freshdesk fields for
+ * @param abortSignal A signal to abort any asynchronous processing
+ * @returns An array of Freshdesk Fields
+ */
+async function getFreshdeskFields(
+  formId: number,
+  abortSignal: AbortSignal,
+): Promise<FreshdeskTypes.FreshdeskField[]> {
+  return await getRequest<FreshdeskTypes.FreshdeskField[]>(
+    `${tenants.current.apiOrigin}/forms/${formId}/freshdesk-fields`,
     abortSignal,
   )
-  const freshdeskFields = allFreshdeskFields.filter(({ name }) =>
-    freshdeskFieldNames.includes(name),
+}
+
+/**
+ * Parse Freshdesk Field options associated with a form element as form element options.
+ *
+ * @param freshdeskFields An array of Freshdesk Fields
+ * @param element The element to array of Freshdesk Fields
+ * @returns An object containing valid options or a predictable error
+ */
+function parseFreshdeskFieldOptions(
+  freshdeskFields: FreshdeskTypes.FreshdeskField[],
+  element: FormTypes.FormElementWithOptions,
+):
+  | {
+      type: 'OPTIONS'
+      options: FormTypes.ChoiceElementOption[]
+    }
+  | {
+      type: 'ERROR'
+      error: OneBlinkAppsError
+    } {
+  const freshdeskField = freshdeskFields.find(
+    (freshdeskField) => element.freshdeskFieldName === freshdeskField.name,
   )
-  if (!freshdeskFields.length) {
-    return []
+  if (!freshdeskField) {
+    return {
+      type: 'ERROR',
+      error: new OneBlinkAppsError(
+        `Freshdesk Field does not exist. Please contact your administrator to rectify the issue.`,
+        {
+          title: 'Missing Freshdesk Field',
+          originalError: new Error(JSON.stringify(element, null, 2)),
+        },
+      ),
+    }
+  }
+  const options = freshdeskField.options
+  if (!Array.isArray(options)) {
+    return {
+      type: 'ERROR',
+      error: new OneBlinkAppsError(
+        `Freshdesk Field does not have options. Please contact your administrator to rectify the issue.`,
+        {
+          title: 'Invalid Freshdesk Field',
+          originalError: new Error(
+            JSON.stringify({ element, freshdeskField }, null, 2),
+          ),
+        },
+      ),
+    }
   }
 
-  return forms.reduce<Array<LoadFormElementOptionsResult>>(
-    (optionsForElementId, form) => {
-      formElementsService.forEachFormElementWithOptions(
-        form.elements,
-        (element) => {
-          // Elements with options already can be ignored
-          if (
-            element.optionsType !== 'FRESHDESK_FIELD' ||
-            Array.isArray(element.options)
-          ) {
-            return
-          }
-
-          const freshdeskField = freshdeskFields.find(
-            (freshdeskField) =>
-              element.freshdeskFieldName === freshdeskField.name,
-          )
-          if (!freshdeskField) {
-            optionsForElementId.push({
-              type: 'ERROR',
-              elementId: element.id,
-              error: new OneBlinkAppsError(
-                `Freshdesk Field does not exist. Please contact your administrator to rectify the issue.`,
-                {
-                  title: 'Missing Freshdesk Field',
-                  originalError: new Error(JSON.stringify(element, null, 2)),
-                },
-              ),
-            })
-            return
-          }
-          const options = freshdeskField.options
-          if (!Array.isArray(options)) {
-            optionsForElementId.push({
-              type: 'ERROR',
-              elementId: element.id,
-              error: new OneBlinkAppsError(
-                `Freshdesk Field does not have options. Please contact your administrator to rectify the issue.`,
-                {
-                  title: 'Invalid Freshdesk Field',
-                  originalError: new Error(
-                    JSON.stringify({ element, freshdeskField }, null, 2),
-                  ),
-                },
-              ),
-            })
-            return
-          }
-
-          optionsForElementId.push({
-            type: 'OPTIONS',
-            elementId: element.id,
-            options: mapNestedOptions(options) || [],
-          })
-        },
-      )
-
-      return optionsForElementId
-    },
-    [],
-  )
+  return {
+    type: 'OPTIONS',
+    options: mapNestedOptions(options) || [],
+  }
 }
 
 const mapNestedOptions = (
@@ -966,11 +791,16 @@ function generateExternalId(receiptComponents: FormTypes.ReceiptComponent[]) {
 }
 
 export {
-  LoadFormElementOptionsResult,
+  FormElementOptionsSetResult,
   getForms,
   getForm,
   getFormElementLookups,
   getFormElementLookupById,
-  getFormElementDynamicOptions,
+  getFormElementOptionsSets,
+  getFormElementOptionsSetOptions,
+  parseFormElementOptions,
+  getFreshdeskFields,
+  parseFreshdeskFieldOptions,
+  loadFormElementDynamicOptions,
   generateExternalId,
 }

@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `formService.FormElementOptionsSetResult` type
+- `formService.parseFormElementOptions()`
+- `formService.getFormElementOptionsSets()`
+- `formService.getFreshdeskFields()`
+- `formService.parseFreshdeskFieldFormElementOptions()`
+- `formService.getFormElementOptionsSetOptions()`
+- `formService.loadFormElementDynamicOptions()`
+
+### Changed
+
+### Removed
+
+- **[BREAKING]** `formService.getFormElementDynamicOptions()`
+- **[BREAKING]** `formService.LoadFormElementOptionsResult` type
+
 ## [5.2.0] - 2023-07-12
 
 ### Changed

@@ -28,7 +28,6 @@ import tenants from '../tenants'
 import externalIdGeneration from './external-id-generation'
 import serverValidateForm from './server-validation'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
-import { SubmissionEventTypes } from '@oneblink/types'
 
 type SubmissionParams = {
   formSubmission: FormSubmission
@@ -40,11 +39,6 @@ type SubmissionParams = {
     schedulingReceiptUrl: string
     schedulingCancelUrl: string
   }
-}
-
-type PaymentSubmissionEventConfiguration = {
-  paymentSubmissionEvent: SubmissionEventTypes.FormPaymentEvent
-  amount: number
 }
 
 export { SubmissionParams, ProgressListener, ProgressListenerEvent }
@@ -71,15 +65,49 @@ export default async function submit({
     const schedulingSubmissionEvent =
       checkForSchedulingSubmissionEvent(formSubmission)
 
-    const offlineSubmission = await offlinePendingQueue({
-      schedulingSubmissionEvent,
-      paymentSubmissionEventConfiguration,
-      formSubmission,
-      isPendingQueueEnabled,
-    })
+    if (isOffline()) {
+      if (paymentSubmissionEventConfiguration || schedulingSubmissionEvent) {
+        console.log(
+          'Offline - form has a payment/scheduling submission event that has not been processed yet, return offline',
+          { paymentSubmissionEventConfiguration, schedulingSubmissionEvent },
+        )
+        return Object.assign({}, formSubmission, {
+          isOffline: true,
+          isInPendingQueue: false,
+          submissionTimestamp: null,
+          submissionId: null,
+          payment: null,
+          scheduling: null,
+          isUploadingAttachments: false,
+        })
+      }
 
-    if (offlineSubmission) {
-      return offlineSubmission
+      if (!isPendingQueueEnabled) {
+        console.log(
+          'Offline - app does not support pending queue, return offline',
+        )
+        return Object.assign({}, formSubmission, {
+          isOffline: true,
+          isInPendingQueue: false,
+          submissionTimestamp: null,
+          submissionId: null,
+          payment: null,
+          scheduling: null,
+          isUploadingAttachments: false,
+        })
+      }
+
+      console.log('Offline - saving submission to pending queue..')
+      await addFormSubmissionToPendingQueue(formSubmission)
+      return Object.assign({}, formSubmission, {
+        isOffline: true,
+        isInPendingQueue: true,
+        submissionTimestamp: null,
+        submissionId: null,
+        payment: null,
+        scheduling: null,
+        isUploadingAttachments: false,
+      })
     }
 
     const attachmentsStillUploading = checkIfAttachmentsAreUploading(
@@ -197,20 +225,34 @@ export default async function submit({
     }
 
     return formSubmissionResult
-  } catch (error) {
-    const paymentSubmissionEventConfiguration =
-      checkForPaymentSubmissionEvent(formSubmission)
+  } catch (error: OneBlinkAppsError | unknown) {
+    if (error instanceof OneBlinkAppsError && error.isOffline) {
+      if (!isPendingQueueEnabled) {
+        console.log(
+          'Offline - app does not support pending queue, return offline',
+        )
+        return Object.assign({}, formSubmission, {
+          isOffline: true,
+          isInPendingQueue: false,
+          submissionTimestamp: null,
+          submissionId: null,
+          payment: null,
+          scheduling: null,
+          isUploadingAttachments: false,
+        })
+      }
 
-    const schedulingSubmissionEvent =
-      checkForSchedulingSubmissionEvent(formSubmission)
-    const offlineSubmission = await offlinePendingQueue({
-      paymentSubmissionEventConfiguration,
-      schedulingSubmissionEvent,
-      formSubmission,
-      isPendingQueueEnabled,
-    })
-    if (offlineSubmission) {
-      return offlineSubmission
+      console.log('Offline - saving submission to pending queue..')
+      await addFormSubmissionToPendingQueue(formSubmission)
+      return Object.assign({}, formSubmission, {
+        isOffline: true,
+        isInPendingQueue: true,
+        submissionTimestamp: null,
+        submissionId: null,
+        payment: null,
+        scheduling: null,
+        isUploadingAttachments: false,
+      })
     }
     throw new OneBlinkAppsError(
       'An error has occurred with your submission, please contact Support if this problem persists.',
@@ -219,62 +261,5 @@ export default async function submit({
         originalError: error as Error,
       },
     )
-  }
-}
-
-async function offlinePendingQueue({
-  paymentSubmissionEventConfiguration,
-  schedulingSubmissionEvent,
-  formSubmission,
-  isPendingQueueEnabled,
-}: {
-  paymentSubmissionEventConfiguration?: PaymentSubmissionEventConfiguration
-  schedulingSubmissionEvent?: SubmissionEventTypes.SchedulingSubmissionEvent
-  formSubmission: FormSubmission
-  isPendingQueueEnabled: boolean
-}) {
-  if (isOffline()) {
-    if (paymentSubmissionEventConfiguration || schedulingSubmissionEvent) {
-      console.log(
-        'Offline - form has a payment/scheduling submission event that has not been processed yet, return offline',
-        { paymentSubmissionEventConfiguration, schedulingSubmissionEvent },
-      )
-      return Object.assign({}, formSubmission, {
-        isOffline: true,
-        isInPendingQueue: false,
-        submissionTimestamp: null,
-        submissionId: null,
-        payment: null,
-        scheduling: null,
-        isUploadingAttachments: false,
-      })
-    }
-
-    if (!isPendingQueueEnabled) {
-      console.log(
-        'Offline - app does not support pending queue, return offline',
-      )
-      return Object.assign({}, formSubmission, {
-        isOffline: true,
-        isInPendingQueue: false,
-        submissionTimestamp: null,
-        submissionId: null,
-        payment: null,
-        scheduling: null,
-        isUploadingAttachments: false,
-      })
-    }
-
-    console.log('Offline - saving submission to pending queue..')
-    await addFormSubmissionToPendingQueue(formSubmission)
-    return Object.assign({}, formSubmission, {
-      isOffline: true,
-      isInPendingQueue: true,
-      submissionTimestamp: null,
-      submissionId: null,
-      payment: null,
-      scheduling: null,
-      isUploadingAttachments: false,
-    })
   }
 }

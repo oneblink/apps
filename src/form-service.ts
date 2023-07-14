@@ -594,62 +594,66 @@ async function loadFormElementDynamicOptions(
   forms: FormTypes.Form[],
   abortSignal: AbortSignal,
 ): Promise<void> {
-  if (!forms.length) {
-    return
-  }
-
-  const formWithFreshdeskFields = forms.find((form) => {
-    return formElementsService.findFormElement(form.elements, (el) => {
-      const formElementWithOptions =
-        typeCastService.formElements.toOptionsElement(el)
-      return (
-        formElementWithOptions?.optionsType === 'FRESHDESK_FIELD' &&
-        !!formElementWithOptions.freshdeskFieldName
-      )
-    })
-  }, [])
-  if (formWithFreshdeskFields) {
-    await getFreshdeskFields(formWithFreshdeskFields.id, abortSignal)
-  }
-
-  // Get the lists id for each element
-  const formElementOptionsSetIds = forms.reduce((ids: number[], form) => {
-    formElementsService.forEachFormElementWithOptions(form.elements, (el) => {
-      if (
-        el.optionsType === 'DYNAMIC' &&
-        typeof el.dynamicOptionSetId === 'number'
-      ) {
-        ids.push(el.dynamicOptionSetId)
+  await Promise.all([
+    (async () => {
+      const formWithFreshdeskFields = forms.find((form) => {
+        return formElementsService.findFormElement(form.elements, (el) => {
+          const formElementWithOptions =
+            typeCastService.formElements.toOptionsElement(el)
+          return (
+            formElementWithOptions?.optionsType === 'FRESHDESK_FIELD' &&
+            !!formElementWithOptions.freshdeskFieldName
+          )
+        })
+      }, [])
+      if (formWithFreshdeskFields) {
+        await getFreshdeskFields(formWithFreshdeskFields.id, abortSignal)
       }
-    })
-    return ids
-  }, [])
+    })(),
+    (async () => {
+      // Get the lists id for each element
+      const formElementOptionsSetIds = forms.reduce((ids: number[], form) => {
+        formElementsService.forEachFormElementWithOptions(
+          form.elements,
+          (el) => {
+            if (
+              el.optionsType === 'DYNAMIC' &&
+              typeof el.dynamicOptionSetId === 'number'
+            ) {
+              ids.push(el.dynamicOptionSetId)
+            }
+          },
+        )
+        return ids
+      }, [])
 
-  if (!formElementOptionsSetIds.length) {
-    return
-  }
+      if (!formElementOptionsSetIds.length) {
+        return
+      }
 
-  // Get the lists for all the ids
-  const organisationId = forms[0].organisationId
-  const allFormElementOptionsSets = await getFormElementOptionsSets(
-    organisationId,
-    abortSignal,
-  )
-
-  const formElementOptionsSets = allFormElementOptionsSets.filter(({ id }) =>
-    formElementOptionsSetIds.includes(id || 0),
-  )
-
-  // Get the options for all the lists
-  await Promise.all(
-    formElementOptionsSets.map(async (formElementOptionsSet) => {
-      await getFormElementOptionsSetOptions(
-        formElementOptionsSet,
-        forms[0].formsAppEnvironmentId,
+      // Get the lists for all the ids
+      const organisationId = forms[0].organisationId
+      const allFormElementOptionsSets = await getFormElementOptionsSets(
+        organisationId,
         abortSignal,
       )
-    }),
-  )
+
+      const formElementOptionsSets = allFormElementOptionsSets.filter(
+        ({ id }) => formElementOptionsSetIds.includes(id || 0),
+      )
+
+      // Get the options for all the lists
+      await Promise.all(
+        formElementOptionsSets.map(async (formElementOptionsSet) => {
+          await getFormElementOptionsSetOptions(
+            formElementOptionsSet,
+            forms[0].formsAppEnvironmentId,
+            abortSignal,
+          )
+        }),
+      )
+    })(),
+  ])
 }
 
 /**

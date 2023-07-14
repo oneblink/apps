@@ -226,14 +226,28 @@ export default async function submit({
 
     return formSubmissionResult
   } catch (error: OneBlinkAppsError | unknown) {
-    if (error instanceof OneBlinkAppsError && error.isOffline) {
-      if (!isPendingQueueEnabled) {
-        console.log(
-          'Offline - app does not support pending queue, return offline',
-        )
+    if (error instanceof OneBlinkAppsError) {
+      if (error.isOffline) {
+        if (!isPendingQueueEnabled) {
+          console.log(
+            'Offline - app does not support pending queue, return offline',
+          )
+          return Object.assign({}, formSubmission, {
+            isOffline: true,
+            isInPendingQueue: false,
+            submissionTimestamp: null,
+            submissionId: null,
+            payment: null,
+            scheduling: null,
+            isUploadingAttachments: false,
+          })
+        }
+
+        console.log('Offline - saving submission to pending queue..')
+        await addFormSubmissionToPendingQueue(formSubmission)
         return Object.assign({}, formSubmission, {
           isOffline: true,
-          isInPendingQueue: false,
+          isInPendingQueue: true,
           submissionTimestamp: null,
           submissionId: null,
           payment: null,
@@ -242,18 +256,11 @@ export default async function submit({
         })
       }
 
-      console.log('Offline - saving submission to pending queue..')
-      await addFormSubmissionToPendingQueue(formSubmission)
-      return Object.assign({}, formSubmission, {
-        isOffline: true,
-        isInPendingQueue: true,
-        submissionTimestamp: null,
-        submissionId: null,
-        payment: null,
-        scheduling: null,
-        isUploadingAttachments: false,
-      })
+      // If the error has already been handled as a
+      // OneBlinkAppsError, we can throw it as is.
+      throw error
     }
+
     throw new OneBlinkAppsError(
       'An error has occurred with your submission, please contact Support if this problem persists.',
       {

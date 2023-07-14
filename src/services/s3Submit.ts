@@ -166,7 +166,8 @@ async function uploadToS3({
       )
       if (
         /Network Failure/.test((err as Error).message) ||
-        /Timeout/.test((err as Error).message)
+        /Timeout/.test((err as Error).message) ||
+        /Failed to fetch/.test((err as Error).message)
       ) {
         console.warn('Network error uploading to S3:', err)
         if (!retryAttempt || retryAttempt < 3) {
@@ -185,6 +186,7 @@ async function uploadToS3({
           {
             title: 'Connectivity Issues',
             originalError: err as Error,
+            isOffline: true,
           },
         )
       }

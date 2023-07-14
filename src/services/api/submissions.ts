@@ -59,6 +59,16 @@ const handleError = (error: HTTPError) => {
   if (error instanceof OneBlinkAppsError) {
     throw error
   }
+  if (/Failed to fetch/.test((error as Error).message)) {
+    throw new OneBlinkAppsError(
+      'We encountered a network related issue. Please ensure you are connected to the internet before trying again. If the problem persists, contact your administrator.',
+      {
+        title: 'Connectivity Issues',
+        originalError: error as Error,
+        isOffline: true,
+      },
+    )
+  }
   switch (error.status) {
     case 400: {
       return getBadRequestError(error)

@@ -41,6 +41,7 @@ async function fetchWithError(url: string, options?: RequestInit) {
       {
         title: 'Connectivity Issues',
         originalError: error as Error,
+        isOffline: true,
       },
     )
   }

@@ -229,8 +229,9 @@ export default async function submit({
     if (error instanceof OneBlinkAppsError) {
       if (error.isOffline) {
         if (!isPendingQueueEnabled) {
-          console.log(
-            'Offline - app does not support pending queue, return offline',
+          console.warn(
+            'Offline error thrown - app does not support pending queue, return offline',
+            error,
           )
           return Object.assign({}, formSubmission, {
             isOffline: true,
@@ -243,7 +244,10 @@ export default async function submit({
           })
         }
 
-        console.log('Offline - saving submission to pending queue..')
+        console.warn(
+          'Offline error thrown - saving submission to pending queue..',
+          error,
+        )
         await addFormSubmissionToPendingQueue(formSubmission)
         return Object.assign({}, formSubmission, {
           isOffline: true,

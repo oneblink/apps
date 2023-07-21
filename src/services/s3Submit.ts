@@ -156,43 +156,32 @@ async function uploadToS3({
 
     await managedUpload.done()
   } catch (err) {
-    if (!abortSignal?.aborted) {
-      Sentry.captureException(err)
-      // handle storing in s3 errors here
-      console.log(
-        `Upload failed for attempt ${retryAttempt} with error ${
-          (err as Error).message
-        }`,
-      )
-      if (
-        /Network Failure/.test((err as Error).message) ||
-        /Timeout/.test((err as Error).message) ||
-        /Failed to fetch/.test((err as Error).message)
-      ) {
-        console.warn('Network error uploading to S3:', err)
-        if (!retryAttempt || retryAttempt < 3) {
-          retryAttempt = retryAttempt ? retryAttempt + 1 : 1
-          await uploadToS3({
-            s3Configuration,
-            putObjectRequest,
-            abortSignal,
-            onProgress,
-            retryAttempt,
-          })
-          return
-        }
-        throw new OneBlinkAppsError(
-          'We encountered a network related issue. Please ensure you are connected to the internet before trying again. If the problem persists, contact your administrator.',
-          {
-            title: 'Connectivity Issues',
-            originalError: err as Error,
-            isOffline: true,
-          },
-        )
-      }
+    if (abortSignal?.aborted) {
+      return
     }
 
-    throw err
+    console.error(`Upload failed for attempt ${retryAttempt} with error`, err)
+    Sentry.captureException(err)
+    // handle storing in s3 errors here
+    if (!retryAttempt || retryAttempt < 3) {
+      retryAttempt = retryAttempt ? retryAttempt + 1 : 1
+      await uploadToS3({
+        s3Configuration,
+        putObjectRequest,
+        abortSignal,
+        onProgress,
+        retryAttempt,
+      })
+      return
+    }
+    throw new OneBlinkAppsError(
+      'We encountered a network related issue. Please ensure you are connected to the internet before trying again. If the problem persists, contact your administrator.',
+      {
+        title: 'Connectivity Issues',
+        originalError: err as Error,
+        isOffline: true,
+      },
+    )
   }
 }
 

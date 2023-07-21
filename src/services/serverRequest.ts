@@ -1,5 +1,5 @@
 import { FormTypes } from '@oneblink/types'
-import { generateHeaders } from './fetch'
+import { fetchWithError, generateHeaders } from './fetch'
 
 function getOBApi(apiId: string, apiEnv: string): string {
   if (apiEnv.toLowerCase() === 'prod') {
@@ -25,7 +25,7 @@ export default async function serverRequest(
         )}${endpoint.configuration.apiEnvironmentRoute}`
 
   const headers = await generateHeaders()
-  const response = await fetch(url, {
+  const response = await fetchWithError(url, {
     method: 'POST',
     headers,
     body: JSON.stringify(payload),

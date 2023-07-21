@@ -6,6 +6,7 @@ import {
   searchRequest,
   postRequest,
   HTTPError,
+  fetchWithError,
 } from './services/fetch'
 import tenants from './tenants'
 
@@ -126,11 +127,10 @@ export async function searchFormStoreRecords(
   meta: { limit: number; offset: number; nextOffset?: number }
 }> {
   try {
-    const { submissions, meta } = await postRequest(
-      `${tenants.current.apiOrigin}/form-store`,
-      searchParameters,
-      abortSignal,
-    )
+    const { submissions, meta } = await postRequest<{
+      submissions: SubmissionTypes.FormStoreRecord[]
+      meta: { limit: number; offset: number; nextOffset?: number }
+    }>(`${tenants.current.apiOrigin}/form-store`, searchParameters, abortSignal)
     return {
       formStoreRecords: submissions,
       meta,
@@ -175,7 +175,7 @@ export async function exportFormStoreRecords(
   }
   const headers = await generateHeaders()
   headers.Accept = 'text/csv'
-  const response = await fetch(
+  const response = await fetchWithError(
     `${tenants.current.apiOrigin}/form-store/export`,
     {
       method: 'POST',

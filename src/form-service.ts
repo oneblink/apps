@@ -6,6 +6,7 @@ import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { isOffline } from './offline-service'
 import { isLoggedIn } from './services/cognito'
 import {
+  fetchWithError,
   generateHeaders,
   HTTPError,
   searchRequest,
@@ -461,10 +462,13 @@ async function getFormElementOptionsSetOptions(
 
   try {
     const headers = await generateHeaders()
-    const response = await fetch(formElementOptionsSetEnvironment.url, {
-      headers,
-      signal: abortSignal,
-    })
+    const response = await fetchWithError(
+      formElementOptionsSetEnvironment.url,
+      {
+        headers,
+        signal: abortSignal,
+      },
+    )
 
     if (!response.ok) {
       const text = await response.text()

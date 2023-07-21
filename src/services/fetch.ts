@@ -32,7 +32,7 @@ export class HTTPError extends Error {
   }
 }
 
-async function fetchWithError(url: string, options?: RequestInit) {
+export const fetchWithError: typeof fetch = async (url, options) => {
   try {
     return await fetch(url, options)
   } catch (error) {

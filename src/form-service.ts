@@ -216,6 +216,12 @@ async function getForm(
   )
 }
 
+type FormElementLookupResult = FormTypes.FormElementLookup & {
+  url: string | null
+  records: FormTypes.FormElementLookupStaticDataRecord[] | null
+  runLookupOnClear: boolean
+}
+
 /**
  * Get an array of OneBlink Form Element Lookups.
  *
@@ -239,34 +245,37 @@ async function getFormElementLookups(
   organisationId: string,
   formsAppEnvironmentId: number,
   abortSignal?: AbortSignal,
-): Promise<
-  Array<
-    FormTypes.FormElementLookup & {
-      url: string | null
-    }
-  >
-> {
-  return searchRequest<{ formElementLookups: FormTypes.FormElementLookup[] }>(
-    `${tenants.current.apiOrigin}/form-element-lookups`,
-    {
-      organisationId,
-    },
-    abortSignal,
-  )
-    .then((data) =>
-      data.formElementLookups.map((formElementLookup) => ({
-        ...formElementLookup,
-        url: getFormElementLookupUrl(formElementLookup, formsAppEnvironmentId),
-      })),
+): Promise<FormElementLookupResult[]> {
+  try {
+    const data = await searchRequest<{
+      formElementLookups: FormTypes.FormElementLookup[]
+    }>(
+      `${tenants.current.apiOrigin}/form-element-lookups`,
+      {
+        organisationId,
+      },
+      abortSignal,
     )
-    .catch((error) => {
-      Sentry.captureException(error)
-      console.warn(
-        `Error retrieving form element lookups for organisationId ${organisationId}`,
-        error,
-      )
-      throw error
-    })
+    return data.formElementLookups.map((formElementLookup) => ({
+      ...formElementLookup,
+      url: getFormElementLookupUrl(formElementLookup, formsAppEnvironmentId),
+      records: getFormElementLookupRecords(
+        formElementLookup,
+        formsAppEnvironmentId,
+      ),
+      runLookupOnClear: getFormElementLookupRunLookupOnClear(
+        formElementLookup,
+        formsAppEnvironmentId,
+      ),
+    }))
+  } catch (error) {
+    Sentry.captureException(error)
+    console.warn(
+      `Error retrieving form element lookups for organisationId ${organisationId}`,
+      error,
+    )
+    throw error
+  }
 }
 function getFormElementLookupUrl(
   formElementLookup: FormTypes.FormElementLookup,
@@ -276,8 +285,8 @@ function getFormElementLookupUrl(
     return null
   }
 
-  return formElementLookup.environments.reduce(
-    (url: null | string, formElementLookupEnvironment) => {
+  return formElementLookup.environments.reduce<string | null>(
+    (url, formElementLookupEnvironment) => {
       if (
         !url &&
         formElementLookupEnvironment.formsAppEnvironmentId ===
@@ -289,6 +298,52 @@ function getFormElementLookupUrl(
     },
     null,
   )
+}
+function getFormElementLookupRecords(
+  formElementLookup: FormTypes.FormElementLookup,
+  formsAppEnvironmentId: number,
+) {
+  if (formElementLookup.type !== 'STATIC_DATA') {
+    return null
+  }
+
+  return formElementLookup.environments.reduce<
+    FormTypes.FormElementLookupStaticDataRecord[] | null
+  >((records, formElementLookupEnvironment) => {
+    if (
+      !records &&
+      formElementLookupEnvironment.formsAppEnvironmentId ===
+        formsAppEnvironmentId
+    ) {
+      return formElementLookupEnvironment.records
+    }
+    return records
+  }, null)
+}
+function getFormElementLookupRunLookupOnClear(
+  formElementLookup: FormTypes.FormElementLookup,
+  formsAppEnvironmentId: number,
+) {
+  if (formElementLookup.type === 'STATIC_DATA') {
+    return formElementLookup.environments.some(
+      (formElementLookupEnvironment) => {
+        return (
+          formElementLookupEnvironment.formsAppEnvironmentId ===
+            formsAppEnvironmentId &&
+          formElementLookupEnvironment.records.some((record) => {
+            return record.inputType === 'UNDEFINED'
+          })
+        )
+      },
+    )
+  }
+
+  return formElementLookup.environments.some((formElementLookupEnvironment) => {
+    return (
+      formElementLookupEnvironment.formsAppEnvironmentId ===
+        formsAppEnvironmentId && formElementLookupEnvironment.runLookupOnClear
+    )
+  })
 }
 
 /**
@@ -321,12 +376,7 @@ async function getFormElementLookupById(
   formsAppEnvironmentId: number,
   formElementLookupId: number,
   abortSignal?: AbortSignal,
-): Promise<
-  | (FormTypes.FormElementLookup & {
-      url: string | null
-    })
-  | void
-> {
+): Promise<FormElementLookupResult | undefined> {
   return getFormElementLookups(
     organisationId,
     formsAppEnvironmentId,
@@ -802,6 +852,7 @@ export {
   FormElementOptionsSetResult,
   getForms,
   getForm,
+  FormElementLookupResult,
   getFormElementLookups,
   getFormElementLookupById,
   getFormElementOptionsSets,

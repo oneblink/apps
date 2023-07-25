@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `formService.getFormElementOptionsSetOptions()`
 - `formService.loadFormElementDynamicOptions()`
 - `runLookupOnClear` and `records` to response from `formService.getFormElementLookups()`
+- `formService.FormElementLookupResult` type
 
 ### Changed
 

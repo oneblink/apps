@@ -216,6 +216,12 @@ async function getForm(
   )
 }
 
+type FormElementLookupResult = FormTypes.FormElementLookup & {
+  url: string | null
+  records: FormTypes.FormElementLookupStaticDataRecord[] | null
+  runLookupOnClear: boolean
+}
+
 /**
  * Get an array of OneBlink Form Element Lookups.
  *
@@ -239,15 +245,7 @@ async function getFormElementLookups(
   organisationId: string,
   formsAppEnvironmentId: number,
   abortSignal?: AbortSignal,
-): Promise<
-  Array<
-    FormTypes.FormElementLookup & {
-      url: string | null
-      records: FormTypes.FormElementLookupStaticDataRecord[] | null
-      runLookupOnClear: boolean
-    }
-  >
-> {
+): Promise<FormElementLookupResult[]> {
   try {
     const data = await searchRequest<{
       formElementLookups: FormTypes.FormElementLookup[]
@@ -378,12 +376,7 @@ async function getFormElementLookupById(
   formsAppEnvironmentId: number,
   formElementLookupId: number,
   abortSignal?: AbortSignal,
-): Promise<
-  | (FormTypes.FormElementLookup & {
-      url: string | null
-    })
-  | void
-> {
+): Promise<FormElementLookupResult | undefined> {
   return getFormElementLookups(
     organisationId,
     formsAppEnvironmentId,
@@ -859,6 +852,7 @@ export {
   FormElementOptionsSetResult,
   getForms,
   getForm,
+  FormElementLookupResult,
   getFormElementLookups,
   getFormElementLookupById,
   getFormElementOptionsSets,

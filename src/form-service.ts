@@ -707,6 +707,38 @@ async function loadFormElementDynamicOptions(
         }),
       )
     })(),
+    (async () => {
+      //Obtain all the Lookup ids that are featured on the elements on all forms
+      const formElementLookupsIds = forms.reduce((ids: number[], form) => {
+        formElementsService.forEachFormElement(form.elements, (el) => {
+          const lookupElement = typeCastService.formElements.toLookupElement(el)
+          if (lookupElement) {
+            if (lookupElement.isDataLookup && lookupElement.dataLookupId) {
+              ids.push(lookupElement.dataLookupId)
+            }
+            if (
+              lookupElement.isElementLookup &&
+              lookupElement.elementLookupId
+            ) {
+              ids.push(lookupElement.elementLookupId)
+            }
+          }
+        })
+        return ids
+      }, [])
+      if (!formElementLookupsIds.length) {
+        return
+      }
+
+      //Obtain all lookups
+      const organisationId = forms[0].organisationId
+      const formsAppEnvironmentId = forms[0].formsAppEnvironmentId
+      await getFormElementLookups(
+        organisationId,
+        formsAppEnvironmentId,
+        abortSignal,
+      )
+    })(),
   ])
 }
 

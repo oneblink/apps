@@ -708,25 +708,25 @@ async function loadFormElementDynamicOptions(
       )
     })(),
     (async () => {
-      //Obtain all the Lookup ids that are featured on the elements on all forms
-      const formElementLookupsIds = forms.reduce((ids: number[], form) => {
-        formElementsService.forEachFormElement(form.elements, (el) => {
-          const lookupElement = typeCastService.formElements.toLookupElement(el)
-          if (lookupElement) {
-            if (lookupElement.isDataLookup && lookupElement.dataLookupId) {
-              ids.push(lookupElement.dataLookupId)
+      //Check if there are any forms with a lookup
+      const isThereAFormWithLookup = forms.some((form) => {
+        const element = formElementsService.findFormElement(
+          form.elements,
+          (el) => {
+            const lookupElement =
+              typeCastService.formElements.toLookupElement(el)
+            if (lookupElement) {
+              if (lookupElement.isDataLookup || lookupElement.isElementLookup) {
+                return true
+              }
             }
-            if (
-              lookupElement.isElementLookup &&
-              lookupElement.elementLookupId
-            ) {
-              ids.push(lookupElement.elementLookupId)
-            }
-          }
-        })
-        return ids
-      }, [])
-      if (!formElementLookupsIds.length) {
+            return false
+          },
+        )
+        return !!element
+      })
+
+      if (!isThereAFormWithLookup) {
         return
       }
 

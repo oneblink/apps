@@ -77,13 +77,11 @@ export type FormSubmissionsAdministrationApprovalsResponse = {
  */
 export async function getFormSubmissionApprovals(
   formsAppId: number,
-  submissionTitle?: string,
   abortSignal?: AbortSignal,
 ): Promise<FormSubmissionApprovalsResponse> {
   try {
-    return await searchRequest<FormSubmissionApprovalsResponse>(
+    return await getRequest<FormSubmissionApprovalsResponse>(
       `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/my-approvals`,
-      { submissionTitle },
       abortSignal,
     )
   } catch (err) {

@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - `submissionTitle` to `approvalsService.getFormSubmissionAdministrationApprovals()`
 
+### Changed
+
+- `localisationService.formatNumber()` to return up to the maximum number of fractional digits as per `Intl.NumberFormat`
+
 ## [6.1.0] - 2023-08-01
 
 ### Added

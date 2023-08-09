@@ -28,6 +28,7 @@ const generateFormatters = (locale: Locale) => {
   return {
     number: new Intl.NumberFormat(locale, {
       style: 'decimal',
+      maximumFractionDigits: 20,
     }),
     currency: new Intl.NumberFormat(locale, {
       style: 'currency',

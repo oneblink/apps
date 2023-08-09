@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+- `deleteAllAutosaveData` to `autosaveService`
 - `submissionTitle` to `approvalsService.getFormSubmissionAdministrationApprovals()`
 
 ### Changed

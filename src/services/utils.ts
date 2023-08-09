@@ -136,4 +136,5 @@ export default {
   getLocalForageItem,
   setLocalForageItem,
   removeLocalForageItem,
+  getLocalForageKeys,
 }

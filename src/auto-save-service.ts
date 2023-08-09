@@ -83,3 +83,21 @@ export async function deleteAutoSaveData(
   const key = getAutoSaveKey(formId, autoSaveKey)
   return utilsService.removeLocalForageItem(key)
 }
+
+/**
+ * Delete all auto saved data.
+ *
+ * #### Example
+ *
+ * ```js
+ * await autoSaveService.deleteAllAutosaveData()
+ * ```
+ *
+ * @returns
+ */
+export async function deleteAllAutosaveData() {
+  const keys = await utilsService.getLocalForageKeys('AUTO_SAVE_')
+  console.log('Deleting all autosave data from local forage...')
+  await Promise.all(keys.map((k) => utilsService.removeLocalForageItem(k)))
+  console.log('All Autosave data deleted from local forage successfully.')
+}

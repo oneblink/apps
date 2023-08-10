@@ -2,9 +2,10 @@ import { MiscTypes } from '@oneblink/types'
 import utilsService from './services/utils'
 
 const defaultAutoSaveKey = 'NO_AUTO_SAVE_KEY'
+const autosaveKeyPrefix = 'AUTO_SAVE_'
 
 function getAutoSaveKey(formId: number, autoSaveKey: string | MiscTypes.NoU) {
-  return `AUTO_SAVE_${formId}_${autoSaveKey || defaultAutoSaveKey}`
+  return `${autosaveKeyPrefix}${formId}_${autoSaveKey || defaultAutoSaveKey}`
 }
 
 /**
@@ -82,4 +83,22 @@ export async function deleteAutoSaveData(
 ): Promise<void> {
   const key = getAutoSaveKey(formId, autoSaveKey)
   return utilsService.removeLocalForageItem(key)
+}
+
+/**
+ * Delete all auto saved data.
+ *
+ * #### Example
+ *
+ * ```js
+ * await autoSaveService.deleteAllAutosaveData()
+ * ```
+ *
+ * @returns
+ */
+export async function deleteAllAutosaveData() {
+  const keys = await utilsService.getLocalForageKeys(autosaveKeyPrefix)
+  console.log('Deleting all autosave data from local forage...')
+  await Promise.all(keys.map((k) => utilsService.removeLocalForageItem(k)))
+  console.log('All Autosave data deleted from local forage successfully.')
 }

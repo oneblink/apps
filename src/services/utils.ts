@@ -7,10 +7,9 @@ const localForage = createInstance({
   description: 'Store of forms related data',
 })
 
-function getLocalForageKeys(keyPrefix: string): Promise<string[]> {
-  return localForage
-    .keys()
-    .then((keys) => keys.filter((key) => key.startsWith(keyPrefix)))
+async function getLocalForageKeys(keyPrefix: string): Promise<string[]> {
+  const keys = await localForage.keys()
+  return keys.filter((key) => key.startsWith(keyPrefix))
 }
 
 function setValuesOnData<T>(

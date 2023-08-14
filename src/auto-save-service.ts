@@ -9,6 +9,24 @@ function getAutoSaveKey(formId: number, autoSaveKey: string | MiscTypes.NoU) {
 }
 
 /**
+ * Get keys for autosave data.
+ *
+ * #### Example
+ *
+ * ```js
+ * const keys = await autoSaveService.getAutoSaveDataKeys()
+ * if (keys.length) {
+ *   // Display keys to user
+ * }
+ * ```
+ *
+ * @returns
+ */
+export async function getAutoSaveKeys(): Promise<string[]> {
+  return await utilsService.getLocalForageKeys(autosaveKeyPrefix)
+}
+
+/**
  * Get saved data.
  *
  * #### Example
@@ -97,7 +115,7 @@ export async function deleteAutoSaveData(
  * @returns
  */
 export async function deleteAllAutosaveData() {
-  const keys = await utilsService.getLocalForageKeys(autosaveKeyPrefix)
+  const keys = await getAutoSaveKeys()
   console.log('Deleting all autosave data from local forage...')
   await Promise.all(keys.map((k) => utilsService.removeLocalForageItem(k)))
   console.log('All Autosave data deleted from local forage successfully.')

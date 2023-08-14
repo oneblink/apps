@@ -7,11 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `autosaveService.deleteAllAutosaveData()`
+- `autoSaveService.getAutoSaveKeys()`
+
 ## [6.2.0] - 2023-08-10
 
 ### Added
 
-- `deleteAllAutosaveData` to `autosaveService`
 - `submissionTitle` to `approvalsService.getFormSubmissionAdministrationApprovals()`
 
 ### Changed

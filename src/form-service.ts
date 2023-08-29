@@ -439,123 +439,130 @@ async function getFormElementOptionsSetOptions(
   formsAppEnvironmentId: number,
   abortSignal: AbortSignal,
 ): Promise<FormElementOptionsSetResult> {
-  if (formElementOptionsSet.type === 'STATIC') {
-    const formElementOptionsSetEnvironment =
-      formElementOptionsSet.environments.find(
-        (environment: FormTypes.FormElementOptionSetEnvironmentStatic) =>
-          environment.formsAppEnvironmentId === formsAppEnvironmentId,
-      )
-    if (formElementOptionsSetEnvironment) {
+  switch (formElementOptionsSet.type) {
+    case 'HCMS_CATEGORIES':
+    case 'STATIC': {
+      const formElementOptionsSetEnvironment =
+        formElementOptionsSet.environments.find(
+          (environment: FormTypes.FormElementOptionSetEnvironmentStatic) =>
+            environment.formsAppEnvironmentId === formsAppEnvironmentId,
+        )
+      if (formElementOptionsSetEnvironment) {
+        return {
+          type: 'OPTIONS',
+          options: formElementOptionsSetEnvironment.options,
+        }
+      }
       return {
-        type: 'OPTIONS',
-        options: formElementOptionsSetEnvironment.options,
+        type: 'ERROR',
+        error: new OneBlinkAppsError(
+          `List environment configuration has not been completed yet. Please contact your administrator to rectify the issue.`,
+          {
+            title: 'Misconfigured List',
+            originalError: new Error(
+              JSON.stringify(
+                {
+                  formElementOptionsSetId: formElementOptionsSet.id,
+                  formElementOptionsSetName: formElementOptionsSet.name,
+                  formsAppEnvironmentId,
+                },
+                null,
+                2,
+              ),
+            ),
+          },
+        ),
       }
     }
-    return {
-      type: 'ERROR',
-      error: new OneBlinkAppsError(
-        `List environment configuration has not been completed yet. Please contact your administrator to rectify the issue.`,
-        {
-          title: 'Misconfigured List',
-          originalError: new Error(
-            JSON.stringify(
-              {
-                formElementOptionsSetId: formElementOptionsSet.id,
-                formElementOptionsSetName: formElementOptionsSet.name,
-                formsAppEnvironmentId,
-              },
-              null,
-              2,
-            ),
-          ),
-        },
-      ),
-    }
-  }
-
-  const formElementOptionsSetEnvironment =
-    formElementOptionsSet.environments.find(
-      (environment: FormTypes.FormElementOptionSetEnvironmentUrl) =>
-        environment.formsAppEnvironmentId === formsAppEnvironmentId,
-    )
-  if (!formElementOptionsSetEnvironment) {
-    return {
-      type: 'ERROR',
-      error: new OneBlinkAppsError(
-        `Dynamic list configuration has not been completed yet. Please contact your administrator to rectify the issue.`,
-        {
-          title: 'Misconfigured Dynamic List',
-          originalError: new Error(
-            JSON.stringify(
-              {
-                formElementOptionsSetId: formElementOptionsSet.id,
-                formElementOptionsSetName: formElementOptionsSet.name,
-                formsAppEnvironmentId,
-              },
-              null,
-              2,
-            ),
-          ),
-        },
-      ),
-    }
-  }
-
-  if (formElementOptionsSetEnvironment.searchQuerystringParameter) {
-    return {
-      type: 'SEARCH',
-      url: formElementOptionsSetEnvironment.url,
-      searchQuerystringParameter:
-        formElementOptionsSetEnvironment.searchQuerystringParameter,
-    }
-  }
-
-  try {
-    const headers = await generateHeaders()
-    const response = await fetchWithError(
-      formElementOptionsSetEnvironment.url,
-      {
-        headers,
-        signal: abortSignal,
-      },
-    )
-
-    if (!response.ok) {
-      const text = await response.text()
-      throw new Error(text)
-    }
-
-    const options = await response.json()
-    return {
-      type: 'OPTIONS',
-      options,
-    }
-  } catch (error) {
-    Sentry.captureException(error)
-    return {
-      type: 'ERROR',
-      error: new OneBlinkAppsError(
-        `Options could not be loaded. Please contact your administrator to rectify the issue.`,
-        {
-          title: 'Invalid List Response',
-          httpStatusCode: (error as HTTPError).status,
-          originalError: new OneBlinkAppsError(
-            JSON.stringify(
-              {
-                formElementOptionsSetId: formElementOptionsSet.id,
-                formElementOptionsSetName: formElementOptionsSet.name,
-                formElementOptionsSetUrl: formElementOptionsSetEnvironment.url,
-                formsAppEnvironmentId,
-              },
-              null,
-              2,
-            ),
+    case 'HOSTED_API':
+    case 'URL':
+    default: {
+      const formElementOptionsSetEnvironment =
+        formElementOptionsSet.environments.find(
+          (environment: FormTypes.FormElementOptionSetEnvironmentUrl) =>
+            environment.formsAppEnvironmentId === formsAppEnvironmentId,
+        )
+      if (!formElementOptionsSetEnvironment) {
+        return {
+          type: 'ERROR',
+          error: new OneBlinkAppsError(
+            `Dynamic list configuration has not been completed yet. Please contact your administrator to rectify the issue.`,
             {
-              originalError: error as HTTPError,
+              title: 'Misconfigured Dynamic List',
+              originalError: new Error(
+                JSON.stringify(
+                  {
+                    formElementOptionsSetId: formElementOptionsSet.id,
+                    formElementOptionsSetName: formElementOptionsSet.name,
+                    formsAppEnvironmentId,
+                  },
+                  null,
+                  2,
+                ),
+              ),
             },
           ),
-        },
-      ),
+        }
+      }
+
+      if (formElementOptionsSetEnvironment.searchQuerystringParameter) {
+        return {
+          type: 'SEARCH',
+          url: formElementOptionsSetEnvironment.url,
+          searchQuerystringParameter:
+            formElementOptionsSetEnvironment.searchQuerystringParameter,
+        }
+      }
+
+      try {
+        const headers = await generateHeaders()
+        const response = await fetchWithError(
+          formElementOptionsSetEnvironment.url,
+          {
+            headers,
+            signal: abortSignal,
+          },
+        )
+
+        if (!response.ok) {
+          const text = await response.text()
+          throw new Error(text)
+        }
+
+        const options = await response.json()
+        return {
+          type: 'OPTIONS',
+          options,
+        }
+      } catch (error) {
+        Sentry.captureException(error)
+        return {
+          type: 'ERROR',
+          error: new OneBlinkAppsError(
+            `Options could not be loaded. Please contact your administrator to rectify the issue.`,
+            {
+              title: 'Invalid List Response',
+              httpStatusCode: (error as HTTPError).status,
+              originalError: new OneBlinkAppsError(
+                JSON.stringify(
+                  {
+                    formElementOptionsSetId: formElementOptionsSet.id,
+                    formElementOptionsSetName: formElementOptionsSet.name,
+                    formElementOptionsSetUrl:
+                      formElementOptionsSetEnvironment.url,
+                    formsAppEnvironmentId,
+                  },
+                  null,
+                  2,
+                ),
+                {
+                  originalError: error as HTTPError,
+                },
+              ),
+            },
+          ),
+        }
+      }
     }
   }
 }

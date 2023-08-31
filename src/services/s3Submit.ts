@@ -141,6 +141,10 @@ async function uploadToS3({
       params: putObjectRequest,
       partSize: 5 * 1024 * 1024,
       queueSize,
+      //Related github issue: https://github.com/aws/aws-sdk-js-v3/issues/2311
+      //This is a variable that is set to false by default, setting it to true
+      //means that it will force the upload to try again when one part fails on
+      //an upload
       leavePartsOnError: true,
     })
 

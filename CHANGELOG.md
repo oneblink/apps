@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - `HCMS_CATEGORIES` form element options set type
+- `leavePartsOnError` set to `true` for S3 uploads
 
 ## [6.3.0] - 2023-08-28
 

@@ -141,6 +141,11 @@ async function uploadToS3({
       params: putObjectRequest,
       partSize: 5 * 1024 * 1024,
       queueSize,
+      //Related github issue: https://github.com/aws/aws-sdk-js-v3/issues/2311
+      //This is a variable that is set to false by default, setting it to true
+      //means that it will force the upload to fail when one part fails on
+      //an upload. The S3 client has built in retry logic to retry uploads by default
+      leavePartsOnError: true,
     })
 
     managedUpload.on('httpUploadProgress', (progress) => {

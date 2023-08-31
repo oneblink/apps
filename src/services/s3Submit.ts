@@ -141,6 +141,7 @@ async function uploadToS3({
       params: putObjectRequest,
       partSize: 5 * 1024 * 1024,
       queueSize,
+      leavePartsOnError: true,
     })
 
     managedUpload.on('httpUploadProgress', (progress) => {

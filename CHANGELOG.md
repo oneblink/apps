@@ -10,7 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - `HCMS_CATEGORIES` form element options set type
-- `leavePartsOnError` set to `true` for S3 uploads
+
+### Fixed
+
+- uploads to S3 being corrupted if a single part fails in the multi-part upload process by setting `leavePartsOnError`
 
 ## [6.3.0] - 2023-08-28
 

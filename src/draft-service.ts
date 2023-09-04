@@ -354,7 +354,9 @@ export async function getDrafts(): Promise<SubmissionTypes.FormsAppDraft[]> {
  * @param draftId
  * @returns
  */
-export async function getDraftAndData(draftId: string | undefined): Promise<{
+export async function getDraftAndData(
+  draftId: string | undefined | null,
+): Promise<{
   draft: SubmissionTypes.FormsAppDraft
   draftData: DraftSubmission['submission']
   lastElementUpdated: FormTypes.FormElement | undefined

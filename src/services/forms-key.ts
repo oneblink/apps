@@ -4,7 +4,7 @@ import { getCognitoIdToken } from './cognito'
 import Sentry from '../Sentry'
 
 import { OneBlinkAppsError } from '..'
-let formsKeyToken: string | null = null
+let formsKeyToken: string | null | undefined = null
 
 /**
  * Set the Forms Key token being used to make requests to the OneBlink API on
@@ -18,7 +18,7 @@ let formsKeyToken: string | null = null
  *
  * @param jwtToken
  */
-export function setFormsKeyToken(jwtToken: string | undefined): void {
+export function setFormsKeyToken(jwtToken: string | undefined | null): void {
   formsKeyToken = jwtToken || null
 }
 

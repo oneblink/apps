@@ -22,7 +22,7 @@ export type HandlePaymentResult = {
     /** `true` if the transaction was successful */
     isSuccess: boolean
     /** The error message to display if `isSuccess` is `false` */
-    errorMessage: string | undefined
+    errorMessage: string | undefined | null
   }
   submissionResult: FormSubmissionResult
 }

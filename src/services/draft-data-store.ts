@@ -15,7 +15,7 @@ function getDraftDataKey(draftDataId: string) {
 }
 
 async function getLocalDraftData(
-  draftDataId: undefined | string,
+  draftDataId: undefined | null | string,
 ): Promise<DraftSubmission | null> {
   if (!draftDataId) {
     return null
@@ -33,7 +33,7 @@ async function setLocalDraftData(
 }
 
 export async function removeDraftData(
-  draftDataId: undefined | string,
+  draftDataId: undefined | null | string,
 ): Promise<void> {
   if (!draftDataId) {
     return

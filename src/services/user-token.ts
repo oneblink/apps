@@ -1,4 +1,4 @@
-let userToken: string | null = null
+let userToken: string | null | undefined = null
 
 /**
  * Set the User token being included in requests to the OneBlink API on behalf
@@ -10,7 +10,7 @@ let userToken: string | null = null
  * authService.setUserToken('a value')
  * ```
  */
-export function setUserToken(token: string | undefined): void {
+export function setUserToken(token: string | undefined | null): void {
   userToken = token || null
 }
 

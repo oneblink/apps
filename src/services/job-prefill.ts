@@ -43,7 +43,7 @@ function set<T extends Record<string, unknown>>(
  */
 export async function getPrefillFormData<T extends Record<string, unknown>>(
   formId: number,
-  prefillFormDataId: string | undefined,
+  prefillFormDataId: string | undefined | null,
 ): Promise<T | null> {
   if (!prefillFormDataId) {
     return null

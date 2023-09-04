@@ -19,7 +19,7 @@ import {
   ensureDraftsDataExists,
   ensureDraftsDataIsUploaded,
 } from './services/draft-data-store'
-import { FormTypes, MiscTypes, SubmissionTypes } from '@oneblink/types'
+import { FormTypes, SubmissionTypes } from '@oneblink/types'
 import Sentry from './Sentry'
 import { DraftSubmission } from './types/submissions'
 import { ProgressListener } from './services/s3Submit'
@@ -354,9 +354,7 @@ export async function getDrafts(): Promise<SubmissionTypes.FormsAppDraft[]> {
  * @param draftId
  * @returns
  */
-export async function getDraftAndData(
-  draftId: string | MiscTypes.NoU,
-): Promise<{
+export async function getDraftAndData(draftId: string | undefined): Promise<{
   draft: SubmissionTypes.FormsAppDraft
   draftData: DraftSubmission['submission']
   lastElementUpdated: FormTypes.FormElement | undefined

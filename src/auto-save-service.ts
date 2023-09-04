@@ -1,10 +1,9 @@
-import { MiscTypes } from '@oneblink/types'
 import utilsService from './services/utils'
 
 const defaultAutoSaveKey = 'NO_AUTO_SAVE_KEY'
 const autosaveKeyPrefix = 'AUTO_SAVE_'
 
-function getAutoSaveKey(formId: number, autoSaveKey: string | MiscTypes.NoU) {
+function getAutoSaveKey(formId: number, autoSaveKey: string | undefined) {
   return `${autosaveKeyPrefix}${formId}_${autoSaveKey || defaultAutoSaveKey}`
 }
 
@@ -46,7 +45,7 @@ export async function getAutoSaveKeys(): Promise<string[]> {
  */
 export async function getAutoSaveData<T>(
   formId: number,
-  autoSaveKey: string | MiscTypes.NoU,
+  autoSaveKey: string | undefined,
 ): Promise<T | null> {
   const key = getAutoSaveKey(formId, autoSaveKey)
   return utilsService.getLocalForageItem(key)
@@ -73,7 +72,7 @@ export async function getAutoSaveData<T>(
  */
 export async function upsertAutoSaveData<T extends Record<string, unknown>>(
   formId: number,
-  autoSaveKey: string | MiscTypes.NoU,
+  autoSaveKey: string | undefined,
   model: T,
 ): Promise<T> {
   const key = getAutoSaveKey(formId, autoSaveKey)
@@ -97,7 +96,7 @@ export async function upsertAutoSaveData<T extends Record<string, unknown>>(
  */
 export async function deleteAutoSaveData(
   formId: number,
-  autoSaveKey: string | MiscTypes.NoU,
+  autoSaveKey: string | undefined,
 ): Promise<void> {
   const key = getAutoSaveKey(formId, autoSaveKey)
   return utilsService.removeLocalForageItem(key)

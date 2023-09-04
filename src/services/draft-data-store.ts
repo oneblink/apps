@@ -5,7 +5,7 @@ import {
   downloadDraftData,
   PutDraftsPayload,
 } from './api/drafts'
-import { MiscTypes, SubmissionTypes } from '@oneblink/types'
+import { SubmissionTypes } from '@oneblink/types'
 import Sentry from '../Sentry'
 import { DraftSubmission } from '../types/submissions'
 import { deleteAutoSaveData } from '../auto-save-service'
@@ -15,7 +15,7 @@ function getDraftDataKey(draftDataId: string) {
 }
 
 async function getLocalDraftData(
-  draftDataId: MiscTypes.NoU | string,
+  draftDataId: undefined | string,
 ): Promise<DraftSubmission | null> {
   if (!draftDataId) {
     return null
@@ -33,7 +33,7 @@ async function setLocalDraftData(
 }
 
 export async function removeDraftData(
-  draftDataId: MiscTypes.NoU | string,
+  draftDataId: undefined | string,
 ): Promise<void> {
   if (!draftDataId) {
     return

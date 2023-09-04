@@ -1,4 +1,4 @@
-import { MiscTypes, SubmissionEventTypes } from '@oneblink/types'
+import { SubmissionEventTypes } from '@oneblink/types'
 import { FormSubmissionResult } from './submissions'
 
 export type PaymentReceiptItem = {
@@ -22,7 +22,7 @@ export type HandlePaymentResult = {
     /** `true` if the transaction was successful */
     isSuccess: boolean
     /** The error message to display if `isSuccess` is `false` */
-    errorMessage: string | MiscTypes.NoU
+    errorMessage: string | undefined
   }
   submissionResult: FormSubmissionResult
 }

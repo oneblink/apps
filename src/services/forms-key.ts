@@ -3,9 +3,8 @@ import jwtDecode from 'jwt-decode'
 import { getCognitoIdToken } from './cognito'
 import Sentry from '../Sentry'
 
-import { MiscTypes } from '@oneblink/types'
 import { OneBlinkAppsError } from '..'
-let formsKeyToken: string | MiscTypes.NoU = null
+let formsKeyToken: string | null | undefined = null
 
 /**
  * Set the Forms Key token being used to make requests to the OneBlink API on
@@ -19,7 +18,7 @@ let formsKeyToken: string | MiscTypes.NoU = null
  *
  * @param jwtToken
  */
-export function setFormsKeyToken(jwtToken: string | MiscTypes.NoU): void {
+export function setFormsKeyToken(jwtToken: string | undefined | null): void {
   formsKeyToken = jwtToken || null
 }
 

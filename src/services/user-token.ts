@@ -1,5 +1,4 @@
-import { MiscTypes } from '@oneblink/types'
-let userToken: string | MiscTypes.NoU = null
+let userToken: string | null | undefined = null
 
 /**
  * Set the User token being included in requests to the OneBlink API on behalf
@@ -11,7 +10,7 @@ let userToken: string | MiscTypes.NoU = null
  * authService.setUserToken('a value')
  * ```
  */
-export function setUserToken(token: string | MiscTypes.NoU): void {
+export function setUserToken(token: string | undefined | null): void {
   userToken = token || null
 }
 

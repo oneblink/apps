@@ -1,6 +1,6 @@
 import utilsService from './utils'
 import { downloadPreFillFormData } from './api/prefill'
-import { MiscTypes, SubmissionTypes } from '@oneblink/types'
+import { SubmissionTypes } from '@oneblink/types'
 
 export function getPrefillKey(prefillFormDataId: string) {
   return `V2_PREFILL_${prefillFormDataId}`
@@ -43,7 +43,7 @@ function set<T extends Record<string, unknown>>(
  */
 export async function getPrefillFormData<T extends Record<string, unknown>>(
   formId: number,
-  prefillFormDataId: string | MiscTypes.NoU,
+  prefillFormDataId: string | undefined | null,
 ): Promise<T | null> {
   if (!prefillFormDataId) {
     return null

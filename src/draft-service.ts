@@ -285,7 +285,10 @@ export async function updateDraft({
       })
       existingDraft.draftDataId = draftDataId
       existingDraft.title = draft.title
-      existingDraft.updatedAt = now
+      if (existingDraft.updatedAt) {
+        existingDraft.updatedAt = now
+      }
+      existingDraft.createdAt = now
       existingDraft.updatedBy = getUserProfile() || undefined
       await utilsService.localForage.setItem(`DRAFTS_${username}`, draftsData)
       executeDraftsListeners(draftsData)

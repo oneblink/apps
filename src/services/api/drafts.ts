@@ -101,7 +101,7 @@ const uploadDraftData = async (
 
 export type PutDraftsPayload = Omit<
   FormsAppsTypes.NewFormsAppsDraft,
-  'formsAppUserUsername' | 'formsAppId'
+  'formsAppId'
 >
 
 const putDrafts = async (

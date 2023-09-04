@@ -5,7 +5,7 @@ import utilsService from './services/utils'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { isOffline } from './offline-service'
 import { getUsername, isLoggedIn } from './services/cognito'
-import { getFormsKeyId } from './auth-service'
+import { getFormsKeyId, getUserProfile } from './auth-service'
 import {
   uploadDraftData,
   putDrafts,
@@ -171,6 +171,11 @@ export async function addDraft({
       },
     )
   }
+
+  const userProfile = getUserProfile() || undefined
+  draft.updatedBy = userProfile
+  draft.createdBy = userProfile
+
   try {
     // Push draft data to s3 (should also update local storage draft data)
     // add drafts to array in local storage
@@ -244,7 +249,6 @@ export async function updateDraft({
 }): Promise<void> {
   const now = new Date().toISOString()
   draftSubmission.keyId = getFormsKeyId() || undefined
-  draft.createdAt = now
   draft.updatedAt = undefined
   if (draftSubmission.keyId) {
     await upsertDraftByKey(draft, draftSubmission)
@@ -281,10 +285,8 @@ export async function updateDraft({
       })
       existingDraft.draftDataId = draftDataId
       existingDraft.title = draft.title
-      if (existingDraft.updatedAt) {
-        existingDraft.updatedAt = now
-      }
-      existingDraft.createdAt = now
+      existingDraft.updatedAt = now
+      existingDraft.updatedBy = getUserProfile() || undefined
       await utilsService.localForage.setItem(`DRAFTS_${username}`, draftsData)
       executeDraftsListeners(draftsData)
     }

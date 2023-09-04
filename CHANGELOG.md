@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - `HCMS_CATEGORIES` form element options set type
+- `createdBy` and `updatedBy` to drafts
 
 ### Fixed
 

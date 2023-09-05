@@ -82,7 +82,7 @@
     "format": "prettier --write .",
     "prepare": "npm run build",
     "pretest": "npm run fixpack && npm run eslint && npm run typescript",
-    "release": "typedoc && oneblink-release --no-name",
+    "release": "oneblink-release --no-name",
     "start": "tsc-watch",
     "test": "jest",
     "types": "npm i --save-dev github:oneblink/types",

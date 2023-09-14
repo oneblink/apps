@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- include taskId in submission credentials request body
+
 ## [6.4.0] - 2023-09-07
 
 ### Added

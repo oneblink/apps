@@ -51,10 +51,12 @@ export type FormSubmission = DraftSubmission &
     /** The id of the prefill data to clean up after successful submission */
     preFillFormDataId: string | null
     /**
-     * The id of the previous form submission approval id. (Only used when the
+     * The id of the previous form submission approval id. Only used when the
      * form submission is in response to `CLARIFICATION_REQUIRED` approval.
      */
     previousFormSubmissionApprovalId?: string
+    /** The id of the scheduled task being completed */
+    taskId?: number
   }
 
 export type FormSubmissionResult = FormSubmission & {

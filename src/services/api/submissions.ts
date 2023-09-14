@@ -93,6 +93,7 @@ const generateSubmissionCredentialsBody = (formSubmission: FormSubmission) => ({
   externalId: formSubmission.externalId || undefined,
   previousFormSubmissionApprovalId:
     formSubmission.previousFormSubmissionApprovalId,
+  taskId: formSubmission.taskId,
   recaptchas: (formSubmission.captchaTokens || []).map((token: string) => ({
     token,
   })),

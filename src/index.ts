@@ -224,6 +224,16 @@ export * as localisationService from './localisation-service'
  * ```
  */
 export * as attachmentsService from './attachments-service'
+/**
+ * ## Scheduled Tasks Service
+ *
+ * Helper functions for scheduled tasks
+ *
+ * ```js
+ * import { scheduledTasksService } from '@oneblink/apps'
+ * ```
+ */
+export * as scheduledTasksService from './scheduled-tasks-service'
 
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import tenants from './tenants'

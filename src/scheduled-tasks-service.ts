@@ -87,11 +87,15 @@ export async function getTasksForFormsApp(
  * @param abortSignal
  * @returns
  */
-export async function completeTask(
-  formsAppId: number,
-  taskId: number,
-  abortSignal?: AbortSignal,
-): Promise<CompletedTask> {
+export async function completeTask({
+  formsAppId,
+  taskId,
+  abortSignal,
+}: {
+  formsAppId: number
+  taskId: number
+  abortSignal?: AbortSignal
+}): Promise<CompletedTask> {
   const url = `${tenants.current.apiOrigin}/completed-tasks`
   try {
     return await postRequest<CompletedTask>(

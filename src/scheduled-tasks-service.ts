@@ -1,7 +1,7 @@
-import { Task } from '@oneblink/types/typescript/scheduledTasks'
+import { Task, CompletedTask } from '@oneblink/types/typescript/scheduledTasks'
 import tenants from './tenants'
 import Sentry from './Sentry'
-import { HTTPError, getRequest } from './services/fetch'
+import { HTTPError, getRequest, postRequest } from './services/fetch'
 import { isOffline } from './offline-service'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 
@@ -54,6 +54,83 @@ export async function getTasksForFormsApp(
             httpStatusCode: error.status,
           },
         )
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  }
+}
+
+/**
+ * Complete the related Task for a specific Forms App
+ *
+ * #### Example
+ *
+ * ```js
+ * const formsAppId = 1
+ * const taskId = 2
+ * const completedTask = await scheduledTasksService.completeTask({
+ *   formsAppId,
+ *   taskId,
+ * })
+ * ```
+ *
+ * @param options
+ * @returns
+ */
+export async function completeTask({
+  formsAppId,
+  taskId,
+  abortSignal,
+}: {
+  formsAppId: number
+  taskId: number
+  abortSignal?: AbortSignal
+}): Promise<CompletedTask> {
+  const url = `${tenants.current.apiOrigin}/completed-tasks`
+  try {
+    return await postRequest<CompletedTask>(
+      url,
+      { formsAppId, taskId },
+      abortSignal,
+    )
+  } catch (err) {
+    Sentry.captureException(err)
+
+    const error = err as HTTPError
+    if (isOffline()) {
+      throw new OneBlinkAppsError(
+        'You are currently offline, please connect to the internet and try again',
+        {
+          originalError: error,
+          isOffline: true,
+        },
+      )
+    }
+    switch (error.status) {
+      case 403: {
+        throw new OneBlinkAppsError(
+          'You do not have access to complete this task. Please contact your administrator to gain the correct level of access.',
+          {
+            originalError: error,
+            requiresAccessRequest: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 400:
+      case 404: {
+        throw new OneBlinkAppsError(error.message, {
+          title: 'Invalid Request',
+          httpStatusCode: error.status,
+        })
       }
       default: {
         throw new OneBlinkAppsError(

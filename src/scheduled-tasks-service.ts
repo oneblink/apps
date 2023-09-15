@@ -76,15 +76,13 @@ export async function getTasksForFormsApp(
  * ```js
  * const formsAppId = 1
  * const taskId = 2
- * const completedTask = await scheduledTasksService.completeTask(
+ * const completedTask = await scheduledTasksService.completeTask({
  *   formsAppId,
  *   taskId,
- * )
+ * })
  * ```
  *
- * @param formsAppId
- * @param taskId
- * @param abortSignal
+ * @param options
  * @returns
  */
 export async function completeTask({

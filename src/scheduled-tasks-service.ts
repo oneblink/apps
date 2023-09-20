@@ -1,9 +1,14 @@
-import { Task, CompletedTask } from '@oneblink/types/typescript/scheduledTasks'
+import { ScheduledTasksTypes } from '@oneblink/types'
 import tenants from './tenants'
 import Sentry from './Sentry'
 import { HTTPError, getRequest, postRequest } from './services/fetch'
 import { isOffline } from './offline-service'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
+
+export type TaskResponse = {
+  task: ScheduledTasksTypes.Task
+  daysAvailable: number
+}
 
 /**
  * Obtain all of the related Tasks for a specific Forms App
@@ -19,17 +24,17 @@ import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
  * @param abortSignal
  * @returns
  */
-
 export async function getTasksForFormsApp(
   formsAppId: number,
   abortSignal?: AbortSignal,
-): Promise<{ overdueTasks: Task[]; tasks: Task[] }> {
+): Promise<{
+  tasks: TaskResponse[]
+}> {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/scheduled-tasks`
   try {
-    return await getRequest<{ overdueTasks: Task[]; tasks: Task[] }>(
-      url,
-      abortSignal,
-    )
+    return await getRequest<{
+      tasks: TaskResponse[]
+    }>(url, abortSignal)
   } catch (err) {
     Sentry.captureException(err)
 
@@ -93,10 +98,10 @@ export async function completeTask({
   formsAppId: number
   taskId: number
   abortSignal?: AbortSignal
-}): Promise<CompletedTask> {
+}): Promise<ScheduledTasksTypes.CompletedTask> {
   const url = `${tenants.current.apiOrigin}/completed-tasks`
   try {
-    return await postRequest<CompletedTask>(
+    return await postRequest<ScheduledTasksTypes.CompletedTask>(
       url,
       { formsAppId, taskId },
       abortSignal,

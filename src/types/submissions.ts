@@ -80,6 +80,14 @@ export type FormSubmissionResult = FormSubmission & {
     /** The scheduling submission event */
     submissionEvent: SubmissionEventTypes.SchedulingSubmissionEvent
   } | null
+  /**
+   * Will have a value if the user was attempting to complete a scheduled task
+   * via a form submission
+   */
+  taskCompletion?: {
+    /** The URL to redirect the user to after completing the task via form submission */
+    scheduledTasksUrl: string
+  }
   /** `true` if the submission was not submitted yet and was added to the pending queue */
   isInPendingQueue: boolean
   /** `true` if the submission was attempted offline */

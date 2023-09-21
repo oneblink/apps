@@ -34,6 +34,7 @@ type SubmissionParams = {
   isPendingQueueEnabled: boolean
   shouldRunServerValidation: boolean
   shouldRunExternalIdGeneration: boolean
+  scheduledTasksUrl?: string
   paymentReceiptUrl?: string
   schedulingUrlConfiguration?: {
     schedulingReceiptUrl: string
@@ -47,6 +48,7 @@ export default async function submit({
   formSubmission,
   isPendingQueueEnabled,
   paymentReceiptUrl,
+  scheduledTasksUrl,
   schedulingUrlConfiguration,
   generateCredentials,
   onProgress,
@@ -171,6 +173,12 @@ export default async function submit({
       downloadSubmissionPdfUrl: !data.pdfAccessToken
         ? undefined
         : `${tenants.current.apiOrigin}/forms/${formSubmission.definition.id}/submissions/${data.submissionId}/pdf-document?accessToken=${data.pdfAccessToken}`,
+      taskCompletion:
+        scheduledTasksUrl && formSubmission.taskId
+          ? {
+              scheduledTasksUrl,
+            }
+          : undefined,
     }
 
     if (schedulingSubmissionEvent && schedulingUrlConfiguration) {

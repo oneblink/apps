@@ -406,6 +406,8 @@ async function executePostSubmissionAction(
   } else if (submissionResult.payment) {
     postSubmissionAction = 'URL'
     redirectUrl = submissionResult.payment.hostedFormUrl
+  } else if (submissionResult.taskCompletion) {
+    redirectUrl = submissionResult.taskCompletion.scheduledTasksUrl
   }
 
   await executeAction(submissionResult, postSubmissionAction, redirectUrl, push)

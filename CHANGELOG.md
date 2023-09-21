@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - include taskId in submission credentials request body
 - `scheduledTasksService.getTasksForFormsApp()`
 - `scheduledTasksService.completeTask()`
+- `scheduledTasksUrl` option to `submissionService.submit()`
 
 ## [6.4.0] - 2023-09-07
 

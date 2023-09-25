@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `actions` to `TaskResponse`
+
 ## [6.5.0] - 2023-09-22
 
 ### Added

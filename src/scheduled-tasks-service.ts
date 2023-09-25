@@ -7,6 +7,7 @@ import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 
 export type TaskResponse = {
   task: ScheduledTasksTypes.Task
+  actions: ScheduledTasksTypes.TaskAction[]
   daysAvailable: number
 }
 

@@ -75,13 +75,13 @@ export async function getTasksForFormsApp(
 }
 
 /**
- * Obtain all of the related Tasks for a specific Forms App
+ * Obtain all of the related Task Group Instances and their Tasks for a specific Forms App
  *
  * #### Example
  *
  * ```js
  * const formsAppId = 1
- * const Tasks = await getTasksForFormsApp(formsAppId)
+ * const Tasks = await getTaskGroupInstancesForFormsApp(formsAppId)
  * ```
  *
  * @param formsAppId
@@ -157,17 +157,21 @@ export async function getTaskGroupInstancesForFormsApp(
 export async function completeTask({
   formsAppId,
   taskId,
+  taskGroupId,
+  taskGroupInstanceId,
   abortSignal,
 }: {
   formsAppId: number
   taskId: number
+  taskGroupId?: number
+  taskGroupInstanceId?: string
   abortSignal?: AbortSignal
 }): Promise<ScheduledTasksTypes.CompletedTask> {
   const url = `${tenants.current.apiOrigin}/completed-tasks`
   try {
     return await postRequest<ScheduledTasksTypes.CompletedTask>(
       url,
-      { formsAppId, taskId },
+      { formsAppId, taskId, taskGroupId, taskGroupInstanceId },
       abortSignal,
     )
   } catch (err) {

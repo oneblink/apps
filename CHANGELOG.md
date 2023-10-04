@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `scheduledTasksService.getTaskGroupInstancesForFormsApp`
+
+### Changed
+
+- include taskGroupId and taskGroupInstanceId in `scheduledTasksService.completeTask()` and submission credentials request body
+
 ## [6.5.1] - 2023-10-03
 
 ### Added

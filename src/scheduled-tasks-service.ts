@@ -92,12 +92,12 @@ export async function getTaskGroupInstancesForFormsApp(
   formsAppId: number,
   abortSignal?: AbortSignal,
 ): Promise<{
-  instances: Array<TaskResponse & FormsAppsTypes.TaskGroupInstance>
+  taskGroupInstances: Array<TaskResponse & FormsAppsTypes.TaskGroupInstance>
 }> {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/scheduled-task-group-instances`
   try {
     return await getRequest<{
-      instances: Array<TaskResponse & FormsAppsTypes.TaskGroupInstance>
+      taskGroupInstances: Array<TaskResponse & FormsAppsTypes.TaskGroupInstance>
     }>(url, abortSignal)
   } catch (err) {
     Sentry.captureException(err)

@@ -57,7 +57,9 @@ export type FormSubmission = DraftSubmission &
     previousFormSubmissionApprovalId?: string
     /** The id of the scheduled task being completed */
     taskId?: number
+    /** The id of the scheduled task group the task is associated with */
     taskGroupId?: number
+    /** The id of the scheduled task group instance the task is associated with */
     taskGroupInstanceId?: number
   }
 

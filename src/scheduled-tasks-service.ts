@@ -61,7 +61,7 @@ async function getTasks(url: string, abortSignal?: AbortSignal) {
  *
  * ```js
  * const formsAppId = 1
- * const Tasks = await getTasksForFormsApp(formsAppId)
+ * const tasks = await getTasksForFormsApp(formsAppId)
  * ```
  *
  * @param formsAppId
@@ -85,10 +85,15 @@ export async function getTasksForFormsApp(
  *
  * ```js
  * const formsAppId = 1
- * const Tasks = await getTaskGroupInstanceTasks(formsAppId)
+ * const taskGroupInstanceId = 'abc123'
+ * const tasks = await getTaskGroupInstanceTasks(
+ *   formsAppId,
+ *   taskGroupInstanceId,
+ * )
  * ```
  *
  * @param formsAppId
+ * @param taskGroupInstanceId
  * @param abortSignal
  * @returns
  */

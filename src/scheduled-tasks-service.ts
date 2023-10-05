@@ -1,4 +1,4 @@
-import { ScheduledTasksTypes, FormsAppsTypes } from '@oneblink/types'
+import { ScheduledTasksTypes } from '@oneblink/types'
 import tenants from './tenants'
 import Sentry from './Sentry'
 import { HTTPError, getRequest, postRequest } from './services/fetch'
@@ -11,27 +11,7 @@ export type TaskResponse = {
   daysAvailable: number
 }
 
-/**
- * Obtain all of the related Tasks for a specific Forms App
- *
- * #### Example
- *
- * ```js
- * const formsAppId = 1
- * const Tasks = await getTasksForFormsApp(formsAppId)
- * ```
- *
- * @param formsAppId
- * @param abortSignal
- * @returns
- */
-export async function getTasksForFormsApp(
-  formsAppId: number,
-  abortSignal?: AbortSignal,
-): Promise<{
-  tasks: TaskResponse[]
-}> {
-  const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/scheduled-tasks`
+async function getTasks(url: string, abortSignal?: AbortSignal) {
   try {
     return await getRequest<{
       tasks: TaskResponse[]
@@ -75,68 +55,52 @@ export async function getTasksForFormsApp(
 }
 
 /**
- * Obtain all of the related Task Group Instances and their Tasks for a specific Forms App
+ * Obtain all of the related Tasks for a specific Forms App
  *
  * #### Example
  *
  * ```js
  * const formsAppId = 1
- * const Tasks = await getTaskGroupInstancesForFormsApp(formsAppId)
+ * const Tasks = await getTasksForFormsApp(formsAppId)
  * ```
  *
  * @param formsAppId
  * @param abortSignal
  * @returns
  */
-export async function getTaskGroupInstancesForFormsApp(
+export async function getTasksForFormsApp(
   formsAppId: number,
   abortSignal?: AbortSignal,
 ): Promise<{
-  taskGroupsInstances: Array<TaskResponse & FormsAppsTypes.TaskGroupInstance>
+  tasks: TaskResponse[]
 }> {
-  const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/scheduled-task-group-instances`
-  try {
-    return await getRequest<{
-      taskGroupsInstances: Array<
-        TaskResponse & FormsAppsTypes.TaskGroupInstance
-      >
-    }>(url, abortSignal)
-  } catch (err) {
-    Sentry.captureException(err)
+  const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/scheduled-tasks`
+  return await getTasks(url, abortSignal)
+}
 
-    const error = err as HTTPError
-    if (isOffline()) {
-      throw new OneBlinkAppsError(
-        'You are currently offline and do not have a local version of these scheduled tasks, please connect to the internet and try again',
-        {
-          originalError: error,
-          isOffline: true,
-        },
-      )
-    }
-    switch (error.status) {
-      case 400:
-      case 404: {
-        throw new OneBlinkAppsError(
-          'We could not find the forms app you are looking for. Please contact support if the problem persists.',
-          {
-            originalError: error,
-            title: 'Unknown Forms App',
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      default: {
-        throw new OneBlinkAppsError(
-          'An unknown error has occurred. Please contact support if the problem persists.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-    }
-  }
+/**
+ * Obtain all of the tasks related to a Task Group Instances in a specific Forms App
+ *
+ * #### Example
+ *
+ * ```js
+ * const formsAppId = 1
+ * const Tasks = await getTaskGroupInstanceTasks(formsAppId)
+ * ```
+ *
+ * @param formsAppId
+ * @param abortSignal
+ * @returns
+ */
+export async function getTaskGroupInstanceTasks(
+  taskGroupInstanceId: string,
+  formsAppId: number,
+  abortSignal?: AbortSignal,
+): Promise<{
+  tasks: TaskResponse[]
+}> {
+  const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/scheduled-task-group-instances/${taskGroupInstanceId}`
+  return await getTasks(url, abortSignal)
 }
 
 /**

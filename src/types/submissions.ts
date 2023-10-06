@@ -60,7 +60,7 @@ export type FormSubmission = DraftSubmission &
     /** The id of the scheduled task group the task is associated with */
     taskGroupId?: number
     /** The id of the scheduled task group instance the task is associated with */
-    taskGroupInstanceId?: number
+    taskGroupInstanceId?: string
   }
 
 export type FormSubmissionResult = FormSubmission & {

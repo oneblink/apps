@@ -109,42 +109,38 @@ export async function getTaskGroupInstanceTasks(
 }
 
 /**
- * Complete the related Task for a specific Forms App
+ * Obtain all of the Task Group instances for a specific Forms App
  *
  * #### Example
  *
  * ```js
  * const formsAppId = 1
- * const taskId = 2
- * const completedTask = await scheduledTasksService.completeTask({
- *   formsAppId,
- *   taskId,
- * })
+ * const taskGroupInstances = await getTaskGroupInstances(formsAppId)
  * ```
  *
- * @param options
+ * @param formsAppId
+ * @param abortSignal
  * @returns
  */
-
 export async function getTaskGroupInstances(
   formsAppId: number,
   abortSignal?: AbortSignal,
-): Promise<
-  Array<
+): Promise<{
+  taskGroupInstances: Array<
     ScheduledTasksTypes.TaskGroupInstance & {
       tasks: TaskResponse[]
     }
   >
-> {
+}> {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/scheduled-task-group-instances`
   try {
-    return await getRequest<
-      Array<
+    return await getRequest<{
+      taskGroupInstances: Array<
         ScheduledTasksTypes.TaskGroupInstance & {
           tasks: TaskResponse[]
         }
       >
-    >(url, abortSignal)
+    }>(url, abortSignal)
   } catch (err) {
     Sentry.captureException(err)
 
@@ -182,6 +178,24 @@ export async function getTaskGroupInstances(
     }
   }
 }
+
+/**
+ * Complete the related Task for a specific Forms App
+ *
+ * #### Example
+ *
+ * ```js
+ * const formsAppId = 1
+ * const taskId = 2
+ * const completedTask = await scheduledTasksService.completeTask({
+ *   formsAppId,
+ *   taskId,
+ * })
+ * ```
+ *
+ * @param options
+ * @returns
+ */
 
 export async function completeTask({
   formsAppId,

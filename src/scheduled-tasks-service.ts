@@ -125,6 +125,64 @@ export async function getTaskGroupInstanceTasks(
  * @param options
  * @returns
  */
+
+export async function getTaskGroupInstances(
+  formsAppId: number,
+  abortSignal?: AbortSignal,
+): Promise<
+  Array<
+    ScheduledTasksTypes.TaskGroupInstance & {
+      tasks: TaskResponse[]
+    }
+  >
+> {
+  const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/scheduled-task-group-instances`
+  try {
+    return await getRequest<
+      Array<
+        ScheduledTasksTypes.TaskGroupInstance & {
+          tasks: TaskResponse[]
+        }
+      >
+    >(url, abortSignal)
+  } catch (err) {
+    Sentry.captureException(err)
+
+    const error = err as HTTPError
+    if (isOffline()) {
+      throw new OneBlinkAppsError(
+        'You are currently offline and do not have a local version of these scheduled task groups, please connect to the internet and try again',
+        {
+          originalError: error,
+          isOffline: true,
+        },
+      )
+    }
+    switch (error.status) {
+      case 400:
+      case 404: {
+        throw new OneBlinkAppsError(
+          'We could not find the forms app you are looking for. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            title: 'Unknown Forms App',
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  }
+}
+
 export async function completeTask({
   formsAppId,
   taskId,

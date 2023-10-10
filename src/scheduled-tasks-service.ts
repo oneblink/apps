@@ -125,19 +125,14 @@ export async function getTaskGroupInstanceTasks(
 export async function getTaskGroupInstances(
   formsAppId: number,
   abortSignal?: AbortSignal,
-): Promise<{
-  taskGroupInstances: Array<
-    ScheduledTasksTypes.TaskGroupInstance & {
-      tasks: TaskResponse[]
-    }
-  >
-}> {
+) {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/scheduled-task-group-instances`
   try {
     return await getRequest<{
       taskGroupInstances: Array<
         ScheduledTasksTypes.TaskGroupInstance & {
           tasks: TaskResponse[]
+          taskGroup: ScheduledTasksTypes.TaskGroup
         }
       >
     }>(url, abortSignal)

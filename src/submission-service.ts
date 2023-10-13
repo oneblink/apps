@@ -325,6 +325,7 @@ async function executeCancelAction(
   options: {
     definition: FormTypes.Form
     externalId: string | null
+    taskCompletion?: { scheduledTasksUrl: string }
   },
   push: (url: string) => void,
 ): Promise<void> {
@@ -346,10 +347,19 @@ async function executeCancelAction(
     isUploadingAttachments: false,
   }
 
+  let postSubmissionAction =
+    formSubmissionResult.definition.postSubmissionAction
+  let redirectUrl = formSubmissionResult.definition.redirectUrl
+
+  if (formSubmissionResult.taskCompletion) {
+    postSubmissionAction = 'URL'
+    redirectUrl = formSubmissionResult.taskCompletion.scheduledTasksUrl
+  }
+
   await executeAction(
     formSubmissionResult,
-    formSubmissionResult.definition.cancelAction,
-    formSubmissionResult.definition.cancelRedirectUrl,
+    postSubmissionAction,
+    redirectUrl,
     push,
   )
 }

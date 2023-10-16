@@ -276,7 +276,8 @@ export async function completeTask({
  * await deleteCompletedTask(completedTask.id)
  * ```
  *
- * @param options
+ * @param id
+ * @param abortSignal
  * @returns
  */
 

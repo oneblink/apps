@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@microsoft/eslint-plugin-sdl": "^0.2.0",
-    "@oneblink/release-cli": "^2.0.3",
+    "@oneblink/release-cli": "^2.1.0",
     "@oneblink/types": "github:oneblink/types",
     "@types/file-saver": "^2.0.5",
     "@types/jest": "^27.5.0",

@@ -411,15 +411,31 @@ export default class AWSCognitoClient {
     )
 
     return async (code, password) => {
-      await unsignedAWSRequest(
-        this.cognitoIdentityServiceProvider.confirmForgotPassword({
-          ClientId: this.clientId,
-          ConfirmationCode: code,
-          Password: password,
-          Username: username,
-        }),
-      )
+      await this.confirmForgotPassword({
+        username,
+        code,
+        password,
+      })
     }
+  }
+
+  async confirmForgotPassword({
+    username,
+    code,
+    password,
+  }: {
+    username: string
+    code: string
+    password: string
+  }) {
+    await unsignedAWSRequest(
+      this.cognitoIdentityServiceProvider.confirmForgotPassword({
+        ClientId: this.clientId,
+        ConfirmationCode: code,
+        Password: password,
+        Username: username,
+      }),
+    )
   }
 
   logoutHostedUI(): void {

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 
 - date parsing to use `date-fns`
+- forgot password flow to use API instead of AWS
 
 ## [6.7.0] - 2023-10-23
 

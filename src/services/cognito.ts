@@ -5,6 +5,9 @@ import AWSCognitoClient, { LoginAttemptResponse } from './AWSCognitoClient'
 import * as offlineService from '../offline-service'
 import { userService } from '@oneblink/sdk-core'
 import { MiscTypes } from '@oneblink/types'
+import { HTTPError, postRequest } from './fetch'
+import tenants from '../tenants'
+import OneBlinkAppsError from './errors/oneBlinkAppsError'
 
 interface CognitoServiceData {
   oAuthClientId: string
@@ -243,14 +246,48 @@ async function changePassword(existingPassword: string, newPassword: string) {
  * @param username
  * @returns
  */
-async function forgotPassword(username: string) {
+async function forgotPassword(
+  username: string,
+): Promise<(code: string, password: string) => Promise<void>> {
   if (!awsCognitoClient) {
     throw new Error(
       '"authService" has not been initiated. You must call the init() function before starting the forgot password process.',
     )
   }
 
-  return await awsCognitoClient.forgotPassword(username.toLowerCase())
+  try {
+    const url = `${tenants.current.apiOrigin}/authentication/reset-password`
+    await postRequest(url, {
+      username,
+    })
+  } catch (err) {
+    const error = err as HTTPError
+    switch (error.status) {
+      case 400: {
+        throw new OneBlinkAppsError(error.message, {
+          title: 'Invalid Request',
+          httpStatusCode: error.status,
+        })
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  }
+
+  return async (code, password) => {
+    await awsCognitoClient?.confirmForgotPassword({
+      username,
+      code,
+      password,
+    })
+  }
 }
 
 /**

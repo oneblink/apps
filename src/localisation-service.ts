@@ -275,21 +275,36 @@ export function generateDate({
     }
     return date
   } else {
-    const date = parse(
-      value,
-      dateOnly ? 'yyyy-MM-dd' : "yyyy-MM-dd'T'HH:mm:ss.SSSX",
-      new Date(),
-    )
-    if (!Number.isNaN(date.getTime())) {
-      if (daysOffset !== undefined) {
-        date.setDate(date.getDate() + daysOffset)
+    let date = parse(value, 'yyyy-MM-dd', new Date())
+    if (Number.isNaN(date.getTime())) {
+      date = parse(value, "yyyy-MM-dd'T'HH:mm:ss.SSSX", new Date())
+      if (!Number.isNaN(date.getTime())) {
+        return generateDateOffset({ date, daysOffset, dateOnly })
       }
-      if (dateOnly) {
-        const offset = date.getTimezoneOffset()
-        return new Date(date.getTime() + offset * 60000)
-      }
-      return date
+    } else {
+      return generateDateOffset({ date, daysOffset, dateOnly })
     }
+  }
+}
+
+function generateDateOffset({
+  date,
+  daysOffset,
+  dateOnly,
+}: {
+  daysOffset: number | undefined
+  date: Date
+  dateOnly: boolean
+}) {
+  if (!Number.isNaN(date.getTime())) {
+    if (daysOffset !== undefined) {
+      date.setDate(date.getDate() + daysOffset)
+    }
+    if (dateOnly) {
+      const offset = date.getTimezoneOffset()
+      return new Date(date.getTime() + offset * 60000)
+    }
+    return date
   }
 }
 

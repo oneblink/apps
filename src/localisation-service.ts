@@ -1,6 +1,7 @@
 import { submissionService } from '@oneblink/sdk-core'
 import tenants from './tenants'
 import parser from 'ua-parser-js'
+import { parse } from 'date-fns'
 
 let iosVersion: number | undefined
 const parsedUserAgent: parser.IResult = parser(window.navigator.userAgent)
@@ -274,9 +275,12 @@ export function generateDate({
     }
     return date
   } else {
-    const timestamp = Date.parse(value)
-    if (!Number.isNaN(timestamp)) {
-      const date = new Date(timestamp)
+    const date = parse(
+      value,
+      dateOnly ? 'yyyy-MM-dd' : "yyyy-MM-dd'T'HH:mm:ss.SSSX",
+      new Date(),
+    )
+    if (!Number.isNaN(date.getTime())) {
       if (daysOffset !== undefined) {
         date.setDate(date.getDate() + daysOffset)
       }

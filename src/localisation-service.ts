@@ -1,7 +1,7 @@
 import { submissionService } from '@oneblink/sdk-core'
 import tenants from './tenants'
 import parser from 'ua-parser-js'
-import { parse } from 'date-fns'
+import { add, parse } from 'date-fns'
 
 let iosVersion: number | undefined
 const parsedUserAgent: parser.IResult = parser(window.navigator.userAgent)
@@ -262,7 +262,6 @@ export function formatCurrency(value: number): string {
 export function generateDate({
   daysOffset,
   value,
-  dateOnly,
 }: {
   daysOffset: number | undefined
   value: string
@@ -279,10 +278,10 @@ export function generateDate({
     if (Number.isNaN(date.getTime())) {
       date = parse(value, "yyyy-MM-dd'T'HH:mm:ss.SSSX", new Date())
       if (!Number.isNaN(date.getTime())) {
-        return generateDateOffset({ date, daysOffset, dateOnly })
+        return generateDateOffset({ date, daysOffset })
       }
     } else {
-      return generateDateOffset({ date, daysOffset, dateOnly })
+      return generateDateOffset({ date, daysOffset })
     }
   }
 }
@@ -290,22 +289,14 @@ export function generateDate({
 function generateDateOffset({
   date,
   daysOffset,
-  dateOnly,
 }: {
   daysOffset: number | undefined
   date: Date
-  dateOnly: boolean
 }) {
-  if (!Number.isNaN(date.getTime())) {
-    if (daysOffset !== undefined) {
-      date.setDate(date.getDate() + daysOffset)
-    }
-    if (dateOnly) {
-      const offset = date.getTimezoneOffset()
-      return new Date(date.getTime() + offset * 60000)
-    }
-    return date
+  if (daysOffset !== undefined) {
+    return add(date, { days: daysOffset })
   }
+  return date
 }
 
 const replaceSubmissionFormatters: submissionService.ReplaceInjectablesFormatters =

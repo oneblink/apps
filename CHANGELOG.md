@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `taskName` to `FormSubmission` type
+
 ## [6.8.0] - 2023-10-25
 
 ### Changed

@@ -57,10 +57,16 @@ export type FormSubmission = DraftSubmission &
     previousFormSubmissionApprovalId?: string
     /** The id of the scheduled task being completed */
     taskId?: number
+    /** The name of the scheduled task being completed */
+    taskName?: string
     /** The id of the scheduled task group the task is associated with */
     taskGroupId?: number
+    /** The name of the scheduled task group the task is associated with */
+    taskGroupName?: string
     /** The id of the scheduled task group instance the task is associated with */
     taskGroupInstanceId?: string
+    /** The name of the scheduled task group instance the task is associated with */
+    taskGroupInstanceLabel?: string
   }
 
 export type FormSubmissionResult = FormSubmission & {

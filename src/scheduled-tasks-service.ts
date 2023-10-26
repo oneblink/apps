@@ -16,11 +16,13 @@ export type TaskResponse = {
   daysAvailable: number
 }
 
-async function getTasks(url: string, abortSignal?: AbortSignal) {
+async function getTasks<
+  T extends {
+    tasks: TaskResponse[]
+  },
+>(url: string, abortSignal?: AbortSignal) {
   try {
-    return await getRequest<{
-      tasks: TaskResponse[]
-    }>(url, abortSignal)
+    return await getRequest<T>(url, abortSignal)
   } catch (err) {
     Sentry.captureException(err)
 
@@ -106,11 +108,13 @@ export async function getTaskGroupInstanceTasks(
   taskGroupInstanceId: string,
   formsAppId: number,
   abortSignal?: AbortSignal,
-): Promise<{
-  tasks: TaskResponse[]
-}> {
+) {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/scheduled-task-group-instances/${taskGroupInstanceId}`
-  return await getTasks(url, abortSignal)
+  return await getTasks<{
+    tasks: TaskResponse[]
+    taskGroup: ScheduledTasksTypes.TaskGroup
+    taskGroupInstance: ScheduledTasksTypes.TaskGroupInstance
+  }>(url, abortSignal)
 }
 
 /**

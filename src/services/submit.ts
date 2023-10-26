@@ -34,12 +34,12 @@ type SubmissionParams = {
   isPendingQueueEnabled: boolean
   shouldRunServerValidation: boolean
   shouldRunExternalIdGeneration: boolean
-  scheduledTasksUrl?: string
   paymentReceiptUrl?: string
   schedulingUrlConfiguration?: {
     schedulingReceiptUrl: string
     schedulingCancelUrl: string
   }
+  taskCompletion?: FormSubmissionResult['taskCompletion']
 }
 
 export { SubmissionParams, ProgressListener, ProgressListenerEvent }
@@ -48,7 +48,7 @@ export default async function submit({
   formSubmission,
   isPendingQueueEnabled,
   paymentReceiptUrl,
-  scheduledTasksUrl,
+  taskCompletion,
   schedulingUrlConfiguration,
   generateCredentials,
   onProgress,
@@ -173,12 +173,7 @@ export default async function submit({
       downloadSubmissionPdfUrl: !data.pdfAccessToken
         ? undefined
         : `${tenants.current.apiOrigin}/forms/${formSubmission.definition.id}/submissions/${data.submissionId}/pdf-document?accessToken=${data.pdfAccessToken}`,
-      taskCompletion:
-        scheduledTasksUrl && formSubmission.taskId
-          ? {
-              scheduledTasksUrl,
-            }
-          : undefined,
+      taskCompletion,
     }
 
     if (schedulingSubmissionEvent && schedulingUrlConfiguration) {
@@ -212,6 +207,9 @@ export default async function submit({
         ipAddress: data.ipAddress,
         user: data.userProfile,
         externalId: formSubmission.externalId || undefined,
+        task: formSubmission.taskCompletion?.task,
+        taskGroup: formSubmission.taskCompletion?.taskGroup,
+        taskGroupInstance: formSubmission.taskCompletion?.taskGroupInstance,
       },
       tags: {
         jobId: formSubmission.jobId || undefined,

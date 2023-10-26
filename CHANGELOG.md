@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-- `taskName` to `FormSubmission` type
+- `taskCompletion` to `FormSubmission` type
+
+### Added
+
+- `{TASK_NAME}`, `{TASK_GROUP_NAME}` and `{TASK_GROUP_INSTANCE_LABEL}` to replaceable parameters
 
 ## [6.8.0] - 2023-10-25
 

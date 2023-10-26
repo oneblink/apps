@@ -14,5 +14,8 @@ export default function replaceInjectablesWithSubmissionValues(
     submissionTimestamp: submissionResult.submissionTimestamp || '',
     externalId: submissionResult.externalId || undefined,
     userProfile: getUserProfile() || undefined,
+    task: submissionResult.taskCompletion?.task,
+    taskGroup: submissionResult.taskCompletion?.taskGroup,
+    taskGroupInstance: submissionResult.taskCompletion?.taskGroupInstance,
   })
 }

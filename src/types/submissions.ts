@@ -3,6 +3,7 @@ import {
   SubmissionEventTypes,
   MiscTypes,
   SubmissionTypes,
+  ScheduledTasksTypes,
 } from '@oneblink/types'
 import { S3ObjectCredentials } from '@oneblink/types/typescript/aws'
 import { FormElement } from '@oneblink/types/typescript/forms'
@@ -55,18 +56,20 @@ export type FormSubmission = DraftSubmission &
      * form submission is in response to `CLARIFICATION_REQUIRED` approval.
      */
     previousFormSubmissionApprovalId?: string
-    /** The id of the scheduled task being completed */
-    taskId?: number
-    /** The name of the scheduled task being completed */
-    taskName?: string
-    /** The id of the scheduled task group the task is associated with */
-    taskGroupId?: number
-    /** The name of the scheduled task group the task is associated with */
-    taskGroupName?: string
-    /** The id of the scheduled task group instance the task is associated with */
-    taskGroupInstanceId?: string
-    /** The name of the scheduled task group instance the task is associated with */
-    taskGroupInstanceLabel?: string
+    /**
+     * Will have a value if the user was attempting to complete a scheduled task
+     * via a form submission
+     */
+    taskCompletion?: {
+      /** The task */
+      task: ScheduledTasksTypes.Task
+      /** The task group */
+      taskGroup: ScheduledTasksTypes.TaskGroup | undefined
+      /** The task group instance */
+      taskGroupInstance: ScheduledTasksTypes.TaskGroupInstance | undefined
+      /** The URL to redirect the user to after completing the task via form submission */
+      redirectUrl: string
+    }
   }
 
 export type FormSubmissionResult = FormSubmission & {
@@ -90,14 +93,6 @@ export type FormSubmissionResult = FormSubmission & {
     /** The scheduling submission event */
     submissionEvent: SubmissionEventTypes.SchedulingSubmissionEvent
   } | null
-  /**
-   * Will have a value if the user was attempting to complete a scheduled task
-   * via a form submission
-   */
-  taskCompletion?: {
-    /** The URL to redirect the user to after completing the task via form submission */
-    scheduledTasksUrl: string
-  }
   /** `true` if the submission was not submitted yet and was added to the pending queue */
   isInPendingQueue: boolean
   /** `true` if the submission was attempted offline */

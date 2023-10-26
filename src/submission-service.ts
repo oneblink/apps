@@ -325,7 +325,7 @@ async function executeCancelAction(
   options: {
     definition: FormTypes.Form
     externalId: string | null
-    taskCompletion?: { scheduledTasksUrl: string }
+    taskCompletion?: FormSubmissionResult['taskCompletion']
   },
   push: (url: string) => void,
 ): Promise<void> {
@@ -352,7 +352,7 @@ async function executeCancelAction(
 
   if (formSubmissionResult.taskCompletion) {
     cancelAction = 'URL'
-    cancelRedirectUrl = formSubmissionResult.taskCompletion.scheduledTasksUrl
+    cancelRedirectUrl = formSubmissionResult.taskCompletion.redirectUrl
   }
 
   await executeAction(
@@ -417,7 +417,7 @@ async function executePostSubmissionAction(
     redirectUrl = submissionResult.payment.hostedFormUrl
   } else if (submissionResult.taskCompletion) {
     postSubmissionAction = 'URL'
-    redirectUrl = submissionResult.taskCompletion.scheduledTasksUrl
+    redirectUrl = submissionResult.taskCompletion.redirectUrl
   }
 
   await executeAction(submissionResult, postSubmissionAction, redirectUrl, push)

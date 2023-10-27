@@ -39,7 +39,6 @@ type SubmissionParams = {
     schedulingReceiptUrl: string
     schedulingCancelUrl: string
   }
-  taskCompletion?: FormSubmissionResult['taskCompletion']
 }
 
 export { SubmissionParams, ProgressListener, ProgressListenerEvent }
@@ -48,7 +47,6 @@ export default async function submit({
   formSubmission,
   isPendingQueueEnabled,
   paymentReceiptUrl,
-  taskCompletion,
   schedulingUrlConfiguration,
   generateCredentials,
   onProgress,
@@ -173,7 +171,6 @@ export default async function submit({
       downloadSubmissionPdfUrl: !data.pdfAccessToken
         ? undefined
         : `${tenants.current.apiOrigin}/forms/${formSubmission.definition.id}/submissions/${data.submissionId}/pdf-document?accessToken=${data.pdfAccessToken}`,
-      taskCompletion,
     }
 
     if (schedulingSubmissionEvent && schedulingUrlConfiguration) {

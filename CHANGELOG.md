@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [7.0.0] - 2023-11-01
+
 ### Added
 
 - `taskCompletion` to `FormSubmission` type
@@ -14,6 +16,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - `{TASK_NAME}`, `{TASK_GROUP_NAME}` and `{TASK_GROUP_INSTANCE_LABEL}` to replaceable parameters
+
+### Dependencies
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [5.0.0-beta.2](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [4.0.0-beta.1](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
 
 ## [6.8.0] - 2023-10-25
 

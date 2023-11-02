@@ -1,4 +1,4 @@
-import jwtDecode from 'jwt-decode'
+import { jwtDecode } from 'jwt-decode'
 
 import { getCognitoIdToken } from './cognito'
 import Sentry from '../Sentry'

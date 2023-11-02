@@ -258,7 +258,6 @@ export default class AWSCognitoClient {
     username: string,
     password: string,
   ): Promise<LoginAttemptResponse> {
-    console.log('username', username)
     const loginResult = await this.cognitoIdentityProviderClient.send(
       new InitiateAuthCommand({
         AuthFlow: 'USER_PASSWORD_AUTH',

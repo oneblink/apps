@@ -1,7 +1,7 @@
 import { FormSubmission } from '../types/submissions'
 import serverRequest from './serverRequest'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
-import { generateExternalId } from '../form-service'
+import { generateExternalId } from './generateExternalId'
 
 export default async function externalIdGeneration(
   formSubmission: FormSubmission,

@@ -1,4 +1,4 @@
-import jwtDecode from 'jwt-decode'
+import { jwtDecode } from 'jwt-decode'
 
 import AWSCognitoClient, { LoginAttemptResponse } from './AWSCognitoClient'
 

@@ -31,7 +31,7 @@ export type UploadAttachmentConfiguration = {
   fileName: string
   contentType: string
   isPrivate: boolean
-  data: PutObjectCommandInput['Body']
+  data: Blob
 }
 
 export type ProgressListenerEvent = { progress: number; total: number }

@@ -7,9 +7,41 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [7.0.1] - 2023-11-20
+
 ### Changed
 
 - `UploadAttachmentConfiguration.data` to `Blob` type
+
+### Dependencies
+
+- update [@aws-sdk/client-s3](https://www.npmjs.com/package/@aws-sdk/client-s3) to [3.441.0](https://github.com/aws/aws-sdk-js-v3/releases/tag/v3.441.0) (from [3.363.0](https://github.com/aws/aws-sdk-js-v3/releases/tag/v3.363.0))
+
+- update [@aws-sdk/lib-storage](https://www.npmjs.com/package/@aws-sdk/lib-storage) to [3.441.0](https://github.com/aws/aws-sdk-js-v3/releases/tag/v3.441.0) (from [3.363.0](https://github.com/aws/aws-sdk-js-v3/releases/tag/v3.363.0))
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [5.1.0-beta.3](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [5.0.0-beta.2](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
+
+- update [@sentry/browser](https://www.npmjs.com/package/@sentry/browser) to [7.77.0](https://github.com/getsentry/sentry-javascript/releases/tag/7.77.0) (from [6.19.7](https://github.com/getsentry/sentry-javascript/releases/tag/6.19.7))
+
+- update [@sentry/tracing](https://www.npmjs.com/package/@sentry/tracing) to [7.77.0](https://github.com/getsentry/sentry-javascript/releases/tag/7.77.0) (from [6.19.7](https://github.com/getsentry/sentry-javascript/releases/tag/6.19.7))
+
+- no longer depend upon [aws-sdk](https://www.npmjs.com/package/aws-sdk)
+
+- update [date-fns](https://www.npmjs.com/package/date-fns) to [2.30.0](https://github.com/date-fns/date-fns/releases/tag/v2.30.0) (from [2.29.3](https://github.com/date-fns/date-fns/releases/tag/v2.29.3))
+
+- update [jwt-decode](https://www.npmjs.com/package/jwt-decode) to [4.0.0](https://github.com/auth0/jwt-decode/releases/tag/v4.0.0) (from [3.1.2](https://github.com/auth0/jwt-decode/blob/master/CHANGELOG.md))
+
+- no longer depend upon [local-storage](https://www.npmjs.com/package/local-storage)
+
+- update [nanoid](https://www.npmjs.com/package/nanoid) to [5.0.2](https://github.com/ai/nanoid/blob/master/CHANGELOG.md) (from [4.0.1](https://github.com/ai/nanoid/blob/master/CHANGELOG.md))
+
+- update [query-string](https://www.npmjs.com/package/query-string) to [7.1.3](https://github.com/sindresorhus/query-string/releases/tag/v7.1.3) (from [7.1.1](https://github.com/sindresorhus/query-string/releases/tag/v7.1.1))
+
+- update [ua-parser-js](https://www.npmjs.com/package/ua-parser-js) to [1.0.37](https://github.com/faisalman/ua-parser-js/blob/master/CHANGELOG.md) (from [1.0.2](https://github.com/faisalman/ua-parser-js/blob/master/CHANGELOG.md))
+
+- update [uuid](https://www.npmjs.com/package/uuid) to [9.0.1](https://github.com/uuidjs/uuid/blob/master/CHANGELOG.md) (from [8.3.2](https://github.com/uuidjs/uuid/blob/master/CHANGELOG.md))
+
+- depend upon [@aws-sdk/client-cognito-identity-provider](https://www.npmjs.com/package/@aws-sdk/client-cognito-identity-provider) [3.441.0](https://github.com/aws/aws-sdk-js-v3/releases/tag/v3.441.0)
 
 ## [7.0.0] - 2023-11-01
 

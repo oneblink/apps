@@ -204,21 +204,21 @@ export async function getTaskGroupInstances(
 export async function completeTask({
   formsAppId,
   taskId,
-  taskGroupId,
+  taskActionId,
   taskGroupInstanceId,
   abortSignal,
 }: {
   formsAppId: number
-  taskId: number
-  taskGroupId?: number
-  taskGroupInstanceId?: string
+  taskId: string
+  taskActionId: string
+  taskGroupInstanceId: string | undefined
   abortSignal?: AbortSignal
 }): Promise<ScheduledTasksTypes.CompletedTask> {
   const url = `${tenants.current.apiOrigin}/completed-tasks`
   try {
     return await postRequest<ScheduledTasksTypes.CompletedTask>(
       url,
-      { formsAppId, taskId, taskGroupId, taskGroupInstanceId },
+      { formsAppId, taskId, taskActionId, taskGroupInstanceId },
       abortSignal,
     )
   } catch (err) {

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `taskActionId` to payload to complete request
+
 ## [7.0.1] - 2023-11-20
 
 ### Changed

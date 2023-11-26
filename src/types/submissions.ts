@@ -63,6 +63,8 @@ export type FormSubmission = DraftSubmission &
     taskCompletion?: {
       /** The task */
       task: ScheduledTasksTypes.Task
+      /** The task action */
+      taskAction: ScheduledTasksTypes.TaskAction
       /** The task group */
       taskGroup: ScheduledTasksTypes.TaskGroup | undefined
       /** The task group instance */

@@ -9,8 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
-- **[BREAKING]** `scheduledTasksSerivce.getTasksForFormsApp()` function signature. Made `date` argument required.
-- **[BREAKING]** `scheduledTasksSerivce.getTaskGroupInstanceTasks()` function signature. Made `date` argument required.
+- **[BREAKING]** `scheduledTasksService.getTasksForFormsApp()` function signature. Made `date` argument required and changed result.
+- **[BREAKING]** `scheduledTasksService.getTaskGroupInstanceTasks()` function signature. Made `date` argument required and changed result.
+- **[BREAKING]** `scheduledTasksService.getTaskGroupInstances()` result.
 
 ### Added
 

@@ -10,20 +10,19 @@ import {
 import { isOffline } from './offline-service'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 
-export type TaskResponse = {
+export interface TaskAvailability {
   task: ScheduledTasksTypes.Task
-  actions: ScheduledTasksTypes.TaskAction[]
+  completedTask?: ScheduledTasksTypes.CompletedTask
   daysAvailable: number
 }
 
-export type CompletedTaskResponse = {
-  task: ScheduledTasksTypes.CompletedTask
-  action: ScheduledTasksTypes.TaskAction
+export interface TaskResponse extends TaskAvailability {
+  actions: ScheduledTasksTypes.TaskAction[]
 }
 
 async function getTasks<
   T extends {
-    tasks: TaskResponse[]
+    taskResponses: TaskResponse[]
   },
 >(url: string, abortSignal?: AbortSignal) {
   try {
@@ -90,8 +89,7 @@ export async function getTasksForFormsApp({
   date: string
   abortSignal?: AbortSignal
 }): Promise<{
-  tasks: TaskResponse[]
-  completedTasks: CompletedTaskResponse[]
+  taskResponses: TaskResponse[]
 }> {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/scheduled-tasks?date=${date}`
   return await getTasks(url, abortSignal)
@@ -131,8 +129,7 @@ export async function getTaskGroupInstanceTasks({
 }) {
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/scheduled-task-group-instances/${taskGroupInstanceId}?date=${date}`
   return await getTasks<{
-    tasks: TaskResponse[]
-    completedTasks: CompletedTaskResponse[]
+    taskResponses: TaskResponse[]
     taskGroup: ScheduledTasksTypes.TaskGroup
     taskGroupInstance: ScheduledTasksTypes.TaskGroupInstance
   }>(url, abortSignal)
@@ -161,7 +158,7 @@ export async function getTaskGroupInstances(
     return await getRequest<{
       taskGroupInstances: Array<
         ScheduledTasksTypes.TaskGroupInstance & {
-          tasks: TaskResponse[]
+          taskAvailabilities: TaskAvailability[]
           taskGroup: ScheduledTasksTypes.TaskGroup
         }
       >

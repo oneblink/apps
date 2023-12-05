@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- **[BREAKING]** `scheduledTasksService.getTasksForFormsApp()` function signature. Made `date` argument required and changed result.
+- **[BREAKING]** `scheduledTasksService.getTaskGroupInstanceTasks()` function signature. Made `date` argument required and changed result.
+- **[BREAKING]** `scheduledTasksService.getTaskGroupInstances()` result.
+
 ### Added
 
-- `taskActionId` to payload to complete request
+- `taskActionId` to payload to complete scheduled task request
 
 ## [7.0.1] - 2023-11-20
 

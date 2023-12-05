@@ -10,15 +10,19 @@ import {
 import { isOffline } from './offline-service'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 
-export type TaskResponse = {
+export interface TaskAvailability {
   task: ScheduledTasksTypes.Task
-  actions: ScheduledTasksTypes.TaskAction[]
+  completedTask?: ScheduledTasksTypes.CompletedTask
   daysAvailable: number
+}
+
+export interface TaskResponse extends TaskAvailability {
+  actions: ScheduledTasksTypes.TaskAction[]
 }
 
 async function getTasks<
   T extends {
-    tasks: TaskResponse[]
+    taskResponses: TaskResponse[]
   },
 >(url: string, abortSignal?: AbortSignal) {
   try {
@@ -68,20 +72,26 @@ async function getTasks<
  *
  * ```js
  * const formsAppId = 1
- * const tasks = await getTasksForFormsApp(formsAppId)
+ * const date = '2023-12-01'
+ * const tasks = await getTasksForFormsApp({ formsAppId, date })
  * ```
  *
  * @param formsAppId
  * @param abortSignal
  * @returns
  */
-export async function getTasksForFormsApp(
-  formsAppId: number,
-  abortSignal?: AbortSignal,
-): Promise<{
-  tasks: TaskResponse[]
+export async function getTasksForFormsApp({
+  formsAppId,
+  date,
+  abortSignal,
+}: {
+  formsAppId: number
+  date: string
+  abortSignal?: AbortSignal
+}): Promise<{
+  taskResponses: TaskResponse[]
 }> {
-  const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/scheduled-tasks`
+  const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/scheduled-tasks?date=${date}`
   return await getTasks(url, abortSignal)
 }
 
@@ -93,10 +103,12 @@ export async function getTasksForFormsApp(
  * ```js
  * const formsAppId = 1
  * const taskGroupInstanceId = 'abc123'
- * const tasks = await getTaskGroupInstanceTasks(
+ * const date = '2023-12-01'
+ * const tasks = await getTaskGroupInstanceTasks({
  *   formsAppId,
  *   taskGroupInstanceId,
- * )
+ *   date,
+ * })
  * ```
  *
  * @param formsAppId
@@ -104,14 +116,20 @@ export async function getTasksForFormsApp(
  * @param abortSignal
  * @returns
  */
-export async function getTaskGroupInstanceTasks(
-  taskGroupInstanceId: string,
-  formsAppId: number,
-  abortSignal?: AbortSignal,
-) {
-  const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/scheduled-task-group-instances/${taskGroupInstanceId}`
+export async function getTaskGroupInstanceTasks({
+  taskGroupInstanceId,
+  date,
+  formsAppId,
+  abortSignal,
+}: {
+  taskGroupInstanceId: string
+  date: string
+  formsAppId: number
+  abortSignal?: AbortSignal
+}) {
+  const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/scheduled-task-group-instances/${taskGroupInstanceId}?date=${date}`
   return await getTasks<{
-    tasks: TaskResponse[]
+    taskResponses: TaskResponse[]
     taskGroup: ScheduledTasksTypes.TaskGroup
     taskGroupInstance: ScheduledTasksTypes.TaskGroupInstance
   }>(url, abortSignal)
@@ -140,7 +158,7 @@ export async function getTaskGroupInstances(
     return await getRequest<{
       taskGroupInstances: Array<
         ScheduledTasksTypes.TaskGroupInstance & {
-          tasks: TaskResponse[]
+          taskAvailabilities: TaskAvailability[]
           taskGroup: ScheduledTasksTypes.TaskGroup
         }
       >

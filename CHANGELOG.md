@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - `taskActionId` to payload to complete scheduled task request
+- `shortYearlessDate` and `longYearlessDate` to `localisationService`
 
 ## [7.0.1] - 2023-11-20
 

@@ -33,16 +33,22 @@ export function getLocale() {
 function generateFormats({
   time,
   shortDate,
+  shortYearlessDate,
   longDate,
+  longYearlessDate,
 }: {
   time: string
   shortDate: string
+  shortYearlessDate: string
   longDate: string
+  longYearlessDate: string
 }) {
   return {
     time,
     shortDate,
+    shortYearlessDate,
     longDate,
+    longYearlessDate,
     shortDateTime: `${shortDate} ${time}`,
     longDateTime: `${longDate} ${time}`,
   }
@@ -55,7 +61,9 @@ export function getDateFnsFormats() {
       return generateFormats({
         time,
         shortDate: 'MM/dd/yyyy',
+        shortYearlessDate: 'MM/dd',
         longDate: 'MMM do, yyyy',
+        longYearlessDate: 'MMM do',
       })
     }
     case 'en-AU':
@@ -63,7 +71,9 @@ export function getDateFnsFormats() {
       return generateFormats({
         time,
         shortDate: 'dd/MM/yyyy',
+        shortYearlessDate: 'dd/MM',
         longDate: 'do MMM, yyyy',
+        longYearlessDate: 'do MMM',
       })
     }
   }
@@ -76,7 +86,9 @@ export function getFlatpickrFormats() {
       return generateFormats({
         time,
         shortDate: 'm/d/Y',
+        shortYearlessDate: 'm/d',
         longDate: 'M J, Y',
+        longYearlessDate: 'M J',
       })
     }
     case 'en-AU':
@@ -84,7 +96,9 @@ export function getFlatpickrFormats() {
       return generateFormats({
         time,
         shortDate: 'd/m/Y',
+        shortYearlessDate: 'dd/MM',
         longDate: 'J M, Y',
+        longYearlessDate: 'J M',
       })
     }
   }

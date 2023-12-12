@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [8.0.0] - 2023-12-12
+
 ### Changed
 
 - **[BREAKING]** `scheduledTasksService.getTasksForFormsApp()` function signature. Made `date` argument required and changed result.

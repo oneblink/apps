@@ -1,4 +1,4 @@
-import { FormTypes } from '@oneblink/types'
+import { MiscTypes } from '@oneblink/types'
 import { fetchWithError, generateHeaders } from './fetch'
 
 function getOBApi(apiId: string, apiEnv: string): string {
@@ -11,7 +11,7 @@ function getOBApi(apiId: string, apiEnv: string): string {
 }
 
 export default async function serverRequest(
-  endpoint: FormTypes.EndpointConfiguration | undefined,
+  endpoint: MiscTypes.EndpointConfiguration | undefined,
   payload: Record<string, unknown>,
 ): Promise<{ response: Response; url: string } | void> {
   if (!endpoint) return

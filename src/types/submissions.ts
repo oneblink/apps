@@ -83,6 +83,8 @@ export type FormSubmissionResult = FormSubmission & {
   payment: {
     /** The amount required to pay */
     amount: number
+    /** The URL to redirect the user to to make a payment for a form hosted by customer instead of payment provider */
+    paymentFormUrl: string | undefined
     /** The URL to redirect the user to to complete the payment process */
     hostedFormUrl: string
     /** The payment submission event */

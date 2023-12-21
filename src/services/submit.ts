@@ -34,7 +34,8 @@ type SubmissionParams = {
   isPendingQueueEnabled: boolean
   shouldRunServerValidation: boolean
   shouldRunExternalIdGeneration: boolean
-  paymentReceiptUrl?: string
+  paymentReceiptUrl: string | undefined
+  paymentFormUrl: string | undefined
   schedulingUrlConfiguration?: {
     schedulingReceiptUrl: string
     schedulingCancelUrl: string
@@ -47,6 +48,7 @@ export default async function submit({
   formSubmission,
   isPendingQueueEnabled,
   paymentReceiptUrl,
+  paymentFormUrl,
   schedulingUrlConfiguration,
   generateCredentials,
   onProgress,
@@ -179,6 +181,7 @@ export default async function submit({
         schedulingSubmissionEvent,
         schedulingUrlConfiguration,
         paymentReceiptUrl,
+        paymentFormUrl,
       })
     } else if (
       paymentSubmissionEventConfiguration &&
@@ -189,6 +192,7 @@ export default async function submit({
         ...paymentSubmissionEventConfiguration,
         formSubmissionResult,
         paymentReceiptUrl,
+        paymentFormUrl,
       })
     }
     const userToken = getUserToken()

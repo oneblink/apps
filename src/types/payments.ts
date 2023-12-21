@@ -31,6 +31,7 @@ export type BasePaymentConfigurationPayload = {
   amount: number
   redirectUrl: string
   submissionId: string | null
+  paymentFormUrl?: string
 }
 
 export interface PaymentProvider<T extends SubmissionEventTypes.FormEventBase> {
@@ -42,10 +43,28 @@ export interface PaymentProvider<T extends SubmissionEventTypes.FormEventBase> {
   ): {
     path: string
     payload: BasePaymentConfigurationPayload
+    interpretResponse?: (response: unknown) => {
+      hostedFormUrl: string
+    }
   }
 
   verifyPaymentTransaction(
     query: Record<string, unknown>,
     formSubmissionResult: FormSubmissionResult,
   ): Promise<HandlePaymentResult>
+}
+
+export interface PaymentFormProvider<
+  T extends SubmissionEventTypes.FormEventBase,
+  C,
+  P,
+> extends PaymentProvider<T> {
+  handlePaymentFormQueryString(
+    query: Record<string, unknown>,
+    formSubmissionResult: FormSubmissionResult,
+    paymentReceiptUrl: string,
+  ): Promise<{
+    paymentFormConfiguration: C
+    completeTransaction(payload: P, abortSignal?: AbortSignal): Promise<void>
+  }>
 }

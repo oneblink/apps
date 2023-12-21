@@ -6,7 +6,7 @@ import {
   handlePaymentSubmissionEvent,
 } from './payment-service'
 import { FormSubmissionResult } from './types/submissions'
-const KEY = 'SCHEDULING_SUBMISSION_RESULT'
+import { KEY } from './services/schedulingHandlers'
 
 type SchedulingBooking = {
   /** The unique identifier for the submission associated with the booking */
@@ -80,7 +80,8 @@ async function handleSchedulingQuerystring({
   const schedulingSubmissionResultConfiguration =
     await utilsService.getLocalForageItem<{
       formSubmissionResult: FormSubmissionResult
-      paymentReceiptUrl?: string
+      paymentReceiptUrl: string | undefined
+      paymentFormUrl: string | undefined
     } | null>(KEY)
   // If the current transaction does not match the submission
   // we will display message to user indicating
@@ -91,7 +92,7 @@ async function handleSchedulingQuerystring({
     )
   }
 
-  const { formSubmissionResult, paymentReceiptUrl } =
+  const { formSubmissionResult, paymentReceiptUrl, paymentFormUrl } =
     schedulingSubmissionResultConfiguration
   if (
     !formSubmissionResult ||
@@ -117,6 +118,7 @@ async function handleSchedulingQuerystring({
         ...paymentSubmissionEventConfiguration,
         formSubmissionResult,
         paymentReceiptUrl,
+        paymentFormUrl,
       })
     }
   }

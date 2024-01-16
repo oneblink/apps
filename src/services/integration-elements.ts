@@ -1,6 +1,12 @@
 import OneBlinkAppsError from '../services/errors/oneBlinkAppsError'
 import { isOffline } from '../offline-service'
-import { getRequest, HTTPError, searchRequest } from '../services/fetch'
+import {
+  fetchJSON,
+  getRequest,
+  HTTPError,
+  postRequest,
+  searchRequest,
+} from '../services/fetch'
 import tenants from '../tenants'
 import {
   GeoscapeTypes,
@@ -8,8 +14,10 @@ import {
   CivicaTypes,
   FormTypes,
   MiscTypes,
+  APINSWTypes,
 } from '@oneblink/types'
 import Sentry from '../Sentry'
+import { add } from 'date-fns'
 
 /**
  * Search for geoscape addresses based on a partial address.
@@ -597,6 +605,243 @@ export async function getBSBRecord(
           {
             originalError: error,
             title: 'Unknown BSB Number',
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  }
+}
+
+const API_NSW_LIQUOR_LICENCE_TOKEN_KEY = 'API_NSW_LIQUOR_LICENCE_TOKEN'
+function getAPINSWLiquorLicenceTokenFromStorage() {
+  const localStorageValue = localStorage.getItem(
+    API_NSW_LIQUOR_LICENCE_TOKEN_KEY,
+  )
+  if (localStorageValue) {
+    try {
+      return JSON.parse(
+        localStorageValue,
+      ) as APINSWTypes.LiquorLicenceAccessTokenResponse
+    } catch {
+      // ignore JSON parse error
+    }
+  }
+}
+
+async function getAPINSWLiquorLicenceToken(
+  formId: number,
+  abortSignal?: AbortSignal,
+) {
+  const liquorLicenceAccessTokenResponse =
+    getAPINSWLiquorLicenceTokenFromStorage()
+  if (liquorLicenceAccessTokenResponse) {
+    const now = new Date()
+    const issuedAt = new Date(
+      parseInt(liquorLicenceAccessTokenResponse.issued_at),
+    )
+    const expiresAt = add(issuedAt, {
+      seconds: parseInt(liquorLicenceAccessTokenResponse.expires_in),
+    })
+    if (expiresAt > now) {
+      return liquorLicenceAccessTokenResponse
+    }
+  }
+
+  const result =
+    await postRequest<APINSWTypes.LiquorLicenceAccessTokenResponse>(
+      `${tenants.current.apiOrigin}/forms/${formId}/api-nsw/liquor/access-token`,
+      abortSignal,
+    )
+  localStorage.setItem(API_NSW_LIQUOR_LICENCE_TOKEN_KEY, JSON.stringify(result))
+  return result
+}
+
+/**
+ * Search for API.NSW Liquor licences based on a partial text search.
+ *
+ * #### Example
+ *
+ * ```js
+ * const result = await formService.searchAPINSWLiquorLicences({
+ *   formId: 1,
+ *   search: 'SMITH',
+ * })
+ * ```
+ *
+ * @param options
+ * @param abortSignal
+ * @returns
+ */
+export async function searchAPINSWLiquorLicences(
+  {
+    formId,
+    searchText,
+  }: {
+    formId: number
+    searchText: string
+  },
+  abortSignal?: AbortSignal,
+): Promise<APINSWTypes.LiquorLicenceBrowseResults> {
+  try {
+    const apiNSWLiquorLicenceToken = await getAPINSWLiquorLicenceToken(
+      formId,
+      abortSignal,
+    )
+    return await fetchJSON<APINSWTypes.LiquorLicenceBrowseResults>(
+      `https://api.onegov.nsw.gov.au/liquorregister/v1/browse?searchText=${searchText}`,
+      {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          apikey: apiNSWLiquorLicenceToken.client_id,
+          Authorization: `Bearer ${apiNSWLiquorLicenceToken.access_token}`,
+        },
+        signal: abortSignal,
+      },
+    )
+  } catch (err) {
+    if (!abortSignal?.aborted) {
+      Sentry.captureException(err)
+    }
+    const error = err as HTTPError
+    if (isOffline()) {
+      throw new OneBlinkAppsError(
+        'You are currently offline, please connect to the internet and try again',
+        {
+          originalError: error,
+          isOffline: true,
+        },
+      )
+    }
+    switch (error.status) {
+      case 401: {
+        throw new OneBlinkAppsError('Please login and try again.', {
+          originalError: error,
+          requiresLogin: true,
+          httpStatusCode: error.status,
+        })
+      }
+      case 403: {
+        throw new OneBlinkAppsError(
+          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
+          {
+            originalError: error,
+            requiresAccessRequest: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 400:
+      case 404: {
+        throw new OneBlinkAppsError(
+          "Please contact your administrator to ensure this application's configuration has been completed successfully.",
+          {
+            originalError: error,
+            title: 'Unknown Application',
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  }
+}
+
+/**
+ * Get the details for a single  API.NSW Liquor licence based on the licenceID.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formId = 1
+ * const licenceId = '1-RL22KV'
+ * const result = await formService.getAPINSWLiquorLicence(formId, licenceId)
+ * ```
+ *
+ * @param formId
+ * @param licenceId
+ * @param abortSignal
+ * @returns
+ */
+export async function getAPINSWLiquorLicence(
+  formId: number,
+  licenceId: string,
+  abortSignal?: AbortSignal,
+): Promise<APINSWTypes.LiquorLicenceDetails> {
+  try {
+    const apiNSWLiquorLicenceToken = await getAPINSWLiquorLicenceToken(
+      formId,
+      abortSignal,
+    )
+    return await fetchJSON<APINSWTypes.LiquorLicenceDetails>(
+      `https://api.onegov.nsw.gov.au/liquorregister/v1/details?licenceid=${licenceId}`,
+      {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          apikey: apiNSWLiquorLicenceToken.client_id,
+          Authorization: `Bearer ${apiNSWLiquorLicenceToken.access_token}`,
+        },
+        signal: abortSignal,
+      },
+    )
+  } catch (err) {
+    if (!abortSignal?.aborted) {
+      Sentry.captureException(err)
+    }
+    const error = err as HTTPError
+    if (isOffline()) {
+      throw new OneBlinkAppsError(
+        'You are currently offline, please connect to the internet and try again',
+        {
+          originalError: error,
+          isOffline: true,
+        },
+      )
+    }
+    switch (error.status) {
+      case 401: {
+        throw new OneBlinkAppsError('Please login and try again.', {
+          originalError: error,
+          requiresLogin: true,
+          httpStatusCode: error.status,
+        })
+      }
+      case 403: {
+        throw new OneBlinkAppsError(
+          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
+          {
+            originalError: error,
+            requiresAccessRequest: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 400:
+      case 404: {
+        throw new OneBlinkAppsError(
+          "Please contact your administrator to ensure this application's configuration has been completed successfully.",
+          {
+            originalError: error,
+            title: 'Unknown Application',
             httpStatusCode: error.status,
           },
         )

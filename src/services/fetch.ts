@@ -47,7 +47,10 @@ export const fetchWithError: typeof fetch = async (url, options) => {
   }
 }
 
-async function fetchJSON<T>(url: string, options?: RequestInit): Promise<T> {
+export async function fetchJSON<T>(
+  url: string,
+  options?: RequestInit,
+): Promise<T> {
   const response = await fetchWithError(url, options)
 
   if (response.status === 204) {

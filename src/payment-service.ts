@@ -6,7 +6,6 @@ import { SubmissionEventTypes } from '@oneblink/types'
 import { FormSubmission, FormSubmissionResult } from './types/submissions'
 import {
   HandlePaymentResult,
-  PaymentFormProvider,
   PaymentProvider,
   PaymentReceiptItem,
 } from './types/payments'
@@ -14,50 +13,46 @@ import BPOINTPaymentProvider from './services/payment-providers/BPOINTPaymentPro
 import CPPayPaymentProvider from './services/payment-providers/CPPayPaymentProvider'
 import NSWGovPayPaymentProvider from './services/payment-providers/NSWGovPayPaymentProvider'
 import WestpacQuickWebPaymentProvider from './services/payment-providers/WestpacQuickWebPaymentProvider'
-import WestpacQuickStreamPaymentProvider from './services/payment-providers/WestpacQuickStreamPaymentProvider'
+import WestpacQuickStreamPaymentProvider, * as westpacQuickStream from './services/payment-providers/WestpacQuickStreamPaymentProvider'
 
 const KEY = 'PAYMENT_SUBMISSION_RESULT'
 
 export { HandlePaymentResult, PaymentReceiptItem }
 
 function getPaymentProvider(
+  formSubmissionResult: FormSubmissionResult,
   paymentSubmissionEvent: SubmissionEventTypes.FormPaymentEvent,
 ): PaymentProvider<SubmissionEventTypes.FormPaymentEvent> {
   switch (paymentSubmissionEvent.type) {
     case 'BPOINT': {
-      return new BPOINTPaymentProvider(paymentSubmissionEvent)
+      return new BPOINTPaymentProvider(
+        paymentSubmissionEvent,
+        formSubmissionResult,
+      )
     }
     case 'CP_PAY': {
-      return new CPPayPaymentProvider(paymentSubmissionEvent)
+      return new CPPayPaymentProvider(
+        paymentSubmissionEvent,
+        formSubmissionResult,
+      )
     }
     case 'NSW_GOV_PAY': {
-      return new NSWGovPayPaymentProvider(paymentSubmissionEvent)
+      return new NSWGovPayPaymentProvider(
+        paymentSubmissionEvent,
+        formSubmissionResult,
+      )
     }
     case 'WESTPAC_QUICK_WEB': {
-      return new WestpacQuickWebPaymentProvider(paymentSubmissionEvent)
+      return new WestpacQuickWebPaymentProvider(
+        paymentSubmissionEvent,
+        formSubmissionResult,
+      )
     }
     case 'WESTPAC_QUICK_STREAM': {
-      return new WestpacQuickStreamPaymentProvider(paymentSubmissionEvent)
-    }
-  }
-}
-
-function getPaymentFormProvider(
-  paymentSubmissionEvent: SubmissionEventTypes.FormPaymentEvent,
-): PaymentFormProvider<
-  SubmissionEventTypes.FormPaymentEvent,
-  unknown,
-  unknown
-> {
-  switch (paymentSubmissionEvent.type) {
-    case 'BPOINT':
-    case 'CP_PAY':
-    case 'NSW_GOV_PAY':
-    case 'WESTPAC_QUICK_WEB': {
-      throw new Error('Not a valid provider')
-    }
-    case 'WESTPAC_QUICK_STREAM': {
-      return new WestpacQuickStreamPaymentProvider(paymentSubmissionEvent)
+      return new WestpacQuickStreamPaymentProvider(
+        paymentSubmissionEvent,
+        formSubmissionResult,
+      )
     }
   }
 }
@@ -101,6 +96,7 @@ export async function handlePaymentQuerystring(
     )
   }
   const paymentProvider = getPaymentProvider(
+    submissionResult,
     submissionResult.payment.submissionEvent,
   )
   if (!paymentProvider) {
@@ -108,7 +104,7 @@ export async function handlePaymentQuerystring(
       'It looks like you are attempting to view a receipt for an unsupported payment.',
     )
   }
-  return await paymentProvider.verifyPaymentTransaction(query, submissionResult)
+  return await paymentProvider.verifyPaymentTransaction(query)
 }
 
 export function checkForPaymentSubmissionEvent(formSubmission: FormSubmission):
@@ -183,7 +179,10 @@ export async function handlePaymentSubmissionEvent({
   paymentReceiptUrl: string
   paymentFormUrl: string | undefined
 }): Promise<FormSubmissionResult['payment']> {
-  const paymentProvider = getPaymentProvider(paymentSubmissionEvent)
+  const paymentProvider = getPaymentProvider(
+    formSubmissionResult,
+    paymentSubmissionEvent,
+  )
   if (!paymentProvider) {
     throw new OneBlinkAppsError(
       'It looks like you are attempting to make a payment using an unsupported payment method.',
@@ -192,7 +191,6 @@ export async function handlePaymentSubmissionEvent({
 
   const paymentConfiguration = await generatePaymentConfiguration(
     paymentProvider,
-    formSubmissionResult,
     {
       amount,
       redirectUrl: paymentReceiptUrl,
@@ -203,6 +201,7 @@ export async function handlePaymentSubmissionEvent({
 
   const payment = {
     submissionEvent: paymentSubmissionEvent,
+    paymentReceiptUrl,
     hostedFormUrl: paymentConfiguration.hostedFormUrl,
     paymentFormUrl,
     amount,
@@ -218,16 +217,13 @@ export async function handlePaymentSubmissionEvent({
   return payment
 }
 
-export async function handlePaymentFormQueryString(
-  query: Record<string, unknown>,
-  paymentReceiptUrl: string,
-) {
+export async function getFormSubmissionResultPayment(): Promise<{
+  formSubmissionResult: FormSubmissionResult
+  paymentSubmissionEvent: SubmissionEventTypes.FormPaymentEvent
+}> {
   const formSubmissionResult =
     await utilsService.getLocalForageItem<FormSubmissionResult | null>(KEY)
 
-  // If the current transaction does not match the submission
-  // we will display message to user indicating
-  // they are completing the wrong transaction.
   if (!formSubmissionResult) {
     throw new OneBlinkAppsError(
       'It looks like you are attempting to complete a transaction for an unknown payment.',
@@ -239,13 +235,10 @@ export async function handlePaymentFormQueryString(
     )
   }
 
-  const paymentFormProvider = getPaymentFormProvider(
-    formSubmissionResult.payment.submissionEvent,
-  )
-
-  return paymentFormProvider.handlePaymentFormQueryString(
-    query,
+  return {
     formSubmissionResult,
-    paymentReceiptUrl,
-  )
+    paymentSubmissionEvent: formSubmissionResult.payment?.submissionEvent,
+  }
 }
+
+export { westpacQuickStream }

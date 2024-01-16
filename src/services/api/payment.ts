@@ -1,5 +1,5 @@
 import { SubmissionEventTypes, SubmissionTypes } from '@oneblink/types'
-import { HTTPError, postRequest } from '../fetch'
+import { HTTPError, getRequest, postRequest } from '../fetch'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 import Sentry from '../../Sentry'
@@ -7,7 +7,76 @@ import {
   BasePaymentConfigurationPayload,
   PaymentProvider,
 } from '../../types/payments'
-import { FormSubmissionResult } from '../../types/submissions'
+
+async function getCustomFormPaymentConfiguration<T>(
+  path: string,
+  {
+    formSubmissionPaymentId,
+    integrationEnvironmentId,
+  }: {
+    formSubmissionPaymentId: string
+    integrationEnvironmentId: string
+  },
+  abortSignal?: AbortSignal,
+) {
+  const url = new URL(path, tenants.current.apiOrigin)
+  url.searchParams.append('formSubmissionPaymentId', formSubmissionPaymentId)
+  url.searchParams.append('integrationEnvironmentId', integrationEnvironmentId)
+
+  console.log('Attempting to get payment configuration', url.href)
+
+  try {
+    return await getRequest<T>(url.href, abortSignal)
+  } catch (err) {
+    const error = err as HTTPError
+    Sentry.captureException(error)
+    console.warn(
+      'Error occurred while attempting to retrieve configuration for payment',
+      error,
+    )
+    switch (error.status) {
+      case 401: {
+        throw new OneBlinkAppsError(
+          'You cannot retrieve payment configuration until you have logged in. Please login and try again.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+            requiresLogin: true,
+          },
+        )
+      }
+      case 403: {
+        throw new OneBlinkAppsError(
+          'You do not have access retrieve payment configuration. Please contact your administrator to gain the correct level of access.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+            requiresAccessRequest: true,
+          },
+        )
+      }
+      case 400:
+      case 404: {
+        throw new OneBlinkAppsError(
+          'We could not find the payment configuration. Please contact your administrator to ensure your application configuration has been completed successfully.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  }
+}
 
 async function completeWestpacQuickStreamTransaction(
   formId: number,
@@ -79,19 +148,14 @@ async function completeWestpacQuickStreamTransaction(
 
 async function generatePaymentConfiguration(
   paymentProvider: PaymentProvider<SubmissionEventTypes.FormPaymentEvent>,
-  formSubmissionResult: FormSubmissionResult,
   basePayload: BasePaymentConfigurationPayload,
 ) {
-  const { path, payload, interpretResponse } =
-    paymentProvider.preparePaymentConfiguration(
-      basePayload,
-      formSubmissionResult,
-    )
+  const { path, payload } =
+    paymentProvider.preparePaymentConfiguration(basePayload)
   const url = `${tenants.current.apiOrigin}${path}`
   console.log('Attempting to generate payment configuration', url)
   try {
-    const result = await postRequest<unknown>(url, payload)
-    return interpretResponse?.(result) || (result as { hostedFormUrl: string })
+    return await postRequest<{ hostedFormUrl: string }>(url, payload)
   } catch (err) {
     const error = err as HTTPError
     Sentry.captureException(error)
@@ -259,5 +323,6 @@ export {
   generatePaymentConfiguration,
   acknowledgeCPPayTransaction,
   verifyPaymentTransaction,
+  getCustomFormPaymentConfiguration,
   completeWestpacQuickStreamTransaction,
 }

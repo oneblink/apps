@@ -22,18 +22,18 @@ class CPPayPaymentProvider
 {
   constructor(
     paymentSubmissionEvent: SubmissionEventTypes.CPPaySubmissionEvent,
+    formSubmissionResult: FormSubmissionResult,
   ) {
     this.paymentSubmissionEvent = paymentSubmissionEvent
+    this.formSubmissionResult = formSubmissionResult
   }
 
   paymentSubmissionEvent: SubmissionEventTypes.CPPaySubmissionEvent
+  formSubmissionResult: FormSubmissionResult
 
-  preparePaymentConfiguration(
-    basePayload: BasePaymentConfigurationPayload,
-    formSubmissionResult: FormSubmissionResult,
-  ) {
+  preparePaymentConfiguration(basePayload: BasePaymentConfigurationPayload) {
     return {
-      path: `/forms/${formSubmissionResult.definition.id}/cp-pay-payment`,
+      path: `/forms/${this.formSubmissionResult.definition.id}/cp-pay-payment`,
       payload: {
         ...basePayload,
         integrationGatewayId:
@@ -42,17 +42,14 @@ class CPPayPaymentProvider
     }
   }
 
-  async verifyPaymentTransaction(
-    query: Record<string, unknown>,
-    submissionResult: FormSubmissionResult,
-  ) {
+  async verifyPaymentTransaction(query: Record<string, unknown>) {
     const { transactionId, externalReferenceId: submissionId } = query
     if (typeof transactionId !== 'string' || !submissionId) {
       throw new OneBlinkAppsError(
         'Transactions can not be verified unless navigating here directly after a payment.',
       )
     }
-    if (submissionResult.submissionId !== submissionId) {
+    if (this.formSubmissionResult.submissionId !== submissionId) {
       throw new OneBlinkAppsError(
         'It looks like you are attempting to view a receipt for the incorrect payment.',
       )
@@ -60,12 +57,12 @@ class CPPayPaymentProvider
 
     const transaction = await verifyPaymentTransaction<
       components['schemas']['TransactionDetailsViewModelResponseEnvelope']
-    >(`/forms/${submissionResult.definition.id}/cp-pay-verification`, {
+    >(`/forms/${this.formSubmissionResult.definition.id}/cp-pay-verification`, {
       transactionId,
       integrationGatewayId: this.paymentSubmissionEvent.configuration.gatewayId,
     })
     // Asynchronously acknowledge receipt
-    acknowledgeCPPayTransaction(submissionResult.definition.id, {
+    acknowledgeCPPayTransaction(this.formSubmissionResult.definition.id, {
       transactionId,
       integrationGatewayId: this.paymentSubmissionEvent.configuration.gatewayId,
     }).catch((error) => {
@@ -77,7 +74,7 @@ class CPPayPaymentProvider
 
     return {
       receiptItems: prepareReceiptItems([
-        generateSubmissionIdReceiptItem(submissionResult.submissionId),
+        generateSubmissionIdReceiptItem(this.formSubmissionResult.submissionId),
         {
           className: 'ob-payment-receipt__transaction-id',
           valueClassName: 'cypress-payment-receipt-transaction-id',
@@ -97,7 +94,7 @@ class CPPayPaymentProvider
         isSuccess: transaction.result?.responseType === 'Success',
         errorMessage: transaction.result?.errorCode,
       },
-      submissionResult,
+      submissionResult: this.formSubmissionResult,
     }
   }
 }

@@ -1,7 +1,7 @@
 import { SubmissionEventTypes } from '@oneblink/types'
 import {
   BasePaymentConfigurationPayload,
-  PaymentFormProvider,
+  PaymentProvider,
 } from '../../types/payments'
 import { FormSubmissionResult } from '../../types/submissions'
 import replaceInjectablesWithSubmissionValues from '../replaceInjectablesWithSubmissionValues'
@@ -12,85 +12,44 @@ import {
   generateSubmissionIdReceiptItem,
   prepareReceiptItems,
 } from './receipt-items'
-import { completeWestpacQuickStreamTransaction } from '../api/payment'
+import {
+  completeWestpacQuickStreamTransaction,
+  getCustomFormPaymentConfiguration,
+} from '../api/payment'
 
 export default class WestpacQuickStreamPaymentProvider
   implements
-    PaymentFormProvider<
-      SubmissionEventTypes.WestpacQuickStreamSubmissionEvent,
-      {
-        supplierBusinessCode: string
-        publishableApiKey: string
-        isTestMode: boolean
-      },
-      {
-        singleUseTokenId: string
-      }
-    >
+    PaymentProvider<SubmissionEventTypes.WestpacQuickStreamSubmissionEvent>
 {
   constructor(
     paymentSubmissionEvent: SubmissionEventTypes.WestpacQuickStreamSubmissionEvent,
+    formSubmissionResult: FormSubmissionResult,
   ) {
+    this.formSubmissionResult = formSubmissionResult
     this.paymentSubmissionEvent = paymentSubmissionEvent
   }
 
+  formSubmissionResult: FormSubmissionResult
   paymentSubmissionEvent: SubmissionEventTypes.WestpacQuickStreamSubmissionEvent
 
-  preparePaymentConfiguration(
-    { paymentFormUrl, ...basePayload }: BasePaymentConfigurationPayload,
-    formSubmissionResult: FormSubmissionResult,
-  ) {
-    if (!paymentFormUrl) {
+  preparePaymentConfiguration(payload: BasePaymentConfigurationPayload) {
+    if (!payload.submissionId) {
       throw new Error(
-        'Westpac QuickStream Payments require the "hostedFormUrl" option.',
+        'Westpac QuickStream Payments require the "submissionId" option.',
+      )
+    }
+    if (!payload.paymentFormUrl) {
+      throw new Error(
+        'Westpac QuickStream Payments require the "paymentFormUrl" option.',
       )
     }
     return {
-      path: `/forms/${formSubmissionResult.definition.id}/westpac-quick-stream-payment`,
-      payload: {
-        ...basePayload,
-        integrationEnvironmentId:
-          this.paymentSubmissionEvent.configuration.environmentId,
-      },
-      interpretResponse: (response: unknown) => {
-        const {
-          formSubmissionPaymentId,
-          supplierBusinessCode,
-          publishableApiKey,
-          isTestMode,
-        } = response as {
-          formSubmissionPaymentId: string
-          supplierBusinessCode: string
-          publishableApiKey: string
-          isTestMode: boolean
-        }
-        const url = new URL(paymentFormUrl)
-        url.searchParams.append(
-          'formSubmissionPaymentId',
-          formSubmissionPaymentId,
-        )
-        url.searchParams.append('isTestMode', isTestMode.toString())
-        url.searchParams.append('publishableApiKey', publishableApiKey)
-        url.searchParams.append('supplierBusinessCode', supplierBusinessCode)
-        url.searchParams.append(
-          'customerReferenceNumber',
-          replaceInjectablesWithSubmissionValues(
-            this.paymentSubmissionEvent.configuration.customerReferenceNumber,
-            formSubmissionResult,
-          ),
-        )
-        url.searchParams.append('amount', basePayload.amount.toString())
-        return {
-          hostedFormUrl: url.href,
-        }
-      },
+      path: `/forms/${this.formSubmissionResult.definition.id}/westpac-quick-stream-payment`,
+      payload,
     }
   }
 
-  async verifyPaymentTransaction(
-    query: Record<string, unknown>,
-    submissionResult: FormSubmissionResult,
-  ) {
+  async verifyPaymentTransaction(query: Record<string, unknown>) {
     const {
       paymentReferenceNumber,
       receiptNumber,
@@ -117,7 +76,7 @@ export default class WestpacQuickStreamPaymentProvider
         'Transactions can not be verified unless navigating here directly after a payment.',
       )
     }
-    if (submissionResult.submissionId !== paymentReferenceNumber) {
+    if (this.formSubmissionResult.submissionId !== paymentReferenceNumber) {
       throw new OneBlinkAppsError(
         'It looks like you are attempting to view a receipt for the incorrect payment.',
       )
@@ -125,7 +84,7 @@ export default class WestpacQuickStreamPaymentProvider
 
     return {
       receiptItems: prepareReceiptItems([
-        generateSubmissionIdReceiptItem(submissionResult.submissionId),
+        generateSubmissionIdReceiptItem(this.formSubmissionResult.submissionId),
         {
           className: 'ob-payment-receipt__transaction-id',
           valueClassName: 'cypress-payment-receipt-transaction-id',
@@ -141,125 +100,119 @@ export default class WestpacQuickStreamPaymentProvider
         isSuccess: summaryCode === '0',
         errorMessage: responseDescription,
       },
-      submissionResult,
+      submissionResult: this.formSubmissionResult,
     }
   }
+}
 
-  async handlePaymentFormQueryString(
-    query: Record<string, unknown>,
-    formSubmissionResult: FormSubmissionResult,
-    paymentReceiptUrl: string,
-  ): Promise<{
-    paymentFormConfiguration: {
+export async function getPaymentFormConfiguration({
+  formSubmissionResult,
+  formSubmissionPaymentId,
+  paymentSubmissionEvent,
+  abortSignal,
+}: {
+  formSubmissionResult: FormSubmissionResult
+  formSubmissionPaymentId: string
+  paymentSubmissionEvent: SubmissionEventTypes.WestpacQuickStreamSubmissionEvent
+  abortSignal: AbortSignal
+}): Promise<{
+  supplierBusinessCode: string
+  publishableApiKey: string
+  isTestMode: boolean
+}> {
+  const { supplierBusinessCode, publishableApiKey, isTestMode } =
+    await getCustomFormPaymentConfiguration<{
       supplierBusinessCode: string
       publishableApiKey: string
       isTestMode: boolean
-    }
-    completeTransaction(
-      payload: { singleUseTokenId: string },
-      abortSignal?: AbortSignal | undefined,
-    ): Promise<void>
-  }> {
-    const {
-      formSubmissionPaymentId,
-      supplierBusinessCode,
-      publishableApiKey,
-      isTestMode,
-      customerReferenceNumber,
-    } = query
+    }>(
+      `/forms/${formSubmissionResult.definition.id}/westpac-quick-stream-payment`,
+      {
+        integrationEnvironmentId:
+          paymentSubmissionEvent.configuration.environmentId,
+        formSubmissionPaymentId,
+      },
+      abortSignal,
+    )
 
+  return {
+    supplierBusinessCode,
+    publishableApiKey,
+    isTestMode,
+  }
+}
+
+export async function completeTransaction({
+  formSubmissionPaymentId,
+  formSubmissionResult,
+  paymentSubmissionEvent,
+  singleUseTokenId,
+  abortSignal,
+}: {
+  formSubmissionPaymentId: string
+  formSubmissionResult: FormSubmissionResult
+  paymentSubmissionEvent: SubmissionEventTypes.WestpacQuickStreamSubmissionEvent
+  singleUseTokenId: string
+  abortSignal?: AbortSignal
+}) {
+  if (!formSubmissionResult.payment) {
+    throw new Error(
+      '"formSubmissionResult.payment" must have a value to complete transactions',
+    )
+  }
+
+  const { formSubmissionPayment } = await completeWestpacQuickStreamTransaction(
+    formSubmissionResult.definition.id,
+    {
+      formSubmissionPaymentId,
+      singleUseTokenId,
+      integrationEnvironmentId:
+        paymentSubmissionEvent.configuration.environmentId,
+      customerReferenceNumber: replaceInjectablesWithSubmissionValues(
+        paymentSubmissionEvent.configuration.customerReferenceNumber,
+        formSubmissionResult,
+      ),
+      principalAmount: formSubmissionResult.payment.amount,
+    },
+    abortSignal,
+  )
+
+  const url = new URL(formSubmissionResult.payment.paymentReceiptUrl)
+  if (
+    formSubmissionPayment.type === 'WESTPAC_QUICK_STREAM' &&
+    formSubmissionPayment.paymentTransaction
+  ) {
+    url.searchParams.append(
+      'paymentReferenceNumber',
+      formSubmissionPayment.paymentTransaction.paymentReferenceNumber,
+    )
+    url.searchParams.append(
+      'receiptNumber',
+      formSubmissionPayment.paymentTransaction.receiptNumber,
+    )
+    url.searchParams.append(
+      'totalAmount',
+      formSubmissionPayment.paymentTransaction.totalAmount.amount.toString(),
+    )
+    url.searchParams.append(
+      'summaryCode',
+      formSubmissionPayment.paymentTransaction.summaryCode,
+    )
+    url.searchParams.append(
+      'responseDescription',
+      formSubmissionPayment.paymentTransaction.responseDescription,
+    )
     if (
-      typeof customerReferenceNumber !== 'string' ||
-      !customerReferenceNumber ||
-      typeof formSubmissionPaymentId !== 'string' ||
-      !formSubmissionPaymentId ||
-      typeof supplierBusinessCode !== 'string' ||
-      !supplierBusinessCode ||
-      typeof publishableApiKey !== 'string' ||
-      !publishableApiKey ||
-      typeof isTestMode !== 'string' ||
-      !isTestMode
+      formSubmissionPayment.paymentTransaction.creditCard
+        ?.maskedCardNumber4Digits
     ) {
-      throw new OneBlinkAppsError(
-        'It looks like you are attempting to view a receipt for a misconfigured payment.',
+      url.searchParams.append(
+        'maskedCardNumber4Digits',
+        formSubmissionPayment.paymentTransaction.creditCard
+          ?.maskedCardNumber4Digits,
       )
     }
-
-    return {
-      paymentFormConfiguration: {
-        supplierBusinessCode,
-        publishableApiKey,
-        isTestMode: isTestMode === 'true',
-      },
-      completeTransaction: async (
-        {
-          singleUseTokenId,
-        }: {
-          singleUseTokenId: string
-        },
-        abortSignal?: AbortSignal,
-      ) => {
-        if (
-          formSubmissionResult.payment?.submissionEvent.type !==
-          'WESTPAC_QUICK_STREAM'
-        ) {
-          throw new Error('')
-        }
-
-        const { formSubmissionPayment } =
-          await completeWestpacQuickStreamTransaction(
-            formSubmissionResult.definition.id,
-            {
-              formSubmissionPaymentId,
-              singleUseTokenId,
-              integrationEnvironmentId:
-                formSubmissionResult.payment.submissionEvent.configuration
-                  .environmentId,
-              customerReferenceNumber,
-              principalAmount: formSubmissionResult.payment.amount,
-            },
-            abortSignal,
-          )
-
-        const url = new URL(paymentReceiptUrl)
-        if (
-          formSubmissionPayment.type === 'WESTPAC_QUICK_STREAM' &&
-          formSubmissionPayment.paymentTransaction
-        ) {
-          url.searchParams.append(
-            'paymentReferenceNumber',
-            formSubmissionPayment.paymentTransaction.paymentReferenceNumber,
-          )
-          url.searchParams.append(
-            'receiptNumber',
-            formSubmissionPayment.paymentTransaction.receiptNumber,
-          )
-          url.searchParams.append(
-            'totalAmount',
-            formSubmissionPayment.paymentTransaction.totalAmount.amount.toString(),
-          )
-          url.searchParams.append(
-            'summaryCode',
-            formSubmissionPayment.paymentTransaction.summaryCode,
-          )
-          url.searchParams.append(
-            'responseDescription',
-            formSubmissionPayment.paymentTransaction.responseDescription,
-          )
-          if (
-            formSubmissionPayment.paymentTransaction.creditCard
-              ?.maskedCardNumber4Digits
-          ) {
-            url.searchParams.append(
-              'maskedCardNumber4Digits',
-              formSubmissionPayment.paymentTransaction.creditCard
-                ?.maskedCardNumber4Digits,
-            )
-          }
-        }
-
-        window.location.replace(url.href)
-      },
-    }
   }
+
+  window.location.replace(url.href)
 }

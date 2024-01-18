@@ -13,26 +13,46 @@ import BPOINTPaymentProvider from './services/payment-providers/BPOINTPaymentPro
 import CPPayPaymentProvider from './services/payment-providers/CPPayPaymentProvider'
 import NSWGovPayPaymentProvider from './services/payment-providers/NSWGovPayPaymentProvider'
 import WestpacQuickWebPaymentProvider from './services/payment-providers/WestpacQuickWebPaymentProvider'
+import WestpacQuickStreamPaymentProvider, * as westpacQuickStream from './services/payment-providers/WestpacQuickStreamPaymentProvider'
 
 const KEY = 'PAYMENT_SUBMISSION_RESULT'
 
-export { HandlePaymentResult, PaymentReceiptItem }
+export { HandlePaymentResult, PaymentReceiptItem, westpacQuickStream }
 
 function getPaymentProvider(
+  formSubmissionResult: FormSubmissionResult,
   paymentSubmissionEvent: SubmissionEventTypes.FormPaymentEvent,
 ): PaymentProvider<SubmissionEventTypes.FormPaymentEvent> {
   switch (paymentSubmissionEvent.type) {
     case 'BPOINT': {
-      return new BPOINTPaymentProvider(paymentSubmissionEvent)
+      return new BPOINTPaymentProvider(
+        paymentSubmissionEvent,
+        formSubmissionResult,
+      )
     }
     case 'CP_PAY': {
-      return new CPPayPaymentProvider(paymentSubmissionEvent)
+      return new CPPayPaymentProvider(
+        paymentSubmissionEvent,
+        formSubmissionResult,
+      )
     }
     case 'NSW_GOV_PAY': {
-      return new NSWGovPayPaymentProvider(paymentSubmissionEvent)
+      return new NSWGovPayPaymentProvider(
+        paymentSubmissionEvent,
+        formSubmissionResult,
+      )
     }
     case 'WESTPAC_QUICK_WEB': {
-      return new WestpacQuickWebPaymentProvider(paymentSubmissionEvent)
+      return new WestpacQuickWebPaymentProvider(
+        paymentSubmissionEvent,
+        formSubmissionResult,
+      )
+    }
+    case 'WESTPAC_QUICK_STREAM': {
+      return new WestpacQuickStreamPaymentProvider(
+        paymentSubmissionEvent,
+        formSubmissionResult,
+      )
     }
   }
 }
@@ -60,35 +80,31 @@ function getPaymentProvider(
 export async function handlePaymentQuerystring(
   query: Record<string, unknown>,
 ): Promise<HandlePaymentResult> {
-  return utilsService
-    .getLocalForageItem<FormSubmissionResult | null>(KEY)
-    .then((submissionResult) => {
-      // If the current transaction does not match the submission
-      // we will display message to user indicating
-      // they are looking for the wrong transaction receipt.
-      if (!submissionResult) {
-        throw new OneBlinkAppsError(
-          'It looks like you are attempting to view a receipt for an unknown payment.',
-        )
-      }
-      if (
-        !submissionResult.payment ||
-        !submissionResult.payment.submissionEvent
-      ) {
-        throw new OneBlinkAppsError(
-          'It looks like you are attempting to view a receipt for a misconfigured payment.',
-        )
-      }
-      const paymentProvider = getPaymentProvider(
-        submissionResult.payment.submissionEvent,
-      )
-      if (!paymentProvider) {
-        throw new OneBlinkAppsError(
-          'It looks like you are attempting to view a receipt for an unsupported payment.',
-        )
-      }
-      return paymentProvider.verifyPaymentTransaction(query, submissionResult)
-    })
+  const submissionResult =
+    await utilsService.getLocalForageItem<FormSubmissionResult | null>(KEY)
+  // If the current transaction does not match the submission
+  // we will display message to user indicating
+  // they are looking for the wrong transaction receipt.
+  if (!submissionResult) {
+    throw new OneBlinkAppsError(
+      'It looks like you are attempting to view a receipt for an unknown payment.',
+    )
+  }
+  if (!submissionResult.payment || !submissionResult.payment.submissionEvent) {
+    throw new OneBlinkAppsError(
+      'It looks like you are attempting to view a receipt for a misconfigured payment.',
+    )
+  }
+  const paymentProvider = getPaymentProvider(
+    submissionResult,
+    submissionResult.payment.submissionEvent,
+  )
+  if (!paymentProvider) {
+    throw new OneBlinkAppsError(
+      'It looks like you are attempting to view a receipt for an unsupported payment.',
+    )
+  }
+  return await paymentProvider.verifyPaymentTransaction(query)
 }
 
 export function checkForPaymentSubmissionEvent(formSubmission: FormSubmission):
@@ -155,13 +171,18 @@ export async function handlePaymentSubmissionEvent({
   formSubmissionResult,
   paymentSubmissionEvent,
   paymentReceiptUrl,
+  paymentFormUrl,
 }: {
   amount: number
   formSubmissionResult: FormSubmissionResult
   paymentSubmissionEvent: SubmissionEventTypes.FormPaymentEvent
   paymentReceiptUrl: string
+  paymentFormUrl: string | undefined
 }): Promise<FormSubmissionResult['payment']> {
-  const paymentProvider = getPaymentProvider(paymentSubmissionEvent)
+  const paymentProvider = getPaymentProvider(
+    formSubmissionResult,
+    paymentSubmissionEvent,
+  )
   if (!paymentProvider) {
     throw new OneBlinkAppsError(
       'It looks like you are attempting to make a payment using an unsupported payment method.',
@@ -170,17 +191,19 @@ export async function handlePaymentSubmissionEvent({
 
   const paymentConfiguration = await generatePaymentConfiguration(
     paymentProvider,
-    formSubmissionResult,
     {
       amount,
       redirectUrl: paymentReceiptUrl,
       submissionId: formSubmissionResult.submissionId,
+      paymentFormUrl,
     },
   )
 
   const payment = {
     submissionEvent: paymentSubmissionEvent,
+    paymentReceiptUrl,
     hostedFormUrl: paymentConfiguration.hostedFormUrl,
+    paymentFormUrl,
     amount,
   }
   console.log('Created Payment configuration to start transaction', payment)
@@ -192,4 +215,28 @@ export async function handlePaymentSubmissionEvent({
   })
 
   return payment
+}
+
+export async function getFormSubmissionResultPayment(): Promise<{
+  formSubmissionResult: FormSubmissionResult
+  paymentSubmissionEvent: SubmissionEventTypes.FormPaymentEvent
+}> {
+  const formSubmissionResult =
+    await utilsService.getLocalForageItem<FormSubmissionResult | null>(KEY)
+
+  if (!formSubmissionResult) {
+    throw new OneBlinkAppsError(
+      'It looks like you are attempting to complete a transaction for an unknown payment.',
+    )
+  }
+  if (!formSubmissionResult.payment?.submissionEvent) {
+    throw new OneBlinkAppsError(
+      'It looks like you are attempting to complete a transaction for a misconfigured payment.',
+    )
+  }
+
+  return {
+    formSubmissionResult,
+    paymentSubmissionEvent: formSubmissionResult.payment?.submissionEvent,
+  }
 }

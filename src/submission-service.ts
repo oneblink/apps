@@ -120,6 +120,8 @@ async function processPendingQueue({
         },
         shouldRunExternalIdGeneration,
         shouldRunServerValidation,
+        paymentFormUrl: undefined,
+        paymentReceiptUrl: undefined,
       })
 
       await removePendingQueueSubmission(

@@ -19,18 +19,18 @@ class BPOINTPaymentProvider
 {
   constructor(
     paymentSubmissionEvent: SubmissionEventTypes.BPOINTSubmissionEvent,
+    formSubmissionResult: FormSubmissionResult,
   ) {
     this.paymentSubmissionEvent = paymentSubmissionEvent
+    this.formSubmissionResult = formSubmissionResult
   }
 
   paymentSubmissionEvent: SubmissionEventTypes.BPOINTSubmissionEvent
+  formSubmissionResult: FormSubmissionResult
 
-  preparePaymentConfiguration(
-    basePayload: BasePaymentConfigurationPayload,
-    formSubmissionResult: FormSubmissionResult,
-  ) {
+  preparePaymentConfiguration(basePayload: BasePaymentConfigurationPayload) {
     return {
-      path: `/forms/${formSubmissionResult.definition.id}/bpoint-payment`,
+      path: `/forms/${this.formSubmissionResult.definition.id}/bpoint-payment`,
       payload: {
         ...basePayload,
         integrationEnvironmentId:
@@ -39,22 +39,19 @@ class BPOINTPaymentProvider
           this.paymentSubmissionEvent.configuration.crn2 &&
           replaceInjectablesWithSubmissionValues(
             this.paymentSubmissionEvent.configuration.crn2,
-            formSubmissionResult,
+            this.formSubmissionResult,
           ),
         crn3:
           this.paymentSubmissionEvent.configuration.crn3 &&
           replaceInjectablesWithSubmissionValues(
             this.paymentSubmissionEvent.configuration.crn3,
-            formSubmissionResult,
+            this.formSubmissionResult,
           ),
       },
     }
   }
 
-  async verifyPaymentTransaction(
-    query: Record<string, unknown>,
-    formSubmissionResult: FormSubmissionResult,
-  ) {
+  async verifyPaymentTransaction(query: Record<string, unknown>) {
     const { ResultKey: transactionToken } = query
     if (!transactionToken) {
       throw new OneBlinkAppsError(
@@ -70,19 +67,22 @@ class BPOINTPaymentProvider
       }
       Amount: number
       Crn1: string | null
-    }>(`/forms/${formSubmissionResult.definition.id}/bpoint-verification`, {
-      transactionToken,
-      integrationEnvironmentId:
-        this.paymentSubmissionEvent.configuration.environmentId,
-    })
-    if (formSubmissionResult.submissionId !== transaction.Crn1) {
+    }>(
+      `/forms/${this.formSubmissionResult.definition.id}/bpoint-verification`,
+      {
+        transactionToken,
+        integrationEnvironmentId:
+          this.paymentSubmissionEvent.configuration.environmentId,
+      },
+    )
+    if (this.formSubmissionResult.submissionId !== transaction.Crn1) {
       throw new OneBlinkAppsError(
         'It looks like you are attempting to view a receipt for the incorrect payment.',
       )
     }
     return {
       receiptItems: prepareReceiptItems([
-        generateSubmissionIdReceiptItem(formSubmissionResult.submissionId),
+        generateSubmissionIdReceiptItem(this.formSubmissionResult.submissionId),
         {
           className: 'ob-payment-receipt__transaction-id',
           valueClassName: 'cypress-payment-receipt-transaction-id',
@@ -100,7 +100,7 @@ class BPOINTPaymentProvider
         isSuccess: transaction.ResponseCode === '0',
         errorMessage: transaction.ResponseText,
       },
-      submissionResult: formSubmissionResult,
+      submissionResult: this.formSubmissionResult,
     }
   }
 }

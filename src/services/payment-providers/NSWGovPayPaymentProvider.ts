@@ -20,46 +20,43 @@ class NSWGovPayPaymentProvider
 {
   constructor(
     paymentSubmissionEvent: SubmissionEventTypes.NSWGovPaySubmissionEvent,
+    formSubmissionResult: FormSubmissionResult,
   ) {
     this.paymentSubmissionEvent = paymentSubmissionEvent
+    this.formSubmissionResult = formSubmissionResult
   }
 
   paymentSubmissionEvent: SubmissionEventTypes.NSWGovPaySubmissionEvent
+  formSubmissionResult: FormSubmissionResult
 
-  preparePaymentConfiguration(
-    basePayload: BasePaymentConfigurationPayload,
-    formSubmissionResult: FormSubmissionResult,
-  ) {
+  preparePaymentConfiguration(basePayload: BasePaymentConfigurationPayload) {
     return {
-      path: `/forms/${formSubmissionResult.definition.id}/nsw-gov-pay-payment`,
+      path: `/forms/${this.formSubmissionResult.definition.id}/nsw-gov-pay-payment`,
       payload: {
         ...basePayload,
         integrationPrimaryAgencyId:
           this.paymentSubmissionEvent.configuration.primaryAgencyId,
         productDescription: replaceInjectablesWithSubmissionValues(
           this.paymentSubmissionEvent.configuration.productDescription,
-          formSubmissionResult,
+          this.formSubmissionResult,
         ),
         customerReference:
           this.paymentSubmissionEvent.configuration.customerReference &&
           replaceInjectablesWithSubmissionValues(
             this.paymentSubmissionEvent.configuration.customerReference,
-            formSubmissionResult,
+            this.formSubmissionResult,
           ),
         subAgencyCode:
           this.paymentSubmissionEvent.configuration.subAgencyCode &&
           replaceInjectablesWithSubmissionValues(
             this.paymentSubmissionEvent.configuration.subAgencyCode,
-            formSubmissionResult,
+            this.formSubmissionResult,
           ),
       },
     }
   }
 
-  async verifyPaymentTransaction(
-    query: Record<string, unknown>,
-    submissionResult: FormSubmissionResult,
-  ) {
+  async verifyPaymentTransaction(query: Record<string, unknown>) {
     const {
       submissionId,
       isSuccess,
@@ -92,7 +89,7 @@ class NSWGovPayPaymentProvider
       )
     }
 
-    if (submissionResult.submissionId !== submissionId) {
+    if (this.formSubmissionResult.submissionId !== submissionId) {
       throw new OneBlinkAppsError(
         'It looks like you are attempting to view a receipt for the incorrect payment.',
       )
@@ -100,7 +97,7 @@ class NSWGovPayPaymentProvider
 
     return {
       receiptItems: prepareReceiptItems([
-        generateSubmissionIdReceiptItem(submissionResult.submissionId),
+        generateSubmissionIdReceiptItem(this.formSubmissionResult.submissionId),
         generateReceiptItem({
           className: 'ob-payment-receipt__completion-reference',
           valueClassName: 'cypress-payment-receipt-completion-reference',
@@ -166,7 +163,7 @@ class NSWGovPayPaymentProvider
         isSuccess: isSuccess === 'true',
         errorMessage,
       },
-      submissionResult,
+      submissionResult: this.formSubmissionResult,
     }
   }
 }

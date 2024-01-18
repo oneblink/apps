@@ -31,21 +31,21 @@ export type BasePaymentConfigurationPayload = {
   amount: number
   redirectUrl: string
   submissionId: string | null
+  paymentFormUrl?: string
 }
 
-export interface PaymentProvider<T extends SubmissionEventTypes.FormEventBase> {
+export interface PaymentProvider<
+  T extends SubmissionEventTypes.FormPaymentEvent,
+> {
+  formSubmissionResult: FormSubmissionResult
   paymentSubmissionEvent: T
 
-  preparePaymentConfiguration(
-    basePayload: BasePaymentConfigurationPayload,
-    formSubmissionResult: FormSubmissionResult,
-  ): {
+  preparePaymentConfiguration(basePayload: BasePaymentConfigurationPayload): {
     path: string
     payload: BasePaymentConfigurationPayload
   }
 
   verifyPaymentTransaction(
     query: Record<string, unknown>,
-    formSubmissionResult: FormSubmissionResult,
   ): Promise<HandlePaymentResult>
 }

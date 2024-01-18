@@ -3,7 +3,7 @@ import utilsService from './utils'
 import { SubmissionEventTypes } from '@oneblink/types'
 import { schedulingService } from '@oneblink/sdk-core'
 import { FormSubmissionResult, BaseFormSubmission } from '../types/submissions'
-const KEY = 'SCHEDULING_SUBMISSION_RESULT'
+export const KEY = 'SCHEDULING_SUBMISSION_RESULT'
 
 type SchedulingBooking = {
   startTime: Date
@@ -39,7 +39,8 @@ async function handleSchedulingSubmissionEvent({
     schedulingReceiptUrl: string
     schedulingCancelUrl: string
   }
-  paymentReceiptUrl?: string
+  paymentReceiptUrl: string | undefined
+  paymentFormUrl: string | undefined
 }): Promise<FormSubmissionResult['scheduling']> {
   console.log(
     'Attempting to handle submission with scheduling submission event',

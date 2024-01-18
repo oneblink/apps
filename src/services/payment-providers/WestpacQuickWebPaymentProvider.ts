@@ -19,18 +19,18 @@ class WestpacQuickWebPaymentProvider
 {
   constructor(
     paymentSubmissionEvent: SubmissionEventTypes.WestpacQuickWebSubmissionEvent,
+    formSubmissionResult: FormSubmissionResult,
   ) {
     this.paymentSubmissionEvent = paymentSubmissionEvent
+    this.formSubmissionResult = formSubmissionResult
   }
 
   paymentSubmissionEvent: SubmissionEventTypes.WestpacQuickWebSubmissionEvent
+  formSubmissionResult: FormSubmissionResult
 
-  preparePaymentConfiguration(
-    basePayload: BasePaymentConfigurationPayload,
-    formSubmissionResult: FormSubmissionResult,
-  ) {
+  preparePaymentConfiguration(basePayload: BasePaymentConfigurationPayload) {
     return {
-      path: `/forms/${formSubmissionResult.definition.id}/westpac-quick-web-payment`,
+      path: `/forms/${this.formSubmissionResult.definition.id}/westpac-quick-web-payment`,
       payload: {
         ...basePayload,
         integrationEnvironmentId:
@@ -39,16 +39,13 @@ class WestpacQuickWebPaymentProvider
           this.paymentSubmissionEvent.configuration.customerReferenceNumber &&
           replaceInjectablesWithSubmissionValues(
             this.paymentSubmissionEvent.configuration.customerReferenceNumber,
-            formSubmissionResult,
+            this.formSubmissionResult,
           ),
       },
     }
   }
 
-  async verifyPaymentTransaction(
-    query: Record<string, unknown>,
-    submissionResult: FormSubmissionResult,
-  ) {
+  async verifyPaymentTransaction(query: Record<string, unknown>) {
     const {
       paymentReference,
       receiptNumber,
@@ -76,7 +73,7 @@ class WestpacQuickWebPaymentProvider
         'Transactions can not be verified unless navigating here directly after a payment.',
       )
     }
-    if (submissionResult.submissionId !== paymentReference) {
+    if (this.formSubmissionResult.submissionId !== paymentReference) {
       throw new OneBlinkAppsError(
         'It looks like you are attempting to view a receipt for the incorrect payment.',
       )
@@ -84,7 +81,7 @@ class WestpacQuickWebPaymentProvider
 
     return {
       receiptItems: prepareReceiptItems([
-        generateSubmissionIdReceiptItem(submissionResult.submissionId),
+        generateSubmissionIdReceiptItem(this.formSubmissionResult.submissionId),
         {
           className: 'ob-payment-receipt__transaction-id',
           valueClassName: 'cypress-payment-receipt-transaction-id',
@@ -100,7 +97,7 @@ class WestpacQuickWebPaymentProvider
         isSuccess: summaryCode === '0',
         errorMessage: responseDescription,
       },
-      submissionResult,
+      submissionResult: this.formSubmissionResult,
     }
   }
 }

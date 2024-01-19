@@ -130,11 +130,10 @@ export async function getPaymentFormConfiguration({
       publishableApiKey: string
       isTestMode: boolean
     }>(
-      `/forms/${formSubmissionResult.definition.id}/westpac-quick-stream-payment`,
+      `/forms/${formSubmissionResult.definition.id}/westpac-quick-stream-payment/${formSubmissionPaymentId}`,
       {
         integrationEnvironmentId:
           paymentSubmissionEvent.configuration.environmentId,
-        formSubmissionPaymentId,
       },
       abortSignal,
     )

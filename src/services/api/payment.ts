@@ -11,16 +11,13 @@ import {
 async function getCustomFormPaymentConfiguration<T>(
   path: string,
   {
-    formSubmissionPaymentId,
     integrationEnvironmentId,
   }: {
-    formSubmissionPaymentId: string
     integrationEnvironmentId: string
   },
   abortSignal?: AbortSignal,
 ) {
   const url = new URL(path, tenants.current.apiOrigin)
-  url.searchParams.append('formSubmissionPaymentId', formSubmissionPaymentId)
   url.searchParams.append('integrationEnvironmentId', integrationEnvironmentId)
 
   console.log('Attempting to get payment configuration', url.href)

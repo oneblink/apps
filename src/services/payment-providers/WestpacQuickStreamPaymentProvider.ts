@@ -16,6 +16,10 @@ import {
   completeWestpacQuickStreamTransaction,
   getCustomFormPaymentConfiguration,
 } from '../api/payment'
+import { deleteRequest } from '../fetch'
+import Sentry from '../../Sentry'
+import { HTTPError } from '../fetch'
+import { isOffline } from '../../offline-service'
 
 export default class WestpacQuickStreamPaymentProvider
   implements
@@ -215,4 +219,50 @@ export async function completeTransaction({
   }
 
   window.location.replace(url.href)
+}
+
+export async function cancelPayment(
+  formId: number,
+  formSubmissionPaymentId: string,
+  abortSignal?: AbortSignal,
+) {
+  try {
+    const url = `/forms/${formId}/westpac-quick-stream-payment/${formSubmissionPaymentId}`
+    return await deleteRequest(url, abortSignal)
+  } catch (error) {
+    Sentry.captureException(error)
+
+    const httpError = error as HTTPError
+    if (isOffline()) {
+      throw new OneBlinkAppsError(
+        'You are currently offline, please connect to the internet to continue',
+        {
+          originalError: httpError,
+          isOffline: true,
+        },
+      )
+    }
+    switch (httpError.status) {
+      case 400:
+      case 404: {
+        throw new OneBlinkAppsError(
+          'We could not find the form you are looking for. Please contact support if the problem persists.',
+          {
+            originalError: httpError,
+            title: 'Unknown Form',
+            httpStatusCode: httpError.status,
+          },
+        )
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: httpError,
+            httpStatusCode: httpError.status,
+          },
+        )
+      }
+    }
+  }
 }

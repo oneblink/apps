@@ -1,5 +1,5 @@
 import { SubmissionEventTypes, SubmissionTypes } from '@oneblink/types'
-import { HTTPError, getRequest, postRequest } from '../fetch'
+import { HTTPError, deleteRequest, getRequest, postRequest } from '../fetch'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 import Sentry from '../../Sentry'
@@ -7,6 +7,7 @@ import {
   BasePaymentConfigurationPayload,
   PaymentProvider,
 } from '../../types/payments'
+import { isOffline } from '../../offline-service'
 
 async function getCustomFormPaymentConfiguration<T>(
   path: string,
@@ -136,6 +137,53 @@ async function completeWestpacQuickStreamTransaction(
           {
             originalError: error,
             httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  }
+}
+
+async function cancelWestpacQuickStreamPayment(
+  formId: number,
+  formSubmissionPaymentId: string,
+  abortSignal?: AbortSignal,
+) {
+  try {
+    const url = `${tenants.current.apiOrigin}/forms/${formId}/westpac-quick-stream-payment/${formSubmissionPaymentId}`
+    console.log('Attempting to cancel Westpac QuickStream payment', url)
+    return await deleteRequest(url, abortSignal)
+  } catch (error) {
+    Sentry.captureException(error)
+
+    const httpError = error as HTTPError
+    if (isOffline()) {
+      throw new OneBlinkAppsError(
+        'You are currently offline, please connect to the internet to continue',
+        {
+          originalError: httpError,
+          isOffline: true,
+        },
+      )
+    }
+    switch (httpError.status) {
+      case 400:
+      case 404: {
+        throw new OneBlinkAppsError(
+          'We could not find the form you are looking for. Please contact support if the problem persists.',
+          {
+            originalError: httpError,
+            title: 'Unknown Form',
+            httpStatusCode: httpError.status,
+          },
+        )
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: httpError,
+            httpStatusCode: httpError.status,
           },
         )
       }
@@ -319,4 +367,5 @@ export {
   verifyPaymentTransaction,
   getCustomFormPaymentConfiguration,
   completeWestpacQuickStreamTransaction,
+  cancelWestpacQuickStreamPayment,
 }

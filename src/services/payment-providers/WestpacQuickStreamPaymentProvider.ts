@@ -13,13 +13,10 @@ import {
   prepareReceiptItems,
 } from './receipt-items'
 import {
+  cancelWestpacQuickStreamPayment,
   completeWestpacQuickStreamTransaction,
   getCustomFormPaymentConfiguration,
 } from '../api/payment'
-import { deleteRequest } from '../fetch'
-import Sentry from '../../Sentry'
-import { HTTPError } from '../fetch'
-import { isOffline } from '../../offline-service'
 
 export default class WestpacQuickStreamPaymentProvider
   implements
@@ -217,51 +214,49 @@ export async function completeTransaction({
     }
   }
 
-  window.location.replace(url.href)
+  return {
+    formSubmissionPayment,
+    paymentReceiptUrl: url.href,
+  }
 }
 
-export async function cancelPayment(
-  formId: number,
-  formSubmissionPaymentId: string,
-  abortSignal?: AbortSignal,
-) {
-  try {
-    const url = `/forms/${formId}/westpac-quick-stream-payment/${formSubmissionPaymentId}`
-    return await deleteRequest(url, abortSignal)
-  } catch (error) {
-    Sentry.captureException(error)
+export async function cancelPayment({
+  formSubmissionPaymentId,
+  formSubmissionResult,
+  abortSignal,
+}: {
+  formSubmissionPaymentId: string
+  formSubmissionResult: FormSubmissionResult
+  abortSignal?: AbortSignal
+}) {
+  if (!formSubmissionResult.payment) {
+    throw new Error(
+      '"formSubmissionResult.payment" must have a value to cancel payments',
+    )
+  }
 
-    const httpError = error as HTTPError
-    if (isOffline()) {
-      throw new OneBlinkAppsError(
-        'You are currently offline, please connect to the internet to continue',
-        {
-          originalError: httpError,
-          isOffline: true,
-        },
-      )
-    }
-    switch (httpError.status) {
-      case 400:
-      case 404: {
-        throw new OneBlinkAppsError(
-          'We could not find the form you are looking for. Please contact support if the problem persists.',
-          {
-            originalError: httpError,
-            title: 'Unknown Form',
-            httpStatusCode: httpError.status,
-          },
-        )
-      }
-      default: {
-        throw new OneBlinkAppsError(
-          'An unknown error has occurred. Please contact support if the problem persists.',
-          {
-            originalError: httpError,
-            httpStatusCode: httpError.status,
-          },
-        )
-      }
-    }
+  await cancelWestpacQuickStreamPayment(
+    formSubmissionResult.definition.id,
+    formSubmissionPaymentId,
+    abortSignal,
+  )
+
+  const url = new URL(formSubmissionResult.payment.paymentReceiptUrl)
+  if (formSubmissionResult.submissionId) {
+    url.searchParams.append(
+      'paymentReferenceNumber',
+      formSubmissionResult.submissionId,
+    )
+  }
+  url.searchParams.append('receiptNumber', formSubmissionPaymentId)
+  url.searchParams.append(
+    'totalAmount',
+    formSubmissionResult.payment.amount.toString(),
+  )
+  url.searchParams.append('summaryCode', '1')
+  url.searchParams.append('responseDescription', 'Payment Cancelled')
+
+  return {
+    paymentReceiptUrl: url.href,
   }
 }

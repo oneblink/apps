@@ -147,12 +147,14 @@ export async function completeTransaction({
   formSubmissionResult,
   paymentSubmissionEvent,
   singleUseTokenId,
+  captchaToken,
   abortSignal,
 }: {
   formSubmissionPaymentId: string
   formSubmissionResult: FormSubmissionResult
   paymentSubmissionEvent: SubmissionEventTypes.WestpacQuickStreamSubmissionEvent
   singleUseTokenId: string
+  captchaToken: string
   abortSignal?: AbortSignal
 }) {
   if (!formSubmissionResult.payment) {
@@ -173,6 +175,9 @@ export async function completeTransaction({
         formSubmissionResult,
       ),
       principalAmount: formSubmissionResult.payment.amount,
+      recaptcha: {
+        token: captchaToken,
+      },
     },
     abortSignal,
   )

@@ -84,6 +84,9 @@ async function completeWestpacQuickStreamTransaction(
     integrationEnvironmentId: string
     customerReferenceNumber: string
     principalAmount: number
+    recaptcha: {
+      token: string
+    }
   },
   abortSignal?: AbortSignal,
 ) {

@@ -460,7 +460,8 @@ let _isSyncingDrafts = false
 
 /**
  * Force a sync of remote drafts with locally stored drafts. This function will
- * swallow all errors thrown unless `true` is passed for the `throwError` property.
+ * swallow all errors thrown unless `true` is passed for the `throwError`
+ * property.
  *
  * #### Example
  *

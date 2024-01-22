@@ -63,9 +63,8 @@ export type FormStoreParameters = {
  *
  * ```js
  * const formId = 1
- * const { formElements } = await formStoreService.getFormStoreDefinition(
- *   formId,
- * )
+ * const { formElements } =
+ *   await formStoreService.getFormStoreDefinition(formId)
  * ```
  *
  * @param formId The identified of the form you want to get the definition of
@@ -158,7 +157,8 @@ export async function searchFormStoreRecords(
  *
  * @param fileName Name of the file to download. ".csv" will be added to the end
  *   of the file name if not passed
- * @param searchParameters Search parameters for filtering, sorting, and including columns
+ * @param searchParameters Search parameters for filtering, sorting, and
+ *   including columns
  * @param abortSignal An AbortSignal to abort the request
  * @returns
  */

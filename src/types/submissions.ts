@@ -69,7 +69,10 @@ export type FormSubmission = DraftSubmission &
       taskGroup: ScheduledTasksTypes.TaskGroup | undefined
       /** The task group instance */
       taskGroupInstance: ScheduledTasksTypes.TaskGroupInstance | undefined
-      /** The URL to redirect the user to after completing the task via form submission */
+      /**
+       * The URL to redirect the user to after completing the task via form
+       * submission
+       */
       redirectUrl: string
     }
   }
@@ -85,7 +88,10 @@ export type FormSubmissionResult = FormSubmission & {
     amount: number
     /** The URL to redirect the user to after payment to display a receipt */
     paymentReceiptUrl: string
-    /** The URL to redirect the user to to make a payment for a form hosted by customer instead of payment provider */
+    /**
+     * The URL to redirect the user to to make a payment for a form hosted by
+     * customer instead of payment provider
+     */
     paymentFormUrl: string | undefined
     /** The URL to redirect the user to to complete the payment process */
     hostedFormUrl: string
@@ -99,7 +105,10 @@ export type FormSubmissionResult = FormSubmission & {
     /** The scheduling submission event */
     submissionEvent: SubmissionEventTypes.SchedulingSubmissionEvent
   } | null
-  /** `true` if the submission was not submitted yet and was added to the pending queue */
+  /**
+   * `true` if the submission was not submitted yet and was added to the pending
+   * queue
+   */
   isInPendingQueue: boolean
   /** `true` if the submission was attempted offline */
   isOffline: boolean

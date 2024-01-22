@@ -13,7 +13,8 @@ export * as offlineService from './offline-service'
  *
  * Helper functions for handling user authentication and authorisation.
  *
- * **NOTE: `init()` must be called before using some of the functions in this service.**
+ * **NOTE: `init()` must be called before using some of the functions in this
+ * service.**
  *
  * ```js
  * import { authService } from '@oneblink/apps'
@@ -103,7 +104,8 @@ export * as autoSaveService from './auto-save-service'
  *
  * To display push notifications and allow them to be clicked to open the
  * application, add the following JavaScript to your service worker (we
- * recommend using [offline-plugin](https://www.npmjs.com/package/offline-plugin)):
+ * recommend using
+ * [offline-plugin](https://www.npmjs.com/package/offline-plugin)):
  *
  * #### Example
  *

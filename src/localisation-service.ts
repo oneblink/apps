@@ -105,7 +105,8 @@ export function getFlatpickrFormats() {
 }
 
 /**
- * Format a `Date` as a `string` that just contains the date portion e.g. _31/01/2020_
+ * Format a `Date` as a `string` that just contains the date portion e.g.
+ * _31/01/2020_
  *
  * #### Example
  *
@@ -142,7 +143,8 @@ export function formatDateLong(value: Date): string {
 }
 
 /**
- * Format a `Date` as a `string` that just contains the time portion e.g. _5:31 pm_
+ * Format a `Date` as a `string` that just contains the time portion e.g. _5:31
+ * pm_
  *
  * #### Example
  *
@@ -207,7 +209,8 @@ export function formatDatetimeLong(value: Date) {
 }
 
 /**
- * Format a `number` as a `string` represented as a readable number e.g. _123,321.123_
+ * Format a `number` as a `string` represented as a readable number e.g.
+ * _123,321.123_
  *
  * #### Example
  *
@@ -360,7 +363,8 @@ export function replaceInjectablesWithSubmissionValues(
 /**
  * Replace the `{ELEMENT:<elementName>}` values in text while a form is being
  * filled out. The replacements are suppose to be user friendly and for display
- * purposes, e.g. dates should be displayed in the user's desired format and timezone.
+ * purposes, e.g. dates should be displayed in the user's desired format and
+ * timezone.
  *
  * @param text
  * @param options

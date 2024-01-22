@@ -248,9 +248,8 @@ async function unsubscribe(formsAppId: number): Promise<void> {
  *
  * ```js
  * const formsAppId = 1
- * const emailSubscriptions = await approvalsService.getEmailSubscriptions(
- *   formsAppId,
- * )
+ * const emailSubscriptions =
+ *   await approvalsService.getEmailSubscriptions(formsAppId)
  * ```
  *
  * @param formsAppId

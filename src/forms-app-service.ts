@@ -15,9 +15,8 @@ export type FormsAppConfigurationResponse =
  *
  * ```js
  * const formsAppId = 1
- * const formsApp = await formsAppService.getFormsAppConfiguration(
- *   formAppId,
- * )
+ * const formsApp =
+ *   await formsAppService.getFormsAppConfiguration(formAppId)
  * ```
  *
  * @param formsAppId

@@ -86,9 +86,8 @@ function registerAuthListener(listener: () => unknown): () => void {
  *     const newPassword = prompt(
  *       'The password you entered was only temporary, and must be reset for security purposes. Please enter your new password below to continue.',
  *     )
- *     const resetPasswordResponse = await resetPasswordCallback(
- *       newPassword,
- *     )
+ *     const resetPasswordResponse =
+ *       await resetPasswordCallback(newPassword)
  *     return await handleLoginAttemptResponse(resetPasswordResponse)
  *   }
  *
@@ -227,7 +226,8 @@ async function changePassword(existingPassword: string, newPassword: string) {
 
 /**
  * Allow a user to start the forgot password process. The user will be emailed a
- * temporary code that must be passed with a new password to the function returned.
+ * temporary code that must be passed with a new password to the function
+ * returned.
  *
  * #### Example
  *

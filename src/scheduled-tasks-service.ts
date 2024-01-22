@@ -96,7 +96,8 @@ export async function getTasksForFormsApp({
 }
 
 /**
- * Obtain all of the tasks related to a Task Group Instances in a specific Forms App
+ * Obtain all of the tasks related to a Task Group Instances in a specific Forms
+ * App
  *
  * #### Example
  *

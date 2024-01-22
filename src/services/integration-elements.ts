@@ -288,7 +288,8 @@ export async function searchPointAddresses(
 }
 
 /**
- * Get the details for a single Point address based on the Id of a Point address resource.
+ * Get the details for a single Point address based on the Id of a Point address
+ * resource.
  *
  * #### Example
  *
@@ -766,14 +767,17 @@ export async function searchAPINSWLiquorLicences(
 }
 
 /**
- * Get the details for a single  API.NSW Liquor licence based on the licenceID.
+ * Get the details for a single API.NSW Liquor licence based on the licenceID.
  *
  * #### Example
  *
  * ```js
  * const formId = 1
  * const licenceId = '1-RL22KV'
- * const result = await formService.getAPINSWLiquorLicence(formId, licenceId)
+ * const result = await formService.getAPINSWLiquorLicence(
+ *   formId,
+ *   licenceId,
+ * )
  * ```
  *
  * @param formId

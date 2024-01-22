@@ -53,7 +53,8 @@ export {
 import Sentry from './Sentry'
 
 /**
- * Log the current user out and remove an data stored locally by the user e.g. drafts.
+ * Log the current user out and remove an data stored locally by the user e.g.
+ * drafts.
  *
  * #### Example
  *
@@ -146,9 +147,8 @@ export async function isAuthorised(formsAppId: number): Promise<boolean> {
  *
  * ```js
  * const formsAppId = 1
- * const formsAppUserDetails = await authService.getCurrentFormsAppUser(
- *   formsAppId,
- * )
+ * const formsAppUserDetails =
+ *   await authService.getCurrentFormsAppUser(formsAppId)
  * if (!formsAppUserDetails) {
  *   // handle unauthorised user
  * }

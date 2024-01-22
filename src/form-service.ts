@@ -389,7 +389,8 @@ async function getFormElementLookupById(
 /**
  * Get a list of options sets for an organisation.
  *
- * @param organisationId The identifier for the organisation to fetch options sets for
+ * @param organisationId The identifier for the organisation to fetch options
+ *   sets for
  * @param abortSignal A signal to abort any asynchronous processing
  * @returns An array of options sets
  */
@@ -427,7 +428,8 @@ type FormElementOptionsSetResult =
 /**
  * Get the options for an options set.
  *
- * @param formElementOptionsSet The form element options set to generate options from
+ * @param formElementOptionsSet The form element options set to generate options
+ *   from
  * @param formsAppEnvironmentId The environment to pull options from
  * @param abortSignal A signal to abort any asynchronous processing
  * @returns A result object containing potential options or a predictable error
@@ -765,7 +767,8 @@ async function getFreshdeskFields(
 }
 
 /**
- * Parse Freshdesk Field options associated with a form element as form element options.
+ * Parse Freshdesk Field options associated with a form element as form element
+ * options.
  *
  * @param freshdeskFields An array of Freshdesk Fields
  * @param element The element to array of Freshdesk Fields

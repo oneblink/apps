@@ -773,9 +773,8 @@ export type FormApprovalUsernamesResponse = {
  *
  * ```js
  * const formsAppId = 1
- * const { usernames } = await approvalsService.getFormApprovalUsernames(
- *   formsAppId,
- * )
+ * const { usernames } =
+ *   await approvalsService.getFormApprovalUsernames(formsAppId)
  * ```
  *
  * @param formsAppId

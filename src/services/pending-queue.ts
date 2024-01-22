@@ -41,9 +41,8 @@ const pendingQueueListeners: Array<PendingQueueListener> = []
  * const listener = async (pendingSubmissions) => {
  *   // use pending submissions here...
  * }
- * const deregister = await submissionService.registerPendingQueueListener(
- *   listener,
- * )
+ * const deregister =
+ *   await submissionService.registerPendingQueueListener(listener)
  *
  * // When no longer needed, remember to deregister the listener
  * deregister()

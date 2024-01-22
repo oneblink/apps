@@ -173,7 +173,10 @@ function handleCancelSchedulingBookingQuerystring({
   location: string
   /** The timezone the booking was booked in */
   timezone: string
-  /** The policy to display to users when asked why they are cancelling the booking */
+  /**
+   * The policy to display to users when asked why they are cancelling the
+   * booking
+   */
   cancellationPolicy?: string
 } {
   if (

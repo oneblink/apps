@@ -366,7 +366,8 @@ async function executeCancelAction(
 }
 
 /**
- * Execute the post submission action for a form after a successful form submission.
+ * Execute the post submission action for a form after a successful form
+ * submission.
  *
  * ### Example
  *

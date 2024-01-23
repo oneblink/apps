@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - `paymentService.westpacQuickStream`
 - **[BREAKING]** `paymentFormUrl` option to `submissionService.submit()`
+- `formSubmissionService` service
 
 ## [8.1.0] - 2024-01-18
 

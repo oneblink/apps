@@ -11,6 +11,7 @@ interface OneBlinkAppsTenant {
     time: Intl.DateTimeFormat
     olderIOSTime: Intl.DateTimeFormat
   }
+  name: string
 }
 type Locale = 'en-AU' | 'en-US'
 
@@ -62,6 +63,7 @@ const tenants = {
       vapidPublicKey:
         'BE5wtYdaQW3z7DWc08rzNlOwPuituVWFRLW_lUMD78ZJatFOjio8fYDHaIpQCRyeKsJ5j4kLaFU374J4dM90iUc',
       intlFormats: generateFormatters('en-AU'),
+      name: 'OneBlink',
     },
     civicplus: {
       awsRegion: 'us-east-2',
@@ -70,6 +72,7 @@ const tenants = {
       vapidPublicKey:
         'BLg2Dn9sYj1a0I3AcS22Fg71uubdMLwoemG8zfnPOljgFKB-5MR3FIxc2Mtt0AzM3zk2QWl3YzEy6EEwIUmz19k',
       intlFormats: generateFormatters('en-US'),
+      name: 'CivicPlus',
     },
   },
   prod: {
@@ -80,6 +83,7 @@ const tenants = {
       vapidPublicKey:
         'BADH0JnMngI0uFKUnbC79VGXy5d6WutccnEvVuFBMx--BrZtFAHGTgOBiABJXmE8_VHC92_jK5K-2qdP2kZeius',
       intlFormats: generateFormatters('en-AU'),
+      name: 'OneBlink',
     },
     civicplus: {
       awsRegion: 'us-east-2',
@@ -88,6 +92,7 @@ const tenants = {
       vapidPublicKey:
         'BLoDtCutrC7tEd75x89zBaIyz3Fk8AeWOcABasV3YO4Tei5UO8WjJVPFyilNLYxeseaiKlgoa0DOh1HoR59M_G4',
       intlFormats: generateFormatters('en-US'),
+      name: 'CivicPlus',
     },
   },
 }

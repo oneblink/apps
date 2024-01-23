@@ -237,6 +237,17 @@ export * as attachmentsService from './attachments-service'
  */
 export * as scheduledTasksService from './scheduled-tasks-service'
 
+/**
+ * ## Form Submission Service
+ *
+ * Helper functions for working with form submission data
+ *
+ * ```js
+ * import { formSubmissionService } from '@oneblink/apps'
+ * ```
+ */
+export * as formSubmississionService from './form-submission-service'
+
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import tenants from './tenants'
 import Sentry from './Sentry'

@@ -246,7 +246,7 @@ export * as scheduledTasksService from './scheduled-tasks-service'
  * import { formSubmissionService } from '@oneblink/apps'
  * ```
  */
-export * as formSubmississionService from './form-submission-service'
+export * as formSubmissionService from './form-submission-service'
 
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import tenants from './tenants'

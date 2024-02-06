@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `submissionService.getSubmissionData()`
+
+### Removed
+
+- **[BREAKING]** `formSubmissionService` service (`getSubmissionData` is now exported from `submissionService`, other exports have been removed)
+
 ## [9.0.0] - 2024-01-30
 
 ### Added

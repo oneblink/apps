@@ -13,9 +13,12 @@ import {
   PendingQueueListener,
   PendingQueueAction,
 } from './services/pending-queue'
-import { generateSubmissionCredentials } from './services/api/submissions'
+import {
+  generateSubmissionCredentials,
+  generateSubmissionRetrievalCredentials,
+} from './services/api/submissions'
 import replaceInjectablesWithSubmissionValues from './services/replaceInjectablesWithSubmissionValues'
-import { FormTypes } from '@oneblink/types'
+import { FormTypes, SubmissionTypes } from '@oneblink/types'
 import Sentry from './Sentry'
 import prepareSubmissionData from './services/prepareSubmissionData'
 import submitForm, {
@@ -33,6 +36,7 @@ import {
   DraftSubmission,
 } from './types/submissions'
 import { deleteAutoSaveData } from './auto-save-service'
+import { downloadSubmissionS3Data } from './services/s3Submit'
 
 let _isProcessingPendingQueue = false
 
@@ -470,6 +474,42 @@ async function executeAction(
   }
 }
 
+/**
+ * Retrieve submission data for a known formId and submissionId
+ *
+ * #### Example
+ *
+ * ```js
+ * const formId = 1
+ * const submissionId = 'fba95b9d-5a9c-463d-ab68-867f431e4120'
+ * const credentials = await formSubmissionService.getSubmissionData({
+ *   formId,
+ *   submissionId,
+ * })
+ * ```
+ *
+ * @param formId
+ * @param submissionId
+ * @param abortSignal
+ * @returns
+ */
+async function getSubmissionData({
+  formId,
+  submissionId,
+  abortSignal,
+}: {
+  formId: number
+  submissionId: string
+  abortSignal?: AbortSignal
+}): Promise<SubmissionTypes.S3SubmissionData> {
+  const s3Details = await generateSubmissionRetrievalCredentials({
+    formId,
+    submissionId,
+    abortSignal,
+  })
+  return await downloadSubmissionS3Data(s3Details)
+}
+
 export {
   submit,
   executePostSubmissionAction,
@@ -493,4 +533,5 @@ export {
   ProgressListenerEvent,
   PendingQueueListener,
   PendingQueueAction,
+  getSubmissionData,
 }

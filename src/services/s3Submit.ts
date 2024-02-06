@@ -9,7 +9,6 @@ import {
   SubmissionTypes,
 } from '@oneblink/types'
 import Sentry from '../Sentry'
-import { HTTPError } from './fetch'
 
 declare global {
   interface Window {
@@ -279,8 +278,6 @@ async function downloadPreFillS3Data<T>(
         "Data has been removed based on your administrator's prefill data retention policy.",
         {
           title: 'Prefill Data Unavailable',
-          originalError: error as HTTPError,
-          httpStatusCode: (error as HTTPError).status,
         },
       )
     }
@@ -304,8 +301,6 @@ async function downloadDraftS3Data<T>(
         "Data has been removed based on your administrator's draft data retention policy.",
         {
           title: 'Draft Data Unavailable',
-          originalError: error as HTTPError,
-          httpStatusCode: (error as HTTPError).status,
         },
       )
     }
@@ -329,8 +324,6 @@ async function downloadSubmissionS3Data<T>(
         "This submission has been removed based on your administrator's retention policy.",
         {
           title: 'Submission Data Unavailable',
-          originalError: error as HTTPError,
-          httpStatusCode: (error as HTTPError).status,
         },
       )
     }

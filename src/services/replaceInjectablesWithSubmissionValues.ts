@@ -5,7 +5,9 @@ import { getUserProfile } from '../auth-service'
 export default function replaceInjectablesWithSubmissionValues(
   text: string,
   submissionResult: FormSubmissionResult,
-): string {
+): ReturnType<
+  typeof localisationService.replaceInjectablesWithSubmissionValues
+> {
   return localisationService.replaceInjectablesWithSubmissionValues(text, {
     previousApprovalId: submissionResult.previousFormSubmissionApprovalId,
     form: submissionResult.definition,

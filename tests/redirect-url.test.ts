@@ -55,7 +55,10 @@ describe('Form redirect URL', () => {
 
     const result = replaceInjectablesWithSubmissionValues(url, submissionResult)
 
-    expect(result).toEqual('https://some-url.com?name=blinkybill&home=gosford')
+    expect(result).toEqual({
+      text: 'https://some-url.com?name=blinkybill&home=gosford',
+      hadAllInjectablesReplaced: true,
+    })
   })
 
   test('should replace all INDENTICAL instances of {ELEMENT} with correct property value', () => {
@@ -71,9 +74,10 @@ describe('Form redirect URL', () => {
 
     const result = replaceInjectablesWithSubmissionValues(url, submissionResult)
 
-    expect(result).toEqual(
-      'https://some-url.com?name=blinkybill&koala=blinkybill',
-    )
+    expect(result).toEqual({
+      text: 'https://some-url.com?name=blinkybill&koala=blinkybill',
+      hadAllInjectablesReplaced: true,
+    })
   })
 
   test('should replace only one(1) instance of {ELEMENT} with correct property value', () => {
@@ -89,6 +93,9 @@ describe('Form redirect URL', () => {
 
     const result = replaceInjectablesWithSubmissionValues(url, submissionResult)
 
-    expect(result).toEqual('https://some-url.com?name=blinkybill')
+    expect(result).toEqual({
+      text: 'https://some-url.com?name=blinkybill',
+      hadAllInjectablesReplaced: true,
+    })
   })
 })

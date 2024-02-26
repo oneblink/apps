@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- **[BREAKING]** `localisationService.replaceInjectablesWithElementValues()` and `localisationService.replaceInjectablesWithSubmissionValues()` return value to be an object with a `hadAllInjectablesReplaced` property
+
 ## [10.1.0] - 2024-02-18
 
 ### Dependencies

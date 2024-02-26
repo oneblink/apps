@@ -173,7 +173,7 @@ export async function completeTransaction({
       customerReferenceNumber: replaceInjectablesWithSubmissionValues(
         paymentSubmissionEvent.configuration.customerReferenceNumber,
         formSubmissionResult,
-      ),
+      ).text,
       principalAmount: formSubmissionResult.payment.amount,
       recaptcha: {
         token: captchaToken,

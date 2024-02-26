@@ -353,7 +353,7 @@ export function replaceInjectablesWithSubmissionValues(
     >[1],
     keyof submissionService.ReplaceInjectablesFormatters
   >,
-): string {
+): ReturnType<typeof submissionService.replaceInjectablesWithSubmissionValues> {
   return submissionService.replaceInjectablesWithSubmissionValues(text, {
     ...options,
     ...replaceSubmissionFormatters,
@@ -376,7 +376,7 @@ export function replaceInjectablesWithElementValues(
     Parameters<typeof submissionService.replaceInjectablesWithElementValues>[1],
     keyof submissionService.ReplaceInjectablesFormatters
   >,
-): string {
+): ReturnType<typeof submissionService.replaceInjectablesWithElementValues> {
   return submissionService.replaceInjectablesWithElementValues(text, {
     ...options,
     ...replaceSubmissionFormatters,

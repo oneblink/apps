@@ -40,7 +40,7 @@ class WestpacQuickWebPaymentProvider
           replaceInjectablesWithSubmissionValues(
             this.paymentSubmissionEvent.configuration.customerReferenceNumber,
             this.formSubmissionResult,
-          ),
+          ).text,
       },
     }
   }

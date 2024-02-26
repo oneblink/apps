@@ -40,13 +40,13 @@ class BPOINTPaymentProvider
           replaceInjectablesWithSubmissionValues(
             this.paymentSubmissionEvent.configuration.crn2,
             this.formSubmissionResult,
-          ),
+          ).text,
         crn3:
           this.paymentSubmissionEvent.configuration.crn3 &&
           replaceInjectablesWithSubmissionValues(
             this.paymentSubmissionEvent.configuration.crn3,
             this.formSubmissionResult,
-          ),
+          ).text,
       },
     }
   }

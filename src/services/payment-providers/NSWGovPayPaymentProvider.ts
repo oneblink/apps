@@ -39,19 +39,19 @@ class NSWGovPayPaymentProvider
         productDescription: replaceInjectablesWithSubmissionValues(
           this.paymentSubmissionEvent.configuration.productDescription,
           this.formSubmissionResult,
-        ),
+        ).text,
         customerReference:
           this.paymentSubmissionEvent.configuration.customerReference &&
           replaceInjectablesWithSubmissionValues(
             this.paymentSubmissionEvent.configuration.customerReference,
             this.formSubmissionResult,
-          ),
+          ).text,
         subAgencyCode:
           this.paymentSubmissionEvent.configuration.subAgencyCode &&
           replaceInjectablesWithSubmissionValues(
             this.paymentSubmissionEvent.configuration.subAgencyCode,
             this.formSubmissionResult,
-          ),
+          ).text,
       },
     }
   }

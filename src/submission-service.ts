@@ -446,7 +446,7 @@ async function executeAction(
       const newUrl = replaceInjectablesWithSubmissionValues(
         redirectUrl || '/',
         submissionResult,
-      )
+      ).text
       // Relative URLs can be navigated to internally
       if (newUrl[0] === '/') {
         push(newUrl)

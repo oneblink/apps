@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `formService.CivicPlusHCMSContentItemsResult` type
+- `formService.CivicPlusHCMSContentItem` type
+- `formService.searchCivicPlusHCMSContentItems()` type
+
 ### Changed
 
 - **[BREAKING]** `localisationService.replaceInjectablesWithElementValues()` and `localisationService.replaceInjectablesWithSubmissionValues()` return value to be an object with a `hadAllInjectablesReplaced` property

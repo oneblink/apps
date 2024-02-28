@@ -15,6 +15,7 @@ import {
   FormTypes,
   MiscTypes,
   APINSWTypes,
+  SubmissionTypes,
 } from '@oneblink/types'
 import Sentry from '../Sentry'
 import { add } from 'date-fns'
@@ -807,6 +808,142 @@ export async function getAPINSWLiquorLicence(
         signal: abortSignal,
       },
     )
+  } catch (err) {
+    if (!abortSignal?.aborted) {
+      Sentry.captureException(err)
+    }
+    const error = err as HTTPError
+    if (isOffline()) {
+      throw new OneBlinkAppsError(
+        'You are currently offline, please connect to the internet and try again',
+        {
+          originalError: error,
+          isOffline: true,
+        },
+      )
+    }
+    switch (error.status) {
+      case 401: {
+        throw new OneBlinkAppsError('Please login and try again.', {
+          originalError: error,
+          requiresLogin: true,
+          httpStatusCode: error.status,
+        })
+      }
+      case 403: {
+        throw new OneBlinkAppsError(
+          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
+          {
+            originalError: error,
+            requiresAccessRequest: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 400:
+      case 404: {
+        throw new OneBlinkAppsError(
+          "Please contact your administrator to ensure this application's configuration has been completed successfully.",
+          {
+            originalError: error,
+            title: 'Unknown Application',
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  }
+}
+
+export type CivicPlusHCMSContentItem = {
+  id: string
+  createdBy: string
+  lastModifiedBy: string
+  data: {
+    'submission-json'?: SubmissionTypes.S3SubmissionData['submission']
+  }
+  /** ISO datetime string */
+  created: string
+  /** ISO datetime string */
+  lastModified: string
+  status: string
+  /** HEX colour */
+  statusColor: string
+  contentTypeName: string
+  contentTypeDisplayName: string
+  version: number
+  contentTypeId: string
+}
+export type CivicPlusHCMSContentItemsResult = {
+  /**
+   * Represents the total number of items based on the search. Can be used to
+   * achieve paging or infinite scrolling to load more.
+   */
+  total: number
+  /** The HCMS Content Type's items */
+  items: CivicPlusHCMSContentItem[]
+}
+
+/**
+ * Search CivicPlus HCMS content items.
+ *
+ * @param options
+ * @returns
+ */
+export async function searchCivicPlusHCMSContentItems({
+  formsAppId,
+  formId,
+  $top,
+  $skip,
+  $search,
+  $filter,
+  $orderby,
+  abortSignal,
+}: {
+  /** The identifier for the Forms App to determine the HCMS Content Type. */
+  formsAppId: number
+  /** The identifier for the Form to determine the HCMS Content Type. */
+  formId: number
+  /**
+   * How many items to return in the result. Can be used to achieve paging or
+   * infinite scrolling to load more.
+   */
+  $top?: number
+  /**
+   * How many items to skip in the result. Can be used to achieve paging or
+   * infinite scrolling to load more.
+   */
+  $skip?: number
+  /** Optional OData full text search. */
+  $search?: string
+  /** Optional OData filter definition. */
+  $filter?: string
+  /** Optional OData order definition. */
+  $orderby?: string
+  /** Allows request to be aborted */
+  abortSignal?: AbortSignal
+}): Promise<CivicPlusHCMSContentItemsResult> {
+  try {
+    const url = new URL(
+      `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms/${formId}/cp-hcms-content-items`,
+    )
+    if (typeof $top === 'number')
+      url.searchParams.append('$top', $top.toString())
+    if (typeof $skip === 'number')
+      url.searchParams.append('$skip', $skip.toString())
+    if ($search) url.searchParams.append('$search', $search)
+    if ($filter) url.searchParams.append('$filter', $filter)
+    if ($orderby) url.searchParams.append('$orderby', $orderby)
+    return await getRequest(url.href, abortSignal)
   } catch (err) {
     if (!abortSignal?.aborted) {
       Sentry.captureException(err)

@@ -976,16 +976,19 @@ export async function searchCivicPlusHCMSContentItems({
           },
         )
       }
-      case 400:
+      case 400: {
+        throw new OneBlinkAppsError(error.message, {
+          originalError: error,
+          title: 'Invalid Request',
+          httpStatusCode: error.status,
+        })
+      }
       case 404: {
-        throw new OneBlinkAppsError(
-          "Please contact your administrator to ensure this application's configuration has been completed successfully.",
-          {
-            originalError: error,
-            title: 'Unknown Application',
-            httpStatusCode: error.status,
-          },
-        )
+        throw new OneBlinkAppsError(error.message, {
+          originalError: error,
+          title: 'Unknown Application',
+          httpStatusCode: error.status,
+        })
       }
       default: {
         throw new OneBlinkAppsError(

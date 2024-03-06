@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [11.0.0] - 2024-03-06
+
 ### Added
 
 - `formService.CivicPlusHCMSContentItemsResult` type
@@ -16,6 +18,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 
 - **[BREAKING]** `localisationService.replaceInjectablesWithElementValues()` and `localisationService.replaceInjectablesWithSubmissionValues()` return value to be an object with a `hadAllInjectablesReplaced` property
+
+### Dependencies
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [6.0.0-beta.3](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [5.4.0-beta.1](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
 
 ## [10.1.0] - 2024-02-18
 

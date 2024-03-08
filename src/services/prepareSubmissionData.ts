@@ -29,7 +29,8 @@ async function maybeUploadAttachment(
       return await uploadAttachment({
         formId,
         fileName: record.fileName,
-        contentType: record.data.type,
+        // S3 defaults unknown file types ("") to application/octet-stream
+        contentType: record.data.type || 'application/octet-stream',
         isPrivate: formElement.storageType !== 'public',
         data: record.data,
         onProgress: (event) =>

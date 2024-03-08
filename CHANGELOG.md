@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+- When preparing submission, default attachments with unknown type ("") to `contentType: "application/octet-stream"` to match AWS S3's default `Content-Type`
+
 ## [11.0.0] - 2024-03-06
 
 ### Added

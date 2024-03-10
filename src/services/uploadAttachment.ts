@@ -66,11 +66,13 @@ export default async function uploadAttachment(
     formId,
     abortSignal,
   )
+  // S3 defaults unknown file types to the following, do the same here for our submission model
+  const _contentType = contentType || 'application/octet-stream'
   await uploadAttachmentToS3({
     s3Configuration: formAttachmentS3Credentials,
     fileConfiguration: {
       fileName,
-      contentType,
+      contentType: _contentType,
       isPrivate,
       data,
     },
@@ -80,7 +82,7 @@ export default async function uploadAttachment(
   return {
     s3: formAttachmentS3Credentials.s3,
     url: `${tenants.current.apiOrigin}/${formAttachmentS3Credentials.s3.key}`,
-    contentType,
+    contentType: _contentType,
     fileName,
     id: formAttachmentS3Credentials.attachmentDataId,
     isPrivate,

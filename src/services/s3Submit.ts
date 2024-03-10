@@ -28,7 +28,7 @@ declare global {
 
 export type UploadAttachmentConfiguration = {
   fileName: string
-  contentType: string
+  contentType?: string
   isPrivate: boolean
   data: Blob
 }

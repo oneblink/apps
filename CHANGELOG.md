@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [11.0.1] - 2024-03-14
+
 ### Changed
 
 - When preparing submission, default attachments with unknown type ("") to `contentType: "application/octet-stream"` to match AWS S3's default `Content-Type`
+
+### Dependencies
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [6.0.1-beta.2](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [6.0.0-beta.3](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
 
 ## [11.0.0] - 2024-03-06
 

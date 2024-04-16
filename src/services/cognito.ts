@@ -330,7 +330,7 @@ function isLoggedIn(): boolean {
   return !!(awsCognitoClient && awsCognitoClient._getRefreshToken())
 }
 
-async function getCognitoIdToken(): Promise<string | void> {
+async function getCognitoIdToken(): Promise<string | undefined> {
   if (!awsCognitoClient) {
     return
   }

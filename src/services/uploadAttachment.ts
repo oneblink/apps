@@ -1,11 +1,15 @@
-import { generateUploadAttachmentCredentials } from './api/submissions'
-import {
-  UploadAttachmentConfiguration,
-  uploadAttachment as uploadAttachmentToS3,
-  ProgressListener,
-} from './s3Submit'
-import tenants from '../tenants'
 import { SubmissionTypes } from '@oneblink/types'
+import { ProgressListener } from '../types/submissions'
+import generateOneBlinkUploader from './generateOneBlinkUploader'
+
+export type UploadAttachmentConfiguration = {
+  fileName: string
+  contentType?: string
+  isPrivate: boolean
+  data: Blob
+  formId: number
+  onProgress?: ProgressListener
+}
 
 /**
  * Upload a submission attachment. Attachment can be passed as a `Blob`,
@@ -56,38 +60,28 @@ export default async function uploadAttachment(
     isPrivate,
     data,
     onProgress,
-  }: UploadAttachmentConfiguration & {
-    formId: number
-    onProgress?: ProgressListener
-  },
+  }: UploadAttachmentConfiguration,
   abortSignal?: AbortSignal,
 ): Promise<SubmissionTypes.FormSubmissionAttachment> {
-  const formAttachmentS3Credentials = await generateUploadAttachmentCredentials(
-    formId,
-    abortSignal,
-  )
+  const oneblinkUploader = generateOneBlinkUploader()
   // S3 defaults unknown file types to the following, do the same here for our submission model
   const _contentType = contentType || 'application/octet-stream'
-  await uploadAttachmentToS3({
-    s3Configuration: formAttachmentS3Credentials,
-    fileConfiguration: {
-      fileName,
-      contentType: _contentType,
-      isPrivate,
-      data,
-    },
+  const result = await oneblinkUploader.uploadAttachment({
+    formId,
+    fileName,
+    contentType: _contentType,
+    isPrivate,
+    data,
     abortSignal,
     onProgress,
   })
   return {
-    s3: formAttachmentS3Credentials.s3,
-    url: `${tenants.current.apiOrigin}/${formAttachmentS3Credentials.s3.key}`,
+    s3: result.s3,
+    url: result.url,
     contentType: _contentType,
     fileName,
-    id: formAttachmentS3Credentials.attachmentDataId,
+    id: result.attachmentDataId,
     isPrivate,
-    uploadedAt: formAttachmentS3Credentials.uploadedAt,
+    uploadedAt: result.uploadedAt,
   }
 }
-
-export { UploadAttachmentConfiguration }

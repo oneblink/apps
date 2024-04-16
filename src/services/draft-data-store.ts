@@ -7,9 +7,8 @@ import {
 } from './api/drafts'
 import { SubmissionTypes } from '@oneblink/types'
 import Sentry from '../Sentry'
-import { DraftSubmission } from '../types/submissions'
+import { DraftSubmission, ProgressListener } from '../types/submissions'
 import { deleteAutoSaveData } from '../auto-save-service'
-import { ProgressListener } from './s3Submit'
 function getDraftDataKey(draftDataId: string) {
   return `DRAFT_DATA_${draftDataId}`
 }
@@ -47,16 +46,23 @@ export async function saveDraftData({
   draftSubmission,
   autoSaveKey,
   onProgress,
+  abortSignal,
 }: {
   draft: SubmissionTypes.FormsAppDraft
   draftSubmission: DraftSubmission
   autoSaveKey: string | undefined
   onProgress?: ProgressListener
+  abortSignal?: AbortSignal
 }): Promise<string> {
   let draftDataId = draft.draftId
   if (!draftSubmission.backgroundUpload) {
     try {
-      draftDataId = await uploadDraftData(draft, draftSubmission, onProgress)
+      draftDataId = await uploadDraftData(
+        draft,
+        draftSubmission,
+        onProgress,
+        abortSignal,
+      )
 
       if (typeof autoSaveKey === 'string') {
         try {

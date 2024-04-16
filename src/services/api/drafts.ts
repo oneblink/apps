@@ -1,53 +1,38 @@
 import { AWSTypes, FormsAppsTypes, SubmissionTypes } from '@oneblink/types'
 import { postRequest, putRequest, HTTPError } from '../fetch'
 import { isLoggedIn } from '../../auth-service'
-import {
-  uploadFormSubmission,
-  downloadDraftS3Data,
-  ProgressListener,
-} from '../s3Submit'
+import { downloadDraftS3Data, getDeviceInformation } from '../s3Submit'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 import { getUserToken } from '../user-token'
 import Sentry from '../../Sentry'
 import prepareSubmissionData from '../prepareSubmissionData'
-import {
-  DraftSubmission,
-  S3DraftUploadCredentials,
-} from '../../types/submissions'
+import { DraftSubmission, ProgressListener } from '../../types/submissions'
+import generateOneBlinkUploader from '../generateOneBlinkUploader'
 
 const uploadDraftData = async (
   draft: SubmissionTypes.FormsAppDraft,
   draftSubmission: DraftSubmission,
   onProgress?: ProgressListener,
+  abortSignal?: AbortSignal,
 ): Promise<string> => {
-  const url = `${tenants.current.apiOrigin}/forms/${draft.formId}/upload-draft-data-credentials`
-  console.log('Attempting to get Credentials to upload draft data', url)
-
   try {
     const submission = await prepareSubmissionData(draftSubmission)
-    const data = await postRequest<S3DraftUploadCredentials>(url)
+    const oneblinkUploader = generateOneBlinkUploader()
     const userToken = getUserToken()
-    console.log('Attempting to upload draft data:', data)
-    await uploadFormSubmission({
-      s3Configuration: data,
-      formJson: {
-        definition: draftSubmission.definition,
-        submission,
-        submissionTimestamp: data.submissionTimestamp,
-        keyId: draftSubmission.keyId,
-        formsAppId: draftSubmission.formsAppId,
-        lastElementUpdated: draftSubmission.lastElementUpdated,
-        externalId: draft.externalId || undefined,
-      },
-      tags: {
-        jobId: draft.jobId || undefined,
-        userToken: userToken || undefined,
-        usernameToken: data.usernameToken,
-        previousFormSubmissionApprovalId:
-          draft.previousFormSubmissionApprovalId,
-      },
+    console.log('Attempting to upload draft data')
+    const data = await oneblinkUploader.uploadDraftSubmission({
+      submission,
+      definition: draftSubmission.definition,
+      device: getDeviceInformation(),
+      userToken: userToken || undefined,
+      previousFormSubmissionApprovalId: draft.previousFormSubmissionApprovalId,
+      jobId: draft.jobId || undefined,
+      formsAppId: draftSubmission.formsAppId,
+      externalId: draft.externalId || undefined,
+      lastElementUpdated: draftSubmission.lastElementUpdated,
       onProgress,
+      abortSignal,
     })
     return data.draftDataId
   } catch (error) {

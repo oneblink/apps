@@ -21,8 +21,7 @@ import {
 } from './services/draft-data-store'
 import { FormTypes, SubmissionTypes } from '@oneblink/types'
 import Sentry from './Sentry'
-import { DraftSubmission } from './types/submissions'
-import { ProgressListener } from './services/s3Submit'
+import { DraftSubmission, ProgressListener } from './types/submissions'
 
 interface DraftsData {
   createdAt?: string
@@ -90,6 +89,8 @@ function executeDraftsListeners(draftsData: DraftsData) {
 async function upsertDraftByKey(
   draft: SubmissionTypes.FormsAppDraft,
   draftSubmission: DraftSubmission,
+  onProgress?: ProgressListener,
+  abortSignal?: AbortSignal,
 ): Promise<string> {
   if (!draftSubmission.keyId) {
     throw new Error('Could not create draft for key without a keyId')
@@ -105,7 +106,7 @@ async function upsertDraftByKey(
     draft.draftId = uuidv4()
   }
 
-  return uploadDraftData(draft, draftSubmission)
+  return uploadDraftData(draft, draftSubmission, onProgress, abortSignal)
 }
 
 /**
@@ -145,11 +146,13 @@ export async function addDraft({
   draftSubmission,
   autoSaveKey,
   onProgress,
+  abortSignal,
 }: {
   newDraft: SubmissionTypes.NewFormsAppDraft
   draftSubmission: DraftSubmission
   autoSaveKey?: string
   onProgress?: ProgressListener
+  abortSignal?: AbortSignal
 }): Promise<void> {
   const draft: SubmissionTypes.FormsAppDraft = {
     ...newDraft,
@@ -158,7 +161,7 @@ export async function addDraft({
   }
   draftSubmission.keyId = getFormsKeyId() || undefined
   if (draftSubmission.keyId) {
-    await upsertDraftByKey(draft, draftSubmission)
+    await upsertDraftByKey(draft, draftSubmission, onProgress, abortSignal)
     return
   }
 
@@ -241,17 +244,19 @@ export async function updateDraft({
   draftSubmission,
   autoSaveKey,
   onProgress,
+  abortSignal,
 }: {
   draft: SubmissionTypes.FormsAppDraft
   draftSubmission: DraftSubmission
   autoSaveKey?: string
   onProgress?: ProgressListener
+  abortSignal?: AbortSignal
 }): Promise<void> {
   const now = new Date().toISOString()
   draftSubmission.keyId = getFormsKeyId() || undefined
   draft.updatedAt = undefined
   if (draftSubmission.keyId) {
-    await upsertDraftByKey(draft, draftSubmission)
+    await upsertDraftByKey(draft, draftSubmission, onProgress, abortSignal)
     return
   }
 

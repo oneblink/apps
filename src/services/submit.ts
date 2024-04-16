@@ -1,18 +1,13 @@
 import { isOffline } from '../offline-service'
-import { getFormsKeyId } from '../auth-service'
+import { getFormsKeyId } from './forms-key'
 import { addFormSubmissionToPendingQueue } from './pending-queue'
 import {
   checkForPaymentSubmissionEvent,
   handlePaymentSubmissionEvent,
 } from '../payment-service'
-import {
-  ProgressListener,
-  ProgressListenerEvent,
-  uploadFormSubmission,
-} from './s3Submit'
+import { getDeviceInformation } from './s3Submit'
 import { deleteDraft } from '../draft-service'
 import { removePrefillFormData } from '../prefill-service'
-import recentlySubmittedJobsService from './recently-submitted-jobs'
 import { getUserToken } from './user-token'
 import {
   handleSchedulingSubmissionEvent,
@@ -21,13 +16,15 @@ import {
 import {
   FormSubmission,
   FormSubmissionResult,
-  S3UploadCredentials,
+  ProgressListener,
+  ProgressListenerEvent,
 } from '../types/submissions'
 import { checkIfAttachmentsAreUploading } from '../attachments-service'
 import tenants from '../tenants'
 import externalIdGeneration from './external-id-generation'
 import serverValidateForm from './server-validation'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
+import generateOneBlinkUploader from './generateOneBlinkUploader'
 
 type SubmissionParams = {
   formSubmission: FormSubmission
@@ -40,6 +37,8 @@ type SubmissionParams = {
     schedulingReceiptUrl: string
     schedulingCancelUrl: string
   }
+  onProgress?: ProgressListener
+  abortSignal?: AbortSignal
 }
 
 export { SubmissionParams, ProgressListener, ProgressListenerEvent }
@@ -50,16 +49,11 @@ export default async function submit({
   paymentReceiptUrl,
   paymentFormUrl,
   schedulingUrlConfiguration,
-  generateCredentials,
   onProgress,
   shouldRunServerValidation,
   shouldRunExternalIdGeneration,
-}: SubmissionParams & {
-  generateCredentials: (
-    formSubmission: FormSubmission,
-  ) => Promise<S3UploadCredentials>
-  onProgress?: ProgressListener
-}): Promise<FormSubmissionResult> {
+  abortSignal,
+}: SubmissionParams): Promise<FormSubmissionResult> {
   try {
     const paymentSubmissionEventConfiguration =
       checkForPaymentSubmissionEvent(formSubmission)
@@ -159,7 +153,31 @@ export default async function submit({
     }
     formSubmission.keyId = getFormsKeyId() || undefined
 
-    const data = await generateCredentials(formSubmission)
+    const oneblinkUploader = generateOneBlinkUploader()
+
+    const userToken = getUserToken()
+
+    console.log('Uploading submission')
+    const data = await oneblinkUploader.uploadSubmission({
+      submission: formSubmission.submission,
+      definition: formSubmission.definition,
+      device: getDeviceInformation(),
+      userToken: userToken || undefined,
+      previousFormSubmissionApprovalId:
+        formSubmission.previousFormSubmissionApprovalId,
+      jobId: formSubmission.jobId || undefined,
+      formsAppId: formSubmission.formsAppId,
+      externalId: formSubmission.externalId || undefined,
+      taskId: formSubmission.taskCompletion?.task.taskId || undefined,
+      taskActionId: formSubmission.taskCompletion?.taskAction.taskActionId,
+      taskGroupInstanceId:
+        formSubmission.taskCompletion?.taskGroupInstance?.taskGroupInstanceId,
+      recaptchas: formSubmission.captchaTokens.map((token) => ({
+        token,
+      })),
+      onProgress,
+      abortSignal,
+    })
 
     const formSubmissionResult: FormSubmissionResult = {
       ...formSubmission,
@@ -195,40 +213,12 @@ export default async function submit({
         paymentFormUrl,
       })
     }
-    const userToken = getUserToken()
 
-    await uploadFormSubmission({
-      s3Configuration: data,
-      formJson: {
-        formsAppId: formSubmission.formsAppId,
-        definition: formSubmission.definition,
-        submission: formSubmission.submission,
-        submissionTimestamp: data.submissionTimestamp,
-        keyId: formSubmission.keyId,
-        ipAddress: data.ipAddress,
-        user: data.userProfile,
-        externalId: formSubmission.externalId || undefined,
-        task: formSubmission.taskCompletion?.task,
-        taskGroup: formSubmission.taskCompletion?.taskGroup,
-        taskGroupInstance: formSubmission.taskCompletion?.taskGroupInstance,
-      },
-      tags: {
-        jobId: formSubmission.jobId || undefined,
-        userToken: userToken || undefined,
-        usernameToken: data.usernameToken,
-        previousFormSubmissionApprovalId:
-          formSubmissionResult.previousFormSubmissionApprovalId,
-      },
-      onProgress,
-    })
     if (formSubmission.draftId) {
       await deleteDraft(formSubmission.draftId, formSubmission.formsAppId)
     }
     if (formSubmission.preFillFormDataId) {
       await removePrefillFormData(formSubmission.preFillFormDataId)
-    }
-    if (formSubmission.jobId) {
-      await recentlySubmittedJobsService.add(formSubmission.jobId)
     }
 
     return formSubmissionResult

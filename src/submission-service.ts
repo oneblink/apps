@@ -13,10 +13,7 @@ import {
   PendingQueueListener,
   PendingQueueAction,
 } from './services/pending-queue'
-import {
-  generateSubmissionCredentials,
-  generateSubmissionRetrievalCredentials,
-} from './services/api/submissions'
+import { generateSubmissionRetrievalCredentials } from './services/api/submissions'
 import replaceInjectablesWithSubmissionValues from './services/replaceInjectablesWithSubmissionValues'
 import { FormTypes, SubmissionTypes } from '@oneblink/types'
 import Sentry from './Sentry'
@@ -235,12 +232,8 @@ async function submit({
   ...params
 }: SubmissionParams & {
   autoSaveKey?: string
-  onProgress?: ProgressListener
 }): Promise<FormSubmissionResult> {
-  const formSubmissionResult = await submitForm({
-    ...params,
-    generateCredentials: generateSubmissionCredentials,
-  })
+  const formSubmissionResult = await submitForm(params)
   if (typeof autoSaveKey === 'string') {
     try {
       await deleteAutoSaveData(params.formSubmission.definition.id, autoSaveKey)

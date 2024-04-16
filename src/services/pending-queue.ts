@@ -1,8 +1,12 @@
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import utilsService from './utils'
 import Sentry from '../Sentry'
-import { FormSubmission, PendingFormSubmission } from '../types/submissions'
-import { ProgressListener, ProgressListenerEvent } from './s3Submit'
+import {
+  FormSubmission,
+  PendingFormSubmission,
+  ProgressListener,
+  ProgressListenerEvent,
+} from '../types/submissions'
 
 function errorHandler(error: Error): Error {
   Sentry.captureException(error)

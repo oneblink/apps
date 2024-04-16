@@ -1,7 +1,6 @@
 import _orderBy from 'lodash.orderby'
 
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
-import recentlySubmittedJobsService from './services/recently-submitted-jobs'
 import { searchRequest } from './services/fetch'
 import { getPendingQueueSubmissions } from './services/pending-queue'
 import { ensurePrefillFormDataExists } from './services/job-prefill'
@@ -63,27 +62,7 @@ export async function getJobs(
       isSubmitted: false,
     },
   )
-    .then((data) => {
-      const recentlySubmittedJobIds = recentlySubmittedJobsService.get()
-      // Remove recently submitted jobs ids that have not been returned from the server
-      const updateJobIds = recentlySubmittedJobIds.filter(
-        (recentlySubmittedJobId) => {
-          return data.jobs.some((job) => job.id === recentlySubmittedJobId)
-        },
-      )
-      // @ts-expect-error
-      if (updateJobIds.length !== recentlySubmittedJobIds) {
-        recentlySubmittedJobsService.set(updateJobIds)
-      }
-      // Filter out jobs that have been recently submitted but are still being returned
-      // from the server. This will happen if the S3 Submission Events have not finished yet.
-      return data.jobs.filter((job) => {
-        return !recentlySubmittedJobIds.some(
-          (recentlySubmittedJobId) => recentlySubmittedJobId === job.id,
-        )
-      })
-    })
-    .then((jobs) => removePendingSubmissions(jobs))
+    .then((data) => removePendingSubmissions(data.jobs))
     .then((jobs) => tagDrafts(jobs))
     .then((jobList) =>
       _orderBy(

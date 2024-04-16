@@ -1,13 +1,12 @@
 import {
   FormTypes,
   SubmissionEventTypes,
-  MiscTypes,
   SubmissionTypes,
   ScheduledTasksTypes,
 } from '@oneblink/types'
-import { S3ObjectCredentials } from '@oneblink/types/typescript/aws'
 import { FormElement } from '@oneblink/types/typescript/forms'
-import { FormSubmissionMeta } from '@oneblink/types/typescript/submissions'
+
+export { ProgressListener, ProgressListenerEvent } from '@oneblink/storage'
 
 export type BaseFormSubmission = {
   /** The submission data */
@@ -78,9 +77,15 @@ export type FormSubmission = DraftSubmission &
   }
 
 export type FormSubmissionResult = FormSubmission & {
-  /** `null` if the form submission was unsuccessful */
+  /**
+   * The identifier that represents the submission. `null` if the form
+   * submission was unsuccessful
+   */
   submissionId: string | null
-  /** `null` if the form submission was unsuccessful */
+  /**
+   * The timestamp the form was submitted, `null` if the form submission was
+   * unsuccessful
+   */
   submissionTimestamp: string | null
   /** `null` if the form submission does not require a payment */
   payment: {
@@ -112,8 +117,6 @@ export type FormSubmissionResult = FormSubmission & {
   isInPendingQueue: boolean
   /** `true` if the submission was attempted offline */
   isOffline: boolean
-  /** The ipAddress of the client submitting */
-  ipAddress?: string
   /** True if the submission was attempted whilst attachments were uploading */
   isUploadingAttachments: boolean
   /** Exists if the form allows PDF download */
@@ -130,22 +133,4 @@ export type PendingFormSubmission = Omit<FormSubmission, 'submission'> & {
    * submission in the pending queue
    */
   error?: string
-}
-
-type _S3UploadCredentials = S3ObjectCredentials & {
-  submissionTimestamp: string
-  usernameToken: string
-}
-
-export type S3UploadCredentials = _S3UploadCredentials & {
-  submissionId: string
-  ipAddress?: string
-  userProfile?: MiscTypes.UserProfile
-  pdfAccessToken?: string
-  formSubmissionMeta: FormSubmissionMeta
-  preventPayment?: boolean
-}
-
-export type S3DraftUploadCredentials = _S3UploadCredentials & {
-  draftDataId: string
 }

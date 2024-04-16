@@ -10,7 +10,7 @@
     "@aws-sdk/client-cognito-identity-provider": "^3.441.0",
     "@aws-sdk/client-s3": "^3.441.0",
     "@aws-sdk/lib-storage": "^3.441.0",
-    "@oneblink/sdk-core": "^6.0.1-beta.2",
+    "@oneblink/sdk-core": "^6.1.0-beta.1",
     "@sentry/browser": "^7.77.0",
     "@sentry/tracing": "^7.77.0",
     "date-fns": "^2.30.0",

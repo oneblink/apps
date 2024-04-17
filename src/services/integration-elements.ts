@@ -1,3 +1,13 @@
+import { add } from 'date-fns'
+import {
+  GeoscapeTypes,
+  PointTypes,
+  CivicaTypes,
+  FormTypes,
+  MiscTypes,
+  APINSWTypes,
+  SubmissionTypes,
+} from '@oneblink/types'
 import OneBlinkAppsError from '../services/errors/oneBlinkAppsError'
 import { isOffline } from '../offline-service'
 import {
@@ -8,17 +18,7 @@ import {
   searchRequest,
 } from '../services/fetch'
 import tenants from '../tenants'
-import {
-  GeoscapeTypes,
-  PointTypes,
-  CivicaTypes,
-  FormTypes,
-  MiscTypes,
-  APINSWTypes,
-  SubmissionTypes,
-} from '@oneblink/types'
 import Sentry from '../Sentry'
-import { add } from 'date-fns'
 
 /**
  * Search for geoscape addresses based on a partial address.
@@ -354,6 +354,107 @@ export async function getPointAddress(
           {
             originalError: error,
             title: 'Unknown Application',
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  }
+}
+/**
+ * Get a formatted address from a latitude and longitude
+ *
+ * #### Example
+ *
+ * ```js
+ * const lat = 41.9475427
+ * const lng = -87.6562292
+ * const integrationEnvironmentId = 'abc123'
+ * const organisationId = 'xyz456'
+ * const result = await formService.getGoogleMapsFormattedAddress({
+ *   lat,
+ *   lng,
+ *   integrationEnvironmentId,
+ *   organisationId,
+ * })
+ * ```
+ *
+ * @param options
+ * @returns
+ */
+export async function getGoogleMapsFormattedAddress({
+  lat,
+  lng,
+  integrationEnvironmentId,
+  organisationId,
+  abortSignal,
+}: {
+  lat: number
+  lng: number
+  integrationEnvironmentId: string
+  organisationId: string
+  abortSignal?: AbortSignal
+}): Promise<{ formattedAddress: string }> {
+  try {
+    const urlParams = new URLSearchParams({
+      lat: lat.toString(),
+      lng: lng.toString(),
+      integrationEnvironmentId,
+    })
+    return await postRequest(
+      `${
+        tenants.current.apiOrigin
+      }/organisations/${organisationId}/integrations/google-maps/reverse-geocode?${urlParams.toString()}`,
+      abortSignal,
+    )
+  } catch (err) {
+    if (!abortSignal?.aborted) {
+      Sentry.captureException(err)
+    }
+    const error = err as HTTPError
+    if (isOffline()) {
+      throw new OneBlinkAppsError(
+        'You are currently offline, please connect to the internet and try again',
+        {
+          originalError: error,
+          isOffline: true,
+        },
+      )
+    }
+    switch (error.status) {
+      case 401: {
+        throw new OneBlinkAppsError('Please login and try again.', {
+          originalError: error,
+          requiresLogin: true,
+          httpStatusCode: error.status,
+        })
+      }
+      case 403: {
+        throw new OneBlinkAppsError(
+          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
+          {
+            originalError: error,
+            requiresAccessRequest: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 400:
+      case 404: {
+        throw new OneBlinkAppsError(
+          `Could not find address from ${lat},${lng}.`,
+          {
+            originalError: error,
+            title: 'Address not found',
             httpStatusCode: error.status,
           },
         )

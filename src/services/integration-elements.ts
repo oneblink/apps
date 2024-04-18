@@ -410,7 +410,7 @@ export async function getGoogleMapsFormattedAddress({
       lng: lng.toString(),
       integrationEnvironmentId,
     })
-    return await postRequest(
+    return await getRequest(
       `${
         tenants.current.apiOrigin
       }/organisations/${organisationId}/integrations/google-maps/reverse-geocode?${urlParams.toString()}`,

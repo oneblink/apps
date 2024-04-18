@@ -4,36 +4,126 @@ import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 import Sentry from '../../Sentry'
 import { isOffline } from '../../offline-service'
+import { getDeviceInformation } from '../s3Submit'
+import { FormSubmission, ProgressListener } from '../../types/submissions'
+import { getUserToken } from '../user-token'
+import generateOneBlinkUploader from '../generateOneBlinkUploader'
+import { OneBlinkStorageError } from '@oneblink/storage'
 
-const getBadRequestError = (error: HTTPError) => {
+const getBadRequestError = (error: OneBlinkStorageError) => {
   return new OneBlinkAppsError(
     'The data you are attempting to submit could not be validated. Please ensure all validation has passed and try again. If the problem persists, please contact your administrator.',
     {
       title: 'Invalid Submission',
       originalError: error,
-      httpStatusCode: error.status,
+      httpStatusCode: error.httpStatusCode,
     },
   )
 }
-const getUnauthenticatedError = (error: HTTPError) => {
+const getUnauthenticatedError = (error: OneBlinkStorageError) => {
   return new OneBlinkAppsError(
     'The form you are attempting to complete requires authentication. Please login and try again.',
     {
       requiresLogin: true,
       originalError: error,
-      httpStatusCode: error.status,
+      httpStatusCode: error.httpStatusCode,
     },
   )
 }
-const getUnauthorisedError = (error: HTTPError) => {
+const getUnauthorisedError = (error: OneBlinkStorageError) => {
   return new OneBlinkAppsError(
     'You do not have access to complete this form. Please contact your administrator to gain the correct level of access.',
     {
       requiresAccessRequest: true,
       originalError: error,
-      httpStatusCode: error.status,
+      httpStatusCode: error.httpStatusCode,
     },
   )
+}
+const getNotFoundError = (error: OneBlinkStorageError) => {
+  return new OneBlinkAppsError(
+    'We could not find the form you are looking for. Please contact your administrator to ensure your form configuration has been completed successfully.',
+    {
+      title: 'Unknown Form',
+      originalError: error,
+      httpStatusCode: error.httpStatusCode,
+    },
+  )
+}
+const getDefaultError = (error: OneBlinkStorageError) => {
+  return new OneBlinkAppsError(
+    'An unknown error has occurred. Please contact support if the problem persists.',
+    {
+      originalError: error,
+      httpStatusCode: error.httpStatusCode,
+    },
+  )
+}
+
+const handleError = (error: OneBlinkStorageError) => {
+  if (/Failed to fetch/.test((error as Error).message)) {
+    throw new OneBlinkAppsError(
+      'We encountered a network related issue. Please ensure you are connected to the internet before trying again. If the problem persists, contact your administrator.',
+      {
+        title: 'Connectivity Issues',
+        originalError: error as Error,
+        isOffline: true,
+      },
+    )
+  }
+  switch (error.httpStatusCode) {
+    case 400: {
+      return getBadRequestError(error)
+    }
+    case 401: {
+      return getUnauthenticatedError(error)
+    }
+    case 403: {
+      return getUnauthorisedError(error)
+    }
+    case 404: {
+      return getNotFoundError(error)
+    }
+    default: {
+      return getDefaultError(error)
+    }
+  }
+}
+
+export async function uploadFormSubmission(
+  formSubmission: FormSubmission,
+  onProgress?: ProgressListener,
+  abortSignal?: AbortSignal,
+) {
+  try {
+    const oneblinkUploader = generateOneBlinkUploader()
+
+    const userToken = getUserToken()
+
+    console.log('Uploading submission')
+    return await oneblinkUploader.uploadSubmission({
+      submission: formSubmission.submission,
+      definition: formSubmission.definition,
+      device: getDeviceInformation(),
+      userToken: userToken || undefined,
+      previousFormSubmissionApprovalId:
+        formSubmission.previousFormSubmissionApprovalId,
+      jobId: formSubmission.jobId || undefined,
+      formsAppId: formSubmission.formsAppId,
+      externalId: formSubmission.externalId || undefined,
+      taskId: formSubmission.taskCompletion?.task.taskId || undefined,
+      taskActionId: formSubmission.taskCompletion?.taskAction.taskActionId,
+      taskGroupInstanceId:
+        formSubmission.taskCompletion?.taskGroupInstance?.taskGroupInstanceId,
+      recaptchas: formSubmission.captchaTokens.map((token) => ({
+        token,
+      })),
+      onProgress,
+      abortSignal,
+    })
+  } catch (error) {
+    throw handleError(error as OneBlinkStorageError)
+  }
 }
 
 export const generateRetrieveApprovalSubmissionCredentials = async (

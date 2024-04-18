@@ -5,10 +5,8 @@ import {
   checkForPaymentSubmissionEvent,
   handlePaymentSubmissionEvent,
 } from '../payment-service'
-import { getDeviceInformation } from './s3Submit'
 import { deleteDraft } from '../draft-service'
 import { removePrefillFormData } from '../prefill-service'
-import { getUserToken } from './user-token'
 import {
   handleSchedulingSubmissionEvent,
   checkForSchedulingSubmissionEvent,
@@ -24,7 +22,7 @@ import tenants from '../tenants'
 import externalIdGeneration from './external-id-generation'
 import serverValidateForm from './server-validation'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
-import generateOneBlinkUploader from './generateOneBlinkUploader'
+import { uploadFormSubmission } from './api/submissions'
 
 type SubmissionParams = {
   formSubmission: FormSubmission
@@ -153,31 +151,11 @@ export default async function submit({
     }
     formSubmission.keyId = getFormsKeyId() || undefined
 
-    const oneblinkUploader = generateOneBlinkUploader()
-
-    const userToken = getUserToken()
-
-    console.log('Uploading submission')
-    const data = await oneblinkUploader.uploadSubmission({
-      submission: formSubmission.submission,
-      definition: formSubmission.definition,
-      device: getDeviceInformation(),
-      userToken: userToken || undefined,
-      previousFormSubmissionApprovalId:
-        formSubmission.previousFormSubmissionApprovalId,
-      jobId: formSubmission.jobId || undefined,
-      formsAppId: formSubmission.formsAppId,
-      externalId: formSubmission.externalId || undefined,
-      taskId: formSubmission.taskCompletion?.task.taskId || undefined,
-      taskActionId: formSubmission.taskCompletion?.taskAction.taskActionId,
-      taskGroupInstanceId:
-        formSubmission.taskCompletion?.taskGroupInstance?.taskGroupInstanceId,
-      recaptchas: formSubmission.captchaTokens.map((token) => ({
-        token,
-      })),
+    const data = await uploadFormSubmission(
+      formSubmission,
       onProgress,
       abortSignal,
-    })
+    )
 
     const formSubmissionResult: FormSubmissionResult = {
       ...formSubmission,

@@ -9,6 +9,7 @@ import Sentry from '../../Sentry'
 import prepareSubmissionData from '../prepareSubmissionData'
 import { DraftSubmission, ProgressListener } from '../../types/submissions'
 import generateOneBlinkUploader from '../generateOneBlinkUploader'
+import { OneBlinkStorageError } from '@oneblink/storage'
 
 const uploadDraftData = async (
   draft: SubmissionTypes.FormsAppDraft,
@@ -38,49 +39,48 @@ const uploadDraftData = async (
   } catch (error) {
     Sentry.captureException(error)
     console.warn('Error occurred while attempting to upload draft data', error)
-    if (!(error instanceof HTTPError)) throw error
-    switch (error.status) {
-      case 401: {
-        throw new OneBlinkAppsError(
-          'You cannot save drafts until you have logged in. Please login and try again.',
-          {
-            originalError: error,
-            requiresLogin: true,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      case 403: {
-        throw new OneBlinkAppsError(
-          'You do not have access to drafts for this application. Please contact your administrator to gain the correct level of access.',
-          {
-            originalError: error,
-            requiresAccessRequest: true,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      case 400:
-      case 404: {
-        throw new OneBlinkAppsError(
-          'We could not find the application your attempting upload a draft for. Please contact your administrator to ensure your application configuration has been completed successfully.',
-          {
-            originalError: error,
-            title: 'Unknown Application',
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      default: {
-        throw new OneBlinkAppsError(
-          'An unknown error has occurred. Please contact support if the problem persists.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
+    if (error instanceof OneBlinkStorageError) {
+      switch (error.httpStatusCode) {
+        case 401: {
+          throw new OneBlinkAppsError(
+            'You cannot save drafts until you have logged in. Please login and try again.',
+            {
+              originalError: error,
+              requiresLogin: true,
+              httpStatusCode: error.httpStatusCode,
+            },
+          )
+        }
+        case 403: {
+          throw new OneBlinkAppsError(
+            'You do not have access to drafts for this application. Please contact your administrator to gain the correct level of access.',
+            {
+              originalError: error,
+              requiresAccessRequest: true,
+              httpStatusCode: error.httpStatusCode,
+            },
+          )
+        }
+        case 400:
+        case 404: {
+          throw new OneBlinkAppsError(
+            'We could not find the application your attempting upload a draft for. Please contact your administrator to ensure your application configuration has been completed successfully.',
+            {
+              originalError: error,
+              title: 'Unknown Application',
+              httpStatusCode: error.httpStatusCode,
+            },
+          )
+        }
       }
     }
+
+    throw new OneBlinkAppsError(
+      'An unknown error has occurred. Please contact support if the problem persists.',
+      {
+        originalError: error instanceof Error ? error : undefined,
+      },
+    )
   }
 }
 

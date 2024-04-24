@@ -55,16 +55,21 @@ function generateFormats({
 }
 
 export function getDateFnsFormats() {
+  console.log('getting formats')
+  console.log('tenants: ', tenants)
+  console.log('tenants.locale: ', tenants.locale)
   const time = 'h:mm a'
   switch (tenants.locale) {
     case 'en-US': {
-      return generateFormats({
+      const formats = generateFormats({
         time,
         shortDate: 'MM/dd/yyyy',
         shortYearlessDate: 'MM/dd',
         longDate: 'MMM do, yyyy',
         longYearlessDate: 'MMM do',
       })
+      console.log('generated formats: ', formats)
+      return formats
     }
     case 'en-AU':
     default: {

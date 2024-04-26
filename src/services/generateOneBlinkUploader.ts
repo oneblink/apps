@@ -6,6 +6,6 @@ export default function generateOneBlinkUploader() {
   return new OneBlinkUploader({
     apiOrigin: tenants.current.apiOrigin,
     region: tenants.current.awsRegion,
-    getIdToken,
+    getBearerToken: getIdToken,
   })
 }

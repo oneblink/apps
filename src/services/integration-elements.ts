@@ -225,7 +225,7 @@ export async function getGeoscapeReverseGeocoding({
   lat: number
   lng: number
   abortSignal?: AbortSignal
-}): Promise<GeoscapeTypes.GeoscapeAddress> {
+}): Promise<{ reverseGeocodeResult: GeoscapeTypes.GeoscapeAddress }> {
   try {
     const urlParams = new URLSearchParams({
       lat: lat.toString(),

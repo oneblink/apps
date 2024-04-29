@@ -976,18 +976,21 @@ function getCPHCMSTokenFromStorage() {
   }
 }
 
-async function getCPHCMSToken(formsAppId: number, abortSignal?: AbortSignal) {
+async function getCPHCMSToken(
+  { formsAppId, formId }: { formsAppId: number; formId: number },
+  abortSignal?: AbortSignal,
+) {
   const CPHCMSTokenResponse = getCPHCMSTokenFromStorage()
   if (CPHCMSTokenResponse) {
     const now = new Date()
-    const expiresAt = new Date(CPHCMSTokenResponse.token.expires_at)
+    const expiresAt = new Date(CPHCMSTokenResponse.auth.expires_at)
     if (expiresAt > now) {
       return CPHCMSTokenResponse
     }
   }
 
   const result = await postRequest<CPHCMSTypes.CPHCSMAccessTokenResponse>(
-    `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/cp-hcms-authentication`,
+    `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms/${formId}/cp-hcms-authentication`,
     abortSignal,
   )
   localStorage.setItem(CP_HCMS_TOKEN_KEY, JSON.stringify(result))
@@ -1031,7 +1034,7 @@ export type CivicPlusHCMSContentItemsResult = {
  */
 export async function searchCivicPlusHCMSContentItems({
   formsAppId,
-  contentTypeName,
+  formId,
   $top,
   $skip,
   $search,
@@ -1039,10 +1042,10 @@ export async function searchCivicPlusHCMSContentItems({
   $orderby,
   abortSignal,
 }: {
-  /** The identifier for the Forms App */
+  /** The identifier for the Forms App to determine the HCMS Content Type. */
   formsAppId: number
-  /** The HCMS Content Type. */
-  contentTypeName: string
+  /** The identifier for the Form to determine the HCMS Content Type. */
+  formId: number
   /**
    * How many items to return in the result. Can be used to achieve paging or
    * infinite scrolling to load more.
@@ -1064,10 +1067,11 @@ export async function searchCivicPlusHCMSContentItems({
 }): Promise<CivicPlusHCMSContentItemsResult> {
   try {
     const {
-      token: access_token,
+      auth: access_token,
       appName,
       baseUrl,
-    } = await getCPHCMSToken(formsAppId, abortSignal)
+      contentTypeName,
+    } = await getCPHCMSToken({ formsAppId, formId }, abortSignal)
 
     const url = new URL(`/api/content/${appName}/${contentTypeName}`, baseUrl)
 
@@ -1126,14 +1130,11 @@ export async function searchCivicPlusHCMSContentItems({
         })
       }
       case 404: {
-        throw new OneBlinkAppsError(
-          `The Content Type "${contentTypeName}" does not exist. Please contact your administrator to ensure this page has been correctly configured.`,
-          {
-            originalError: error,
-            title: 'Unknown Application',
-            httpStatusCode: error.status,
-          },
-        )
+        throw new OneBlinkAppsError(error.message, {
+          originalError: error,
+          title: 'Unknown Application',
+          httpStatusCode: error.status,
+        })
       }
       default: {
         throw new OneBlinkAppsError(

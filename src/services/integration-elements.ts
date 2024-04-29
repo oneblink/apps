@@ -1069,10 +1069,7 @@ export async function searchCivicPlusHCMSContentItems({
       baseUrl,
     } = await getCPHCMSToken(formsAppId, abortSignal)
 
-    const url = new URL(
-      `/api/content/clientId/${appName}/${contentTypeName}`,
-      baseUrl,
-    )
+    const url = new URL(`/api/content/${appName}/${contentTypeName}`, baseUrl)
 
     if (typeof $top === 'number')
       url.searchParams.append('$top', $top.toString())

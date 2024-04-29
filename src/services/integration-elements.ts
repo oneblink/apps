@@ -7,6 +7,7 @@ import {
   MiscTypes,
   APINSWTypes,
   SubmissionTypes,
+  CPHCMSTypes,
 } from '@oneblink/types'
 import OneBlinkAppsError from '../services/errors/oneBlinkAppsError'
 import { isOffline } from '../offline-service'
@@ -961,6 +962,38 @@ export async function getAPINSWLiquorLicence(
   }
 }
 
+const CP_HCMS_TOKEN_KEY = 'CP_HCMS_TOKEN'
+function getCPHCMSTokenFromStorage() {
+  const localStorageValue = localStorage.getItem(CP_HCMS_TOKEN_KEY)
+  if (localStorageValue) {
+    try {
+      return JSON.parse(
+        localStorageValue,
+      ) as CPHCMSTypes.CPHCSMAccessTokenResponse
+    } catch {
+      // ignore JSON parse error
+    }
+  }
+}
+
+async function getCPHCMSToken(formsAppId: number, abortSignal?: AbortSignal) {
+  const CPHCMSTokenResponse = getCPHCMSTokenFromStorage()
+  if (CPHCMSTokenResponse) {
+    const now = new Date()
+    const expiresAt = new Date(CPHCMSTokenResponse.token.expires_at)
+    if (expiresAt > now) {
+      return CPHCMSTokenResponse
+    }
+  }
+
+  const result = await postRequest<CPHCMSTypes.CPHCSMAccessTokenResponse>(
+    `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/cp-hcms-authentication`,
+    abortSignal,
+  )
+  localStorage.setItem(CP_HCMS_TOKEN_KEY, JSON.stringify(result))
+  return result
+}
+
 export type CivicPlusHCMSContentItem = {
   id: string
   createdBy: string
@@ -998,7 +1031,7 @@ export type CivicPlusHCMSContentItemsResult = {
  */
 export async function searchCivicPlusHCMSContentItems({
   formsAppId,
-  formId,
+  contentTypeName,
   $top,
   $skip,
   $search,
@@ -1006,10 +1039,10 @@ export async function searchCivicPlusHCMSContentItems({
   $orderby,
   abortSignal,
 }: {
-  /** The identifier for the Forms App to determine the HCMS Content Type. */
+  /** The identifier for the Forms App */
   formsAppId: number
-  /** The identifier for the Form to determine the HCMS Content Type. */
-  formId: number
+  /** The HCMS Content Type. */
+  contentTypeName: string
   /**
    * How many items to return in the result. Can be used to achieve paging or
    * infinite scrolling to load more.
@@ -1030,9 +1063,17 @@ export async function searchCivicPlusHCMSContentItems({
   abortSignal?: AbortSignal
 }): Promise<CivicPlusHCMSContentItemsResult> {
   try {
+    const {
+      token: access_token,
+      appName,
+      baseUrl,
+    } = await getCPHCMSToken(formsAppId, abortSignal)
+
     const url = new URL(
-      `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms/${formId}/cp-hcms-content-items`,
+      `/api/content/clientId/${appName}/${contentTypeName}`,
+      baseUrl,
     )
+
     if (typeof $top === 'number')
       url.searchParams.append('$top', $top.toString())
     if (typeof $skip === 'number')
@@ -1040,7 +1081,14 @@ export async function searchCivicPlusHCMSContentItems({
     if ($search) url.searchParams.append('$search', $search)
     if ($filter) url.searchParams.append('$filter', $filter)
     if ($orderby) url.searchParams.append('$orderby', $orderby)
-    return await getRequest(url.href, abortSignal)
+    return await fetchJSON(url.href, {
+      signal: abortSignal,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${access_token}`,
+        'X-Flatten': 'true',
+      },
+    })
   } catch (err) {
     if (!abortSignal?.aborted) {
       Sentry.captureException(err)
@@ -1081,11 +1129,14 @@ export async function searchCivicPlusHCMSContentItems({
         })
       }
       case 404: {
-        throw new OneBlinkAppsError(error.message, {
-          originalError: error,
-          title: 'Unknown Application',
-          httpStatusCode: error.status,
-        })
+        throw new OneBlinkAppsError(
+          `The Content Type "${contentTypeName}" does not exist. Please contact your administrator to ensure this page has been correctly configured.`,
+          {
+            originalError: error,
+            title: 'Unknown Application',
+            httpStatusCode: error.status,
+          },
+        )
       }
       default: {
         throw new OneBlinkAppsError(

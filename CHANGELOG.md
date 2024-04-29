@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - `formService.getGeoscapeReverseGeocoding()`
+- **BREAKING** update `searchCivicPlusHCMSContentItems` to call HCMS directly
 
 ### Changed
 

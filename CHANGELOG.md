@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- update `searchCivicPlusHCMSContentItems` to call HCMS directly
+
 ## [11.1.0] - 2024-04-30
 
 ### Added

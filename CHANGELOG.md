@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
-- **BREAKING** update `searchCivicPlusHCMSContentItems` to call HCMS directly
+- update `searchCivicPlusHCMSContentItems` to call HCMS directly
 
 ### Added
 

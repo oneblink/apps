@@ -1156,12 +1156,15 @@ export async function searchCivicPlusHCMSContentItems({
 
 export async function deleteCivicPlusHCMSContentItem({
   formsAppId,
+  formId,
   contentTypeName,
   contentId,
   abortSignal,
 }: {
-  /** The identifier for the Forms App */
+  /** The identifier for the Forms App to determine the HCMS Content Type. */
   formsAppId: number
+  /** The identifier for the Form to determine the HCMS Content Type. */
+  formId: number
   /** The HCMS Content Type. */
   contentTypeName: string
   /** The HCMS Content Id. */
@@ -1171,10 +1174,10 @@ export async function deleteCivicPlusHCMSContentItem({
 }): Promise<void> {
   try {
     const {
-      token: access_token,
+      auth: { access_token },
       appName,
       baseUrl,
-    } = await getCPHCMSToken(formsAppId, abortSignal)
+    } = await getCPHCMSToken({ formsAppId, formId }, abortSignal)
 
     const url = new URL(
       `/api/content/${appName}/${contentTypeName}/${contentId}`,
@@ -1229,14 +1232,11 @@ export async function deleteCivicPlusHCMSContentItem({
         })
       }
       case 404: {
-        throw new OneBlinkAppsError(
-          `The Content Id "${contentId}" does not exist in ${contentTypeName}. Please contact your administrator to ensure this page has been correctly configured.`,
-          {
-            originalError: error,
-            title: 'Unknown Application',
-            httpStatusCode: error.status,
-          },
-        )
+        throw new OneBlinkAppsError(error.message, {
+          originalError: error,
+          title: 'Unknown Application',
+          httpStatusCode: error.status,
+        })
       }
       default: {
         throw new OneBlinkAppsError(

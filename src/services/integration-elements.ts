@@ -1002,6 +1002,212 @@ async function getCPHCMSToken(
   return result
 }
 
+export async function publishHCMSContentItem({
+  contentTypeName,
+  contentTypeId,
+  formsAppId,
+  formId,
+  abortSignal,
+}: {
+  contentTypeName: string
+  contentTypeId: string
+  formsAppId: number
+  formId: number
+  abortSignal?: AbortSignal
+}) {
+  try {
+    const {
+      auth: { access_token },
+      appName,
+      baseUrl,
+    } = await getCPHCMSToken({ formsAppId, formId }, abortSignal)
+
+    const url = new URL(
+      `/api/content/${appName}/${contentTypeName}/${contentTypeId}/status`,
+      baseUrl,
+    )
+
+    const HCMSStatusBody = {
+      status: 'Published',
+      notificationDetails: {
+        subject: '',
+        emailIntroduction: '',
+        notificationOption: 0,
+        daysInAdvance: 0,
+      },
+    }
+
+    return await fetchJSON(url.href, {
+      signal: abortSignal,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${access_token}`,
+        'X-Flatten': 'true',
+      },
+      body: JSON.stringify(HCMSStatusBody),
+    })
+  } catch (err) {
+    if (!abortSignal?.aborted) {
+      Sentry.captureException(err)
+    }
+    const error = err as HTTPError
+    if (isOffline()) {
+      throw new OneBlinkAppsError(
+        'You are currently offline, please connect to the internet and try again',
+        {
+          originalError: error,
+          isOffline: true,
+        },
+      )
+    }
+    switch (error.status) {
+      case 401: {
+        throw new OneBlinkAppsError('Please login and try again.', {
+          originalError: error,
+          requiresLogin: true,
+          httpStatusCode: error.status,
+        })
+      }
+      case 403: {
+        throw new OneBlinkAppsError(
+          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
+          {
+            originalError: error,
+            requiresAccessRequest: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 400: {
+        throw new OneBlinkAppsError(error.message, {
+          originalError: error,
+          title: 'Invalid Request',
+          httpStatusCode: error.status,
+        })
+      }
+      case 404: {
+        throw new OneBlinkAppsError(error.message, {
+          originalError: error,
+          title: 'Unknown Application',
+          httpStatusCode: error.status,
+        })
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  }
+}
+
+export async function unpublishHCMSContentItem({
+  contentTypeName,
+  contentTypeId,
+  formsAppId,
+  formId,
+  abortSignal,
+}: {
+  contentTypeName: string
+  contentTypeId: string
+  formsAppId: number
+  formId: number
+  abortSignal?: AbortSignal
+}) {
+  try {
+    const {
+      auth: { access_token },
+      appName,
+      baseUrl,
+    } = await getCPHCMSToken({ formsAppId, formId }, abortSignal)
+
+    const url = new URL(
+      `/api/content/${appName}/${contentTypeName}/${contentTypeId}/status`,
+      baseUrl,
+    )
+
+    const HCMSStatusBody = {
+      status: 'Draft',
+      notificationDetails: {
+        subject: '',
+        emailIntroduction: '',
+        notificationOption: 0,
+        daysInAdvance: 0,
+      },
+    }
+
+    return await fetchJSON(url.href, {
+      signal: abortSignal,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${access_token}`,
+        'X-Flatten': 'true',
+      },
+      body: JSON.stringify(HCMSStatusBody),
+    })
+  } catch (err) {
+    if (!abortSignal?.aborted) {
+      Sentry.captureException(err)
+    }
+    const error = err as HTTPError
+    if (isOffline()) {
+      throw new OneBlinkAppsError(
+        'You are currently offline, please connect to the internet and try again',
+        {
+          originalError: error,
+          isOffline: true,
+        },
+      )
+    }
+    switch (error.status) {
+      case 401: {
+        throw new OneBlinkAppsError('Please login and try again.', {
+          originalError: error,
+          requiresLogin: true,
+          httpStatusCode: error.status,
+        })
+      }
+      case 403: {
+        throw new OneBlinkAppsError(
+          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
+          {
+            originalError: error,
+            requiresAccessRequest: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 400: {
+        throw new OneBlinkAppsError(error.message, {
+          originalError: error,
+          title: 'Invalid Request',
+          httpStatusCode: error.status,
+        })
+      }
+      case 404: {
+        throw new OneBlinkAppsError(error.message, {
+          originalError: error,
+          title: 'Unknown Application',
+          httpStatusCode: error.status,
+        })
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  }
+}
+
 export type CivicPlusHCMSContentItem = {
   id: string
   createdBy: string
@@ -1030,6 +1236,8 @@ export type CivicPlusHCMSContentItemsResult = {
   /** The HCMS Content Type's items */
   items: CivicPlusHCMSContentItem[]
 }
+
+export type CivicPlusHCMSContentItemStatus = 'Draft' | 'Publish'
 
 /**
  * Search CivicPlus HCMS content items.

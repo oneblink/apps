@@ -962,9 +962,13 @@ export async function getAPINSWLiquorLicence(
   }
 }
 
-const CP_HCMS_TOKEN_KEY = 'CP_HCMS_TOKEN'
-function getCPHCMSTokenFromStorage() {
-  const localStorageValue = localStorage.getItem(CP_HCMS_TOKEN_KEY)
+function generateCPHCMSStorageKey(formId: number) {
+  return `CP_HCMS_TOKEN_FORM_${formId}`
+}
+
+function getCPHCMSTokenFromStorage(formId: number) {
+  const itemKey = generateCPHCMSStorageKey(formId)
+  const localStorageValue = localStorage.getItem(itemKey)
   if (localStorageValue) {
     try {
       return JSON.parse(
@@ -980,7 +984,7 @@ async function getCPHCMSToken(
   { formsAppId, formId }: { formsAppId: number; formId: number },
   abortSignal?: AbortSignal,
 ) {
-  const CPHCMSTokenResponse = getCPHCMSTokenFromStorage()
+  const CPHCMSTokenResponse = getCPHCMSTokenFromStorage(formId)
   if (CPHCMSTokenResponse) {
     const now = new Date()
     const expiresAt = new Date(CPHCMSTokenResponse.auth.expires_at)
@@ -993,7 +997,8 @@ async function getCPHCMSToken(
     `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms/${formId}/cp-hcms-authentication`,
     abortSignal,
   )
-  localStorage.setItem(CP_HCMS_TOKEN_KEY, JSON.stringify(result))
+  const itemKey = generateCPHCMSStorageKey(formId)
+  localStorage.setItem(itemKey, JSON.stringify(result))
   return result
 }
 

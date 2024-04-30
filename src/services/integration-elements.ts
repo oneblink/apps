@@ -1072,7 +1072,7 @@ export async function searchCivicPlusHCMSContentItems({
 }): Promise<CivicPlusHCMSContentItemsResult> {
   try {
     const {
-      auth: access_token,
+      auth: { access_token },
       appName,
       baseUrl,
       contentTypeName,

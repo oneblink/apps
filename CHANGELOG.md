@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [11.1.0] - 2024-04-30
+
 ### Added
 
 - `formService.getGeoscapeReverseGeocoding()`
@@ -14,6 +16,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 
 - s3 uploads to `@oneblink/storage`
+
+### Dependencies
+
+- no longer depend upon [@aws-sdk/lib-storage](https://www.npmjs.com/package/@aws-sdk/lib-storage)
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [6.1.0-beta.2](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [6.0.1-beta.2](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
+
+- depend upon [@oneblink/storage](https://www.npmjs.com/package/@oneblink/storage) [1.0.0-beta.13](https://github.com/oneblink/storage/blob/master/CHANGELOG.md)
 
 ## [11.0.1] - 2024-03-14
 

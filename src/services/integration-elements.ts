@@ -1153,3 +1153,100 @@ export async function searchCivicPlusHCMSContentItems({
     }
   }
 }
+
+export async function deleteCivicPlusHCMSContentItem({
+  formsAppId,
+  formId,
+  contentTypeName,
+  contentId,
+  abortSignal,
+}: {
+  /** The identifier for the Forms App to determine the HCMS Content Type. */
+  formsAppId: number
+  /** The identifier for the Form to determine the HCMS Content Type. */
+  formId: number
+  /** The HCMS Content Type. */
+  contentTypeName: string
+  /** The HCMS Content Id. */
+  contentId: string
+  /** Allows request to be aborted */
+  abortSignal?: AbortSignal
+}): Promise<void> {
+  try {
+    const {
+      auth: { access_token },
+      appName,
+      baseUrl,
+    } = await getCPHCMSToken({ formsAppId, formId }, abortSignal)
+
+    const url = new URL(
+      `/api/content/${appName}/${contentTypeName}/${contentId}`,
+      baseUrl,
+    )
+
+    return await fetchJSON(url.href, {
+      signal: abortSignal,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${access_token}`,
+        'X-Flatten': 'true',
+      },
+    })
+  } catch (err) {
+    if (!abortSignal?.aborted) {
+      Sentry.captureException(err)
+    }
+    const error = err as HTTPError
+    if (isOffline()) {
+      throw new OneBlinkAppsError(
+        'You are currently offline, please connect to the internet and try again',
+        {
+          originalError: error,
+          isOffline: true,
+        },
+      )
+    }
+    switch (error.status) {
+      case 401: {
+        throw new OneBlinkAppsError('Please login and try again.', {
+          originalError: error,
+          requiresLogin: true,
+          httpStatusCode: error.status,
+        })
+      }
+      case 403: {
+        throw new OneBlinkAppsError(
+          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
+          {
+            originalError: error,
+            requiresAccessRequest: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 400: {
+        throw new OneBlinkAppsError(error.message, {
+          originalError: error,
+          title: 'Invalid Request',
+          httpStatusCode: error.status,
+        })
+      }
+      case 404: {
+        throw new OneBlinkAppsError(error.message, {
+          originalError: error,
+          title: 'Unknown Application',
+          httpStatusCode: error.status,
+        })
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  }
+}

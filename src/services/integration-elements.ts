@@ -7,6 +7,7 @@ import {
   MiscTypes,
   APINSWTypes,
   SubmissionTypes,
+  CPHCMSTypes,
 } from '@oneblink/types'
 import OneBlinkAppsError from '../services/errors/oneBlinkAppsError'
 import { isOffline } from '../offline-service'
@@ -961,6 +962,46 @@ export async function getAPINSWLiquorLicence(
   }
 }
 
+function generateCPHCMSStorageKey(formId: number) {
+  return `CP_HCMS_TOKEN_FORM_${formId}`
+}
+
+function getCPHCMSTokenFromStorage(formId: number) {
+  const itemKey = generateCPHCMSStorageKey(formId)
+  const localStorageValue = localStorage.getItem(itemKey)
+  if (localStorageValue) {
+    try {
+      return JSON.parse(
+        localStorageValue,
+      ) as CPHCMSTypes.CPHCSMAccessTokenResponse
+    } catch {
+      // ignore JSON parse error
+    }
+  }
+}
+
+async function getCPHCMSToken(
+  { formsAppId, formId }: { formsAppId: number; formId: number },
+  abortSignal?: AbortSignal,
+) {
+  const CPHCMSTokenResponse = getCPHCMSTokenFromStorage(formId)
+  if (CPHCMSTokenResponse) {
+    const now = new Date()
+    const expiresAt = new Date(CPHCMSTokenResponse.auth.expires_at)
+    if (expiresAt > now) {
+      return CPHCMSTokenResponse
+    }
+  }
+
+  const result = await postRequest<CPHCMSTypes.CPHCSMAccessTokenResponse>(
+    `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms/${formId}/cp-hcms-authentication`,
+    abortSignal,
+  )
+  const itemKey = generateCPHCMSStorageKey(formId)
+  localStorage.setItem(itemKey, JSON.stringify(result))
+  return result
+}
+
 export type CivicPlusHCMSContentItem = {
   id: string
   createdBy: string
@@ -1030,9 +1071,15 @@ export async function searchCivicPlusHCMSContentItems({
   abortSignal?: AbortSignal
 }): Promise<CivicPlusHCMSContentItemsResult> {
   try {
-    const url = new URL(
-      `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms/${formId}/cp-hcms-content-items`,
-    )
+    const {
+      auth: { access_token },
+      appName,
+      baseUrl,
+      contentTypeName,
+    } = await getCPHCMSToken({ formsAppId, formId }, abortSignal)
+
+    const url = new URL(`/api/content/${appName}/${contentTypeName}`, baseUrl)
+
     if (typeof $top === 'number')
       url.searchParams.append('$top', $top.toString())
     if (typeof $skip === 'number')
@@ -1040,7 +1087,14 @@ export async function searchCivicPlusHCMSContentItems({
     if ($search) url.searchParams.append('$search', $search)
     if ($filter) url.searchParams.append('$filter', $filter)
     if ($orderby) url.searchParams.append('$orderby', $orderby)
-    return await getRequest(url.href, abortSignal)
+    return await fetchJSON(url.href, {
+      signal: abortSignal,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${access_token}`,
+        'X-Flatten': 'true',
+      },
+    })
   } catch (err) {
     if (!abortSignal?.aborted) {
       Sentry.captureException(err)

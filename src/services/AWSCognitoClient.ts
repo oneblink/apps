@@ -4,7 +4,6 @@ import {
   ChangePasswordCommand,
   CognitoIdentityProviderClient,
   ConfirmForgotPasswordCommand,
-  ForgotPasswordCommand,
   GetUserCommand,
   GlobalSignOutCommand,
   InitiateAuthCommand,
@@ -397,26 +396,6 @@ export default class AWSCognitoClient {
       }),
     )
   }
-
-  async forgotPassword(
-    username: string,
-  ): Promise<(code: string, password: string) => Promise<void>> {
-    await this.cognitoIdentityProviderClient.send(
-      new ForgotPasswordCommand({
-        ClientId: this.clientId,
-        Username: username,
-      }),
-    )
-
-    return async (code, password) => {
-      await this.confirmForgotPassword({
-        username,
-        code,
-        password,
-      })
-    }
-  }
-
   async confirmForgotPassword({
     username,
     code,

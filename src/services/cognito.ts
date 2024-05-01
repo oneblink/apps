@@ -244,10 +244,17 @@ async function changePassword(existingPassword: string, newPassword: string) {
  * ```
  *
  * @param username
+ * @param formsAppId Used to give the resulting email sent to the user
+ *   associated forms app branding and sending address
  * @returns
  */
 async function forgotPassword(
   username: string,
+  /**
+   * Used to give the resulting email sent to the user associated forms app
+   * branding and sending address
+   */
+  formsAppId?: number,
 ): Promise<(code: string, password: string) => Promise<void>> {
   if (!awsCognitoClient) {
     throw new Error(
@@ -259,6 +266,7 @@ async function forgotPassword(
     const url = `${tenants.current.apiOrigin}/authentication/reset-password`
     await postRequest(url, {
       username,
+      formsAppId,
     })
   } catch (err) {
     const error = err as HTTPError

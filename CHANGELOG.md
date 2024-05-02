@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Support for the `formsAppId` as an optional second property in the `authService.forgotPassword()` function
 - `formService.deleteCivicPlusHCMSContentItem`
 - `formService.publishHCMSContentItem`
-- `formService.unpublishHCMSContentItem`
+- `formService.draftHCMSContentItem`
 
 ### Changed
 

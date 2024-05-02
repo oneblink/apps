@@ -1162,6 +1162,8 @@ export async function draftHCMSContentItem({
   }
 }
 
+export type CivicPlusHCMSContentItemStatus = 'Draft' | 'Published'
+
 export type CivicPlusHCMSContentItem = {
   id: string
   createdBy: string
@@ -1173,7 +1175,7 @@ export type CivicPlusHCMSContentItem = {
   created: string
   /** ISO datetime string */
   lastModified: string
-  status: string
+  status: CivicPlusHCMSContentItemStatus
   /** HEX colour */
   statusColor: string
   contentTypeName: string
@@ -1190,8 +1192,6 @@ export type CivicPlusHCMSContentItemsResult = {
   /** The HCMS Content Type's items */
   items: CivicPlusHCMSContentItem[]
 }
-
-export type CivicPlusHCMSContentItemStatus = 'Draft' | 'Publish'
 
 /**
  * Search CivicPlus HCMS content items.

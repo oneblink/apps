@@ -18,6 +18,7 @@ import {
   HTTPError,
   postRequest,
   searchRequest,
+  putRequest,
 } from '../services/fetch'
 import tenants from '../tenants'
 import Sentry from '../Sentry'
@@ -1003,50 +1004,26 @@ async function getCPHCMSToken(
   return result
 }
 
+/**
+ * Change the status of a CivicPlus HCMS content item to published.
+ *
+ * @param options
+ * @returns
+ */
 export async function publishHCMSContentItem({
-  contentTypeName,
-  contentTypeId,
   formsAppId,
   formId,
+  contentId,
   abortSignal,
 }: {
-  contentTypeName: string
-  contentTypeId: string
   formsAppId: number
   formId: number
+  contentId: string
   abortSignal?: AbortSignal
 }) {
   try {
-    const {
-      auth: { access_token },
-      appName,
-      baseUrl,
-    } = await getCPHCMSToken({ formsAppId, formId }, abortSignal)
-
-    const url = new URL(
-      `/api/content/${appName}/${contentTypeName}/${contentTypeId}/status`,
-      baseUrl,
-    )
-
-    const HCMSStatusBody = {
-      status: 'Published',
-      notificationDetails: {
-        subject: '',
-        emailIntroduction: '',
-        notificationOption: 0,
-        daysInAdvance: 0,
-      },
-    }
-
-    return await fetchJSON(url.href, {
-      signal: abortSignal,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${access_token}`,
-        'X-Flatten': 'true',
-      },
-      body: JSON.stringify(HCMSStatusBody),
-    })
+    const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms/${formId}/cp-hcms-content/${contentId}/publish`
+    return await putRequest(url, undefined, abortSignal)
   } catch (err) {
     if (!abortSignal?.aborted) {
       Sentry.captureException(err)
@@ -1106,50 +1083,26 @@ export async function publishHCMSContentItem({
   }
 }
 
-export async function unpublishHCMSContentItem({
-  contentTypeName,
-  contentTypeId,
+/**
+ * Change the status of a CivicPlus HCMS content item to draft.
+ *
+ * @param options
+ * @returns
+ */
+export async function draftHCMSContentItem({
   formsAppId,
   formId,
+  contentId,
   abortSignal,
 }: {
-  contentTypeName: string
-  contentTypeId: string
   formsAppId: number
   formId: number
+  contentId: string
   abortSignal?: AbortSignal
 }) {
   try {
-    const {
-      auth: { access_token },
-      appName,
-      baseUrl,
-    } = await getCPHCMSToken({ formsAppId, formId }, abortSignal)
-
-    const url = new URL(
-      `/api/content/${appName}/${contentTypeName}/${contentTypeId}/status`,
-      baseUrl,
-    )
-
-    const HCMSStatusBody = {
-      status: 'Draft',
-      notificationDetails: {
-        subject: '',
-        emailIntroduction: '',
-        notificationOption: 0,
-        daysInAdvance: 0,
-      },
-    }
-
-    return await fetchJSON(url.href, {
-      signal: abortSignal,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${access_token}`,
-        'X-Flatten': 'true',
-      },
-      body: JSON.stringify(HCMSStatusBody),
-    })
+    const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms/${formId}/cp-hcms-content/${contentId}/draft`
+    return await putRequest(url, undefined, abortSignal)
   } catch (err) {
     if (!abortSignal?.aborted) {
       Sentry.captureException(err)

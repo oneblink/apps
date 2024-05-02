@@ -18,6 +18,7 @@ import {
   HTTPError,
   postRequest,
   searchRequest,
+  putRequest,
 } from '../services/fetch'
 import tenants from '../tenants'
 import Sentry from '../Sentry'
@@ -1003,6 +1004,166 @@ async function getCPHCMSToken(
   return result
 }
 
+/**
+ * Change the status of a CivicPlus HCMS content item to published.
+ *
+ * @param options
+ * @returns
+ */
+export async function publishHCMSContentItem({
+  formsAppId,
+  formId,
+  contentId,
+  abortSignal,
+}: {
+  formsAppId: number
+  formId: number
+  contentId: string
+  abortSignal?: AbortSignal
+}) {
+  try {
+    const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms/${formId}/cp-hcms-content/${contentId}/publish`
+    return await putRequest(url, undefined, abortSignal)
+  } catch (err) {
+    if (!abortSignal?.aborted) {
+      Sentry.captureException(err)
+    }
+    const error = err as HTTPError
+    if (isOffline()) {
+      throw new OneBlinkAppsError(
+        'You are currently offline, please connect to the internet and try again',
+        {
+          originalError: error,
+          isOffline: true,
+        },
+      )
+    }
+    switch (error.status) {
+      case 401: {
+        throw new OneBlinkAppsError('Please login and try again.', {
+          originalError: error,
+          requiresLogin: true,
+          httpStatusCode: error.status,
+        })
+      }
+      case 403: {
+        throw new OneBlinkAppsError(
+          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
+          {
+            originalError: error,
+            requiresAccessRequest: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 400: {
+        throw new OneBlinkAppsError(error.message, {
+          originalError: error,
+          title: 'Invalid Request',
+          httpStatusCode: error.status,
+        })
+      }
+      case 404: {
+        throw new OneBlinkAppsError(error.message, {
+          originalError: error,
+          title: 'Unknown Application',
+          httpStatusCode: error.status,
+        })
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  }
+}
+
+/**
+ * Change the status of a CivicPlus HCMS content item to draft.
+ *
+ * @param options
+ * @returns
+ */
+export async function draftHCMSContentItem({
+  formsAppId,
+  formId,
+  contentId,
+  abortSignal,
+}: {
+  formsAppId: number
+  formId: number
+  contentId: string
+  abortSignal?: AbortSignal
+}) {
+  try {
+    const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms/${formId}/cp-hcms-content/${contentId}/draft`
+    return await putRequest(url, undefined, abortSignal)
+  } catch (err) {
+    if (!abortSignal?.aborted) {
+      Sentry.captureException(err)
+    }
+    const error = err as HTTPError
+    if (isOffline()) {
+      throw new OneBlinkAppsError(
+        'You are currently offline, please connect to the internet and try again',
+        {
+          originalError: error,
+          isOffline: true,
+        },
+      )
+    }
+    switch (error.status) {
+      case 401: {
+        throw new OneBlinkAppsError('Please login and try again.', {
+          originalError: error,
+          requiresLogin: true,
+          httpStatusCode: error.status,
+        })
+      }
+      case 403: {
+        throw new OneBlinkAppsError(
+          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
+          {
+            originalError: error,
+            requiresAccessRequest: true,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      case 400: {
+        throw new OneBlinkAppsError(error.message, {
+          originalError: error,
+          title: 'Invalid Request',
+          httpStatusCode: error.status,
+        })
+      }
+      case 404: {
+        throw new OneBlinkAppsError(error.message, {
+          originalError: error,
+          title: 'Unknown Application',
+          httpStatusCode: error.status,
+        })
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  }
+}
+
+export type CivicPlusHCMSContentItemStatus = 'Draft' | 'Published'
+
 export type CivicPlusHCMSContentItem = {
   id: string
   createdBy: string
@@ -1014,7 +1175,7 @@ export type CivicPlusHCMSContentItem = {
   created: string
   /** ISO datetime string */
   lastModified: string
-  status: string
+  status: CivicPlusHCMSContentItemStatus
   /** HEX colour */
   statusColor: string
   contentTypeName: string

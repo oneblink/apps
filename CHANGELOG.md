@@ -7,10 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- update `searchCivicPlusHCMSContentItems` to call HCMS directly
+
 ### Added
 
 - Support for the `formsAppId` as an optional second property in the `authService.forgotPassword()` function
 - `formService.deleteCivicPlusHCMSContentItem`
+- `formService.publishHCMSContentItem`
+- `formService.draftHCMSContentItem`
 
 ### Changed
 

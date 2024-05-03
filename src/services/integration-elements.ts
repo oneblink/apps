@@ -1255,6 +1255,7 @@ export async function searchCivicPlusHCMSContentItems({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${access_token}`,
         'X-Flatten': 'true',
+        'X-Unpublished': 'true',
       },
     })
   } catch (err) {

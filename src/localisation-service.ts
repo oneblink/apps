@@ -55,9 +55,6 @@ function generateFormats({
 }
 
 export function getDateFnsFormats() {
-  console.log('getting formats')
-  console.log('tenants: ', tenants)
-  console.log('tenants.locale: ', tenants.locale)
   const time = 'h:mm a'
   switch (tenants.locale) {
     case 'en-US': {

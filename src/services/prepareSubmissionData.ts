@@ -1,12 +1,12 @@
 import { FormTypes } from '@oneblink/types'
-import { BaseFormSubmission } from '../types/submissions'
+import { BaseNewFormSubmission } from '../types/submissions'
 import { executePendingQueueAttachmentProgressListeners } from './pending-queue'
 import uploadAttachment from './uploadAttachment'
 
 export default async function prepareSubmissionData({
   definition,
   submission,
-}: BaseFormSubmission): Promise<BaseFormSubmission['submission']> {
+}: BaseNewFormSubmission): Promise<BaseNewFormSubmission['submission']> {
   return await uploadAttachments(definition.id, definition.elements, submission)
 }
 
@@ -46,8 +46,8 @@ async function maybeUploadAttachment(
 async function uploadAttachments(
   formId: number,
   formElements: FormTypes.FormElement[],
-  submission: BaseFormSubmission['submission'],
-): Promise<BaseFormSubmission['submission']> {
+  submission: BaseNewFormSubmission['submission'],
+): Promise<BaseNewFormSubmission['submission']> {
   for (const formElement of formElements) {
     switch (formElement.type) {
       case 'page':
@@ -63,7 +63,7 @@ async function uploadAttachments(
         await uploadAttachments(
           formId,
           formElement.elements || [],
-          nestedSubmission as BaseFormSubmission['submission'],
+          nestedSubmission as BaseNewFormSubmission['submission'],
         )
         break
       }

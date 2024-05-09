@@ -1,5 +1,6 @@
 import { FormTypes } from '@oneblink/types'
 import replaceInjectablesWithSubmissionValues from '../src/services/replaceInjectablesWithSubmissionValues'
+import { FormSubmissionResult } from '../src/submission-service'
 
 jest.mock('nanoid/non-secure', () => {
   return {
@@ -25,12 +26,12 @@ describe('Form redirect URL', () => {
     createdAt: 'string',
     updatedAt: 'string',
   }
-  const baseSubmissionResult = {
+  const baseSubmissionResult: Omit<FormSubmissionResult, 'submission'> = {
     formsAppId: 1,
     definition,
-    jobId: null,
-    draftId: null,
-    externalId: null,
+    jobId: undefined,
+    formSubmissionDraftId: undefined,
+    externalId: undefined,
     preFillFormDataId: null,
     submissionId: null,
     submissionTimestamp: null,

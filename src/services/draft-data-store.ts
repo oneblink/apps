@@ -3,159 +3,167 @@ import utilsService from './utils'
 import {
   uploadDraftData,
   downloadDraftData,
-  PutDraftsPayload,
+  deleteFormSubmissionDraft,
 } from './api/drafts'
 import { SubmissionTypes } from '@oneblink/types'
 import Sentry from '../Sentry'
 import { DraftSubmission, ProgressListener } from '../types/submissions'
 import { deleteAutoSaveData } from '../auto-save-service'
-function getDraftDataKey(draftDataId: string) {
-  return `DRAFT_DATA_${draftDataId}`
+
+function getLocalDraftSubmissionKey(formSubmissionDraftId: string) {
+  return `DRAFT_SUBMISSION_${formSubmissionDraftId}`
 }
 
-async function getLocalDraftData(
-  draftDataId: undefined | null | string,
+export async function getLocalDraftSubmission(
+  formSubmissionDraftId: string | undefined,
 ): Promise<DraftSubmission | null> {
-  if (!draftDataId) {
+  if (!formSubmissionDraftId) {
     return null
   }
-  const key = getDraftDataKey(draftDataId)
+  const key = getLocalDraftSubmissionKey(formSubmissionDraftId)
   return utilsService.getLocalForageItem(key)
 }
 
-async function setLocalDraftData(
-  draftDataId: string,
-  model: DraftSubmission,
+async function setLocalDraftSubmission(
+  draftSubmission: DraftSubmission,
 ): Promise<DraftSubmission> {
-  const key = getDraftDataKey(draftDataId)
-  return utilsService.setLocalForageItem(key, model)
+  const key = getLocalDraftSubmissionKey(draftSubmission.formSubmissionDraftId)
+  return utilsService.setLocalForageItem(key, draftSubmission)
 }
 
-export async function removeDraftData(
-  draftDataId: undefined | null | string,
+export async function removeLocalDraftSubmission(
+  formSubmissionDraftId: undefined | null | string,
 ): Promise<void> {
-  if (!draftDataId) {
+  if (!formSubmissionDraftId) {
     return
   }
-  const key = getDraftDataKey(draftDataId)
+  const key = getLocalDraftSubmissionKey(formSubmissionDraftId)
   return utilsService.removeLocalForageItem(key)
 }
 
-export async function saveDraftData({
-  draft,
+export async function saveDraftSubmission({
   draftSubmission,
   autoSaveKey,
   onProgress,
   abortSignal,
 }: {
-  draft: SubmissionTypes.FormsAppDraft
   draftSubmission: DraftSubmission
   autoSaveKey: string | undefined
   onProgress?: ProgressListener
   abortSignal?: AbortSignal
-}): Promise<string> {
-  let draftDataId = draft.draftId
-  if (!draftSubmission.backgroundUpload) {
-    try {
-      draftDataId = await uploadDraftData(
-        draft,
-        draftSubmission,
-        onProgress,
-        abortSignal,
-      )
+}): Promise<SubmissionTypes.FormSubmissionDraftVersion | undefined> {
+  await setLocalDraftSubmission(draftSubmission)
 
-      if (typeof autoSaveKey === 'string') {
-        try {
-          await deleteAutoSaveData(draftSubmission.definition.id, autoSaveKey)
-        } catch (error) {
-          console.warn('Error removing auto save data: ', error)
-          Sentry.captureException(error)
-        }
-      }
-    } catch (error) {
-      Sentry.captureException(error)
-      // Ignoring all errors here as we don't want draft submission data
-      // being saved to the cloud to prevent drafts from being saved on the device
-      console.warn('Could not upload Draft Data as JSON', error)
-    }
-  }
-  await setLocalDraftData(draftDataId, draftSubmission)
-  return draftDataId
-}
-
-export async function getDraftData(
-  formId: number,
-  draftDataId: string,
-): Promise<DraftSubmission> {
-  return getLocalDraftData(draftDataId)
-    .then((draftData) => {
-      if (draftData) return draftData
-
-      return downloadDraftData<DraftSubmission>(formId, draftDataId).then(
-        (downloadedDraftData) =>
-          setLocalDraftData(draftDataId, downloadedDraftData),
-      )
-    })
-    .then((formSubmissionResult) => {
-      if (!formSubmissionResult) {
-        throw new Error('draft data does not exist')
-      }
-      return formSubmissionResult
-    })
-}
-
-export async function ensureDraftsDataExists(
-  drafts: SubmissionTypes.FormsAppDraft[],
-) {
-  if (!Array.isArray(drafts)) {
+  if (draftSubmission.backgroundUpload) {
     return
   }
 
-  const keys = await utilsService.localForage.keys()
-  for (const draft of drafts) {
-    const draftDataId = draft.draftDataId
-    if (
-      !draft.formId ||
-      !draftDataId ||
-      keys.some((key) => key === getDraftDataKey(draftDataId))
-    ) {
-      return
+  try {
+    const formSubmissionDraftVersion = await uploadDraftData(
+      draftSubmission,
+      onProgress,
+      abortSignal,
+    )
+
+    if (typeof autoSaveKey === 'string') {
+      try {
+        await deleteAutoSaveData(draftSubmission.definition.id, autoSaveKey)
+      } catch (error) {
+        console.warn('Error removing auto save data: ', error)
+        Sentry.captureException(error)
+      }
     }
-    await getDraftData(draft.formId, draftDataId).catch((error) => {
-      console.warn('Could not download Draft Data as JSON', error)
-    })
+
+    return formSubmissionDraftVersion
+  } catch (error) {
+    Sentry.captureException(error)
+    // Ignoring all errors here as we don't want draft submission data
+    // being saved to the cloud to prevent drafts from being saved on the device
+    console.warn('Could not upload Draft Data as JSON', error)
   }
 }
 
-export async function ensureDraftsDataIsUploaded(draftsData: PutDraftsPayload) {
-  const newDrafts = []
-  for (const draft of draftsData.drafts) {
-    // draftId will be set as draftDataId if data cannot be uploaded
-    if (draft.draftId !== draft.draftDataId) {
-      newDrafts.push(draft)
-      continue
+export async function deleteDraftData(
+  formSubmissionDraftId: string,
+  abortSignal?: AbortSignal,
+): Promise<{ hasDeletedRemoteDraft: boolean }> {
+  try {
+    await deleteFormSubmissionDraft(formSubmissionDraftId, abortSignal)
+    return {
+      hasDeletedRemoteDraft: true,
     }
-
-    const draftSubmission = await getLocalDraftData(draft.draftDataId)
-    if (!draftSubmission) {
-      continue
-    }
-
-    console.log('Uploading draft data that was saved while offline', draft)
-    draftSubmission.backgroundUpload = false
-    const newDraftDataId = await saveDraftData({
-      draft,
-      draftSubmission,
-      autoSaveKey: undefined,
-    })
-    newDrafts.push(
-      Object.assign({}, draft, {
-        draftDataId: newDraftDataId,
-      }),
+  } catch (error) {
+    console.warn(
+      'Could not delete remote draft, will attempt to delete again later.',
+      error,
     )
+    return {
+      hasDeletedRemoteDraft: false,
+    }
   }
-  return {
-    ...draftsData,
-    drafts: newDrafts,
+}
+
+export function getLatestFormSubmissionDraftVersion(
+  versions: SubmissionTypes.FormSubmissionDraftVersion[] | undefined,
+) {
+  return versions?.reduce<
+    SubmissionTypes.FormSubmissionDraftVersion | undefined
+  >((memo, formSubmissionDraftVersion) => {
+    if (!memo || formSubmissionDraftVersion.createdAt > memo.createdAt) {
+      return formSubmissionDraftVersion
+    }
+    return memo
+  }, undefined)
+}
+
+export async function getDraftSubmission(
+  formSubmissionDraft: SubmissionTypes.FormSubmissionDraft,
+  abortSignal?: AbortSignal,
+): Promise<DraftSubmission | undefined> {
+  const latestFormSubmissionDraftVersion = getLatestFormSubmissionDraftVersion(
+    formSubmissionDraft.versions,
+  )
+  const draftSubmission = await getLocalDraftSubmission(formSubmissionDraft.id)
+
+  // If there is local data and no server data, return local data.
+  // Or if the latest server version of the draft is what
+  // is currently saved locally, return local data.
+  if (
+    draftSubmission &&
+    (!latestFormSubmissionDraftVersion ||
+      latestFormSubmissionDraftVersion.createdAt === draftSubmission.createdAt)
+  ) {
+    return draftSubmission
   }
+
+  if (!latestFormSubmissionDraftVersion) {
+    return undefined
+  }
+
+  const s3SubmissionData = await downloadDraftData(
+    formSubmissionDraft.formId,
+    latestFormSubmissionDraftVersion.id,
+    abortSignal,
+  )
+  return await setLocalDraftSubmission({
+    definition: s3SubmissionData.definition,
+    submission: s3SubmissionData.submission,
+    lastElementUpdated: s3SubmissionData.lastElementUpdated,
+    formsAppId: s3SubmissionData.formsAppId,
+    jobId: formSubmissionDraft.jobId,
+    externalId: formSubmissionDraft.externalId,
+    previousFormSubmissionApprovalId:
+      formSubmissionDraft.previousFormSubmissionApprovalId,
+    taskCompletion: s3SubmissionData.task &&
+      s3SubmissionData.taskAction && {
+        task: s3SubmissionData.task,
+        taskAction: s3SubmissionData.taskAction,
+        taskGroup: s3SubmissionData.taskGroup,
+        taskGroupInstance: s3SubmissionData.taskGroupInstance,
+        redirectUrl: '',
+      },
+    title: latestFormSubmissionDraftVersion.title,
+    createdAt: latestFormSubmissionDraftVersion.createdAt,
+    formSubmissionDraftId: formSubmissionDraft.id,
+  })
 }

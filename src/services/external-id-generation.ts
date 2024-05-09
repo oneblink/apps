@@ -35,7 +35,7 @@ export default async function externalIdGeneration(
       externalIdUrlSearchParam: formSubmission.externalId,
       formsAppId: formSubmission.formsAppId,
       formId: formSubmission.definition.id,
-      draftId: formSubmission.draftId ? formSubmission.draftId : null,
+      draftId: formSubmission.formSubmissionDraftId || null,
       preFillFormDataId: formSubmission.preFillFormDataId,
       jobId: formSubmission.jobId,
       previousFormSubmissionApprovalId:
@@ -48,7 +48,7 @@ export default async function externalIdGeneration(
       formSubmission.externalId,
     )
     return {
-      externalId: formSubmission.externalId,
+      externalId: formSubmission.externalId || null,
     }
   }
   const { url, response } = result

@@ -1,11 +1,10 @@
 import { isOffline } from '../offline-service'
-import { getFormsKeyId } from './forms-key'
 import { addFormSubmissionToPendingQueue } from './pending-queue'
 import {
   checkForPaymentSubmissionEvent,
   handlePaymentSubmissionEvent,
 } from '../payment-service'
-import { deleteDraft } from '../draft-service'
+import { deleteDraftData } from './draft-data-store'
 import { removePrefillFormData } from '../prefill-service'
 import {
   handleSchedulingSubmissionEvent,
@@ -149,7 +148,6 @@ export default async function submit({
         formSubmission.externalId = externalIdResult.externalId
       }
     }
-    formSubmission.keyId = getFormsKeyId() || undefined
 
     const data = await uploadFormSubmission(
       formSubmission,
@@ -192,8 +190,8 @@ export default async function submit({
       })
     }
 
-    if (formSubmission.draftId) {
-      await deleteDraft(formSubmission.draftId, formSubmission.formsAppId)
+    if (formSubmission.formSubmissionDraftId) {
+      await deleteDraftData(formSubmission.formSubmissionDraftId, abortSignal)
     }
     if (formSubmission.preFillFormDataId) {
       await removePrefillFormData(formSubmission.preFillFormDataId)

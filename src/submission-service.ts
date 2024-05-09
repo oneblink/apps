@@ -31,6 +31,7 @@ import {
   NewDraftSubmission,
   NewFormSubmission,
   DraftSubmission,
+  DraftSubmissionInput,
 } from './types/submissions'
 import { deleteAutoSaveData } from './auto-save-service'
 import { downloadSubmissionS3Data } from './services/s3Submit'
@@ -177,7 +178,7 @@ async function processPendingQueue({
  *   },
  *   definition: OneBlinkForm,
  *   captchaTokens: [],
- *   draftId: '2974602c-2c5b-4b46-b086-87ee9b2aa233',
+ *   formSubmissionDraftId: '2974602c-2c5b-4b46-b086-87ee9b2aa233',
  *   jobId: 'bb37d1da-9cda-4950-a36a-22f58b25de3a',
  *   preFillFormDataId: '7763f828-4aaf-49dc-9c1b-e2eeea8fa990',
  *   externalId: 'external-id-set-by-developer',
@@ -331,9 +332,9 @@ async function executeCancelAction(
   const formSubmissionResult: FormSubmissionResult = {
     ...options,
     formsAppId: NaN,
-    draftId: null,
-    jobId: null,
-    externalId: null,
+    formSubmissionDraftId: undefined,
+    jobId: undefined,
+    externalId: undefined,
     preFillFormDataId: null,
     captchaTokens: [],
     submission: {},
@@ -381,7 +382,7 @@ async function executeCancelAction(
  *   payment: {
  *     hostedFormUrl: 'https://payment.com/transaction'
  *   },
- *   draftId: '2974602c-2c5b-4b46-b086-87ee9b2aa233',
+ *   formSubmissionDraftId: '2974602c-2c5b-4b46-b086-87ee9b2aa233',
  *   jobId: 'bb37d1da-9cda-4950-a36a-22f58b25de3a',
  *   preFillFormDataId: '7763f828-4aaf-49dc-9c1b-e2eeea8fa990',
  *   externalId: 'external-id-set-by-developer',
@@ -515,6 +516,7 @@ export {
   BaseFormSubmission,
   NewDraftSubmission,
   NewFormSubmission,
+  DraftSubmissionInput,
   DraftSubmission,
   FormSubmission,
   FormSubmissionResult,

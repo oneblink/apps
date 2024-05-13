@@ -10,7 +10,7 @@
     "@aws-sdk/client-cognito-identity-provider": "^3.441.0",
     "@aws-sdk/client-s3": "^3.441.0",
     "@oneblink/sdk-core": "^6.1.0-beta.2",
-    "@oneblink/storage": "^1.0.0-beta.13",
+    "@oneblink/storage": "^2.0.0-beta.1",
     "@sentry/browser": "^7.77.0",
     "@sentry/tracing": "^7.77.0",
     "date-fns": "^2.30.0",
@@ -28,7 +28,7 @@
     "@babel/plugin-transform-modules-commonjs": "^7.23.0",
     "@microsoft/eslint-plugin-sdl": "^0.2.0",
     "@oneblink/release-cli": "^3.1.0",
-    "@oneblink/types": "github:oneblink/types#ON-40056",
+    "@oneblink/types": "github:oneblink/types",
     "@types/file-saver": "^2.0.6",
     "@types/jest": "^27.5.0",
     "@types/lodash.clonedeep": "^4.5.8",
@@ -83,7 +83,7 @@
     "release": "oneblink-release repository --no-name",
     "start": "tsc-watch",
     "test": "jest",
-    "types": "npm i --save-dev github:oneblink/types#ON-40056",
+    "types": "npm i --save-dev github:oneblink/types",
     "typescript": "tsc --noEmit",
     "update-dependents": "oneblink-release update-dependents"
   }

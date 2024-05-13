@@ -233,11 +233,7 @@ async function addDraft({
     } else {
       localDraftsStorage.unsyncedDraftSubmissions.push(draftSubmission)
     }
-    await utilsService.localForage.setItem(
-      generateDraftsKey(username),
-      localDraftsStorage,
-    )
-    await executeDraftsListeners(localDraftsStorage)
+    await setDrafts(localDraftsStorage)
     syncDrafts({
       throwError: false,
       formsAppId: draftSubmission.formsAppId,
@@ -343,19 +339,13 @@ async function updateDraft({
       onProgress,
     })
     if (formSubmissionDraftVersion) {
-      const formSubmissionDrafts = await getFormSubmissionDrafts(
-        draftSubmission.formsAppId,
-        abortSignal,
-      )
-      localDraftsStorage.syncedFormSubmissionDrafts = formSubmissionDrafts
+      localDraftsStorage.syncedFormSubmissionDrafts =
+        await getFormSubmissionDrafts(draftSubmission.formsAppId, abortSignal)
     } else {
       localDraftsStorage.unsyncedDraftSubmissions.push(draftSubmission)
     }
-    await utilsService.localForage.setItem(
-      generateDraftsKey(username),
-      localDraftsStorage,
-    )
-    await executeDraftsListeners(localDraftsStorage)
+
+    await setDrafts(localDraftsStorage)
 
     syncDrafts({
       throwError: false,
@@ -415,6 +405,23 @@ async function getDrafts(): Promise<LocalFormSubmissionDraft[]> {
   )
 }
 
+async function tryGetFormSubmissionDrafts(
+  formsAppId: number,
+  abortSignal: AbortSignal | undefined,
+) {
+  const localDraftsStorage = await getLocalDrafts()
+  try {
+    localDraftsStorage.syncedFormSubmissionDrafts =
+      await getFormSubmissionDrafts(formsAppId, abortSignal)
+    await setDrafts(localDraftsStorage)
+  } catch (error) {
+    if (!(error instanceof OneBlinkAppsError) || !error.isOffline) {
+      throw error
+    }
+  }
+  return localDraftsStorage.syncedFormSubmissionDrafts
+}
+
 /**
  * Get a single Draft and the associated submission data.
  *
@@ -431,17 +438,22 @@ async function getDrafts(): Promise<LocalFormSubmissionDraft[]> {
  * @returns
  */
 async function getDraftAndData(
+  formsAppId: number,
   formSubmissionDraftId: string | undefined | null,
+  abortSignal: AbortSignal | undefined,
 ): Promise<DraftSubmission | undefined> {
   if (!formSubmissionDraftId) {
     return
   }
 
-  const localDraftsStorage = await getLocalDrafts()
-  const formSubmissionDraft =
-    localDraftsStorage.syncedFormSubmissionDrafts.find(
-      ({ id }) => id === formSubmissionDraftId,
-    )
+  const formSubmissionDrafts = await tryGetFormSubmissionDrafts(
+    formsAppId,
+    abortSignal,
+  )
+
+  const formSubmissionDraft = formSubmissionDrafts.find(
+    ({ id }) => id === formSubmissionDraftId,
+  )
   if (!formSubmissionDraft) {
     return (await getLocalDraftSubmission(formSubmissionDraftId)) || undefined
   }
@@ -516,12 +528,7 @@ async function deleteDraft(
         )
     }
 
-    utilsService.localForage.setItem(
-      generateDraftsKey(username),
-      localDraftsStorage,
-    )
-
-    await executeDraftsListeners(localDraftsStorage)
+    await setDrafts(localDraftsStorage)
 
     syncDrafts({
       throwError: false,
@@ -602,6 +609,20 @@ async function syncDrafts({
     await setDrafts(localDraftsStorage)
 
     console.log(
+      'Ensuring all draft data is available for offline use for synced drafts',
+      localDraftsStorage.syncedFormSubmissionDrafts,
+    )
+    if (localDraftsStorage.syncedFormSubmissionDrafts.length) {
+      for (const formSubmissionDraft of localDraftsStorage.syncedFormSubmissionDrafts) {
+        await getDraftSubmission(formSubmissionDraft, abortSignal).catch(
+          (error) => {
+            console.warn('Could not download Draft Data as JSON', error)
+          },
+        )
+      }
+    }
+
+    console.log(
       `Attempting to upload ${localDraftsStorage.unsyncedDraftSubmissions.length} local unsycned drafts(s).`,
     )
     if (localDraftsStorage.unsyncedDraftSubmissions.length) {
@@ -628,21 +649,7 @@ async function syncDrafts({
     }
 
     console.log(
-      'Ensuring all draft data is available for offline use for synced drafts',
-      localDraftsStorage.syncedFormSubmissionDrafts,
-    )
-    if (localDraftsStorage.syncedFormSubmissionDrafts.length) {
-      for (const formSubmissionDraft of localDraftsStorage.syncedFormSubmissionDrafts) {
-        await getDraftSubmission(formSubmissionDraft, abortSignal).catch(
-          (error) => {
-            console.warn('Could not download Draft Data as JSON', error)
-          },
-        )
-      }
-    }
-
-    console.log(
-      'Removing local draft data for delete drafts',
+      'Removing local draft data for deleted drafts',
       localDraftsStorage.deletedFormSubmissionDrafts,
     )
     if (localDraftsStorage.deletedFormSubmissionDrafts.length) {

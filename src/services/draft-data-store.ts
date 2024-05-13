@@ -76,10 +76,10 @@ export async function saveDraftSubmission({
 
     return formSubmissionDraftVersion
   } catch (error) {
-    Sentry.captureException(error)
     // Ignoring all errors here as we don't want draft submission data
     // being saved to the cloud to prevent drafts from being saved on the device
     console.warn('Could not upload Draft Data as JSON', error)
+    Sentry.captureException(error)
   }
 }
 

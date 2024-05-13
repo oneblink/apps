@@ -43,8 +43,8 @@ async function uploadDraftData(
       abortSignal,
     })
   } catch (error) {
-    Sentry.captureException(error)
     console.warn('Error occurred while attempting to upload draft data', error)
+    Sentry.captureException(error)
     if (error instanceof OneBlinkStorageError) {
       switch (error.httpStatusCode) {
         case 401: {

@@ -182,7 +182,7 @@ async function deleteFormSubmissionDraft(
   formSubmissionDraftId: string,
   abortSignal?: AbortSignal,
 ) {
-  const url = `${tenants.current.apiOrigin}/form-submission-draft/${formSubmissionDraftId}`
+  const url = `${tenants.current.apiOrigin}/form-submission-drafts/${formSubmissionDraftId}`
   console.log('Attempting to delete form submission draft remotely', url)
   await deleteRequest(url, abortSignal)
 }

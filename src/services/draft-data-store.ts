@@ -9,7 +9,7 @@ import { SubmissionTypes } from '@oneblink/types'
 import Sentry from '../Sentry'
 import { DraftSubmission, ProgressListener } from '../types/submissions'
 import { deleteAutoSaveData } from '../auto-save-service'
-import { OneBlinkAppsError } from '../typedoc'
+import OneBlinkAppsError from './errors/oneBlinkAppsError'
 
 function getLocalDraftSubmissionKey(formSubmissionDraftId: string) {
   return `DRAFT_SUBMISSION_${formSubmissionDraftId}`

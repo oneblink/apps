@@ -9,6 +9,7 @@ import { SubmissionTypes } from '@oneblink/types'
 import Sentry from '../Sentry'
 import { DraftSubmission, ProgressListener } from '../types/submissions'
 import { deleteAutoSaveData } from '../auto-save-service'
+import { OneBlinkAppsError } from '../typedoc'
 
 function getLocalDraftSubmissionKey(formSubmissionDraftId: string) {
   return `DRAFT_SUBMISSION_${formSubmissionDraftId}`
@@ -93,6 +94,15 @@ export async function deleteDraftData(
       hasDeletedRemoteDraft: true,
     }
   } catch (error) {
+    if (error instanceof OneBlinkAppsError && error.httpStatusCode === 404) {
+      console.warn(
+        'Remote draft does not exist, we will assume it has already been deleted.',
+        error,
+      )
+      return {
+        hasDeletedRemoteDraft: true,
+      }
+    }
     console.warn(
       'Could not delete remote draft, will attempt to delete again later.',
       error,

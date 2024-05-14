@@ -184,7 +184,66 @@ async function deleteFormSubmissionDraft(
 ) {
   const url = `${tenants.current.apiOrigin}/form-submission-drafts/${formSubmissionDraftId}`
   console.log('Attempting to delete form submission draft remotely', url)
-  await deleteRequest(url, abortSignal)
+  try {
+    await deleteRequest(url, abortSignal)
+  } catch (error) {
+    console.warn(
+      'Error occurred while attempting to retrieve drafts from API',
+      error,
+    )
+    if (error instanceof OneBlinkAppsError) {
+      throw error
+    }
+
+    Sentry.captureException(error)
+
+    if (error instanceof HTTPError) {
+      switch (error.status) {
+        case 401: {
+          throw new OneBlinkAppsError(
+            'You cannot delete drafts until you have logged in. Please login and try again.',
+            {
+              originalError: error,
+              httpStatusCode: error.status,
+              requiresLogin: true,
+            },
+          )
+        }
+        case 403: {
+          throw new OneBlinkAppsError(
+            'You do not have access to drafts for this application. Please contact your administrator to gain the correct level of access.',
+            {
+              originalError: error,
+              httpStatusCode: error.status,
+              requiresAccessRequest: true,
+            },
+          )
+        }
+        case 400: {
+          throw new OneBlinkAppsError(error.message, {
+            originalError: error,
+            title: 'Invalid Request',
+            httpStatusCode: error.status,
+          })
+        }
+        case 404: {
+          console.warn(
+            'Remote draft does not exist, we will assume it has already been deleted.',
+            formSubmissionDraftId,
+            error,
+          )
+          return
+        }
+      }
+    }
+
+    throw new OneBlinkAppsError(
+      'An unknown error has occurred. Please contact support if the problem persists.',
+      {
+        originalError: error as Error,
+      },
+    )
+  }
 }
 
 export {

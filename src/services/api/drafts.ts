@@ -107,10 +107,10 @@ async function getFormSubmissionDrafts(
   console.log('Attempting to retrieve drafts from API', url.href)
 
   try {
-    return await getRequest<SubmissionTypes.FormSubmissionDraft[]>(
-      url.href,
-      abortSignal,
-    )
+    const { formSubmissionDrafts } = await getRequest<{
+      formSubmissionDrafts: SubmissionTypes.FormSubmissionDraft[]
+    }>(url.href, abortSignal)
+    return formSubmissionDrafts
   } catch (err) {
     console.warn(
       'Error occurred while attempting to retrieve drafts from API',

@@ -8,14 +8,14 @@ import { FormElement } from '@oneblink/types/typescript/forms'
 
 export { ProgressListener, ProgressListenerEvent } from '@oneblink/storage'
 
-export type BaseFormSubmission = {
+export type BaseNewFormSubmission = {
   /** The submission data */
   submission: SubmissionTypes.S3SubmissionData['submission']
   /** The form definition when the draft was saved */
   definition: FormTypes.Form
 }
 
-export type NewDraftSubmission = BaseFormSubmission & {
+export type NewDraftSubmission = BaseNewFormSubmission & {
   /**
    * Set to true if the submission should be uploaded in the background, false
    * or undefined if the submission should be uploaded immediately
@@ -25,55 +25,85 @@ export type NewDraftSubmission = BaseFormSubmission & {
   lastElementUpdated?: FormElement
 }
 
-export type NewFormSubmission = BaseFormSubmission & {
+export type NewFormSubmission = BaseNewFormSubmission & {
   /** Captcha tokens gathered by a `captcha` Form Element */
   captchaTokens: string[]
 }
 
-export type DraftSubmission = NewDraftSubmission & {
+export type BaseFormSubmission = {
   /** The id of the Forms App submitting for */
   formsAppId: number
+  /** The id of the job to submit */
+  jobId?: string
+  /** The id of the Forms App submitting for */
+  externalId?: string
   /**
-   * The id of the Forms Developer Key used to create the token passed to
-   * `authService.setFormsKeyToken()`
+   * The id of the previous form submission approval id. Only used when the form
+   * submission is in response to `CLARIFICATION_REQUIRED` approval.
    */
-  keyId?: string
+  previousFormSubmissionApprovalId?: string
+  /**
+   * Will have a value if the user was attempting to complete a scheduled task
+   * via a form submission
+   */
+  taskCompletion?: {
+    /** The task */
+    task: ScheduledTasksTypes.Task
+    /** The task action */
+    taskAction: ScheduledTasksTypes.TaskAction
+    /** The task group */
+    taskGroup: ScheduledTasksTypes.TaskGroup | undefined
+    /** The task group instance */
+    taskGroupInstance: ScheduledTasksTypes.TaskGroupInstance | undefined
+    /**
+     * The URL to redirect the user to after completing the task via form
+     * submission
+     */
+    redirectUrl: string
+  }
 }
 
-export type FormSubmission = DraftSubmission &
-  NewFormSubmission & {
+export type DraftSubmissionInput = NewDraftSubmission &
+  BaseFormSubmission & {
+    /** The title input by a user to identify the draft. */
+    title: string
+  }
+
+export type DraftSubmission = DraftSubmissionInput & {
+  /**
+   * The date and time (in ISO format) when this version of the draft was
+   * created.
+   */
+  createdAt: string
+  /**
+   * The identifier for the parent draft record. Created client side to store
+   * the draft locally for offline capability
+   */
+  formSubmissionDraftId: string
+}
+
+export type LocalFormSubmissionDraft = Omit<
+  SubmissionTypes.FormSubmissionDraft,
+  'id' | 'versions'
+> & {
+  /**
+   * The versions of the draft data. `undefined` if it has not been uploaded
+   * remotely yet.
+   */
+  versions: SubmissionTypes.FormSubmissionDraftVersion[] | undefined
+  /**
+   * The draft submission data. `undefined` if it has not been downloaded
+   * locally yet.
+   */
+  draftSubmission: DraftSubmission | undefined
+}
+
+export type FormSubmission = NewFormSubmission &
+  BaseFormSubmission & {
     /** The id of the draft to clean up after successful submission */
-    draftId: string | null
-    /** The id of the job to submit */
-    jobId: string | null
-    /** The id of the Forms App submitting for */
-    externalId: string | null
+    formSubmissionDraftId?: string
     /** The id of the prefill data to clean up after successful submission */
     preFillFormDataId: string | null
-    /**
-     * The id of the previous form submission approval id. Only used when the
-     * form submission is in response to `CLARIFICATION_REQUIRED` approval.
-     */
-    previousFormSubmissionApprovalId?: string
-    /**
-     * Will have a value if the user was attempting to complete a scheduled task
-     * via a form submission
-     */
-    taskCompletion?: {
-      /** The task */
-      task: ScheduledTasksTypes.Task
-      /** The task action */
-      taskAction: ScheduledTasksTypes.TaskAction
-      /** The task group */
-      taskGroup: ScheduledTasksTypes.TaskGroup | undefined
-      /** The task group instance */
-      taskGroupInstance: ScheduledTasksTypes.TaskGroupInstance | undefined
-      /**
-       * The URL to redirect the user to after completing the task via form
-       * submission
-       */
-      redirectUrl: string
-    }
   }
 
 export type FormSubmissionResult = FormSubmission & {

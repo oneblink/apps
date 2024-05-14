@@ -124,7 +124,6 @@ class Tenants {
   }
 
   get locale() /* : string */ {
-    console.log('getting locale with tenant: ', this.tenant)
     switch (this.tenant) {
       case 'civicplus':
         return 'en-US'

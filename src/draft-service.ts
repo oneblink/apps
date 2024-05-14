@@ -1,32 +1,81 @@
-import _differenceBy from 'lodash.differenceby'
 import { v4 as uuidv4 } from 'uuid'
-
+import _orderBy from 'lodash.orderby'
 import utilsService from './services/utils'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { isOffline } from './offline-service'
 import { getUsername, isLoggedIn } from './services/cognito'
-import { getFormsKeyId, getUserProfile } from './auth-service'
-import {
-  uploadDraftData,
-  putDrafts,
-  PutDraftsPayload,
-} from './services/api/drafts'
+import { getFormsKeyId } from './auth-service'
+import { getFormSubmissionDrafts, uploadDraftData } from './services/api/drafts'
 import { getPendingQueueSubmissions } from './services/pending-queue'
 import {
-  getDraftData,
-  saveDraftData,
-  removeDraftData,
-  ensureDraftsDataExists,
-  ensureDraftsDataIsUploaded,
+  deleteDraftData,
+  getDraftSubmission,
+  getLatestFormSubmissionDraftVersion,
+  getLocalDraftSubmission,
+  removeLocalDraftSubmission,
+  saveDraftSubmission,
 } from './services/draft-data-store'
-import { FormTypes, SubmissionTypes } from '@oneblink/types'
+import { SubmissionTypes } from '@oneblink/types'
 import Sentry from './Sentry'
-import { DraftSubmission, ProgressListener } from './types/submissions'
+import {
+  DraftSubmission,
+  DraftSubmissionInput,
+  LocalFormSubmissionDraft,
+  PendingFormSubmission,
+  ProgressListener,
+} from './types/submissions'
 
-interface DraftsData {
-  createdAt?: string
-  updatedAt?: string
-  drafts: SubmissionTypes.FormsAppDraft[]
+function generateDraftsKey(username: string) {
+  return `V2_DRAFTS_${username}`
+}
+
+interface LocalDraftsStorage {
+  deletedFormSubmissionDrafts: SubmissionTypes.FormSubmissionDraft[]
+  unsyncedDraftSubmissions: DraftSubmission[]
+  syncedFormSubmissionDrafts: SubmissionTypes.FormSubmissionDraft[]
+}
+
+async function generateLocalFormSubmissionDraftsFromStorage(
+  localDraftsStorage: LocalDraftsStorage,
+  pendingSubmissions: PendingFormSubmission[],
+): Promise<LocalFormSubmissionDraft[]> {
+  const localFormSubmissionDrafts: LocalFormSubmissionDraft[] =
+    localDraftsStorage.unsyncedDraftSubmissions.map((draftSubmission) => ({
+      formsAppId: draftSubmission.formsAppId,
+      formId: draftSubmission.definition.id,
+      externalId: draftSubmission.externalId,
+      jobId: draftSubmission.jobId,
+      previousFormSubmissionApprovalId:
+        draftSubmission.previousFormSubmissionApprovalId,
+      taskId: draftSubmission.taskCompletion?.task.taskId,
+      taskGroupInstanceId:
+        draftSubmission.taskCompletion?.taskGroupInstance?.taskGroupInstanceId,
+      taskActionId: draftSubmission.taskCompletion?.taskAction.taskActionId,
+      draftSubmission,
+      versions: undefined,
+    }))
+
+  for (const formSubmissionDraft of localDraftsStorage.syncedFormSubmissionDrafts) {
+    if (
+      !pendingSubmissions.some(
+        (sub) => sub.formSubmissionDraftId === formSubmissionDraft.id,
+      )
+    ) {
+      const draftSubmission = await getDraftSubmission(formSubmissionDraft)
+      localFormSubmissionDrafts.push({
+        ...formSubmissionDraft,
+        draftSubmission,
+      })
+    }
+  }
+
+  return _orderBy(localFormSubmissionDrafts, (localFormSubmissionDraft) => {
+    return (
+      localFormSubmissionDraft.draftSubmission?.createdAt ||
+      getLatestFormSubmissionDraftVersion(localFormSubmissionDraft.versions)
+        ?.createdAt
+    )
+  })
 }
 
 function errorHandler(error: Error): Error {
@@ -43,9 +92,8 @@ function errorHandler(error: Error): Error {
   return error
 }
 
-const draftsListeners: Array<
-  (draft: SubmissionTypes.FormsAppDraft[]) => unknown
-> = []
+const draftsListeners: Array<(drafts: LocalFormSubmissionDraft[]) => unknown> =
+  []
 
 /**
  * Register a listener function that will be passed an array of Drafts when a
@@ -66,8 +114,8 @@ const draftsListeners: Array<
  * @param listener
  * @returns
  */
-export function registerDraftsListener(
-  listener: (draft: SubmissionTypes.FormsAppDraft[]) => unknown,
+function registerDraftsListener(
+  listener: (drafts: LocalFormSubmissionDraft[]) => unknown,
 ): () => void {
   draftsListeners.push(listener)
 
@@ -79,34 +127,27 @@ export function registerDraftsListener(
   }
 }
 
-function executeDraftsListeners(draftsData: DraftsData) {
-  console.log('Drafts have been updated', draftsData)
+async function executeDraftsListeners(localDraftsStorage: LocalDraftsStorage) {
+  console.log('Drafts have been updated', localDraftsStorage)
+  const localFormSubmissionDrafts =
+    await generateLocalFormSubmissionDraftsFromStorage(localDraftsStorage, [])
   for (const draftsListener of draftsListeners) {
-    draftsListener(draftsData.drafts)
+    draftsListener(localFormSubmissionDrafts)
   }
 }
 
 async function upsertDraftByKey(
-  draft: SubmissionTypes.FormsAppDraft,
   draftSubmission: DraftSubmission,
   onProgress?: ProgressListener,
   abortSignal?: AbortSignal,
-): Promise<string> {
-  if (!draftSubmission.keyId) {
-    throw new Error('Could not create draft for key without a keyId')
-  }
-
+): Promise<void> {
   if (isOffline()) {
     throw new OneBlinkAppsError('Drafts cannot be saved while offline.', {
       isOffline: true,
     })
   }
 
-  if (!draft.draftId) {
-    draft.draftId = uuidv4()
-  }
-
-  return uploadDraftData(draft, draftSubmission, onProgress, abortSignal)
+  await uploadDraftData(draftSubmission, onProgress, abortSignal)
 }
 
 /**
@@ -141,27 +182,25 @@ async function upsertDraftByKey(
  * @param options
  * @returns
  */
-export async function addDraft({
-  newDraft,
-  draftSubmission,
+async function addDraft({
+  draftSubmissionInput,
   autoSaveKey,
   onProgress,
   abortSignal,
 }: {
-  newDraft: SubmissionTypes.NewFormsAppDraft
-  draftSubmission: DraftSubmission
+  draftSubmissionInput: DraftSubmissionInput
   autoSaveKey?: string
   onProgress?: ProgressListener
   abortSignal?: AbortSignal
 }): Promise<void> {
-  const draft: SubmissionTypes.FormsAppDraft = {
-    ...newDraft,
-    draftId: uuidv4(),
+  const draftSubmission: DraftSubmission = {
+    ...draftSubmissionInput,
     createdAt: new Date().toISOString(),
+    formSubmissionDraftId: uuidv4(),
   }
-  draftSubmission.keyId = getFormsKeyId() || undefined
-  if (draftSubmission.keyId) {
-    await upsertDraftByKey(draft, draftSubmission, onProgress, abortSignal)
+  const keyId = getFormsKeyId() || undefined
+  if (keyId) {
+    await upsertDraftByKey(draftSubmission, onProgress, abortSignal)
     return
   }
 
@@ -175,28 +214,26 @@ export async function addDraft({
     )
   }
 
-  const userProfile = getUserProfile() || undefined
-  draft.updatedBy = userProfile
-  draft.createdBy = userProfile
-
   try {
     // Push draft data to s3 (should also update local storage draft data)
     // add drafts to array in local storage
     // sync local storage drafts with server
-    // draftId will be set as draftDataId if data cannot be uploaded
-    const draftDataId = await saveDraftData({
-      draft,
+    const formSubmissionDraftVersion = await saveDraftSubmission({
       draftSubmission,
       autoSaveKey,
       onProgress,
     })
-    const draftsData = await getDraftsData()
-    draftsData.drafts.push({
-      ...draft,
-      draftDataId,
-    })
-    await utilsService.localForage.setItem(`DRAFTS_${username}`, draftsData)
-    executeDraftsListeners(draftsData)
+    const localDraftsStorage = await getLocalDrafts()
+    if (formSubmissionDraftVersion) {
+      const formSubmissionDrafts = await getFormSubmissionDrafts(
+        draftSubmission.formsAppId,
+        abortSignal,
+      )
+      localDraftsStorage.syncedFormSubmissionDrafts = formSubmissionDrafts
+    } else {
+      localDraftsStorage.unsyncedDraftSubmissions.push(draftSubmission)
+    }
+    await setDrafts(localDraftsStorage)
     syncDrafts({
       throwError: false,
       formsAppId: draftSubmission.formsAppId,
@@ -239,24 +276,28 @@ export async function addDraft({
  * @param options
  * @returns
  */
-export async function updateDraft({
-  draft,
-  draftSubmission,
+async function updateDraft({
+  formSubmissionDraftId,
+  draftSubmissionInput,
   autoSaveKey,
   onProgress,
   abortSignal,
 }: {
-  draft: SubmissionTypes.FormsAppDraft
-  draftSubmission: DraftSubmission
+  formSubmissionDraftId: string
+  draftSubmissionInput: DraftSubmissionInput
   autoSaveKey?: string
   onProgress?: ProgressListener
   abortSignal?: AbortSignal
 }): Promise<void> {
-  const now = new Date().toISOString()
-  draftSubmission.keyId = getFormsKeyId() || undefined
-  draft.updatedAt = undefined
-  if (draftSubmission.keyId) {
-    await upsertDraftByKey(draft, draftSubmission, onProgress, abortSignal)
+  const draftSubmission: DraftSubmission = {
+    ...draftSubmissionInput,
+    createdAt: new Date().toISOString(),
+    formSubmissionDraftId,
+  }
+
+  const keyId = getFormsKeyId()
+  if (keyId) {
+    await upsertDraftByKey(draftSubmission, onProgress, abortSignal)
     return
   }
 
@@ -269,35 +310,43 @@ export async function updateDraft({
       },
     )
   }
+
   try {
-    const draftsData = await getDraftsData()
-    const existingDraft = draftsData.drafts.find(
-      (d) => d.draftId === draft.draftId,
-    )
-    if (!existingDraft) {
-      console.log('Could not find existing draft to update in drafts', {
-        draft,
-        draftsData,
-      })
-    } else {
-      await removeDraftData(existingDraft.draftDataId)
-      // draftId will be set as draftDataId if data cannot be uploaded
-      const draftDataId = await saveDraftData({
-        draft,
+    const localDraftsStorage = await getLocalDrafts()
+    // Attempt to update a synced draft
+    const existingFormSubmissionDraft =
+      localDraftsStorage.syncedFormSubmissionDrafts.find(
+        ({ id }) => id === formSubmissionDraftId,
+      )
+    if (!existingFormSubmissionDraft) {
+      console.log(
+        'Could not find existing draft to update in drafts, removing existing local draft and creating new draft',
         draftSubmission,
+      )
+      await removeLocalDraftSubmission(formSubmissionDraftId)
+      await addDraft({
+        draftSubmissionInput,
         autoSaveKey,
         onProgress,
+        abortSignal,
       })
-      existingDraft.draftDataId = draftDataId
-      existingDraft.title = draft.title
-      if (existingDraft.updatedAt) {
-        existingDraft.updatedAt = now
-      }
-      existingDraft.createdAt = now
-      existingDraft.updatedBy = getUserProfile() || undefined
-      await utilsService.localForage.setItem(`DRAFTS_${username}`, draftsData)
-      executeDraftsListeners(draftsData)
+      return
     }
+
+    const formSubmissionDraftVersion = await saveDraftSubmission({
+      draftSubmission,
+      autoSaveKey,
+      onProgress,
+    })
+    if (formSubmissionDraftVersion) {
+      localDraftsStorage.syncedFormSubmissionDrafts =
+        await getFormSubmissionDrafts(draftSubmission.formsAppId, abortSignal)
+    } else {
+      localDraftsStorage.unsyncedDraftSubmissions.push(draftSubmission)
+    }
+
+    await setDrafts(localDraftsStorage)
+
     syncDrafts({
       throwError: false,
       formsAppId: draftSubmission.formsAppId,
@@ -308,20 +357,28 @@ export async function updateDraft({
   }
 }
 
-async function getDraftsData(): Promise<DraftsData> {
+async function getLocalDrafts(): Promise<LocalDraftsStorage> {
   const username = getUsername()
-  if (!username) {
-    return {
-      drafts: [],
+  if (username) {
+    try {
+      const localDraftsStorage =
+        await utilsService.localForage.getItem<LocalDraftsStorage>(
+          generateDraftsKey(username),
+        )
+      if (localDraftsStorage) {
+        return localDraftsStorage
+      }
+    } catch (err) {
+      Sentry.captureException(err)
+      throw errorHandler(err as Error)
     }
   }
-  return utilsService.localForage
-    .getItem(`DRAFTS_${username}`)
-    .then((data) => (data as DraftsData) || { drafts: [] })
-    .catch((err) => {
-      Sentry.captureException(err)
-      throw errorHandler(err)
-    })
+
+  return {
+    unsyncedDraftSubmissions: [],
+    syncedFormSubmissionDrafts: [],
+    deletedFormSubmissionDrafts: [],
+  }
 }
 
 /**
@@ -335,16 +392,34 @@ async function getDraftsData(): Promise<DraftsData> {
  *
  * @returns
  */
-export async function getDrafts(): Promise<SubmissionTypes.FormsAppDraft[]> {
+async function getDrafts(): Promise<LocalFormSubmissionDraft[]> {
   // Get list of pending submissions
-  const [draftsData, pendingSubmissions] = await Promise.all([
-    getDraftsData(),
+  const [localDraftsStorage, pendingSubmissions] = await Promise.all([
+    getLocalDrafts(),
     getPendingQueueSubmissions(),
   ])
   // Remove drafts that are in the pending queue
-  return draftsData.drafts.filter(
-    (draft) => !pendingSubmissions.some((sub) => sub.draftId === draft.draftId),
+  return generateLocalFormSubmissionDraftsFromStorage(
+    localDraftsStorage,
+    pendingSubmissions,
   )
+}
+
+async function tryGetFormSubmissionDrafts(
+  formsAppId: number,
+  abortSignal: AbortSignal | undefined,
+) {
+  const localDraftsStorage = await getLocalDrafts()
+  try {
+    localDraftsStorage.syncedFormSubmissionDrafts =
+      await getFormSubmissionDrafts(formsAppId, abortSignal)
+    await setDrafts(localDraftsStorage)
+  } catch (error) {
+    if (!(error instanceof OneBlinkAppsError) || !error.isOffline) {
+      throw error
+    }
+  }
+  return localDraftsStorage.syncedFormSubmissionDrafts
 }
 
 /**
@@ -362,31 +437,28 @@ export async function getDrafts(): Promise<SubmissionTypes.FormsAppDraft[]> {
  * @param draftId
  * @returns
  */
-export async function getDraftAndData(
-  draftId: string | undefined | null,
-): Promise<{
-  draft: SubmissionTypes.FormsAppDraft
-  draftData: DraftSubmission['submission']
-  lastElementUpdated: FormTypes.FormElement | undefined
-} | null> {
-  if (!draftId) {
-    return null
+async function getDraftAndData(
+  formsAppId: number,
+  formSubmissionDraftId: string | undefined | null,
+  abortSignal: AbortSignal | undefined,
+): Promise<DraftSubmission | undefined> {
+  if (!formSubmissionDraftId) {
+    return
   }
 
-  const draft = await getDrafts().then((drafts) =>
-    drafts.find((draft) => draft.draftId === draftId),
+  const formSubmissionDrafts = await tryGetFormSubmissionDrafts(
+    formsAppId,
+    abortSignal,
   )
-  if (!draft || !draft.formId || !draft.draftDataId) {
-    return null
+
+  const formSubmissionDraft = formSubmissionDrafts.find(
+    ({ id }) => id === formSubmissionDraftId,
+  )
+  if (!formSubmissionDraft) {
+    return (await getLocalDraftSubmission(formSubmissionDraftId)) || undefined
   }
 
-  const draftSubmission = await getDraftData(draft.formId, draft.draftDataId)
-
-  return {
-    draftData: draftSubmission.submission,
-    lastElementUpdated: draftSubmission.lastElementUpdated,
-    draft,
-  }
+  return await getDraftSubmission(formSubmissionDraft)
 }
 
 /**
@@ -403,9 +475,10 @@ export async function getDraftAndData(
  * @param formsAppId
  * @returns
  */
-export async function deleteDraft(
-  draftId: string,
+async function deleteDraft(
+  formSubmissionDraftId: string,
   formsAppId: number,
+  abortSignal?: AbortSignal,
 ): Promise<void> {
   const username = getUsername()
   if (!username) {
@@ -416,38 +489,60 @@ export async function deleteDraft(
       },
     )
   }
-  return getDraftsData()
-    .then((draftsData) => {
-      const draft = draftsData.drafts.find((draft) => draft.draftId === draftId)
-      if (!draft) {
-        console.log('Could not find existing draft to delete in drafts', {
-          draftId,
-          draftsData,
-        })
+  try {
+    await removeLocalDraftSubmission(formSubmissionDraftId)
+    const localDraftsStorage = await getLocalDrafts()
+    const formSubmissionDraft =
+      localDraftsStorage.syncedFormSubmissionDrafts.find(
+        ({ id }) => id === formSubmissionDraftId,
+      )
+    if (formSubmissionDraft) {
+      const { hasDeletedRemoteDraft } = await deleteDraftData(
+        formSubmissionDraftId,
+        abortSignal,
+      )
+      localDraftsStorage.syncedFormSubmissionDrafts =
+        localDraftsStorage.syncedFormSubmissionDrafts.filter(
+          ({ id }) => id !== formSubmissionDraft.id,
+        )
+      if (!hasDeletedRemoteDraft) {
+        localDraftsStorage.deletedFormSubmissionDrafts.push(formSubmissionDraft)
+      }
+    } else {
+      console.log('Could not find existing draft in synced drafts to delete', {
+        formSubmissionDraftId,
+        localDraftsStorage,
+      })
+      const draftSubmission = localDraftsStorage.unsyncedDraftSubmissions.find(
+        (draftSubmission) =>
+          draftSubmission.formSubmissionDraftId === formSubmissionDraftId,
+      )
+      if (!draftSubmission) {
         return
       }
-      draftsData.drafts = draftsData.drafts.filter(
-        (draft) => draft.draftId !== draftId,
-      )
-      return removeDraftData(draft.draftDataId)
-        .then(() =>
-          utilsService.localForage.setItem(`DRAFTS_${username}`, draftsData),
+
+      localDraftsStorage.unsyncedDraftSubmissions =
+        localDraftsStorage.unsyncedDraftSubmissions.filter(
+          (draftSubmission) =>
+            draftSubmission.formSubmissionDraftId !== formSubmissionDraftId,
         )
-        .then(() => executeDraftsListeners(draftsData))
-        .then(() =>
-          syncDrafts({
-            throwError: false,
-            formsAppId,
-          }),
-        )
+    }
+
+    await setDrafts(localDraftsStorage)
+
+    syncDrafts({
+      throwError: false,
+      formsAppId,
     })
-    .catch((err) => {
-      Sentry.captureException(err)
-      throw errorHandler(err)
-    })
+  } catch (err) {
+    Sentry.captureException(err)
+    throw errorHandler(err as Error)
+  }
 }
 
-async function setDrafts(draftsData: PutDraftsPayload): Promise<void> {
+async function setDrafts(
+  localDraftsStorage: LocalDraftsStorage,
+): Promise<void> {
   const username = getUsername()
   if (!username) {
     throw new OneBlinkAppsError(
@@ -457,8 +552,11 @@ async function setDrafts(draftsData: PutDraftsPayload): Promise<void> {
       },
     )
   }
-  await utilsService.localForage.setItem(`DRAFTS_${username}`, draftsData)
-  executeDraftsListeners(draftsData)
+  await utilsService.localForage.setItem(
+    generateDraftsKey(username),
+    localDraftsStorage,
+  )
+  await executeDraftsListeners(localDraftsStorage)
 }
 
 let _isSyncingDrafts = false
@@ -480,14 +578,17 @@ let _isSyncingDrafts = false
  * @param param0
  * @returns
  */
-export async function syncDrafts({
+async function syncDrafts({
   formsAppId,
   throwError,
+  abortSignal,
 }: {
   /** The id of the OneBlink Forms App to sync drafts with */
   formsAppId: number
   /** `true` to throw errors while syncing */
   throwError?: boolean
+  /** Signal to abort the requests */
+  abortSignal?: AbortSignal
 }): Promise<void> {
   if (!isLoggedIn()) {
     console.log('Drafts cannot be synced until user has logged in.')
@@ -502,41 +603,83 @@ export async function syncDrafts({
 
   console.log('Start attempting to sync drafts.')
   try {
-    const localDraftsData = await getDraftsData()
-    console.log(
-      `Found ${localDraftsData.drafts.length} local drafts(s).`,
-      localDraftsData,
-    )
-    const draftsData = await ensureDraftsDataIsUploaded(localDraftsData)
-    const syncDraftsData = await putDrafts(draftsData, formsAppId)
-    await setDrafts(syncDraftsData)
+    let localDraftsStorage = await getLocalDrafts()
+    localDraftsStorage.syncedFormSubmissionDrafts =
+      await getFormSubmissionDrafts(formsAppId, abortSignal)
+    await setDrafts(localDraftsStorage)
+
     console.log(
       'Ensuring all draft data is available for offline use for synced drafts',
-      syncDraftsData,
+      localDraftsStorage.syncedFormSubmissionDrafts,
     )
-    await ensureDraftsDataExists(
-      syncDraftsData.drafts.filter(
-        (draft) => draft.draftId !== draft.draftDataId,
-      ),
-    )
-    // Attempt to get drafts that have been deleted and
-    // remove draft data from local storage
-    const deletedLocalDrafts = _differenceBy(
-      localDraftsData.drafts,
-      syncDraftsData.drafts,
-      'draftId',
-    )
+    if (localDraftsStorage.syncedFormSubmissionDrafts.length) {
+      for (const formSubmissionDraft of localDraftsStorage.syncedFormSubmissionDrafts) {
+        await getDraftSubmission(formSubmissionDraft, abortSignal).catch(
+          (error) => {
+            console.warn('Could not download Draft Data as JSON', error)
+          },
+        )
+      }
+    }
+
     console.log(
-      'Removing local draft data for delete drafts',
-      deletedLocalDrafts,
+      `Attempting to upload ${localDraftsStorage.unsyncedDraftSubmissions.length} local unsycned drafts(s).`,
     )
-    await Promise.all([
-      deletedLocalDrafts.map(({ draftDataId }) => removeDraftData(draftDataId)),
-    ])
+    if (localDraftsStorage.unsyncedDraftSubmissions.length) {
+      const newUnsyncedDraftSubmissions: DraftSubmission[] = []
+      for (const draftSubmission of localDraftsStorage.unsyncedDraftSubmissions) {
+        console.log(
+          'Uploading draft data that was saved while offline',
+          draftSubmission.title,
+        )
+        draftSubmission.backgroundUpload = false
+        const formSubmissionDraftVersion = await saveDraftSubmission({
+          draftSubmission,
+          autoSaveKey: undefined,
+          abortSignal,
+        })
+        if (!formSubmissionDraftVersion) {
+          newUnsyncedDraftSubmissions.push(draftSubmission)
+        }
+      }
+      // Get local drafts again to ensure nothing has happened while processing
+      localDraftsStorage = await getLocalDrafts()
+      localDraftsStorage.unsyncedDraftSubmissions = newUnsyncedDraftSubmissions
+      await setDrafts(localDraftsStorage)
+    }
+
+    console.log(
+      'Removing local draft data for deleted drafts',
+      localDraftsStorage.deletedFormSubmissionDrafts,
+    )
+    if (localDraftsStorage.deletedFormSubmissionDrafts.length) {
+      const newDeletedFormSubmissionDrafts: SubmissionTypes.FormSubmissionDraft[] =
+        []
+      for (const formSubmissionDraft of localDraftsStorage.deletedFormSubmissionDrafts) {
+        const { hasDeletedRemoteDraft } = await deleteDraftData(
+          formSubmissionDraft.id,
+          abortSignal,
+        )
+        if (!hasDeletedRemoteDraft) {
+          newDeletedFormSubmissionDrafts.push(formSubmissionDraft)
+        }
+      }
+
+      // Get local drafts again to ensure nothing has happened while processing
+      localDraftsStorage = await getLocalDrafts()
+      localDraftsStorage.deletedFormSubmissionDrafts =
+        newDeletedFormSubmissionDrafts
+      await setDrafts(localDraftsStorage)
+    }
+
     console.log('Finished syncing drafts.')
     _isSyncingDrafts = false
   } catch (error) {
     _isSyncingDrafts = false
+    if (abortSignal?.aborted) {
+      console.log('Syncing drafts has been aborted')
+      return
+    }
     console.warn(
       'Error while attempting to sync and update local drafts',
       error,
@@ -548,4 +691,16 @@ export async function syncDrafts({
       throw error
     }
   }
+}
+
+export {
+  registerDraftsListener,
+  addDraft,
+  updateDraft,
+  getDraftAndData,
+  getDrafts,
+  deleteDraft,
+  syncDrafts,
+  getLatestFormSubmissionDraftVersion,
+  LocalFormSubmissionDraft,
 }

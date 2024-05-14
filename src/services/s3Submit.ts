@@ -62,6 +62,7 @@ export function getDeviceInformation(): SubmissionTypes.S3SubmissionDataDevice {
 
 async function downloadS3Data<T>(
   s3ObjectCredentials: AWSTypes.S3ObjectCredentials,
+  abortSignal?: AbortSignal,
 ): Promise<T> {
   const s3 = new S3Client({
     region: s3ObjectCredentials.s3.region,
@@ -77,6 +78,9 @@ async function downloadS3Data<T>(
       Bucket: s3ObjectCredentials.s3.bucket,
       Key: s3ObjectCredentials.s3.key,
     }),
+    {
+      abortSignal,
+    },
   )
 
   const s3DataString = await s3Data.Body?.transformToString()
@@ -88,9 +92,10 @@ async function downloadS3Data<T>(
 
 async function downloadPreFillS3Data<T>(
   options: AWSTypes.FormS3Credentials,
+  abortSignal?: AbortSignal,
 ): Promise<T> {
   try {
-    return await downloadS3Data<T>(options)
+    return await downloadS3Data<T>(options, abortSignal)
   } catch (error) {
     // AWS will return an "Access Denied" error for objects that have been
     // deleted. As we should only be getting these if objects are not there
@@ -109,11 +114,15 @@ async function downloadPreFillS3Data<T>(
   }
 }
 
-async function downloadDraftS3Data<T>(
+async function downloadDraftS3Data(
   options: AWSTypes.FormS3Credentials,
-): Promise<T> {
+  abortSignal?: AbortSignal,
+): Promise<SubmissionTypes.S3SubmissionData> {
   try {
-    return await downloadS3Data<T>(options)
+    return await downloadS3Data<SubmissionTypes.S3SubmissionData>(
+      options,
+      abortSignal,
+    )
   } catch (error) {
     // AWS will return an "Access Denied" error for objects that have been
     // deleted. As we should only be getting these if objects are not there
@@ -134,9 +143,10 @@ async function downloadDraftS3Data<T>(
 
 async function downloadSubmissionS3Data<T>(
   options: AWSTypes.FormS3Credentials,
+  abortSignal?: AbortSignal,
 ): Promise<T> {
   try {
-    return await downloadS3Data<T>(options)
+    return await downloadS3Data<T>(options, abortSignal)
   } catch (error) {
     // AWS will return an "Access Denied" error for objects that have been
     // deleted. As we should only be getting these if objects are not there

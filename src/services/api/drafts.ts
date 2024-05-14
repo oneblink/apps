@@ -1,5 +1,5 @@
-import { AWSTypes, FormsAppsTypes, SubmissionTypes } from '@oneblink/types'
-import { postRequest, putRequest, HTTPError } from '../fetch'
+import { AWSTypes, SubmissionTypes } from '@oneblink/types'
+import { postRequest, getRequest, HTTPError, deleteRequest } from '../fetch'
 import { isLoggedIn } from '../../auth-service'
 import { downloadDraftS3Data, getDeviceInformation } from '../s3Submit'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
@@ -11,34 +11,40 @@ import { DraftSubmission, ProgressListener } from '../../types/submissions'
 import generateOneBlinkUploader from '../generateOneBlinkUploader'
 import { OneBlinkStorageError } from '@oneblink/storage'
 
-const uploadDraftData = async (
-  draft: SubmissionTypes.FormsAppDraft,
+async function uploadDraftData(
   draftSubmission: DraftSubmission,
   onProgress?: ProgressListener,
   abortSignal?: AbortSignal,
-): Promise<string> => {
+) {
   try {
     const submission = await prepareSubmissionData(draftSubmission)
     const oneblinkUploader = generateOneBlinkUploader()
     const userToken = getUserToken()
     console.log('Attempting to upload draft data')
-    const data = await oneblinkUploader.uploadDraftSubmission({
+    return await oneblinkUploader.uploadFormSubmissionDraft({
       submission,
       definition: draftSubmission.definition,
       device: getDeviceInformation(),
       userToken: userToken || undefined,
-      previousFormSubmissionApprovalId: draft.previousFormSubmissionApprovalId,
-      jobId: draft.jobId || undefined,
+      previousFormSubmissionApprovalId:
+        draftSubmission.previousFormSubmissionApprovalId,
+      jobId: draftSubmission.jobId,
       formsAppId: draftSubmission.formsAppId,
-      externalId: draft.externalId || undefined,
+      externalId: draftSubmission.externalId,
+      taskId: draftSubmission.taskCompletion?.task.taskId,
+      taskActionId: draftSubmission.taskCompletion?.taskAction.taskActionId,
+      taskGroupInstanceId:
+        draftSubmission.taskCompletion?.taskGroupInstance?.taskGroupInstanceId,
+      formSubmissionDraftId: draftSubmission.formSubmissionDraftId,
+      createdAt: draftSubmission.createdAt,
+      title: draftSubmission.title,
       lastElementUpdated: draftSubmission.lastElementUpdated,
       onProgress,
       abortSignal,
     })
-    return data.draftDataId
   } catch (error) {
-    Sentry.captureException(error)
     console.warn('Error occurred while attempting to upload draft data', error)
+    Sentry.captureException(error)
     if (error instanceof OneBlinkStorageError) {
       switch (error.httpStatusCode) {
         case 401: {
@@ -84,44 +90,32 @@ const uploadDraftData = async (
   }
 }
 
-export type PutDraftsPayload = Omit<
-  FormsAppsTypes.NewFormsAppsDraft,
-  'formsAppId'
->
-
-const putDrafts = async (
-  draftsData: PutDraftsPayload,
+async function getFormSubmissionDrafts(
   formsAppId: number,
-): Promise<PutDraftsPayload> => {
+  abortSignal?: AbortSignal,
+): Promise<SubmissionTypes.FormSubmissionDraft[]> {
   if (!isLoggedIn()) {
     console.log(
-      'Could not sync drafts with API as the current user is not logged in.',
+      'Could not retrieve drafts from API as the current user is not logged in.',
     )
-    return draftsData
+    return []
   }
-  const draftsWithDataInS3 = draftsData.drafts.filter(
-    (draft) => draft.draftDataId && draft.draftId !== draft.draftDataId,
-  )
-  const draftsWithoutDataInS3 = draftsData.drafts.filter(
-    (draft) => !draft.draftDataId || draft.draftId === draft.draftDataId,
-  )
 
-  const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/drafts`
-  console.log('Attempting to sync drafts with API', draftsData)
+  const url = new URL('/form-submission-drafts', tenants.current.apiOrigin)
+  url.searchParams.append('formsAppId', formsAppId.toString())
+  url.searchParams.append('isSubmitted', 'false')
+  console.log('Attempting to retrieve drafts from API', url.href)
 
   try {
-    const putPayload = {
-      drafts: draftsWithDataInS3,
-      createdAt: draftsData.createdAt,
-      updatedAt: draftsData.updatedAt,
-    }
-    const data = await putRequest<typeof putPayload>(url, putPayload)
-    draftsWithoutDataInS3.forEach((draft) => {
-      data.drafts.push(draft)
-    })
-    return data
+    return await getRequest<SubmissionTypes.FormSubmissionDraft[]>(
+      url.href,
+      abortSignal,
+    )
   } catch (err) {
-    console.warn('Error occurred while attempting to sync drafts with API', err)
+    console.warn(
+      'Error occurred while attempting to retrieve drafts from API',
+      err,
+    )
     if (err instanceof OneBlinkAppsError) {
       throw err
     }
@@ -130,7 +124,7 @@ const putDrafts = async (
     switch (error.status) {
       case 401: {
         throw new OneBlinkAppsError(
-          'You cannot sync your drafts until you have logged in. Please login and try again.',
+          'You cannot retrieve your drafts until you have logged in. Please login and try again.',
           {
             originalError: error,
             httpStatusCode: error.status,
@@ -151,7 +145,7 @@ const putDrafts = async (
       case 400:
       case 404: {
         throw new OneBlinkAppsError(
-          'We could not find the application your attempting sync drafts for. Please contact your administrator to ensure your application configuration has been completed successfully.',
+          'We could not find the application your attempting retrieve drafts for. Please contact your administrator to ensure your application configuration has been completed successfully.',
           {
             originalError: error,
             title: 'Error Syncing Drafts',
@@ -171,16 +165,31 @@ const putDrafts = async (
   }
 }
 
-async function downloadDraftData<T>(
+async function downloadDraftData(
   formId: number,
-  draftDataId: string,
-): Promise<T> {
-  const url = `${tenants.current.apiOrigin}/forms/${formId}/download-draft-data-credentials/${draftDataId}`
+  formSubmissionDraftVersionId: string,
+  abortSignal?: AbortSignal,
+): Promise<SubmissionTypes.S3SubmissionData> {
+  const url = `${tenants.current.apiOrigin}/forms/${formId}/download-draft-data-credentials/${formSubmissionDraftVersionId}`
   console.log('Attempting to get Credentials to download draft data', url)
 
-  const data = await postRequest<AWSTypes.FormS3Credentials>(url)
+  const data = await postRequest<AWSTypes.FormS3Credentials>(url, abortSignal)
   console.log('Attempting to download draft form data:', data)
-  return downloadDraftS3Data<T>(data)
+  return downloadDraftS3Data(data)
 }
 
-export { uploadDraftData, putDrafts, downloadDraftData }
+async function deleteFormSubmissionDraft(
+  formSubmissionDraftId: string,
+  abortSignal?: AbortSignal,
+) {
+  const url = `${tenants.current.apiOrigin}/form-submission-draft/${formSubmissionDraftId}`
+  console.log('Attempting to delete form submission draft remotely', url)
+  await deleteRequest(url, abortSignal)
+}
+
+export {
+  uploadDraftData,
+  getFormSubmissionDrafts,
+  downloadDraftData,
+  deleteFormSubmissionDraft,
+}

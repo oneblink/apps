@@ -4,7 +4,7 @@ import {
   checkForPaymentSubmissionEvent,
   handlePaymentSubmissionEvent,
 } from '../payment-service'
-import { deleteDraftData } from './draft-data-store'
+import { removeLocalDraftSubmission } from './draft-data-store'
 import { removePrefillFormData } from '../prefill-service'
 import {
   handleSchedulingSubmissionEvent,
@@ -190,9 +190,7 @@ export default async function submit({
       })
     }
 
-    if (formSubmission.formSubmissionDraftId) {
-      await deleteDraftData(formSubmission.formSubmissionDraftId, abortSignal)
-    }
+    await removeLocalDraftSubmission(formSubmission.formSubmissionDraftId)
     if (formSubmission.preFillFormDataId) {
       await removePrefillFormData(formSubmission.preFillFormDataId)
     }

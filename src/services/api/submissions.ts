@@ -120,6 +120,7 @@ export async function uploadFormSubmission(
       })),
       onProgress,
       abortSignal,
+      formSubmissionDraftId: formSubmission.formSubmissionDraftId,
     })
   } catch (error) {
     throw handleError(error as OneBlinkStorageError)

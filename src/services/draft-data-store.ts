@@ -2,13 +2,14 @@ import utilsService from './utils'
 
 import {
   uploadDraftData,
-  downloadDraftData,
+  generateDownloadDraftDataCredentials,
   deleteFormSubmissionDraft,
 } from './api/drafts'
 import { SubmissionTypes } from '@oneblink/types'
 import Sentry from '../Sentry'
 import { DraftSubmission, ProgressListener } from '../types/submissions'
 import { deleteAutoSaveData } from '../auto-save-service'
+import { downloadDraftS3Data } from './s3Submit'
 
 function getLocalDraftSubmissionKey(formSubmissionDraftId: string) {
   return `DRAFT_SUBMISSION_${formSubmissionDraftId}`
@@ -140,11 +141,14 @@ export async function getDraftSubmission(
     return undefined
   }
 
-  const s3SubmissionData = await downloadDraftData(
+  const data = await generateDownloadDraftDataCredentials(
     formSubmissionDraft.formId,
     latestFormSubmissionDraftVersion.id,
     abortSignal,
   )
+
+  console.log('Attempting to download draft form data:', data)
+  const s3SubmissionData = await downloadDraftS3Data(data)
   return await setLocalDraftSubmission({
     definition: s3SubmissionData.definition,
     submission: s3SubmissionData.submission,

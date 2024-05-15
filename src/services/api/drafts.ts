@@ -1,7 +1,7 @@
 import { AWSTypes, SubmissionTypes } from '@oneblink/types'
 import { postRequest, getRequest, HTTPError, deleteRequest } from '../fetch'
 import { isLoggedIn } from '../../auth-service'
-import { downloadDraftS3Data, getDeviceInformation } from '../s3Submit'
+import { getDeviceInformation } from '../s3Submit'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 import { getUserToken } from '../user-token'
@@ -165,17 +165,77 @@ async function getFormSubmissionDrafts(
   }
 }
 
-async function downloadDraftData(
+async function generateDownloadDraftDataCredentials(
   formId: number,
   formSubmissionDraftVersionId: string,
   abortSignal?: AbortSignal,
-): Promise<SubmissionTypes.S3SubmissionData> {
+) {
   const url = `${tenants.current.apiOrigin}/forms/${formId}/download-draft-data-credentials/${formSubmissionDraftVersionId}`
   console.log('Attempting to get Credentials to download draft data', url)
 
-  const data = await postRequest<AWSTypes.FormS3Credentials>(url, abortSignal)
-  console.log('Attempting to download draft form data:', data)
-  return downloadDraftS3Data(data)
+  try {
+    return await postRequest<AWSTypes.FormS3Credentials>(url, abortSignal)
+  } catch (error) {
+    console.warn(
+      'Error occurred while attempting to retrieve drafts from API',
+      error,
+    )
+    if (error instanceof OneBlinkAppsError) {
+      throw error
+    }
+
+    Sentry.captureException(error)
+
+    if (error instanceof HTTPError) {
+      switch (error.status) {
+        case 400: {
+          throw new OneBlinkAppsError(error.message, {
+            originalError: error,
+            title: 'Invalid Request',
+            httpStatusCode: error.status,
+          })
+        }
+        case 401: {
+          throw new OneBlinkAppsError(
+            'You cannot retrieve draft data until you have logged in. Please login and try again.',
+            {
+              originalError: error,
+              httpStatusCode: error.status,
+              requiresLogin: true,
+            },
+          )
+        }
+        case 403: {
+          throw new OneBlinkAppsError(
+            'You do not have access to drafts for this application. Please contact your administrator to gain the correct level of access.',
+            {
+              originalError: error,
+              httpStatusCode: error.status,
+              requiresAccessRequest: true,
+            },
+          )
+        }
+        case 404: {
+          throw new OneBlinkAppsError(
+            'We could not find the draft your attempting retrieve. Please contact your administrator to ensure your application configuration has been completed successfully.',
+            {
+              originalError: error,
+              title: 'Unknown Draft',
+              httpStatusCode: error.status,
+            },
+          )
+        }
+      }
+    }
+
+    throw new OneBlinkAppsError(
+      'An unknown error has occurred. Please contact support if the problem persists.',
+      {
+        title: 'Unexpected Error',
+        originalError: error as Error,
+      },
+    )
+  }
 }
 
 async function deleteFormSubmissionDraft(
@@ -249,6 +309,6 @@ async function deleteFormSubmissionDraft(
 export {
   uploadDraftData,
   getFormSubmissionDrafts,
-  downloadDraftData,
+  generateDownloadDraftDataCredentials,
   deleteFormSubmissionDraft,
 }

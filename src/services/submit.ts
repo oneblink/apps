@@ -22,6 +22,7 @@ import externalIdGeneration from './external-id-generation'
 import serverValidateForm from './server-validation'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import { uploadFormSubmission } from './api/submissions'
+import { syncDrafts } from '../draft-service'
 
 type SubmissionParams = {
   formSubmission: FormSubmission
@@ -190,7 +191,13 @@ export default async function submit({
       })
     }
 
-    await removeLocalDraftSubmission(formSubmission.formSubmissionDraftId)
+    if (formSubmission.formSubmissionDraftId) {
+      await removeLocalDraftSubmission(formSubmission.formSubmissionDraftId)
+      syncDrafts({
+        formsAppId: formSubmission.formsAppId,
+        throwError: false,
+      })
+    }
     if (formSubmission.preFillFormDataId) {
       await removePrefillFormData(formSubmission.preFillFormDataId)
     }

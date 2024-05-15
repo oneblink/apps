@@ -61,11 +61,22 @@ async function generateLocalFormSubmissionDraftsFromStorage(
         (sub) => sub.formSubmissionDraftId === formSubmissionDraft.id,
       )
     ) {
-      const draftSubmission = await getDraftSubmission(formSubmissionDraft)
-      localFormSubmissionDrafts.push({
-        ...formSubmissionDraft,
-        draftSubmission,
-      })
+      try {
+        const draftSubmission = await getDraftSubmission(formSubmissionDraft)
+        localFormSubmissionDrafts.push({
+          ...formSubmissionDraft,
+          draftSubmission,
+        })
+      } catch (err) {
+        console.warn(
+          `Could not fetch draft submission for draft: ${formSubmissionDraft.id}`,
+          err,
+        )
+        localFormSubmissionDrafts.push({
+          ...formSubmissionDraft,
+          draftSubmission: undefined,
+        })
+      }
     }
   }
 

@@ -620,50 +620,6 @@ async function syncDrafts({
   console.log('Start attempting to sync drafts.')
   try {
     let localDraftsStorage = await getLocalDrafts()
-    localDraftsStorage.syncedFormSubmissionDrafts =
-      await getFormSubmissionDrafts(formsAppId, abortSignal)
-    await setDrafts(localDraftsStorage)
-
-    console.log(
-      'Ensuring all draft data is available for offline use for synced drafts',
-      localDraftsStorage.syncedFormSubmissionDrafts,
-    )
-    if (localDraftsStorage.syncedFormSubmissionDrafts.length) {
-      for (const formSubmissionDraft of localDraftsStorage.syncedFormSubmissionDrafts) {
-        await getDraftSubmission(formSubmissionDraft, abortSignal).catch(
-          (error) => {
-            console.warn('Could not download Draft Data as JSON', error)
-          },
-        )
-      }
-    }
-
-    console.log(
-      `Attempting to upload ${localDraftsStorage.unsyncedDraftSubmissions.length} local unsycned drafts(s).`,
-    )
-    if (localDraftsStorage.unsyncedDraftSubmissions.length) {
-      const newUnsyncedDraftSubmissions: DraftSubmission[] = []
-      for (const draftSubmission of localDraftsStorage.unsyncedDraftSubmissions) {
-        console.log(
-          'Uploading draft data that was saved while offline',
-          draftSubmission.title,
-        )
-        draftSubmission.backgroundUpload = false
-        const formSubmissionDraftVersion = await saveDraftSubmission({
-          draftSubmission,
-          autoSaveKey: undefined,
-          abortSignal,
-        })
-        if (!formSubmissionDraftVersion) {
-          newUnsyncedDraftSubmissions.push(draftSubmission)
-        }
-      }
-      // Get local drafts again to ensure nothing has happened while processing
-      localDraftsStorage = await getLocalDrafts()
-      localDraftsStorage.unsyncedDraftSubmissions = newUnsyncedDraftSubmissions
-      await setDrafts(localDraftsStorage)
-    }
-
     console.log(
       'Removing local draft data for deleted drafts',
       localDraftsStorage.deletedFormSubmissionDrafts,
@@ -685,6 +641,50 @@ async function syncDrafts({
       localDraftsStorage = await getLocalDrafts()
       localDraftsStorage.deletedFormSubmissionDrafts =
         newDeletedFormSubmissionDrafts
+      await setDrafts(localDraftsStorage)
+    }
+
+    localDraftsStorage.syncedFormSubmissionDrafts =
+      await getFormSubmissionDrafts(formsAppId, abortSignal)
+    await setDrafts(localDraftsStorage)
+
+    console.log(
+      'Ensuring all draft data is available for offline use for synced drafts',
+      localDraftsStorage.syncedFormSubmissionDrafts,
+    )
+    if (localDraftsStorage.syncedFormSubmissionDrafts.length) {
+      for (const formSubmissionDraft of localDraftsStorage.syncedFormSubmissionDrafts) {
+        await getDraftSubmission(formSubmissionDraft, abortSignal).catch(
+          (error) => {
+            console.warn('Could not download Draft Data as JSON', error)
+          },
+        )
+      }
+    }
+
+    console.log(
+      `Attempting to upload ${localDraftsStorage.unsyncedDraftSubmissions.length} local unsynced drafts(s).`,
+    )
+    if (localDraftsStorage.unsyncedDraftSubmissions.length) {
+      const newUnsyncedDraftSubmissions: DraftSubmission[] = []
+      for (const draftSubmission of localDraftsStorage.unsyncedDraftSubmissions) {
+        console.log(
+          'Uploading draft data that was saved while offline',
+          draftSubmission.title,
+        )
+        draftSubmission.backgroundUpload = false
+        const formSubmissionDraftVersion = await saveDraftSubmission({
+          draftSubmission,
+          autoSaveKey: undefined,
+          abortSignal,
+        })
+        if (!formSubmissionDraftVersion) {
+          newUnsyncedDraftSubmissions.push(draftSubmission)
+        }
+      }
+      // Get local drafts again to ensure nothing has happened while processing
+      localDraftsStorage = await getLocalDrafts()
+      localDraftsStorage.unsyncedDraftSubmissions = newUnsyncedDraftSubmissions
       await setDrafts(localDraftsStorage)
     }
 

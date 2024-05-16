@@ -336,23 +336,23 @@ async function updateDraft({
       // Remove draft from unsynced incase it was created offline
       localDraftsStorage.unsyncedDraftSubmissions =
         localDraftsStorage.unsyncedDraftSubmissions.filter(
-          (unsycnedDraftSubmission) =>
-            unsycnedDraftSubmission.formSubmissionDraftId !==
+          (unsyncedDraftSubmission) =>
+            unsyncedDraftSubmission.formSubmissionDraftId !==
             formSubmissionDraftId,
         )
     } else {
       let updated = false
       localDraftsStorage.unsyncedDraftSubmissions =
         localDraftsStorage.unsyncedDraftSubmissions.map(
-          (unsycnedDraftSubmission) => {
+          (unsyncedDraftSubmission) => {
             if (
-              unsycnedDraftSubmission.formSubmissionDraftId ===
+              unsyncedDraftSubmission.formSubmissionDraftId ===
               formSubmissionDraftId
             ) {
               updated = true
               return draftSubmission
             }
-            return unsycnedDraftSubmission
+            return unsyncedDraftSubmission
           },
         )
 

@@ -147,154 +147,51 @@ async function executeDraftsListeners(localDraftsStorage: LocalDraftsStorage) {
   }
 }
 
-async function upsertDraftByKey(
-  draftSubmission: DraftSubmission,
-  onProgress?: ProgressListener,
-  abortSignal?: AbortSignal,
-): Promise<void> {
-  if (isOffline()) {
-    throw new OneBlinkAppsError('Drafts cannot be saved while offline.', {
-      isOffline: true,
-    })
-  }
-
-  await uploadDraftData(draftSubmission, onProgress, abortSignal)
-}
-
 /**
- * Add a Draft to the local store and sync it with remote drafts. Will also
- * handle cleaning up auto save data (if the `autoSaveKey` property is passed).
+ * Create or update a Draft in the local store and sync it with remote drafts.
+ * Will also handle cleaning up auto save data (if the `autoSaveKey` property is
+ * passed).
  *
  * #### Example
  *
  * ```js
- * const draft = {
- *   draftId: 'd3aeb944-d0b3-11ea-87d0-0242ac130003',
- *   title: 'I Will Finish This Later',
- *   formId: 1,
- *   externalId: 'external'
- *   jobId: '0ac41494-723b-4a5d-90bb-534b8360f31d',
- *   previousFormSubmissionApprovalId: '7fa79583-ec45-4ffc-8f72-4be80ef2c2b7',
- * }
- * const data = {
+ * const abortController = new AbortController()
+ * const formSubmissionDraftId = 'd3aeb944-d0b3-11ea-87d0-0242ac130003' // pass `undefined` to create a new draft
+ * const autoSaveKey = 'SET ME TO DELETE AUTOSAVE DATA AFTER SAVING DRAFT'
+ * const draftSubmissionInput = {
+ *   title: 1,
  *   formsAppId: 1,
  *   submission: {
  *     form: 'data',
- *     goes: 'here'
+ *     goes: 'here',
  *   },
- *   definition: OneBlinkForm,
+ *   definition: {
+ *     form: 'definition',
+ *     goes: 'here',
+ *   },
  * }
- * await draftService.addDraft(
- *   draft,
- *   data,
- * )
+ * await draftService.upsertDraft({
+ *   formSubmissionDraftId,
+ *   autoSaveKey,
+ *   draftSubmissionInput,
+ *   abortSignal: abortController.signal,
+ *   onProgress: (progress) => {
+ *     // ...
+ *   },
+ * })
  * ```
  *
  * @param options
  * @returns
  */
-async function addDraft({
-  draftSubmissionInput,
-  autoSaveKey,
-  onProgress,
-  abortSignal,
-}: {
-  draftSubmissionInput: DraftSubmissionInput
-  autoSaveKey?: string
-  onProgress?: ProgressListener
-  abortSignal?: AbortSignal
-}): Promise<void> {
-  const draftSubmission: DraftSubmission = {
-    ...draftSubmissionInput,
-    createdAt: new Date().toISOString(),
-    formSubmissionDraftId: uuidv4(),
-  }
-  const keyId = getFormsKeyId() || undefined
-  if (keyId) {
-    await upsertDraftByKey(draftSubmission, onProgress, abortSignal)
-    return
-  }
-
-  const username = getUsername()
-  if (!username) {
-    throw new OneBlinkAppsError(
-      'You cannot add drafts until you have logged in. Please login and try again.',
-      {
-        requiresLogin: true,
-      },
-    )
-  }
-
-  try {
-    // Push draft data to s3 (should also update local storage draft data)
-    // add drafts to array in local storage
-    // sync local storage drafts with server
-    const formSubmissionDraftVersion = await saveDraftSubmission({
-      draftSubmission,
-      autoSaveKey,
-      onProgress,
-    })
-    const localDraftsStorage = await getLocalDrafts()
-    if (formSubmissionDraftVersion) {
-      const formSubmissionDrafts = await getFormSubmissionDrafts(
-        draftSubmission.formsAppId,
-        abortSignal,
-      )
-      localDraftsStorage.syncedFormSubmissionDrafts = formSubmissionDrafts
-    } else {
-      localDraftsStorage.unsyncedDraftSubmissions.push(draftSubmission)
-    }
-    await setDrafts(localDraftsStorage)
-    syncDrafts({
-      throwError: false,
-      formsAppId: draftSubmission.formsAppId,
-    })
-  } catch (err) {
-    Sentry.captureException(err)
-    throw errorHandler(err as Error)
-  }
-}
-
-/**
- * Update a Draft in the local store and sync it with remote drafts. Will also
- * handle cleaning up auto save data (if the `autoSaveKey` property is passed).
- *
- * #### Example
- *
- * ```js
- * const draft = {
- *   draftId: 'd3aeb944-d0b3-11ea-87d0-0242ac130003',
- *   title: 'I Will Finish This Later',
- *   formId: 1,
- *   externalId: 'external'
- *   jobId: '0ac41494-723b-4a5d-90bb-534b8360f31d',
- *   previousFormSubmissionApprovalId: '7fa79583-ec45-4ffc-8f72-4be80ef2c2b7',
- * }
- * const data = {
- *   formsAppId: 1,
- *   submission: {
- *     form: 'data',
- *     goes: 'here'
- *   },
- *   definition: OneBlinkForm,
- * }
- * await draftService.updateDraft(
- *   draft,
- *   data,
- * )
- * ```
- *
- * @param options
- * @returns
- */
-async function updateDraft({
+async function upsertDraft({
   formSubmissionDraftId,
   draftSubmissionInput,
   autoSaveKey,
   onProgress,
   abortSignal,
 }: {
-  formSubmissionDraftId: string
+  formSubmissionDraftId: string | undefined
   draftSubmissionInput: DraftSubmissionInput
   autoSaveKey?: string
   onProgress?: ProgressListener
@@ -303,12 +200,18 @@ async function updateDraft({
   const draftSubmission: DraftSubmission = {
     ...draftSubmissionInput,
     createdAt: new Date().toISOString(),
-    formSubmissionDraftId,
+    formSubmissionDraftId: formSubmissionDraftId || uuidv4(),
   }
 
   const keyId = getFormsKeyId()
   if (keyId) {
-    await upsertDraftByKey(draftSubmission, onProgress, abortSignal)
+    if (isOffline()) {
+      throw new OneBlinkAppsError('Drafts cannot be saved while offline.', {
+        isOffline: true,
+      })
+    }
+
+    await uploadDraftData(draftSubmission, onProgress, abortSignal)
     return
   }
 
@@ -331,30 +234,45 @@ async function updateDraft({
       onProgress,
     })
     if (formSubmissionDraftVersion) {
+      console.log('Draft was saved on server', formSubmissionDraftVersion)
       localDraftsStorage.syncedFormSubmissionDrafts =
         await getFormSubmissionDrafts(draftSubmission.formsAppId, abortSignal)
       // Remove draft from unsynced incase it was created offline
-      localDraftsStorage.unsyncedDraftSubmissions =
-        localDraftsStorage.unsyncedDraftSubmissions.filter(
-          (unsyncedDraftSubmission) =>
-            unsyncedDraftSubmission.formSubmissionDraftId !==
-            formSubmissionDraftId,
-        )
+      if (formSubmissionDraftId) {
+        localDraftsStorage.unsyncedDraftSubmissions =
+          localDraftsStorage.unsyncedDraftSubmissions.filter(
+            (unsyncedDraftSubmission) =>
+              unsyncedDraftSubmission.formSubmissionDraftId !==
+              formSubmissionDraftId,
+          )
+      }
     } else {
+      console.log(
+        'Draft could not be saved on server, saving locally to sync later',
+        draftSubmission,
+      )
       let updated = false
-      localDraftsStorage.unsyncedDraftSubmissions =
-        localDraftsStorage.unsyncedDraftSubmissions.map(
-          (unsyncedDraftSubmission) => {
-            if (
-              unsyncedDraftSubmission.formSubmissionDraftId ===
-              formSubmissionDraftId
-            ) {
-              updated = true
-              return draftSubmission
-            }
-            return unsyncedDraftSubmission
-          },
-        )
+
+      if (formSubmissionDraftId) {
+        localDraftsStorage.unsyncedDraftSubmissions =
+          localDraftsStorage.unsyncedDraftSubmissions.map(
+            (unsyncedDraftSubmission) => {
+              if (
+                unsyncedDraftSubmission.formSubmissionDraftId ===
+                formSubmissionDraftId
+              ) {
+                updated = true
+                return draftSubmission
+              }
+              return unsyncedDraftSubmission
+            },
+          )
+        // Remove draft from synced drafts incase it was retrieved while online
+        localDraftsStorage.syncedFormSubmissionDrafts =
+          localDraftsStorage.syncedFormSubmissionDrafts.filter(
+            ({ id }) => id !== formSubmissionDraftId,
+          )
+      }
 
       if (!updated) {
         localDraftsStorage.unsyncedDraftSubmissions.push(draftSubmission)
@@ -711,8 +629,7 @@ async function syncDrafts({
 
 export {
   registerDraftsListener,
-  addDraft,
-  updateDraft,
+  upsertDraft,
   getDraftAndData,
   getDrafts,
   deleteDraft,

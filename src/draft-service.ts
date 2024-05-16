@@ -324,25 +324,6 @@ async function updateDraft({
 
   try {
     const localDraftsStorage = await getLocalDrafts()
-    // Attempt to update a synced draft
-    const existingFormSubmissionDraft =
-      localDraftsStorage.syncedFormSubmissionDrafts.find(
-        ({ id }) => id === formSubmissionDraftId,
-      )
-    if (!existingFormSubmissionDraft) {
-      console.log(
-        'Could not find existing draft to update in drafts, removing existing local draft and creating new draft',
-        draftSubmission,
-      )
-      await removeLocalDraftSubmission(formSubmissionDraftId)
-      await addDraft({
-        draftSubmissionInput,
-        autoSaveKey,
-        onProgress,
-        abortSignal,
-      })
-      return
-    }
 
     const formSubmissionDraftVersion = await saveDraftSubmission({
       draftSubmission,
@@ -352,8 +333,32 @@ async function updateDraft({
     if (formSubmissionDraftVersion) {
       localDraftsStorage.syncedFormSubmissionDrafts =
         await getFormSubmissionDrafts(draftSubmission.formsAppId, abortSignal)
+      // Remove draft from unsynced incase it was created offline
+      localDraftsStorage.unsyncedDraftSubmissions =
+        localDraftsStorage.unsyncedDraftSubmissions.filter(
+          (unsycnedDraftSubmission) =>
+            unsycnedDraftSubmission.formSubmissionDraftId !==
+            formSubmissionDraftId,
+        )
     } else {
-      localDraftsStorage.unsyncedDraftSubmissions.push(draftSubmission)
+      let updated = false
+      localDraftsStorage.unsyncedDraftSubmissions =
+        localDraftsStorage.unsyncedDraftSubmissions.map(
+          (unsycnedDraftSubmission) => {
+            if (
+              unsycnedDraftSubmission.formSubmissionDraftId ===
+              formSubmissionDraftId
+            ) {
+              updated = true
+              return draftSubmission
+            }
+            return unsycnedDraftSubmission
+          },
+        )
+
+      if (!updated) {
+        localDraftsStorage.unsyncedDraftSubmissions.push(draftSubmission)
+      }
     }
 
     await setDrafts(localDraftsStorage)

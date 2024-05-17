@@ -652,4 +652,5 @@ export {
   syncDrafts,
   getLatestFormSubmissionDraftVersion,
   LocalFormSubmissionDraft,
+  getLocalDrafts,
 }

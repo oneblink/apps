@@ -35,8 +35,39 @@ import {
 } from './types/submissions'
 import { deleteAutoSaveData } from './auto-save-service'
 import { downloadSubmissionS3Data } from './services/s3Submit'
+import { getLocalDrafts, registerDraftsListener } from './draft-service'
 
 let _isProcessingPendingQueue = false
+
+const attemptWaitForDraftSubmissionToSync = (formSubmissionDraftId: string) => {
+  return new Promise<void>((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      // We give the sync 5 seconds to complete, at which point we reject the promise, skipping this submission
+
+      unregisterListener()
+      clearTimeout(timeout)
+      reject()
+    }, 5000)
+
+    const unregisterListener = registerDraftsListener(async () => {
+      // We listen for the broadcast, so we know when drafts have changed,
+      // but we do not use the broadcast data, since we need to know about
+      //drafts that are in the pending queue and those are filtered out in the broadcast data.
+
+      const { unsyncedDraftSubmissions } = await getLocalDrafts()
+      if (
+        !unsyncedDraftSubmissions.some(
+          (d) => d.formSubmissionDraftId === formSubmissionDraftId,
+        )
+      ) {
+        // Draft has been created/synced
+        clearTimeout(timeout)
+        unregisterListener()
+        resolve()
+      }
+    })
+  })
+}
 
 /**
  * Force processing the pending queue. This must be called to process the
@@ -85,6 +116,26 @@ async function processPendingQueue({
       continue
     }
 
+    const { unsyncedDraftSubmissions } = await getLocalDrafts()
+
+    if (
+      // If the pending submission is associated with an unsynced draft
+      pendingQueueSubmission.formSubmissionDraftId &&
+      unsyncedDraftSubmissions.some(
+        (d) =>
+          d.formSubmissionDraftId ===
+          pendingQueueSubmission.formSubmissionDraftId,
+      )
+    ) {
+      try {
+        await attemptWaitForDraftSubmissionToSync(
+          pendingQueueSubmission.formSubmissionDraftId,
+        )
+      } catch (err) {
+        // If the draft is still not synced, skip this submission
+        continue
+      }
+    }
     try {
       console.log(
         'Attempting to process submission from pending queue:',

@@ -21,7 +21,6 @@ import {
   DraftSubmission,
   DraftSubmissionInput,
   LocalFormSubmissionDraft,
-  PendingFormSubmission,
   ProgressListener,
 } from './types/submissions'
 
@@ -37,48 +36,73 @@ interface LocalDraftsStorage {
 
 async function generateLocalFormSubmissionDraftsFromStorage(
   localDraftsStorage: LocalDraftsStorage,
-  pendingSubmissions: PendingFormSubmission[],
 ): Promise<LocalFormSubmissionDraft[]> {
-  const localFormSubmissionDrafts: LocalFormSubmissionDraft[] =
-    localDraftsStorage.unsyncedDraftSubmissions.map((draftSubmission) => ({
-      formsAppId: draftSubmission.formsAppId,
-      formId: draftSubmission.definition.id,
-      externalId: draftSubmission.externalId,
-      jobId: draftSubmission.jobId,
-      previousFormSubmissionApprovalId:
-        draftSubmission.previousFormSubmissionApprovalId,
-      taskId: draftSubmission.taskCompletion?.task.taskId,
-      taskGroupInstanceId:
-        draftSubmission.taskCompletion?.taskGroupInstance?.taskGroupInstanceId,
-      taskActionId: draftSubmission.taskCompletion?.taskAction.taskActionId,
-      draftSubmission,
-      versions: undefined,
-    }))
+  // Get list of pending submissions
+  const pendingSubmissions = await getPendingQueueSubmissions()
+  const pendingSubmissionsDraftIds = pendingSubmissions.reduce<Set<string>>(
+    (memo, pendingSubmission) => {
+      if (pendingSubmission.formSubmissionDraftId) {
+        memo.add(pendingSubmission.formSubmissionDraftId)
+      }
+      return memo
+    },
+    new Set<string>(),
+  )
+
+  const localFormSubmissionDraftsMap = new Map<
+    string,
+    LocalFormSubmissionDraft
+  >()
+
+  for (const draftSubmission of localDraftsStorage.unsyncedDraftSubmissions) {
+    if (
+      // Remove drafts that are in the pending queue
+      !pendingSubmissionsDraftIds.has(draftSubmission.formSubmissionDraftId)
+    ) {
+      localFormSubmissionDraftsMap.set(draftSubmission.formSubmissionDraftId, {
+        formsAppId: draftSubmission.formsAppId,
+        formId: draftSubmission.definition.id,
+        externalId: draftSubmission.externalId,
+        jobId: draftSubmission.jobId,
+        previousFormSubmissionApprovalId:
+          draftSubmission.previousFormSubmissionApprovalId,
+        taskId: draftSubmission.taskCompletion?.task.taskId,
+        taskGroupInstanceId:
+          draftSubmission.taskCompletion?.taskGroupInstance
+            ?.taskGroupInstanceId,
+        taskActionId: draftSubmission.taskCompletion?.taskAction.taskActionId,
+        draftSubmission,
+        versions: undefined,
+      })
+    }
+  }
 
   for (const formSubmissionDraft of localDraftsStorage.syncedFormSubmissionDrafts) {
     if (
-      !pendingSubmissions.some(
-        (sub) => sub.formSubmissionDraftId === formSubmissionDraft.id,
-      )
+      // Unsycned version of draft takes priority over the synced version
+      !localFormSubmissionDraftsMap.has(formSubmissionDraft.id) &&
+      // Remove drafts that are in the pending queue
+      !pendingSubmissionsDraftIds.has(formSubmissionDraft.id)
     ) {
-      try {
-        const draftSubmission = await getDraftSubmission(formSubmissionDraft)
-        localFormSubmissionDrafts.push({
-          ...formSubmissionDraft,
-          draftSubmission,
-        })
-      } catch (err) {
+      const draftSubmission = await getDraftSubmission(
+        formSubmissionDraft,
+      ).catch((err) => {
         console.warn(
           `Could not fetch draft submission for draft: ${formSubmissionDraft.id}`,
           err,
         )
-        localFormSubmissionDrafts.push({
-          ...formSubmissionDraft,
-          draftSubmission: undefined,
-        })
-      }
+        return undefined
+      })
+      localFormSubmissionDraftsMap.set(formSubmissionDraft.id, {
+        ...formSubmissionDraft,
+        draftSubmission,
+      })
     }
   }
+
+  const localFormSubmissionDrafts = Array.from(
+    localFormSubmissionDraftsMap.values(),
+  )
 
   return _orderBy(localFormSubmissionDrafts, (localFormSubmissionDraft) => {
     return (
@@ -141,7 +165,7 @@ function registerDraftsListener(
 async function executeDraftsListeners(localDraftsStorage: LocalDraftsStorage) {
   console.log('Drafts have been updated', localDraftsStorage)
   const localFormSubmissionDrafts =
-    await generateLocalFormSubmissionDraftsFromStorage(localDraftsStorage, [])
+    await generateLocalFormSubmissionDraftsFromStorage(localDraftsStorage)
   for (const draftsListener of draftsListeners) {
     draftsListener(localFormSubmissionDrafts)
   }
@@ -327,16 +351,8 @@ async function getLocalDrafts(): Promise<LocalDraftsStorage> {
  * @returns
  */
 async function getDrafts(): Promise<LocalFormSubmissionDraft[]> {
-  // Get list of pending submissions
-  const [localDraftsStorage, pendingSubmissions] = await Promise.all([
-    getLocalDrafts(),
-    getPendingQueueSubmissions(),
-  ])
-  // Remove drafts that are in the pending queue
-  return generateLocalFormSubmissionDraftsFromStorage(
-    localDraftsStorage,
-    pendingSubmissions,
-  )
+  const localDraftsStorage = await getLocalDrafts()
+  return await generateLocalFormSubmissionDraftsFromStorage(localDraftsStorage)
 }
 
 async function tryGetFormSubmissionDrafts(

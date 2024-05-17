@@ -538,11 +538,11 @@ async function syncDrafts({
   console.log('Start attempting to sync drafts.')
   try {
     let localDraftsStorage = await getLocalDrafts()
-    console.log(
-      'Removing local draft data for deleted drafts',
-      localDraftsStorage.deletedFormSubmissionDrafts,
-    )
     if (localDraftsStorage.deletedFormSubmissionDrafts.length) {
+      console.log(
+        'Removing local draft data for deleted drafts',
+        localDraftsStorage.deletedFormSubmissionDrafts,
+      )
       const newDeletedFormSubmissionDrafts: SubmissionTypes.FormSubmissionDraft[] =
         []
       for (const formSubmissionDraft of localDraftsStorage.deletedFormSubmissionDrafts) {
@@ -581,7 +581,6 @@ async function syncDrafts({
         if (!formSubmissionDraftVersion) {
           newUnsyncedDraftSubmissions.push(draftSubmission)
         }
-        // TODO: Add saved draft to the syncedFormSubmissionDrafts array
       }
       // Get local drafts again to ensure nothing has happened while processing
       localDraftsStorage = await getLocalDrafts()
@@ -593,11 +592,11 @@ async function syncDrafts({
 
     await setAndBroadcastDrafts(localDraftsStorage)
 
-    console.log(
-      'Ensuring all draft data is available for offline use for synced drafts',
-      localDraftsStorage.syncedFormSubmissionDrafts,
-    )
     if (localDraftsStorage.syncedFormSubmissionDrafts.length) {
+      console.log(
+        'Ensuring all draft data is available for offline use for synced drafts',
+        localDraftsStorage.syncedFormSubmissionDrafts,
+      )
       for (const formSubmissionDraft of localDraftsStorage.syncedFormSubmissionDrafts) {
         await getDraftSubmission(formSubmissionDraft, abortSignal).catch(
           (error) => {

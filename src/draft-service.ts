@@ -279,7 +279,7 @@ async function upsertDraft({
       }
     }
 
-    await setDrafts(localDraftsStorage)
+    await setAndBroadcastDrafts(localDraftsStorage)
 
     syncDrafts({
       throwError: false,
@@ -347,7 +347,7 @@ async function tryGetFormSubmissionDrafts(
   try {
     localDraftsStorage.syncedFormSubmissionDrafts =
       await getFormSubmissionDrafts(formsAppId, abortSignal)
-    await setDrafts(localDraftsStorage)
+    await setAndBroadcastDrafts(localDraftsStorage)
   } catch (error) {
     if (!(error instanceof OneBlinkAppsError) || !error.isOffline) {
       throw error
@@ -462,7 +462,7 @@ async function deleteDraft(
         )
     }
 
-    await setDrafts(localDraftsStorage)
+    await setAndBroadcastDrafts(localDraftsStorage)
 
     syncDrafts({
       throwError: false,
@@ -474,7 +474,7 @@ async function deleteDraft(
   }
 }
 
-async function setDrafts(
+async function setAndBroadcastDrafts(
   localDraftsStorage: LocalDraftsStorage,
 ): Promise<void> {
   const username = getUsername()
@@ -538,11 +538,11 @@ async function syncDrafts({
   console.log('Start attempting to sync drafts.')
   try {
     let localDraftsStorage = await getLocalDrafts()
-    console.log(
-      'Removing local draft data for deleted drafts',
-      localDraftsStorage.deletedFormSubmissionDrafts,
-    )
     if (localDraftsStorage.deletedFormSubmissionDrafts.length) {
+      console.log(
+        'Removing local draft data for deleted drafts',
+        localDraftsStorage.deletedFormSubmissionDrafts,
+      )
       const newDeletedFormSubmissionDrafts: SubmissionTypes.FormSubmissionDraft[] =
         []
       for (const formSubmissionDraft of localDraftsStorage.deletedFormSubmissionDrafts) {
@@ -559,31 +559,13 @@ async function syncDrafts({
       localDraftsStorage = await getLocalDrafts()
       localDraftsStorage.deletedFormSubmissionDrafts =
         newDeletedFormSubmissionDrafts
-      await setDrafts(localDraftsStorage)
+      await setAndBroadcastDrafts(localDraftsStorage)
     }
 
-    localDraftsStorage.syncedFormSubmissionDrafts =
-      await getFormSubmissionDrafts(formsAppId, abortSignal)
-    await setDrafts(localDraftsStorage)
-
-    console.log(
-      'Ensuring all draft data is available for offline use for synced drafts',
-      localDraftsStorage.syncedFormSubmissionDrafts,
-    )
-    if (localDraftsStorage.syncedFormSubmissionDrafts.length) {
-      for (const formSubmissionDraft of localDraftsStorage.syncedFormSubmissionDrafts) {
-        await getDraftSubmission(formSubmissionDraft, abortSignal).catch(
-          (error) => {
-            console.warn('Could not download Draft Data as JSON', error)
-          },
-        )
-      }
-    }
-
-    console.log(
-      `Attempting to upload ${localDraftsStorage.unsyncedDraftSubmissions.length} local unsynced drafts(s).`,
-    )
     if (localDraftsStorage.unsyncedDraftSubmissions.length) {
+      console.log(
+        `Attempting to upload ${localDraftsStorage.unsyncedDraftSubmissions.length} local unsynced drafts(s).`,
+      )
       const newUnsyncedDraftSubmissions: DraftSubmission[] = []
       for (const draftSubmission of localDraftsStorage.unsyncedDraftSubmissions) {
         console.log(
@@ -603,7 +585,25 @@ async function syncDrafts({
       // Get local drafts again to ensure nothing has happened while processing
       localDraftsStorage = await getLocalDrafts()
       localDraftsStorage.unsyncedDraftSubmissions = newUnsyncedDraftSubmissions
-      await setDrafts(localDraftsStorage)
+    }
+
+    localDraftsStorage.syncedFormSubmissionDrafts =
+      await getFormSubmissionDrafts(formsAppId, abortSignal)
+
+    await setAndBroadcastDrafts(localDraftsStorage)
+
+    if (localDraftsStorage.syncedFormSubmissionDrafts.length) {
+      console.log(
+        'Ensuring all draft data is available for offline use for synced drafts',
+        localDraftsStorage.syncedFormSubmissionDrafts,
+      )
+      for (const formSubmissionDraft of localDraftsStorage.syncedFormSubmissionDrafts) {
+        await getDraftSubmission(formSubmissionDraft, abortSignal).catch(
+          (error) => {
+            console.warn('Could not download Draft Data as JSON', error)
+          },
+        )
+      }
     }
 
     console.log('Finished syncing drafts.')

@@ -477,7 +477,6 @@ async function deleteDraft(
 async function setAndBroadcastDrafts(
   localDraftsStorage: LocalDraftsStorage,
 ): Promise<void> {
-  console.log('Setting drafts...', localDraftsStorage)
   const username = getUsername()
   if (!username) {
     throw new OneBlinkAppsError(
@@ -552,7 +551,6 @@ async function syncDrafts({
           abortSignal,
         )
         if (!hasDeletedRemoteDraft) {
-          console.log('Did not delete draft data', formSubmissionDraft)
           newDeletedFormSubmissionDrafts.push(formSubmissionDraft)
         }
       }
@@ -563,14 +561,6 @@ async function syncDrafts({
         newDeletedFormSubmissionDrafts
       await setAndBroadcastDrafts(localDraftsStorage)
     }
-
-    // localDraftsStorage.syncedFormSubmissionDrafts =
-    //   await getFormSubmissionDrafts(formsAppId, abortSignal)
-
-    // await setAndBroadcastDrafts(localDraftsStorage)
-    //////// Used to get and set synced drafts here
-
-    //////// Used to fetch submission data for each synced draft here
 
     if (localDraftsStorage.unsyncedDraftSubmissions.length) {
       console.log(
@@ -588,7 +578,6 @@ async function syncDrafts({
           autoSaveKey: undefined,
           abortSignal,
         })
-        console.log('Saved draft to cloud:', formSubmissionDraftVersion)
         if (!formSubmissionDraftVersion) {
           newUnsyncedDraftSubmissions.push(draftSubmission)
         }

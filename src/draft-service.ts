@@ -279,7 +279,7 @@ async function upsertDraft({
       }
     }
 
-    await setDrafts(localDraftsStorage)
+    await setAndBroadcastDrafts(localDraftsStorage)
 
     syncDrafts({
       throwError: false,
@@ -347,7 +347,7 @@ async function tryGetFormSubmissionDrafts(
   try {
     localDraftsStorage.syncedFormSubmissionDrafts =
       await getFormSubmissionDrafts(formsAppId, abortSignal)
-    await setDrafts(localDraftsStorage)
+    await setAndBroadcastDrafts(localDraftsStorage)
   } catch (error) {
     if (!(error instanceof OneBlinkAppsError) || !error.isOffline) {
       throw error
@@ -462,7 +462,7 @@ async function deleteDraft(
         )
     }
 
-    await setDrafts(localDraftsStorage)
+    await setAndBroadcastDrafts(localDraftsStorage)
 
     syncDrafts({
       throwError: false,
@@ -474,9 +474,10 @@ async function deleteDraft(
   }
 }
 
-async function setDrafts(
+async function setAndBroadcastDrafts(
   localDraftsStorage: LocalDraftsStorage,
 ): Promise<void> {
+  console.log('Setting drafts...', localDraftsStorage)
   const username = getUsername()
   if (!username) {
     throw new OneBlinkAppsError(
@@ -551,6 +552,7 @@ async function syncDrafts({
           abortSignal,
         )
         if (!hasDeletedRemoteDraft) {
+          console.log('Did not delete draft data', formSubmissionDraft)
           newDeletedFormSubmissionDrafts.push(formSubmissionDraft)
         }
       }
@@ -559,12 +561,48 @@ async function syncDrafts({
       localDraftsStorage = await getLocalDrafts()
       localDraftsStorage.deletedFormSubmissionDrafts =
         newDeletedFormSubmissionDrafts
-      await setDrafts(localDraftsStorage)
+      await setAndBroadcastDrafts(localDraftsStorage)
+    }
+
+    // localDraftsStorage.syncedFormSubmissionDrafts =
+    //   await getFormSubmissionDrafts(formsAppId, abortSignal)
+
+    // await setAndBroadcastDrafts(localDraftsStorage)
+    //////// Used to get and set synced drafts here
+
+    //////// Used to fetch submission data for each synced draft here
+
+    if (localDraftsStorage.unsyncedDraftSubmissions.length) {
+      console.log(
+        `Attempting to upload ${localDraftsStorage.unsyncedDraftSubmissions.length} local unsynced drafts(s).`,
+      )
+      const newUnsyncedDraftSubmissions: DraftSubmission[] = []
+      for (const draftSubmission of localDraftsStorage.unsyncedDraftSubmissions) {
+        console.log(
+          'Uploading draft data that was saved while offline',
+          draftSubmission.title,
+        )
+        draftSubmission.backgroundUpload = false
+        const formSubmissionDraftVersion = await saveDraftSubmission({
+          draftSubmission,
+          autoSaveKey: undefined,
+          abortSignal,
+        })
+        console.log('Saved draft to cloud:', formSubmissionDraftVersion)
+        if (!formSubmissionDraftVersion) {
+          newUnsyncedDraftSubmissions.push(draftSubmission)
+        }
+        // TODO: Add saved draft to the syncedFormSubmissionDrafts array
+      }
+      // Get local drafts again to ensure nothing has happened while processing
+      localDraftsStorage = await getLocalDrafts()
+      localDraftsStorage.unsyncedDraftSubmissions = newUnsyncedDraftSubmissions
     }
 
     localDraftsStorage.syncedFormSubmissionDrafts =
       await getFormSubmissionDrafts(formsAppId, abortSignal)
-    await setDrafts(localDraftsStorage)
+
+    await setAndBroadcastDrafts(localDraftsStorage)
 
     console.log(
       'Ensuring all draft data is available for offline use for synced drafts',
@@ -578,32 +616,6 @@ async function syncDrafts({
           },
         )
       }
-    }
-
-    console.log(
-      `Attempting to upload ${localDraftsStorage.unsyncedDraftSubmissions.length} local unsynced drafts(s).`,
-    )
-    if (localDraftsStorage.unsyncedDraftSubmissions.length) {
-      const newUnsyncedDraftSubmissions: DraftSubmission[] = []
-      for (const draftSubmission of localDraftsStorage.unsyncedDraftSubmissions) {
-        console.log(
-          'Uploading draft data that was saved while offline',
-          draftSubmission.title,
-        )
-        draftSubmission.backgroundUpload = false
-        const formSubmissionDraftVersion = await saveDraftSubmission({
-          draftSubmission,
-          autoSaveKey: undefined,
-          abortSignal,
-        })
-        if (!formSubmissionDraftVersion) {
-          newUnsyncedDraftSubmissions.push(draftSubmission)
-        }
-      }
-      // Get local drafts again to ensure nothing has happened while processing
-      localDraftsStorage = await getLocalDrafts()
-      localDraftsStorage.unsyncedDraftSubmissions = newUnsyncedDraftSubmissions
-      await setDrafts(localDraftsStorage)
     }
 
     console.log('Finished syncing drafts.')

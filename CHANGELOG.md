@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [12.0.0] - 2024-05-20
+
 ### Changed
 
 - **[BREAKING]** drafts to use versioning
+
+### Dependencies
+
+- update [@oneblink/storage](https://www.npmjs.com/package/@oneblink/storage) to [2.0.0-beta.2](https://github.com/oneblink/storage/blob/master/CHANGELOG.md) (from [1.0.0-beta.13](https://github.com/oneblink/storage/blob/master/CHANGELOG.md))
+
+- no longer depend upon [lodash.differenceby](https://www.npmjs.com/package/lodash.differenceby)
 
 ## [11.2.0] - 2024-05-10
 

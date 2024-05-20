@@ -11,14 +11,10 @@ import generateOneBlinkUploader from '../generateOneBlinkUploader'
 import { OneBlinkStorageError } from '@oneblink/storage'
 
 const getBadRequestError = (error: OneBlinkStorageError) => {
-  return new OneBlinkAppsError(
-    'The data you are attempting to submit could not be validated. Please ensure all validation has passed and try again. If the problem persists, please contact your administrator.',
-    {
-      title: 'Invalid Submission',
-      originalError: error,
-      httpStatusCode: error.httpStatusCode,
-    },
-  )
+  return new OneBlinkAppsError(error.message, {
+    title: 'Invalid Submission',
+    httpStatusCode: error.httpStatusCode,
+  })
 }
 const getUnauthenticatedError = (error: OneBlinkStorageError) => {
   return new OneBlinkAppsError(

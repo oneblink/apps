@@ -1,7 +1,7 @@
 {
   "name": "@oneblink/apps",
   "description": "Helper functions for OneBlink apps in JavaScript.",
-  "version": "12.0.0-beta.15",
+  "version": "12.0.0-beta.16",
   "author": "OneBlink <developers@oneblink.io> (https://oneblink.io)",
   "bugs": {
     "url": "https://github.com/oneblink/apps/issues"

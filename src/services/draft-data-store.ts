@@ -132,7 +132,7 @@ export async function getDraftSubmission(
   if (
     draftSubmission &&
     (!latestFormSubmissionDraftVersion ||
-      latestFormSubmissionDraftVersion.createdAt === draftSubmission.createdAt)
+      latestFormSubmissionDraftVersion.createdAt <= draftSubmission.createdAt)
   ) {
     return draftSubmission
   }

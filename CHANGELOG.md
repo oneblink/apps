@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - autosave data not being removed after saving a draft offline
 - drafts sync process throwing errors while offline
+- drafts deleted offline not being removed from drafts if the request to get synced drafts is returned from cache and includes the deleted draft
 
 ## [12.0.0] - 2024-05-20
 

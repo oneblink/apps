@@ -60,12 +60,13 @@ export async function saveDraftSubmission({
   }
 
   try {
-    const formSubmissionDraftVersion = await uploadDraftData(
-      draftSubmission,
-      onProgress,
-      abortSignal,
-    )
-
+    return await uploadDraftData(draftSubmission, onProgress, abortSignal)
+  } catch (error) {
+    // Ignoring all errors here as we don't want draft submission data
+    // being saved to the cloud to prevent drafts from being saved on the device
+    console.warn('Could not upload Draft Data as JSON', error)
+    Sentry.captureException(error)
+  } finally {
     if (typeof autoSaveKey === 'string') {
       try {
         await deleteAutoSaveData(draftSubmission.definition.id, autoSaveKey)
@@ -74,13 +75,6 @@ export async function saveDraftSubmission({
         Sentry.captureException(error)
       }
     }
-
-    return formSubmissionDraftVersion
-  } catch (error) {
-    // Ignoring all errors here as we don't want draft submission data
-    // being saved to the cloud to prevent drafts from being saved on the device
-    console.warn('Could not upload Draft Data as JSON', error)
-    Sentry.captureException(error)
   }
 }
 

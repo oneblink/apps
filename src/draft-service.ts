@@ -359,17 +359,13 @@ async function tryGetFormSubmissionDrafts(
   formsAppId: number,
   abortSignal: AbortSignal | undefined,
 ) {
-  const localDraftsStorage = await getLocalDrafts()
   try {
-    localDraftsStorage.syncedFormSubmissionDrafts =
-      await getFormSubmissionDrafts(formsAppId, abortSignal)
-    await setAndBroadcastDrafts(localDraftsStorage)
+    return await getFormSubmissionDrafts(formsAppId, abortSignal)
   } catch (error) {
     if (!(error instanceof OneBlinkAppsError) || !error.isOffline) {
       throw error
     }
   }
-  return localDraftsStorage.syncedFormSubmissionDrafts
 }
 
 /**
@@ -396,10 +392,17 @@ async function getDraftAndData(
     return
   }
 
-  const formSubmissionDrafts = await tryGetFormSubmissionDrafts(
+  let formSubmissionDrafts = await tryGetFormSubmissionDrafts(
     formsAppId,
     abortSignal,
   )
+  const localDraftsStorage = await getLocalDrafts()
+  if (formSubmissionDrafts) {
+    localDraftsStorage.syncedFormSubmissionDrafts = formSubmissionDrafts
+    await setAndBroadcastDrafts(localDraftsStorage)
+  } else {
+    formSubmissionDrafts = localDraftsStorage.syncedFormSubmissionDrafts
+  }
 
   const formSubmissionDraft = formSubmissionDrafts.find(
     ({ id }) => id === formSubmissionDraftId,
@@ -575,7 +578,6 @@ async function syncDrafts({
       localDraftsStorage = await getLocalDrafts()
       localDraftsStorage.deletedFormSubmissionDrafts =
         newDeletedFormSubmissionDrafts
-      await setAndBroadcastDrafts(localDraftsStorage)
     }
 
     if (localDraftsStorage.unsyncedDraftSubmissions.length) {
@@ -603,8 +605,13 @@ async function syncDrafts({
       localDraftsStorage.unsyncedDraftSubmissions = newUnsyncedDraftSubmissions
     }
 
-    localDraftsStorage.syncedFormSubmissionDrafts =
-      await getFormSubmissionDrafts(formsAppId, abortSignal)
+    const formSubmissionDrafts = await tryGetFormSubmissionDrafts(
+      formsAppId,
+      abortSignal,
+    )
+    if (formSubmissionDrafts) {
+      localDraftsStorage.syncedFormSubmissionDrafts = formSubmissionDrafts
+    }
 
     await setAndBroadcastDrafts(localDraftsStorage)
 

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- autosave data not being removed after saving a draft offline
+- drafts sync process throwing errors while offline
+
 ## [12.0.0] - 2024-05-20
 
 ### Changed

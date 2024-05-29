@@ -48,6 +48,9 @@ async function generateLocalFormSubmissionDraftsFromStorage(
     },
     new Set<string>(),
   )
+  const deletedDraftIds = new Set(
+    localDraftsStorage.deletedFormSubmissionDrafts.map(({ id }) => id),
+  )
 
   const localFormSubmissionDraftsMap = new Map<
     string,
@@ -57,7 +60,9 @@ async function generateLocalFormSubmissionDraftsFromStorage(
   for (const draftSubmission of localDraftsStorage.unsyncedDraftSubmissions) {
     if (
       // Remove drafts that are in the pending queue
-      !pendingSubmissionsDraftIds.has(draftSubmission.formSubmissionDraftId)
+      !pendingSubmissionsDraftIds.has(draftSubmission.formSubmissionDraftId) &&
+      // Remove any drafts deleted while offline
+      !deletedDraftIds.has(draftSubmission.formSubmissionDraftId)
     ) {
       localFormSubmissionDraftsMap.set(draftSubmission.formSubmissionDraftId, {
         formsAppId: draftSubmission.formsAppId,
@@ -82,7 +87,9 @@ async function generateLocalFormSubmissionDraftsFromStorage(
       // Unsycned version of draft takes priority over the synced version
       !localFormSubmissionDraftsMap.has(formSubmissionDraft.id) &&
       // Remove drafts that are in the pending queue
-      !pendingSubmissionsDraftIds.has(formSubmissionDraft.id)
+      !pendingSubmissionsDraftIds.has(formSubmissionDraft.id) &&
+      // Remove any drafts deleted while offline
+      !deletedDraftIds.has(formSubmissionDraft.id)
     ) {
       const draftSubmission = await getDraftSubmission(
         formSubmissionDraft,

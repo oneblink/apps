@@ -181,14 +181,6 @@ export async function getCurrentFormsAppUser(
     return undefined
   }
 
-  if (userProfile.isSAMLUser) {
-    return {
-      userProfile,
-      formsAppId,
-      groups: [],
-    }
-  }
-
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/my-forms-app-user`
   return getRequest<{
     userProfile?: MiscTypes.UserProfile

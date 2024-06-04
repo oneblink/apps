@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [12.0.1] - 2024-06-04
+
 ### Changed
 
 - `authService.getCurrentFormsAppUser()` to call API regardless of `isSAMLUser`
@@ -16,6 +18,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - autosave data not being removed after saving a draft offline
 - drafts sync process throwing errors while offline
 - drafts deleted offline not being removed from drafts if the request to get synced drafts is returned from cache and includes the deleted draft
+
+### Dependencies
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [6.2.0-beta.5](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [6.1.0-beta.2](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
 
 ## [12.0.0] - 2024-05-20
 

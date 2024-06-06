@@ -248,7 +248,7 @@ async function deleteFormSubmissionDraft(
     await deleteRequest(url, abortSignal)
   } catch (error) {
     console.warn(
-      'Error occurred while attempting to retrieve drafts from API',
+      'Error occurred while attempting to delete a draft from API',
       error,
     )
     if (error instanceof OneBlinkAppsError) {

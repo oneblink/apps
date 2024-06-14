@@ -303,11 +303,12 @@ export async function getGeoscapeReverseGeocoding({
  *
  * ```js
  * const formId = 1
+ * const environmentId = 'zyx987'
  * const result = await formService.searchPointAddresses(formId, {
  *   address: '123 N',
  *   maxNumberOfResults: 10
  *   stateTerritory: 'NSW'
- * })
+ * }, environmentId)
  * ```
  *
  * @param formId
@@ -324,11 +325,12 @@ export async function searchPointAddresses(
     dataset?: string
     addressType?: 'physical' | 'mailing' | 'all'
   },
+  environmentId: string,
   abortSignal?: AbortSignal,
 ): Promise<PointTypes.PointAddressesSearchResult> {
   try {
     return await searchRequest(
-      `${tenants.current.apiOrigin}/forms/${formId}/point/addresses`,
+      `${tenants.current.apiOrigin}/forms/${formId}/point/${environmentId}/addresses`,
       queryParams,
       abortSignal,
     )
@@ -397,7 +399,12 @@ export async function searchPointAddresses(
  * ```js
  * const formId = 1
  * const addressId = 'ABC123'
- * const result = await formService.getPointAddress(formId, addressId)
+ * const environmentId = 'zyx987'
+ * const result = await formService.getPointAddress(
+ *   formId,
+ *   addressId,
+ *   environmentId,
+ * )
  * ```
  *
  * @param formId
@@ -408,11 +415,12 @@ export async function searchPointAddresses(
 export async function getPointAddress(
   formId: number,
   addressId: string,
+  environmentId: string,
   abortSignal?: AbortSignal,
 ): Promise<PointTypes.PointAddress> {
   try {
     return await getRequest(
-      `${tenants.current.apiOrigin}/forms/${formId}/point/addresses/${addressId}`,
+      `${tenants.current.apiOrigin}/forms/${formId}/point/${environmentId}/addresses/${addressId}`,
       abortSignal,
     )
   } catch (err) {

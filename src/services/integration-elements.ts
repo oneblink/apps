@@ -420,7 +420,7 @@ export async function getPointAddress(
 ): Promise<PointTypes.PointAddress> {
   try {
     return await getRequest(
-      `${tenants.current.apiOrigin}/forms/${formId}/point/${environmentId}addresses/${addressId}`,
+      `${tenants.current.apiOrigin}/forms/${formId}/point/${environmentId}/addresses/${addressId}`,
       abortSignal,
     )
   } catch (err) {

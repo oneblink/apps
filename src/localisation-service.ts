@@ -58,15 +58,13 @@ export function getDateFnsFormats() {
   const time = 'h:mm a'
   switch (tenants.locale) {
     case 'en-US': {
-      const formats = generateFormats({
+      return generateFormats({
         time,
         shortDate: 'MM/dd/yyyy',
         shortYearlessDate: 'MM/dd',
         longDate: 'MMM do, yyyy',
         longYearlessDate: 'MMM do',
       })
-      console.log('generated formats: ', formats)
-      return formats
     }
     case 'en-AU':
     default: {

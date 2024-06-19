@@ -7,10 +7,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-### Changed
-
-- **[BREAKING]** `integrationElements.searchPointAddresses()` and `integrationElements.getPointAddress()` to include `environmentId` parameter
-
 ## [12.0.1] - 2024-06-04
 
 ### Changed

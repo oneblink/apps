@@ -12,7 +12,6 @@ import {
 import BPOINTPaymentProvider from './services/payment-providers/BPOINTPaymentProvider'
 import CPPayPaymentProvider from './services/payment-providers/CPPayPaymentProvider'
 import NSWGovPayPaymentProvider from './services/payment-providers/NSWGovPayPaymentProvider'
-import WestpacQuickWebPaymentProvider from './services/payment-providers/WestpacQuickWebPaymentProvider'
 import WestpacQuickStreamPaymentProvider, * as westpacQuickStream from './services/payment-providers/WestpacQuickStreamPaymentProvider'
 
 const KEY = 'PAYMENT_SUBMISSION_RESULT'
@@ -38,12 +37,6 @@ function getPaymentProvider(
     }
     case 'NSW_GOV_PAY': {
       return new NSWGovPayPaymentProvider(
-        paymentSubmissionEvent,
-        formSubmissionResult,
-      )
-    }
-    case 'WESTPAC_QUICK_WEB': {
-      return new WestpacQuickWebPaymentProvider(
         paymentSubmissionEvent,
         formSubmissionResult,
       )

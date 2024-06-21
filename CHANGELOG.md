@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [13.0.0] - 2024-06-21
+
 ### Removed
 
 - **[BREAKING]** Westpac QuickWeb payment event
+
+### Dependencies
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [6.3.0-beta.2](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [6.2.0-beta.5](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
 
 ## [12.0.1] - 2024-06-04
 

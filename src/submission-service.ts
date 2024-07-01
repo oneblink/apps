@@ -13,7 +13,6 @@ import {
   PendingQueueListener,
   PendingQueueAction,
 } from './services/pending-queue'
-import { generateSubmissionRetrievalCredentials } from './services/api/submissions'
 import replaceInjectablesWithSubmissionValues from './services/replaceInjectablesWithSubmissionValues'
 import { FormTypes, SubmissionTypes } from '@oneblink/types'
 import Sentry from './Sentry'
@@ -34,7 +33,7 @@ import {
   DraftSubmissionInput,
 } from './types/submissions'
 import { deleteAutoSaveData } from './auto-save-service'
-import { downloadSubmissionS3Data } from './services/s3Submit'
+import { downloadFormSubmission } from './services/api/submissions'
 
 let _isProcessingPendingQueue = false
 
@@ -496,12 +495,11 @@ async function getSubmissionData({
   submissionId: string
   abortSignal?: AbortSignal
 }): Promise<SubmissionTypes.S3SubmissionData> {
-  const s3Details = await generateSubmissionRetrievalCredentials({
+  return await downloadFormSubmission({
     formId,
     submissionId,
     abortSignal,
   })
-  return await downloadSubmissionS3Data(s3Details)
 }
 
 export {

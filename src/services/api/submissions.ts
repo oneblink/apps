@@ -1,14 +1,12 @@
-import { AWSTypes } from '@oneblink/types'
-import { HTTPError, postRequest } from '../fetch'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
-import tenants from '../../tenants'
 import Sentry from '../../Sentry'
 import { isOffline } from '../../offline-service'
-import { getDeviceInformation } from '../s3Submit'
+import { getDeviceInformation } from '../getDeviceInformation'
 import { FormSubmission, ProgressListener } from '../../types/submissions'
 import { getUserToken } from '../user-token'
 import generateOneBlinkUploader from '../generateOneBlinkUploader'
 import { OneBlinkStorageError } from '@oneblink/storage'
+import generateOneBlinkDownloader from '../generateOneBlinkDownloader'
 
 const getBadRequestError = (error: OneBlinkStorageError) => {
   return new OneBlinkAppsError(error.message, {
@@ -123,89 +121,7 @@ export async function uploadFormSubmission(
   }
 }
 
-export const generateRetrieveApprovalSubmissionCredentials = async (
-  formApprovalFlowInstanceId: number,
-  abortSignal?: AbortSignal,
-) => {
-  return postRequest<AWSTypes.FormS3Credentials>(
-    `${tenants.current.apiOrigin}/form-approval-flow-instances/${formApprovalFlowInstanceId}/retrieval-credentials`,
-    undefined,
-    abortSignal,
-  ).catch((error) => {
-    Sentry.captureException(error)
-    // handle only credential errors here
-    console.error('Error with getting credentials for retrieval:', error)
-    switch (error.status) {
-      case 400: {
-        throw getBadRequestError(error)
-      }
-      case 401: {
-        throw getUnauthenticatedError(error)
-      }
-      case 403: {
-        throw getUnauthorisedError(error)
-      }
-      case 404: {
-        throw new OneBlinkAppsError(
-          'We could not find the approval submission you are looking for. Please contact your administrator to ensure your form configuration has been completed successfully.',
-          {
-            title: 'Unknown Form or Submission',
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      default: {
-        throw new OneBlinkAppsError(
-          'We could not find the approval submission you are looking for. Please contact your administrator to ensure your form configuration has been completed successfully.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-    }
-  })
-}
-
-export async function generateFormSubmissionApprovalSubmissionCredentials(
-  formSubmissionApprovalId: string,
-  abortSignal?: AbortSignal,
-) {
-  return postRequest<AWSTypes.FormS3Credentials>(
-    `${tenants.current.apiOrigin}/form-submission-approvals/${formSubmissionApprovalId}/retrieval-credentials`,
-    undefined,
-    abortSignal,
-  ).catch((error) => {
-    console.error('Error with getting credentials for retrieval:', error)
-    Sentry.captureException(error)
-    // handle only credential errors here
-    switch (error.status) {
-      case 400: {
-        throw getBadRequestError(error)
-      }
-      case 401: {
-        throw getUnauthenticatedError(error)
-      }
-      case 403: {
-        throw getUnauthorisedError(error)
-      }
-      case 404:
-      default: {
-        throw new OneBlinkAppsError(
-          'We could not find the approval submission you are looking for. Please contact your administrator to ensure your form configuration has been completed successfully.',
-          {
-            title: 'Unknown Form or Submission',
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-    }
-  })
-}
-
-export async function generateSubmissionRetrievalCredentials({
+export async function downloadFormSubmission({
   formId,
   submissionId,
   abortSignal,
@@ -214,53 +130,86 @@ export async function generateSubmissionRetrievalCredentials({
   submissionId: string
   abortSignal?: AbortSignal
 }) {
-  const url = `${tenants.current.apiOrigin}/forms/${formId}/retrieval-credentials/${submissionId}`
   try {
-    return await postRequest<AWSTypes.FormS3Credentials>(
-      url,
-      undefined,
+    console.log('Attempting to download form submission data:', {
+      formId,
+      submissionId,
+    })
+    const oneblinkDownloader = generateOneBlinkDownloader()
+    const submissionData = await oneblinkDownloader.downloadSubmission({
+      formId,
+      submissionId,
       abortSignal,
-    )
-  } catch (err) {
-    Sentry.captureException(err)
+    })
+    if (!submissionData) {
+      throw new OneBlinkAppsError(
+        "This submission has been removed based on your administrator's retention policy.",
+        {
+          title: 'Submission Data Unavailable',
+        },
+      )
+    }
+    return submissionData
+  } catch (error) {
+    console.error('Error retrieving form submission data', error)
 
-    const error = err as HTTPError
+    if (error instanceof OneBlinkAppsError) {
+      throw error
+    }
+
+    Sentry.captureException(error)
+
     if (isOffline()) {
       throw new OneBlinkAppsError(
         'You are currently offline, please connect to the internet and try again',
         {
-          originalError: error,
+          originalError: error instanceof Error ? error : undefined,
           isOffline: true,
         },
       )
     }
-    switch (error.status) {
-      case 403: {
-        throw new OneBlinkAppsError(
-          'You do not have access to submission data. Please contact your administrator to gain the correct level of access.',
-          {
-            originalError: error,
-            requiresAccessRequest: true,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      case 400:
-      case 404: {
-        throw new OneBlinkAppsError(error.message, {
-          title: 'Invalid Request',
-          httpStatusCode: error.status,
-        })
-      }
-      default: {
-        throw new OneBlinkAppsError(
-          'An unknown error has occurred. Please contact support if the problem persists.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
+
+    if (error instanceof OneBlinkStorageError) {
+      switch (error.httpStatusCode) {
+        case 401: {
+          throw new OneBlinkAppsError(
+            'The submission you are attempting to view requires authentication. Please login and try again.',
+            {
+              originalError: error,
+              requiresLogin: true,
+              httpStatusCode: error.httpStatusCode,
+            },
+          )
+        }
+        case 403: {
+          throw new OneBlinkAppsError(
+            'You do not have access to submission data. Please contact your administrator to gain the correct level of access.',
+            {
+              originalError: error,
+              requiresAccessRequest: true,
+              httpStatusCode: error.httpStatusCode,
+            },
+          )
+        }
+        case 400:
+        case 404: {
+          throw new OneBlinkAppsError(error.message, {
+            title: 'Invalid Request',
+            httpStatusCode: error.httpStatusCode,
+          })
+        }
       }
     }
+
+    throw new OneBlinkAppsError(
+      'An unknown error has occurred. Please contact support if the problem persists.',
+      {
+        originalError: error instanceof Error ? error : undefined,
+        httpStatusCode:
+          error instanceof OneBlinkStorageError
+            ? error.httpStatusCode
+            : undefined,
+      },
+    )
   }
 }

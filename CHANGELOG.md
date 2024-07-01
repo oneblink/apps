@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- form submissions and draft downloads to use storage endpoints
+
+### Removed
+
+- `approvalsService.getFormApprovalFlowInstanceSubmission()` (use `submissionService.getSubmissionData()`)
+- `approvalsService.getFormSubmissionApprovalSubmission()` (use `submissionService.getSubmissionData()`)
+
 ## [13.0.0] - 2024-06-21
 
 ### Removed

@@ -10,11 +10,6 @@ import {
 } from './services/fetch'
 import tenants from './tenants'
 import { SubmissionTypes, ApprovalTypes, FormTypes } from '@oneblink/types'
-import {
-  generateFormSubmissionApprovalSubmissionCredentials,
-  generateRetrieveApprovalSubmissionCredentials,
-} from './services/api/submissions'
-import { downloadSubmissionS3Data } from './services/s3Submit'
 import Sentry from './Sentry'
 
 export type FormSubmissionApprovalsResponse = {
@@ -515,68 +510,6 @@ export async function closeFormApprovalFlowInstance(
       }
     }
   }
-}
-
-/**
- * Retrieve the submission data associated with a FormApprovalFlowInstance.
- *
- * #### Example
- *
- * ```js
- * const formApprovalFlowInstanceId = 1
- * const formSubmission =
- *   await approvalsService.getFormApprovalFlowInstanceSubmission(
- *     formApprovalFlowInstanceId,
- *   )
- * ```
- *
- * @param formApprovalFlowInstanceId
- * @param abortSignal
- * @returns
- */
-export async function getFormApprovalFlowInstanceSubmission(
-  formApprovalFlowInstanceId: number,
-  abortSignal?: AbortSignal,
-): Promise<SubmissionTypes.S3SubmissionData> {
-  const credentials = await generateRetrieveApprovalSubmissionCredentials(
-    formApprovalFlowInstanceId,
-    abortSignal,
-  )
-  return await downloadSubmissionS3Data<SubmissionTypes.S3SubmissionData>({
-    credentials: credentials.credentials,
-    s3: credentials.s3,
-  })
-}
-
-/**
- * Retrieve the submission data associated with a FormSubmissionApproval.
- *
- * #### Example
- *
- * ```js
- * const formSubmissionApprovalId = '7145544d-853a-47e8-873c-1e849698e414'
- * const formSubmission =
- *   await approvalsService.getFormSubmissionApprovalSubmission(
- *     formSubmissionApprovalId,
- *   )
- * ```
- *
- * @param formSubmissionApprovalId
- * @param abortSignal
- * @returns
- */
-export async function getFormSubmissionApprovalSubmission(
-  formSubmissionApprovalId: string,
-  abortSignal?: AbortSignal,
-): Promise<SubmissionTypes.S3SubmissionData> {
-  const credentials = await generateFormSubmissionApprovalSubmissionCredentials(
-    formSubmissionApprovalId,
-    abortSignal,
-  )
-  return await downloadSubmissionS3Data<SubmissionTypes.S3SubmissionData>({
-    credentials: credentials.credentials,
-    s3: credentials.s3,
-  })
 }
 
 export type FormApprovalFlowResponse = {

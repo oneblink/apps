@@ -1,7 +1,7 @@
-import { AWSTypes, SubmissionTypes } from '@oneblink/types'
-import { postRequest, getRequest, HTTPError, deleteRequest } from '../fetch'
+import { SubmissionTypes } from '@oneblink/types'
+import { getRequest, HTTPError, deleteRequest } from '../fetch'
 import { isLoggedIn } from '../../auth-service'
-import { getDeviceInformation } from '../s3Submit'
+import { getDeviceInformation } from '../getDeviceInformation'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 import { getUserToken } from '../user-token'
@@ -10,6 +10,7 @@ import prepareSubmissionData from '../prepareSubmissionData'
 import { DraftSubmission, ProgressListener } from '../../types/submissions'
 import generateOneBlinkUploader from '../generateOneBlinkUploader'
 import { OneBlinkStorageError } from '@oneblink/storage'
+import generateOneBlinkDownloader from '../generateOneBlinkDownloader'
 
 async function uploadDraftData(
   draftSubmission: DraftSubmission,
@@ -165,34 +166,50 @@ async function getFormSubmissionDrafts(
   }
 }
 
-async function generateDownloadDraftDataCredentials(
+async function downloadDraftData(
   formId: number,
   formSubmissionDraftVersionId: string,
   abortSignal?: AbortSignal,
 ) {
-  const url = `${tenants.current.apiOrigin}/forms/${formId}/download-draft-data-credentials/${formSubmissionDraftVersionId}`
-  console.log('Attempting to get Credentials to download draft data', url)
-
   try {
-    return await postRequest<AWSTypes.FormS3Credentials>(url, abortSignal)
+    console.log('Attempting to download draft form data:', {
+      formId,
+      formSubmissionDraftVersionId,
+    })
+    const oneblinkDownloader = generateOneBlinkDownloader()
+    const data = await oneblinkDownloader.downloadDraftSubmission({
+      formSubmissionDraftVersionId,
+      formId,
+      abortSignal,
+    })
+    if (!data) {
+      throw new OneBlinkAppsError(
+        "Data has been removed based on your administrator's draft data retention policy.",
+        {
+          title: 'Draft Data Unavailable',
+        },
+      )
+    }
+    return data
   } catch (error) {
-    console.warn(
-      'Error occurred while attempting to retrieve drafts from API',
+    console.error(
+      'Error occurred while attempting to download draft data',
       error,
     )
+
     if (error instanceof OneBlinkAppsError) {
       throw error
     }
 
     Sentry.captureException(error)
 
-    if (error instanceof HTTPError) {
-      switch (error.status) {
+    if (error instanceof OneBlinkStorageError) {
+      switch (error.httpStatusCode) {
         case 400: {
           throw new OneBlinkAppsError(error.message, {
             originalError: error,
             title: 'Invalid Request',
-            httpStatusCode: error.status,
+            httpStatusCode: error.httpStatusCode,
           })
         }
         case 401: {
@@ -200,7 +217,7 @@ async function generateDownloadDraftDataCredentials(
             'You cannot retrieve draft data until you have logged in. Please login and try again.',
             {
               originalError: error,
-              httpStatusCode: error.status,
+              httpStatusCode: error.httpStatusCode,
               requiresLogin: true,
             },
           )
@@ -210,7 +227,7 @@ async function generateDownloadDraftDataCredentials(
             'You do not have access to drafts for this application. Please contact your administrator to gain the correct level of access.',
             {
               originalError: error,
-              httpStatusCode: error.status,
+              httpStatusCode: error.httpStatusCode,
               requiresAccessRequest: true,
             },
           )
@@ -221,7 +238,7 @@ async function generateDownloadDraftDataCredentials(
             {
               originalError: error,
               title: 'Unknown Draft',
-              httpStatusCode: error.status,
+              httpStatusCode: error.httpStatusCode,
             },
           )
         }
@@ -232,7 +249,11 @@ async function generateDownloadDraftDataCredentials(
       'An unknown error has occurred. Please contact support if the problem persists.',
       {
         title: 'Unexpected Error',
-        originalError: error as Error,
+        originalError: error instanceof Error ? error : undefined,
+        httpStatusCode:
+          error instanceof OneBlinkStorageError
+            ? error.httpStatusCode
+            : undefined,
       },
     )
   }
@@ -309,6 +330,6 @@ async function deleteFormSubmissionDraft(
 export {
   uploadDraftData,
   getFormSubmissionDrafts,
-  generateDownloadDraftDataCredentials,
+  downloadDraftData,
   deleteFormSubmissionDraft,
 }

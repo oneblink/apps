@@ -135,7 +135,6 @@ export async function getDraftSubmission(
   }
 
   const s3SubmissionData = await downloadDraftData(
-    formSubmissionDraft.formId,
     latestFormSubmissionDraftVersion.id,
     abortSignal,
   )

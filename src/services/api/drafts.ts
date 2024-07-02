@@ -167,19 +167,16 @@ async function getFormSubmissionDrafts(
 }
 
 async function downloadDraftData(
-  formId: number,
   formSubmissionDraftVersionId: string,
   abortSignal?: AbortSignal,
 ) {
   try {
     console.log('Attempting to download draft form data:', {
-      formId,
       formSubmissionDraftVersionId,
     })
     const oneblinkDownloader = generateOneBlinkDownloader()
     const data = await oneblinkDownloader.downloadDraftSubmission({
       formSubmissionDraftVersionId,
-      formId,
       abortSignal,
     })
     if (!data) {

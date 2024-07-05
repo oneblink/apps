@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `submission` to external id generation request payload
+
 ### Changed
 
 - form submissions and draft downloads to use storage endpoints

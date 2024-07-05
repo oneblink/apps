@@ -40,6 +40,7 @@ export default async function externalIdGeneration(
       jobId: formSubmission.jobId,
       previousFormSubmissionApprovalId:
         formSubmission.previousFormSubmissionApprovalId ?? null,
+      submission: formSubmission.submission,
     },
   )
   if (!result) {

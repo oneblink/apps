@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [14.0.0] - 2024-07-10
+
 ### Added
 
 - `submission` to external id generation request payload
@@ -19,6 +21,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - **[BREAKING]** `approvalsService.getFormApprovalFlowInstanceSubmission()` (use `submissionService.getSubmissionData()`)
 - **[BREAKING]** `approvalsService.getFormSubmissionApprovalSubmission()` (use `submissionService.getSubmissionData()`)
+
+### Dependencies
+
+- no longer depend upon [@aws-sdk/client-s3](https://www.npmjs.com/package/@aws-sdk/client-s3)
+
+- update [@oneblink/storage](https://www.npmjs.com/package/@oneblink/storage) to [2.1.0-beta.3](https://github.com/oneblink/storage/blob/master/CHANGELOG.md) (from [2.0.0-beta.2](https://github.com/oneblink/storage/blob/master/CHANGELOG.md))
 
 ## [13.0.0] - 2024-06-21
 

@@ -1169,7 +1169,9 @@ export type CivicPlusHCMSContentItem = {
   createdBy: string
   lastModifiedBy: string
   data: {
-    'submission-json-v1'?: SubmissionTypes.S3SubmissionData
+    'submission-json-v1'?: SubmissionTypes.S3SubmissionData & {
+      originalExternalId?: string
+    }
   }
   /** ISO datetime string */
   created: string

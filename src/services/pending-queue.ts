@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import utilsService from './utils'
 import Sentry from '../Sentry'
@@ -7,6 +8,7 @@ import {
   ProgressListener,
   ProgressListenerEvent,
 } from '../types/submissions'
+import { getPrefillKey } from '../services/job-prefill'
 
 function errorHandler(error: Error): Error {
   Sentry.captureException(error)
@@ -29,6 +31,7 @@ export type PendingQueueAction =
   | 'SUBMIT_SUCCEEDED'
   | 'ADDITION'
   | 'DELETION'
+  | 'EDIT'
 export type PendingQueueListener = (
   results: PendingFormSubmission[],
   action: PendingQueueAction,
@@ -169,9 +172,44 @@ export async function deletePendingQueueSubmission(pendingTimestamp: string) {
   await removePendingQueueSubmission(pendingTimestamp, 'DELETION')
 }
 
+/**
+ * Edit a PendingFormSubmission before it is processed based on the
+ * `pendingTimestamp` property. The function removes the submission from the
+ * pending queue and returns a prefill Id
+ *
+ * ### Example
+ *
+ * ```js
+ * const pendingTimestamp = '2020-07-29T01:03:26.573Z'
+ * const { preFillFormDataId, formId } =
+ *   await submissionService.editPendingQueueSubmission(pendingTimestamp)
+ * window.location.href = `https://mycoolforms.apps.oneblink.io/forms/${formId}?preFillFormDataId=${preFillFormDataId}`
+ * ```
+ *
+ * @param pendingTimestamp
+ */
+export async function editPendingQueueSubmission(
+  pendingTimestamp: string,
+): Promise<{ preFillFormDataId: string; formId: number }> {
+  try {
+    const formSubmission = await getFormSubmission(pendingTimestamp)
+    if (!formSubmission) {
+      throw new Error('Could not find formSubmision to edit')
+    }
+    await removePendingQueueSubmission(pendingTimestamp, 'EDIT')
+    const preFillFormDataId = uuidv4()
+    const key = getPrefillKey(preFillFormDataId)
+    utilsService.setLocalForageItem(key, formSubmission.submission)
+    return { preFillFormDataId, formId: formSubmission.definition.id }
+  } catch (error) {
+    Sentry.captureException(error)
+    throw error instanceof Error ? errorHandler(error) : error
+  }
+}
+
 export async function removePendingQueueSubmission(
   pendingTimestamp: string,
-  action: 'SUBMIT_SUCCEEDED' | 'DELETION',
+  action: 'SUBMIT_SUCCEEDED' | 'DELETION' | 'EDIT',
 ) {
   try {
     await utilsService.removeLocalForageItem(`SUBMISSION_${pendingTimestamp}`)

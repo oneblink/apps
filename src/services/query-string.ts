@@ -1,10 +1,21 @@
 // Parse a query string into an object
-export function parseQueryString(string: string) {
-  if (string == '') {
+export function parseQueryString(str: string) {
+  if (str == '') {
     return {}
   }
-  const segments = string.split('&').map((s) => s.split('='))
-  const queryString: Record<string, unknown> = {}
-  segments.forEach((s) => (queryString[s[0]] = s[1]))
-  return queryString
+  const query = new URLSearchParams(str)
+  return Object.fromEntries(query.entries())
+}
+
+export function formatQueryString(obj: Record<string, unknown>): string {
+  const params = Object.entries(obj).reduce<Record<string, string>>(
+    (memo, [key, value]) => {
+      if (value) {
+        memo[key] = String(value)
+      }
+      return memo
+    },
+    {},
+  )
+  return new URLSearchParams(params).toString()
 }

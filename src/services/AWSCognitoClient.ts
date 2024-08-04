@@ -320,7 +320,7 @@ export default class AWSCognitoClient {
       )
     }
 
-    const query = parseQueryString(window.location.search.substring(1))
+    const query = parseQueryString(window.location.search)
 
     // Check if the server returned an error string
     if (typeof query.error === 'string') {

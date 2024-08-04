@@ -1,7 +1,7 @@
-import * as queryString from 'query-string'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 
 import { getIdToken } from './forms-key'
+import { formatQueryString } from './query-string'
 import { getUserToken } from './user-token'
 
 export async function generateHeaders() {
@@ -68,10 +68,10 @@ export async function fetchJSON<T>(
 
 export async function searchRequest<T>(
   url: string,
-  searchParameters: queryString.StringifiableRecord,
+  searchParameters: Record<string, unknown>,
   abortSignal?: AbortSignal,
 ): Promise<T> {
-  const queryStringParams = queryString.stringify(searchParameters || {})
+  const queryStringParams = formatQueryString(searchParameters)
   const body = await getRequest<T>(`${url}?${queryStringParams}`, abortSignal)
   return body
 }

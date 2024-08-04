@@ -1,3 +1,4 @@
+import { SubmissionTypes, ApprovalTypes, FormTypes } from '@oneblink/types'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { isOffline } from './offline-service'
 import {
@@ -9,7 +10,6 @@ import {
   HTTPError,
 } from './services/fetch'
 import tenants from './tenants'
-import { SubmissionTypes, ApprovalTypes, FormTypes } from '@oneblink/types'
 import Sentry from './Sentry'
 
 export type FormSubmissionApprovalsResponse = {

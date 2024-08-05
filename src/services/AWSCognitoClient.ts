@@ -12,7 +12,6 @@ import {
   SetUserMFAPreferenceCommand,
   VerifySoftwareTokenCommand,
 } from '@aws-sdk/client-cognito-identity-provider'
-import { parseQueryString } from './query-string'
 import Sentry from '../Sentry'
 import { OneBlinkAppsError } from '..'
 
@@ -320,25 +319,27 @@ export default class AWSCognitoClient {
       )
     }
 
-    const query = parseQueryString(window.location.search)
+    const query = new URLSearchParams(window.location.search)
+    const queryError = query.get('error')
+    const queryErrorDescription = query.get('error_description')
 
     // Check if the server returned an error string
-    if (typeof query.error === 'string') {
+    if (typeof queryError === 'string') {
       throw new Error(
-        `${query.error} - ${
-          typeof query.error_description === 'string'
-            ? query.error_description
+        `${queryError} - ${
+          typeof queryErrorDescription === 'string'
+            ? queryErrorDescription
             : 'An unknown error has occurred.'
         }`,
       )
     }
 
-    const code = query.code
+    const code = query.get('code')
     if (typeof code !== 'string') {
       throw new Error('"code" was not including in query string to parse')
     }
 
-    if (localStorage.getItem(this.STATE) !== query.state) {
+    if (localStorage.getItem(this.STATE) !== query.get('state')) {
       throw new Error('Invalid login')
     }
 

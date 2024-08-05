@@ -199,7 +199,7 @@ export async function editPendingQueueSubmission(
     await removePendingQueueSubmission(pendingTimestamp, 'EDIT')
     const preFillFormDataId = uuidv4()
     const key = getPrefillKey(preFillFormDataId)
-    utilsService.setLocalForageItem(key, formSubmission.submission)
+    await utilsService.setLocalForageItem(key, formSubmission.submission)
     return { preFillFormDataId, formId: formSubmission.definition.id }
   } catch (error) {
     Sentry.captureException(error)

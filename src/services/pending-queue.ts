@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
 import utilsService from './utils'
 import Sentry from '../Sentry'
@@ -196,10 +195,10 @@ export async function editPendingQueueSubmission(
     if (!formSubmission) {
       throw new Error('Could not find formSubmision to edit')
     }
-    await removePendingQueueSubmission(pendingTimestamp, 'EDIT')
-    const preFillFormDataId = uuidv4()
+    const preFillFormDataId = `PENDING_SUBMISSION_${pendingTimestamp}`
     const key = getPrefillKey(preFillFormDataId)
     await utilsService.setLocalForageItem(key, formSubmission.submission)
+    await removePendingQueueSubmission(pendingTimestamp, 'EDIT')
     return { preFillFormDataId, formId: formSubmission.definition.id }
   } catch (error) {
     Sentry.captureException(error)

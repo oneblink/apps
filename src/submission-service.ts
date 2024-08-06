@@ -5,6 +5,7 @@ import {
   getPendingQueueSubmissions,
   getFormSubmission,
   updatePendingQueueSubmission,
+  cancelEditingPendingQueueSubmission,
   deletePendingQueueSubmission,
   editPendingQueueSubmission,
   registerPendingQueueAttachmentProgressListener,
@@ -72,6 +73,14 @@ async function processPendingQueue({
     if (isOffline()) {
       console.log(
         'Application is offline, leaving submission in the pending queue:',
+        pendingQueueSubmission,
+      )
+      continue
+    }
+
+    if (pendingQueueSubmission.isEditing) {
+      console.log(
+        'submission is being edited, leaving submission in the pending queue:',
         pendingQueueSubmission,
       )
       continue
@@ -511,6 +520,7 @@ export {
   getPendingQueueSubmissions,
   deletePendingQueueSubmission,
   editPendingQueueSubmission,
+  cancelEditingPendingQueueSubmission,
   registerPendingQueueListener,
   processPendingQueue,
   BaseFormSubmission,

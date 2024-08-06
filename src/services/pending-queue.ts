@@ -30,7 +30,8 @@ export type PendingQueueAction =
   | 'SUBMIT_SUCCEEDED'
   | 'ADDITION'
   | 'DELETION'
-  | 'EDIT'
+  | 'EDIT_STARTED'
+  | 'EDIT_CANCELLED'
 export type PendingQueueListener = (
   results: PendingFormSubmission[],
   action: PendingQueueAction,
@@ -111,7 +112,12 @@ export async function addFormSubmissionToPendingQueue(
 export async function updatePendingQueueSubmission(
   pendingTimestamp: string,
   newSubmission: PendingFormSubmission,
-  action: 'SUBMIT_FAILED' | 'SUBMIT_STARTED',
+  action:
+    | 'SUBMIT_FAILED'
+    | 'SUBMIT_STARTED'
+    | 'EDIT_STARTED'
+    | 'EDIT_CANCELLED',
+  skipSentry?: boolean,
 ) {
   try {
     const submissions = await getPendingQueueSubmissions()
@@ -123,6 +129,32 @@ export async function updatePendingQueueSubmission(
     })
     await utilsService.localForage.setItem('submissions', newSubmissions)
     executePendingQueueListeners(newSubmissions, action)
+  } catch (error) {
+    if (!skipSentry) {
+      Sentry.captureException(error)
+    }
+
+    throw error instanceof Error ? errorHandler(error) : error
+  }
+}
+
+export async function cancelEditingPendingQueueSubmission(
+  pendingTimestamp: string,
+) {
+  try {
+    const submissions = await getPendingQueueSubmissions()
+    const targetSubmission = submissions.find((submission) => {
+      return submission.pendingTimestamp === pendingTimestamp
+    })
+    if (targetSubmission) {
+      await updatePendingQueueSubmission(
+        pendingTimestamp,
+        { ...targetSubmission, isEditing: false },
+        'EDIT_CANCELLED',
+        //this is to avoid logging to sentry twice
+        true,
+      )
+    }
   } catch (error) {
     Sentry.captureException(error)
     throw error instanceof Error ? errorHandler(error) : error
@@ -195,10 +227,22 @@ export async function editPendingQueueSubmission(
     if (!formSubmission) {
       throw new Error('Could not find formSubmision to edit')
     }
+    await updatePendingQueueSubmission(
+      pendingTimestamp,
+      {
+        ...formSubmission,
+        pendingTimestamp,
+        isEditing: true,
+        isSubmitting: false,
+        error: undefined,
+      },
+      'EDIT_STARTED',
+      //this is to avoid logging to sentry twice
+      true,
+    )
     const preFillFormDataId = `PENDING_SUBMISSION_${pendingTimestamp}`
     const key = getPrefillKey(preFillFormDataId)
     await utilsService.setLocalForageItem(key, formSubmission.submission)
-    await removePendingQueueSubmission(pendingTimestamp, 'EDIT')
     return { preFillFormDataId, formId: formSubmission.definition.id }
   } catch (error) {
     Sentry.captureException(error)
@@ -208,7 +252,7 @@ export async function editPendingQueueSubmission(
 
 export async function removePendingQueueSubmission(
   pendingTimestamp: string,
-  action: 'SUBMIT_SUCCEEDED' | 'DELETION' | 'EDIT',
+  action: 'SUBMIT_SUCCEEDED' | 'DELETION',
 ) {
   try {
     await utilsService.removeLocalForageItem(`SUBMISSION_${pendingTimestamp}`)

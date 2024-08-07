@@ -6,7 +6,10 @@ import { isOffline } from './offline-service'
 import { getUsername, isLoggedIn } from './services/cognito'
 import { getFormsKeyId } from './auth-service'
 import { getFormSubmissionDrafts, uploadDraftData } from './services/api/drafts'
-import { getPendingQueueSubmissions } from './services/pending-queue'
+import {
+  getPendingQueueSubmissions,
+  deletePendingQueueSubmission,
+} from './services/pending-queue'
 import {
   deleteDraftData,
   getDraftSubmission,
@@ -221,12 +224,14 @@ async function upsertDraft({
   autoSaveKey,
   onProgress,
   abortSignal,
+  pendingTimestamp,
 }: {
   formSubmissionDraftId: string | undefined
   draftSubmissionInput: DraftSubmissionInput
   autoSaveKey?: string
   onProgress?: ProgressListener
   abortSignal?: AbortSignal
+  pendingTimestamp?: string
 }): Promise<void> {
   const draftSubmission: DraftSubmission = {
     ...draftSubmissionInput,
@@ -308,6 +313,9 @@ async function upsertDraft({
       if (!updated) {
         localDraftsStorage.unsyncedDraftSubmissions.push(draftSubmission)
       }
+    }
+    if (pendingTimestamp) {
+      await deletePendingQueueSubmission(pendingTimestamp)
     }
 
     await setAndBroadcastDrafts(localDraftsStorage)

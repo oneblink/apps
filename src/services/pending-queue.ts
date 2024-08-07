@@ -138,6 +138,23 @@ export async function updatePendingQueueSubmission(
   }
 }
 
+/**
+ * Cancel editing a PendingFormSubmission based on the `pendingTimestamp`
+ * property. The function marks the submission as ready for processing by the
+ * pending queue
+ *
+ * ### Example
+ *
+ * ```js
+ * const pendingTimestamp = '2020-07-29T01:03:26.573Z'
+ *
+ * await submissionService.cancelEditingPendingQueueSubmission(
+ *   pendingTimestamp,
+ * )
+ * ```
+ *
+ * @param pendingTimestamp
+ */
 export async function cancelEditingPendingQueueSubmission(
   pendingTimestamp: string,
 ) {
@@ -205,8 +222,9 @@ export async function deletePendingQueueSubmission(pendingTimestamp: string) {
 
 /**
  * Edit a PendingFormSubmission before it is processed based on the
- * `pendingTimestamp` property. The function removes the submission from the
- * pending queue and returns a prefill Id
+ * `pendingTimestamp` property. The function places the submission in an editing
+ * state preventing it from being processed by the pending queue and returns a
+ * prefill id and form id
  *
  * ### Example
  *
@@ -227,6 +245,9 @@ export async function editPendingQueueSubmission(
     if (!formSubmission) {
       throw new Error('Could not find formSubmision to edit')
     }
+    const preFillFormDataId = `PENDING_SUBMISSION_${pendingTimestamp}`
+    const key = getPrefillKey(preFillFormDataId)
+    await utilsService.setLocalForageItem(key, formSubmission.submission)
     await updatePendingQueueSubmission(
       pendingTimestamp,
       {
@@ -240,9 +261,6 @@ export async function editPendingQueueSubmission(
       //this is to avoid logging to sentry twice
       true,
     )
-    const preFillFormDataId = `PENDING_SUBMISSION_${pendingTimestamp}`
-    const key = getPrefillKey(preFillFormDataId)
-    await utilsService.setLocalForageItem(key, formSubmission.submission)
     return { preFillFormDataId, formId: formSubmission.definition.id }
   } catch (error) {
     Sentry.captureException(error)

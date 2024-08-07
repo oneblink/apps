@@ -1,5 +1,8 @@
 import { isOffline } from '../offline-service'
-import { addFormSubmissionToPendingQueue } from './pending-queue'
+import {
+  addFormSubmissionToPendingQueue,
+  deletePendingQueueSubmission,
+} from './pending-queue'
 import {
   checkForPaymentSubmissionEvent,
   handlePaymentSubmissionEvent,
@@ -35,6 +38,7 @@ type SubmissionParams = {
     schedulingReceiptUrl: string
     schedulingCancelUrl: string
   }
+  pendingTimestamp?: string
   onProgress?: ProgressListener
   abortSignal?: AbortSignal
 }
@@ -51,8 +55,12 @@ export default async function submit({
   shouldRunServerValidation,
   shouldRunExternalIdGeneration,
   abortSignal,
+  pendingTimestamp,
 }: SubmissionParams): Promise<FormSubmissionResult> {
   try {
+    if (pendingTimestamp) {
+      await deletePendingQueueSubmission(pendingTimestamp)
+    }
     const paymentSubmissionEventConfiguration =
       checkForPaymentSubmissionEvent(formSubmission)
 

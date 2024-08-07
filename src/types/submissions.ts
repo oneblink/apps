@@ -158,6 +158,8 @@ export type PendingFormSubmission = Omit<FormSubmission, 'submission'> & {
   pendingTimestamp: string
   /** `true` if the submission is currently being processed by the pending queue */
   isSubmitting?: boolean
+  /** `true` if the submission is currently being edited */
+  isEditing?: boolean
   /**
    * An error message that might be set while attempting to process the
    * submission in the pending queue

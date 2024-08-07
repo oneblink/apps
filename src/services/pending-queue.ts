@@ -7,6 +7,7 @@ import {
   ProgressListener,
   ProgressListenerEvent,
 } from '../types/submissions'
+import { getPrefillKey } from '../services/job-prefill'
 
 function errorHandler(error: Error): Error {
   Sentry.captureException(error)
@@ -29,6 +30,8 @@ export type PendingQueueAction =
   | 'SUBMIT_SUCCEEDED'
   | 'ADDITION'
   | 'DELETION'
+  | 'EDIT_STARTED'
+  | 'EDIT_CANCELLED'
 export type PendingQueueListener = (
   results: PendingFormSubmission[],
   action: PendingQueueAction,
@@ -109,7 +112,12 @@ export async function addFormSubmissionToPendingQueue(
 export async function updatePendingQueueSubmission(
   pendingTimestamp: string,
   newSubmission: PendingFormSubmission,
-  action: 'SUBMIT_FAILED' | 'SUBMIT_STARTED',
+  action:
+    | 'SUBMIT_FAILED'
+    | 'SUBMIT_STARTED'
+    | 'EDIT_STARTED'
+    | 'EDIT_CANCELLED',
+  skipSentry?: boolean,
 ) {
   try {
     const submissions = await getPendingQueueSubmissions()
@@ -121,6 +129,49 @@ export async function updatePendingQueueSubmission(
     })
     await utilsService.localForage.setItem('submissions', newSubmissions)
     executePendingQueueListeners(newSubmissions, action)
+  } catch (error) {
+    if (!skipSentry) {
+      Sentry.captureException(error)
+    }
+
+    throw error instanceof Error ? errorHandler(error) : error
+  }
+}
+
+/**
+ * Cancel editing a PendingFormSubmission based on the `pendingTimestamp`
+ * property. The function marks the submission as ready for processing by the
+ * pending queue
+ *
+ * ### Example
+ *
+ * ```js
+ * const pendingTimestamp = '2020-07-29T01:03:26.573Z'
+ *
+ * await submissionService.cancelEditingPendingQueueSubmission(
+ *   pendingTimestamp,
+ * )
+ * ```
+ *
+ * @param pendingTimestamp
+ */
+export async function cancelEditingPendingQueueSubmission(
+  pendingTimestamp: string,
+) {
+  try {
+    const submissions = await getPendingQueueSubmissions()
+    const targetSubmission = submissions.find((submission) => {
+      return submission.pendingTimestamp === pendingTimestamp
+    })
+    if (targetSubmission) {
+      await updatePendingQueueSubmission(
+        pendingTimestamp,
+        { ...targetSubmission, isEditing: false },
+        'EDIT_CANCELLED',
+        //this is to avoid logging to sentry twice
+        true,
+      )
+    }
   } catch (error) {
     Sentry.captureException(error)
     throw error instanceof Error ? errorHandler(error) : error
@@ -167,6 +218,54 @@ export function getFormSubmission(
  */
 export async function deletePendingQueueSubmission(pendingTimestamp: string) {
   await removePendingQueueSubmission(pendingTimestamp, 'DELETION')
+}
+
+/**
+ * Edit a PendingFormSubmission before it is processed based on the
+ * `pendingTimestamp` property. The function places the submission in an editing
+ * state preventing it from being processed by the pending queue and returns a
+ * prefill id and form id
+ *
+ * ### Example
+ *
+ * ```js
+ * const pendingTimestamp = '2020-07-29T01:03:26.573Z'
+ * const { preFillFormDataId, formId } =
+ *   await submissionService.editPendingQueueSubmission(pendingTimestamp)
+ * window.location.href = `https://mycoolforms.apps.oneblink.io/forms/${formId}?preFillFormDataId=${preFillFormDataId}`
+ * ```
+ *
+ * @param pendingTimestamp
+ */
+export async function editPendingQueueSubmission(
+  pendingTimestamp: string,
+): Promise<{ preFillFormDataId: string; formId: number }> {
+  try {
+    const formSubmission = await getFormSubmission(pendingTimestamp)
+    if (!formSubmission) {
+      throw new Error('Could not find formSubmision to edit')
+    }
+    const preFillFormDataId = `PENDING_SUBMISSION_${pendingTimestamp}`
+    const key = getPrefillKey(preFillFormDataId)
+    await utilsService.setLocalForageItem(key, formSubmission.submission)
+    await updatePendingQueueSubmission(
+      pendingTimestamp,
+      {
+        ...formSubmission,
+        pendingTimestamp,
+        isEditing: true,
+        isSubmitting: false,
+        error: undefined,
+      },
+      'EDIT_STARTED',
+      //this is to avoid logging to sentry twice
+      true,
+    )
+    return { preFillFormDataId, formId: formSubmission.definition.id }
+  } catch (error) {
+    Sentry.captureException(error)
+    throw error instanceof Error ? errorHandler(error) : error
+  }
 }
 
 export async function removePendingQueueSubmission(

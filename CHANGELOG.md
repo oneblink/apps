@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [14.0.1] - 2024-08-07
+
+### Dependencies
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [6.3.1-beta.1](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [6.3.0-beta.2](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
+
 ## [14.0.0] - 2024-07-10
 
 ### Added

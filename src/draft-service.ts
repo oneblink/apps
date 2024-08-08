@@ -314,12 +314,12 @@ async function upsertDraft({
         localDraftsStorage.unsyncedDraftSubmissions.push(draftSubmission)
       }
     }
-    if (pendingTimestamp) {
-      await deletePendingQueueSubmission(pendingTimestamp)
-    }
 
     await setAndBroadcastDrafts(localDraftsStorage)
 
+    if (pendingTimestamp) {
+      await deletePendingQueueSubmission(pendingTimestamp)
+    }
     syncDrafts({
       throwError: false,
       formsAppId: draftSubmission.formsAppId,

@@ -7,10 +7,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [14.1.0] - 2024-08-13
+
 ### Added
 
 - `submissionService.editPendingQueueSubmission`
 - `submissionService.cancelEditingPendingQueueSubmission`
+
+### Dependencies
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [7.0.0-beta.1](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [6.3.1-beta.1](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
+
+- no longer depend upon [query-string](https://www.npmjs.com/package/query-string)
 
 ## [14.0.1] - 2024-08-07
 

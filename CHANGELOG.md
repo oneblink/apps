@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `formSlug` property to `formService.getForm()` options to allow retrieving a form with a slug and `formsAppId`
+
+### Changed
+
+- **[BREAKING]** `formService.getForm()` parameters to an `options` object
+
+  ```diff
+  -const form = await formService.getForm(formId, formsAppId, abortSignal)
+  +const form = await formService.getForm({ formId, formsAppId, abortSignal })
+  ```
+
 ## [14.1.0] - 2024-08-13
 
 ### Added

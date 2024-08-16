@@ -103,33 +103,56 @@ async function getForms(
 }
 
 /**
- * Get a OneBlink Form.
+ * Get a OneBlink Form by id or slug.
  *
  * #### Example
  *
  * ```js
- * const formId = 1
- * const formsAppId = 1 // `formsAppId` is optional
- * const form = await formService.getForm(formId, formAppId)
+ * const form = await formService.getForm({
+ *   formId: 1,
+ *   formAppId: 1, // `formsAppId` is optional
+ *   formSlug: undefined,
+ * })
+ *
+ * // OR
+ *
+ * const form = await formService.getForm({
+ *   formId: undefined,
+ *   formAppId: 1,
+ *   formSlug: 'audit',
+ * })
  * ```
  *
- * @param formId
- * @param formsAppId
- * @param abortSignal
+ * @param options
  * @returns
  */
-async function getForm(
-  formId: number,
-  formsAppId?: number,
-  abortSignal?: AbortSignal,
-): Promise<FormTypes.Form> {
+async function getForm({
+  formsAppId,
+  abortSignal,
+  formSlug,
+  formId,
+}: {
+  formSlug: string | undefined
+  formId: number | undefined
+  formsAppId: number | undefined
+  abortSignal?: AbortSignal
+}): Promise<FormTypes.Form> {
   return (
-    searchRequest<FormTypes.Form>(
-      `${tenants.current.apiOrigin}/forms/${formId}`,
-      {
-        injectForms: true,
-      },
-    )
+    (() => {
+      if (formSlug && !Number.isNaN(formsAppId)) {
+        return getRequest<FormTypes.Form>(
+          `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms/${formSlug}`,
+          abortSignal,
+        )
+      }
+
+      return searchRequest<FormTypes.Form>(
+        `${tenants.current.apiOrigin}/forms/${formId}`,
+        {
+          injectForms: true,
+        },
+      )
+    })()
       // If we could not find a form by Id for any reason,
       // we will try and get it from cache from the all forms endpoint
       .catch((error) => {
@@ -143,7 +166,10 @@ async function getForm(
             throw error
           })
           .then((forms) => {
-            const form = forms.find((form) => form.id === formId)
+            const form = forms.find(
+              (form) =>
+                form.id === formId || (formSlug && form.slug === formSlug),
+            )
             if (form) {
               return form
             }
@@ -152,7 +178,10 @@ async function getForm(
       })
       .catch((error) => {
         Sentry.captureException(error)
-        console.warn(`Error retrieving form ${formId} from API`, error)
+        console.warn(
+          `Error retrieving form (${formId || formSlug}) from API`,
+          error,
+        )
         if (isOffline()) {
           throw new OneBlinkAppsError(
             'You are currently offline and do not have a local copy of this form available, please connect to the internet and try again',

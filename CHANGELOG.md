@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [15.0.0] - 2024-09-03
+
 ### Added
 
 - `formSlug` property to `formService.getForm()` options to allow retrieving a form with a slug and `formsAppId`
@@ -19,6 +21,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   -const form = await formService.getForm(formId, formsAppId, abortSignal)
   +const form = await formService.getForm({ formId, formsAppId, abortSignal })
   ```
+
+### Dependencies
+
+- update [@aws-sdk/client-cognito-identity-provider](https://www.npmjs.com/package/@aws-sdk/client-cognito-identity-provider) to [3.637.0](https://github.com/aws/aws-sdk-js-v3/releases/tag/v3.637.0) (from [3.441.0](https://github.com/aws/aws-sdk-js-v3/releases/tag/v3.441.0))
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [7.1.0-beta.1](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [7.0.0-beta.1](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
+
+- update [@oneblink/storage](https://www.npmjs.com/package/@oneblink/storage) to [2.1.1-beta.1](https://github.com/oneblink/storage/blob/master/CHANGELOG.md) (from [2.1.0-beta.3](https://github.com/oneblink/storage/blob/master/CHANGELOG.md))
 
 ## [14.1.0] - 2024-08-13
 

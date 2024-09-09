@@ -23,6 +23,7 @@ export type FormApprovalFlowInstanceHistory = {
   formApprovalFlowInstance: ApprovalTypes.FormApprovalFlowInstance
   formSubmissionMeta: SubmissionTypes.FormSubmissionMeta
   formSubmissionApprovals: ApprovalTypes.FormSubmissionApproval[]
+  successfulFormSubmissionPayment?: SubmissionTypes.FormSubmissionPayment
 }
 
 export type FormSubmissionApprovalResponse = {
@@ -30,6 +31,7 @@ export type FormSubmissionApprovalResponse = {
   formApprovalFlowInstance: ApprovalTypes.FormApprovalFlowInstance
   formSubmissionApproval: ApprovalTypes.FormSubmissionApproval
   form: FormTypes.Form
+  successfulFormSubmissionPayment?: SubmissionTypes.FormSubmissionPayment
   history: FormApprovalFlowInstanceHistory[]
 }
 

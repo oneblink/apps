@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - `successfulFormSubmissionPayment` to `approvalsService.getFormSubmissionApproval()` function response
 
+### Changed
+
+- **[BREAKING]** updated `FormSubmissionApprovalsResponse` type
+
 ## [15.0.0] - 2024-09-03
 
 ### Added

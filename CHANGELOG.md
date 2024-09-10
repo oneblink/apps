@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `successfulFormSubmissionPayment` to `approvalsService.getFormSubmissionApproval()` function response
+
 ## [15.0.0] - 2024-09-03
 
 ### Added

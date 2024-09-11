@@ -13,10 +13,12 @@ import tenants from './tenants'
 import Sentry from './Sentry'
 
 export type FormSubmissionApprovalsResponse = {
-  forms: FormTypes.Form[]
-  formSubmissionApprovals: ApprovalTypes.FormSubmissionApproval[]
-  formApprovalFlowInstances: ApprovalTypes.FormApprovalFlowInstance[]
-  formSubmissionMeta: SubmissionTypes.FormSubmissionMeta[]
+  approvals: Array<{
+    formSubmissionApproval: ApprovalTypes.FormSubmissionApproval
+    formApprovalFlowInstance: ApprovalTypes.FormApprovalFlowInstance
+    formSubmissionMeta: SubmissionTypes.FormSubmissionMeta
+    latestSuccessfulFormSubmissionPayment: SubmissionTypes.FormSubmissionPayment | undefined
+  }>
 }
 
 export type FormApprovalFlowInstanceHistory = {

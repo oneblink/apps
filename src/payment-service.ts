@@ -2,7 +2,7 @@ import { paymentService } from '@oneblink/sdk-core'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { generatePaymentConfiguration } from './services/api/payment'
 import utilsService from './services/utils'
-import { SubmissionEventTypes } from '@oneblink/types'
+import { SubmissionEventTypes, SubmissionTypes } from '@oneblink/types'
 import { FormSubmission, FormSubmissionResult } from './types/submissions'
 import {
   HandlePaymentResult,
@@ -13,6 +13,7 @@ import BPOINTPaymentProvider from './services/payment-providers/BPOINTPaymentPro
 import CPPayPaymentProvider from './services/payment-providers/CPPayPaymentProvider'
 import NSWGovPayPaymentProvider from './services/payment-providers/NSWGovPayPaymentProvider'
 import WestpacQuickStreamPaymentProvider, * as westpacQuickStream from './services/payment-providers/WestpacQuickStreamPaymentProvider'
+import { replaceSubmissionFormatters } from './localisation-service'
 
 const KEY = 'PAYMENT_SUBMISSION_RESULT'
 
@@ -232,4 +233,28 @@ export async function getFormSubmissionResultPayment(): Promise<{
     formSubmissionResult,
     paymentSubmissionEvent: formSubmissionResult.payment?.submissionEvent,
   }
+}
+
+/**
+ * Retrieve an array of detail items from a form submission payment.
+ *
+ * #### Example
+ *
+ * ```js
+ * const detailItems =
+ *   paymentService.getDisplayDetailsFromFormSubmissionPayment(
+ *     formSubmissionPayment,
+ *   )
+ * ```
+ *
+ * @param formSubmissionPayment
+ * @returns
+ */
+export function getDisplayDetailsFromFormSubmissionPayment(
+  formSubmissionPayment: SubmissionTypes.FormSubmissionPayment,
+) {
+  return paymentService.getDisplayDetailsFromFormSubmissionPayment(
+    formSubmissionPayment,
+    replaceSubmissionFormatters,
+  )
 }

@@ -316,7 +316,7 @@ function generateDateOffset({
   return date
 }
 
-const replaceSubmissionFormatters: submissionService.ReplaceInjectablesFormatters =
+export const replaceSubmissionFormatters: submissionService.ReplaceInjectablesFormatters =
   {
     formatDate: (v) => {
       const date = generateDate({

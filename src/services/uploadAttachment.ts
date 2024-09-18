@@ -1,6 +1,7 @@
 import { SubmissionTypes } from '@oneblink/types'
 import { ProgressListener } from '../types/submissions'
 import generateOneBlinkUploader from './generateOneBlinkUploader'
+import fileTypeChecker from 'file-type-checker'
 
 export type UploadAttachmentConfiguration = {
   fileName: string
@@ -64,8 +65,15 @@ export default async function uploadAttachment(
   abortSignal?: AbortSignal,
 ): Promise<SubmissionTypes.FormSubmissionAttachment> {
   const oneblinkUploader = generateOneBlinkUploader()
-  // S3 defaults unknown file types to the following, do the same here for our submission model
-  const _contentType = contentType || 'application/octet-stream'
+
+  let _contentType = contentType || 'application/octet-stream' // S3 default for unknown content type
+  if (!contentType) {
+    const buffer = await data.arrayBuffer()
+    const detectedType = fileTypeChecker.detectFile(buffer)
+    if (detectedType) {
+      _contentType = detectedType.mimeType
+    }
+  }
   const result = await oneblinkUploader.uploadAttachment({
     formId,
     fileName,

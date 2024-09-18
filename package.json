@@ -14,6 +14,7 @@
     "@sentry/tracing": "^7.77.0",
     "date-fns": "^2.30.0",
     "file-saver": "^2.0.5",
+    "file-type-checker": "^1.1.2",
     "jwt-decode": "^4.0.0",
     "localforage": "^1.10.0",
     "lodash.clonedeep": "^4.5.0",

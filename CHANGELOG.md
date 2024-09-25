@@ -7,16 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Setting of `contentType` to use detection when content type is not provided
+
 ## [16.0.0] - 2024-09-25
 
 ### Added
 
 - `successfulFormSubmissionPayment` to `approvalsService.getFormSubmissionApproval()` function response
 - `paymentService.getDisplayDetailsFromFormSubmissionPayment()`
-
-### Changed
-
-- Setting of `contentType` to use detection when content type is not provided
 
 ### Changed
 

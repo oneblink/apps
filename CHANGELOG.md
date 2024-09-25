@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [16.0.0] - 2024-09-25
+
 ### Added
 
 - `successfulFormSubmissionPayment` to `approvalsService.getFormSubmissionApproval()` function response
@@ -19,6 +21,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 
 - **[BREAKING]** updated `FormSubmissionApprovalsResponse` type
+
+### Dependencies
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [7.3.0-beta.2](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [7.1.0-beta.1](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
 
 ## [15.0.0] - 2024-09-03
 

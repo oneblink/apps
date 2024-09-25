@@ -17,7 +17,9 @@ export type FormSubmissionApprovalsResponse = {
     formSubmissionApproval: ApprovalTypes.FormSubmissionApproval
     formApprovalFlowInstance: ApprovalTypes.FormApprovalFlowInstance
     formSubmissionMeta: SubmissionTypes.FormSubmissionMeta
-    latestSuccessfulFormSubmissionPayment: SubmissionTypes.FormSubmissionPayment | undefined
+    latestSuccessfulFormSubmissionPayment:
+      | SubmissionTypes.FormSubmissionPayment
+      | undefined
   }>
 }
 

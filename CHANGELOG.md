@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [16.1.0] - 2024-09-30
+
 ### Changed
 
 - Setting of `contentType` to use detection when content type is not provided
+
+### Dependencies
+
+- depend upon [file-type-checker](https://www.npmjs.com/package/file-type-checker) [1.1.2](https://github.com/nir11/file-type-checker/releases/tag/v1.1.2)
 
 ## [16.0.0] - 2024-09-25
 

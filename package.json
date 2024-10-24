@@ -19,7 +19,6 @@
     "localforage": "^1.10.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.orderby": "^4.6.0",
-    "nanoid": "^5.0.2",
     "ua-parser-js": "^1.0.37",
     "uuid": "^9.0.1"
   },
@@ -27,7 +26,7 @@
     "@babel/plugin-transform-modules-commonjs": "^7.23.0",
     "@microsoft/eslint-plugin-sdl": "^0.2.0",
     "@oneblink/release-cli": "^3.2.2",
-    "@oneblink/types": "github:oneblink/types",
+    "@oneblink/types": "github:oneblink/types#7517a73f920c21527de7bb01792823d66d5f47e5",
     "@types/file-saver": "^2.0.6",
     "@types/jest": "^27.5.0",
     "@types/lodash.clonedeep": "^4.5.8",

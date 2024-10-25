@@ -1,7 +1,7 @@
 import { FormSubmission } from '../types/submissions'
 import serverRequest from './serverRequest'
 import OneBlinkAppsError from './errors/oneBlinkAppsError'
-import { generateExternalId } from './generateExternalId'
+import generateExternalId from './api/external-id'
 
 export default async function externalIdGeneration(
   formSubmission: FormSubmission,
@@ -22,10 +22,7 @@ export default async function externalIdGeneration(
       }
     }
     return {
-      externalId: generateExternalId(
-        formSubmission.definition.externalIdGenerationOnSubmit.configuration
-          .receiptComponents,
-      ),
+      externalId: await generateExternalId(formSubmission.definition.id),
     }
   }
 

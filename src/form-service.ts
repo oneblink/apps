@@ -13,7 +13,6 @@ import {
 import tenants from './tenants'
 
 import Sentry from './Sentry'
-export * from './services/generateExternalId'
 export * from './services/integration-elements'
 
 /**

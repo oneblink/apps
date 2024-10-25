@@ -26,7 +26,7 @@
     "@babel/plugin-transform-modules-commonjs": "^7.23.0",
     "@microsoft/eslint-plugin-sdl": "^0.2.0",
     "@oneblink/release-cli": "^3.2.2",
-    "@oneblink/types": "github:oneblink/types#7517a73f920c21527de7bb01792823d66d5f47e5",
+    "@oneblink/types": "github:oneblink/types",
     "@types/file-saver": "^2.0.6",
     "@types/jest": "^27.5.0",
     "@types/lodash.clonedeep": "^4.5.8",

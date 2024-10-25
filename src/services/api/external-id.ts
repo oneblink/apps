@@ -42,13 +42,19 @@ async function generateExternalId(formId: number, abortSignal?: AbortSignal) {
           },
         )
       }
-      case 400:
+      case 400: {
+        throw new OneBlinkAppsError(error.message, {
+          originalError: error,
+          title: 'Error Generating Receipt',
+          httpStatusCode: error.status,
+        })
+      }
       case 404: {
         throw new OneBlinkAppsError(
-          'We could not find the form your attempting retrieve drafts for. Please contact your administrator to ensure your application configuration has been completed successfully.',
+          'We could not find the form you are attempting to submit. Please contact your administrator to ensure your application configuration has been completed successfully.',
           {
             originalError: error,
-            title: 'Error Syncing Drafts',
+            title: 'Error Generating Receipt',
             httpStatusCode: error.status,
           },
         )

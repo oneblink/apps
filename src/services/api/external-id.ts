@@ -5,12 +5,12 @@ import { HTTPError, postRequest } from '../fetch'
 async function generateExternalId(formId: number, abortSignal?: AbortSignal) {
   const url = `${tenants.current.apiOrigin}/forms/${formId}/receipt-id`
   try {
-    const { externalId } = await postRequest<{ externalId: string }>(
+    const { receiptId } = await postRequest<{ receiptId: string }>(
       url,
       {},
       abortSignal,
     )
-    return externalId
+    return receiptId
   } catch (err) {
     console.warn(
       'Error occurred while attempting to generate External ID from API',

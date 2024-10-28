@@ -2,7 +2,7 @@ import tenants from '../../tenants'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import { HTTPError, postRequest } from '../fetch'
 
-async function generateExternalId(formId: number, abortSignal?: AbortSignal) {
+async function generateReceiptId(formId: number, abortSignal?: AbortSignal) {
   const url = `${tenants.current.apiOrigin}/forms/${formId}/receipt-id`
   try {
     const { receiptId } = await postRequest<{ receiptId: string }>(
@@ -71,4 +71,4 @@ async function generateExternalId(formId: number, abortSignal?: AbortSignal) {
   }
 }
 
-export default generateExternalId
+export default generateReceiptId

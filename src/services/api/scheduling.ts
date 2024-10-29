@@ -22,18 +22,17 @@ function getBookingQuerystringValue(
   }
 }
 
-function generateSchedulingConfiguration({
+function generateLegacySchedulingConfiguration({
   formSubmissionResult,
   schedulingSubmissionEvent,
-  schedulingUrlConfiguration: { schedulingReceiptUrl, schedulingCancelUrl },
+  schedulingReceiptUrl,
+  schedulingCancelUrl,
 }: {
   formSubmissionResult: FormSubmissionResult
   schedulingSubmissionEvent: SubmissionEventTypes.SchedulingSubmissionEvent
-  schedulingUrlConfiguration: {
-    schedulingReceiptUrl: string
-    schedulingCancelUrl: string
-  }
-}): Promise<{ bookingUrl: string }> {
+  schedulingReceiptUrl: string
+  schedulingCancelUrl: string
+}) {
   const url = `${tenants.current.apiOrigin}/scheduling/generate-booking-url`
   const body = {
     formId: formSubmissionResult.definition.id,
@@ -100,6 +99,61 @@ function generateSchedulingConfiguration({
       }
     }
   })
+}
+
+function generateNylasBookingUrl({
+  formId,
+  ...params
+}: {
+  formId: number
+  configurationId: string
+  submissionId: string
+}): {
+  bookingUrl: string
+} {
+  const queryParams = new URLSearchParams({
+    formId: formId.toString(),
+    ...params,
+  })
+  const bookingUrl = `/forms/:formId/scheduling-form?${queryParams.toString()}`
+  return { bookingUrl }
+}
+
+async function generateSchedulingConfiguration({
+  formSubmissionResult,
+  schedulingSubmissionEvent,
+  schedulingUrlConfiguration: { schedulingReceiptUrl, schedulingCancelUrl },
+}: {
+  formSubmissionResult: FormSubmissionResult
+  schedulingSubmissionEvent: SubmissionEventTypes.FormSchedulingEvent
+  schedulingUrlConfiguration: {
+    schedulingReceiptUrl: string
+    schedulingCancelUrl: string
+  }
+}): Promise<{ bookingUrl: string }> {
+  switch (schedulingSubmissionEvent.type) {
+    case 'SCHEDULING': {
+      return await generateLegacySchedulingConfiguration({
+        formSubmissionResult,
+        schedulingSubmissionEvent,
+        schedulingReceiptUrl,
+        schedulingCancelUrl,
+      })
+    }
+    case 'NYLAS': {
+      if (!formSubmissionResult.submissionId) {
+        throw new OneBlinkAppsError(
+          'submission Id missing - cannot generate Nylas scheduling configuration without a submission Id',
+        )
+      }
+      return generateNylasBookingUrl({
+        formId: formSubmissionResult.definition.id,
+        submissionId: formSubmissionResult.submissionId,
+        configurationId:
+          schedulingSubmissionEvent.configuration.nylasConfigurationId,
+      })
+    }
+  }
 }
 
 /**

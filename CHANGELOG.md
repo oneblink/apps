@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [17.0.0] - 2024-10-29
+
 ### Changed
 
 - `externalId` is generated from the API
@@ -14,6 +16,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 
 - **[BREAKING]** `formService.generateExternalId`
+
+### Dependencies
+
+- no longer depend upon [nanoid](https://www.npmjs.com/package/nanoid)
 
 ## [16.1.0] - 2024-09-30
 

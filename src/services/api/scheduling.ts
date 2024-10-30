@@ -103,6 +103,79 @@ function generateSchedulingConfiguration({
 }
 
 /**
+ * Create a Nylas Session
+ *
+ * #### Example
+ *
+ * ```js
+ * const { sessionId, configurationId, name, email } =
+ *   await schedulingService.createNylasSession(
+ *     '89c6e98e-f56f-45fc-84fe-c4fc62331d34',
+ *   )
+ * // use sessionId and configurationId to create or modify nylas bookings
+ * ```
+ *
+ * @param submissionId
+ * @returns
+ */
+function createNylasSession(submissionId: string) {
+  const url = `${tenants.current.apiOrigin}/nylas/authorise-booking`
+  return postRequest<{
+    sessionId: string
+    configurationId: string
+    name: string | undefined
+    email: string | undefined
+  }>(url, { submissionId }).catch((error) => {
+    Sentry.captureException(error)
+    console.warn(
+      'Error occurred while attempting to create a nylas session',
+      error,
+    )
+    switch (error.status) {
+      case 401: {
+        throw new OneBlinkAppsError(
+          'You cannot start a session until you have logged in. Please login and try again.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+            requiresLogin: true,
+          },
+        )
+      }
+      case 403: {
+        throw new OneBlinkAppsError(
+          'You may not create or modify a calendar booking for a form you did not submit',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+            requiresAccessRequest: true,
+          },
+        )
+      }
+      case 400:
+      case 404: {
+        throw new OneBlinkAppsError(
+          'We could not find a booking to create a session',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+      default: {
+        throw new OneBlinkAppsError(
+          'An unknown error has occurred. Please contact support if the problem persists.',
+          {
+            originalError: error,
+            httpStatusCode: error.status,
+          },
+        )
+      }
+    }
+  })
+}
+
+/**
  * Cancel a booking
  *
  * #### Example
@@ -180,4 +253,8 @@ function cancelSchedulingBooking(details: {
   })
 }
 
-export { generateSchedulingConfiguration, cancelSchedulingBooking }
+export {
+  generateSchedulingConfiguration,
+  cancelSchedulingBooking,
+  createNylasSession,
+}

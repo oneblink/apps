@@ -64,9 +64,7 @@ async function startNylasBooking({
   schedulingSubmissionEvent: SubmissionEventTypes.NylasSubmissionEvent
   schedulingReceiptUrl: string
   schedulingCancelUrl: string
-}): Promise<{
-  bookingUrl: string
-}> {
+}): Promise<void> {
   const url = `${tenants.current.apiOrigin}/nylas/start-booking`
   const body = {
     formId: formSubmissionResult.definition.id,
@@ -86,9 +84,9 @@ async function startNylasBooking({
   }
   console.log('Attempting to generate scheduling configuration', url, body)
 
-  const { queryString } = await postRequest<{ queryString: string }>(url, body)
+  await postRequest(url, body)
 
-  return { bookingUrl: `/forms/:formId/scheduling-form?${queryString}` }
+  return
 }
 
 async function generateSchedulingConfiguration({
@@ -102,24 +100,26 @@ async function generateSchedulingConfiguration({
     schedulingReceiptUrl: string
     schedulingCancelUrl: string
   }
-}): Promise<{ bookingUrl: string }> {
+}): Promise<string | undefined> {
   try {
     switch (schedulingSubmissionEvent.type) {
       case 'SCHEDULING': {
-        return await generateLegacySchedulingConfiguration({
+        const { bookingUrl } = await generateLegacySchedulingConfiguration({
           formSubmissionResult,
           schedulingSubmissionEvent,
           schedulingReceiptUrl,
           schedulingCancelUrl,
         })
+        return bookingUrl
       }
       case 'NYLAS': {
-        return startNylasBooking({
+        await startNylasBooking({
           formSubmissionResult,
           schedulingSubmissionEvent,
           schedulingReceiptUrl,
           schedulingCancelUrl,
         })
+        return
       }
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

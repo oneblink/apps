@@ -136,7 +136,7 @@ export type FormSubmissionResult = FormSubmission & {
   /** `null` if the form submission does not require a booking */
   scheduling: {
     /** The URL to redirect the user to to complete the booking process */
-    bookingUrl: string
+    bookingUrl?: string
     /** The scheduling submission event */
     submissionEvent: SubmissionEventTypes.SchedulingSubmissionEvent
   } | null

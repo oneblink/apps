@@ -49,7 +49,7 @@ async function handleSchedulingSubmissionEvent({
     'Attempting to handle submission with scheduling submission event',
   )
 
-  const { bookingUrl } = await generateSchedulingConfiguration({
+  const bookingUrl = await generateSchedulingConfiguration({
     formSubmissionResult,
     schedulingSubmissionEvent,
     schedulingUrlConfiguration,

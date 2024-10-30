@@ -59,11 +59,13 @@ async function startNylasBooking({
   schedulingSubmissionEvent,
   schedulingReceiptUrl,
   schedulingCancelUrl,
+  schedulingRescheduleUrl,
 }: {
   formSubmissionResult: FormSubmissionResult
   schedulingSubmissionEvent: SubmissionEventTypes.NylasSubmissionEvent
   schedulingReceiptUrl: string
   schedulingCancelUrl: string
+  schedulingRescheduleUrl: string
 }): Promise<void> {
   const url = `${tenants.current.apiOrigin}/nylas/start-booking`
   const body = {
@@ -73,6 +75,7 @@ async function startNylasBooking({
     submissionId: formSubmissionResult.submissionId,
     schedulingReceiptUrl,
     schedulingCancelUrl,
+    schedulingRescheduleUrl,
     name: getBookingQuerystringValue(
       schedulingSubmissionEvent.configuration.nameElementId,
       formSubmissionResult,
@@ -85,20 +88,23 @@ async function startNylasBooking({
   console.log('Attempting to generate scheduling configuration', url, body)
 
   await postRequest(url, body)
-
-  return
 }
 
 async function generateSchedulingConfiguration({
   formSubmissionResult,
   schedulingSubmissionEvent,
-  schedulingUrlConfiguration: { schedulingReceiptUrl, schedulingCancelUrl },
+  schedulingUrlConfiguration: {
+    schedulingReceiptUrl,
+    schedulingCancelUrl,
+    schedulingRescheduleUrl,
+  },
 }: {
   formSubmissionResult: FormSubmissionResult
   schedulingSubmissionEvent: SubmissionEventTypes.FormSchedulingEvent
   schedulingUrlConfiguration: {
     schedulingReceiptUrl: string
     schedulingCancelUrl: string
+    schedulingRescheduleUrl: string
   }
 }): Promise<string | undefined> {
   try {
@@ -118,6 +124,7 @@ async function generateSchedulingConfiguration({
           schedulingSubmissionEvent,
           schedulingReceiptUrl,
           schedulingCancelUrl,
+          schedulingRescheduleUrl,
         })
         return
       }

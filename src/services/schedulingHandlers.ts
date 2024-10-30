@@ -41,6 +41,7 @@ async function handleSchedulingSubmissionEvent({
   schedulingUrlConfiguration: {
     schedulingReceiptUrl: string
     schedulingCancelUrl: string
+    schedulingRescheduleUrl: string
   }
   paymentReceiptUrl: string | undefined
   paymentFormUrl: string | undefined

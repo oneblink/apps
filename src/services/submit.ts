@@ -37,6 +37,7 @@ type SubmissionParams = {
   schedulingUrlConfiguration?: {
     schedulingReceiptUrl: string
     schedulingCancelUrl: string
+    schedulingRescheduleUrl: string
   }
   pendingTimestamp?: string
   onProgress?: ProgressListener

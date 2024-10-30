@@ -1,5 +1,8 @@
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
-import { cancelSchedulingBooking } from './services/api/scheduling'
+import {
+  cancelSchedulingBooking,
+  createNylasSession,
+} from './services/api/scheduling'
 import utilsService from './services/utils'
 import {
   checkForPaymentSubmissionEvent,
@@ -213,5 +216,6 @@ export {
   SchedulingBooking,
   handleSchedulingQuerystring,
   cancelSchedulingBooking,
+  createNylasSession,
   handleCancelSchedulingBookingQuerystring,
 }

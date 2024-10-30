@@ -108,24 +108,25 @@ function generateSchedulingConfiguration({
  * #### Example
  *
  * ```js
- * const { sessionId, configurationId, name, email } =
+ * const { sessionId, configurationId, bookingRef, name, email } =
  *   await schedulingService.createNylasSession(
  *     '89c6e98e-f56f-45fc-84fe-c4fc62331d34',
  *   )
- * // use sessionId and configurationId to create or modify nylas bookings
+ * // use sessionId and configurationId/bookingRef to create or modify nylas bookings
  * ```
  *
  * @param submissionId
  * @returns
  */
-function createNylasSession(submissionId: string) {
+function createNylasSession(submissionId: string, abortSignal?: AbortSignal) {
   const url = `${tenants.current.apiOrigin}/nylas/authorise-booking`
   return postRequest<{
     sessionId: string
     configurationId: string
     name: string | undefined
     email: string | undefined
-  }>(url, { submissionId }).catch((error) => {
+    bookingRef: string | undefined
+  }>(url, { submissionId }, abortSignal).catch((error) => {
     Sentry.captureException(error)
     console.warn(
       'Error occurred while attempting to create a nylas session',

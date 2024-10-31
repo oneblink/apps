@@ -154,6 +154,10 @@ function createNylasSession(submissionId: string, abortSignal?: AbortSignal) {
         )
       }
       case 400:
+        throw new OneBlinkAppsError(error.message, {
+          originalError: error,
+          httpStatusCode: error.status,
+        })
       case 404: {
         throw new OneBlinkAppsError(
           'We could not find a booking to create a session',

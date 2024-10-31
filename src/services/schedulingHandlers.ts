@@ -41,6 +41,7 @@ async function handleSchedulingSubmissionEvent({
   schedulingUrlConfiguration: {
     schedulingReceiptUrl: string
     schedulingCancelUrl: string
+    schedulingRescheduleUrl: string
   }
   paymentReceiptUrl: string | undefined
   paymentFormUrl: string | undefined
@@ -49,7 +50,7 @@ async function handleSchedulingSubmissionEvent({
     'Attempting to handle submission with scheduling submission event',
   )
 
-  const { bookingUrl } = await generateSchedulingConfiguration({
+  const bookingUrl = await generateSchedulingConfiguration({
     formSubmissionResult,
     schedulingSubmissionEvent,
     schedulingUrlConfiguration,

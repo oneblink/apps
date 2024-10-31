@@ -22,18 +22,17 @@ function getBookingQuerystringValue(
   }
 }
 
-function generateSchedulingConfiguration({
+function generateLegacySchedulingConfiguration({
   formSubmissionResult,
   schedulingSubmissionEvent,
-  schedulingUrlConfiguration: { schedulingReceiptUrl, schedulingCancelUrl },
+  schedulingReceiptUrl,
+  schedulingCancelUrl,
 }: {
   formSubmissionResult: FormSubmissionResult
   schedulingSubmissionEvent: SubmissionEventTypes.SchedulingSubmissionEvent
-  schedulingUrlConfiguration: {
-    schedulingReceiptUrl: string
-    schedulingCancelUrl: string
-  }
-}): Promise<{ bookingUrl: string }> {
+  schedulingReceiptUrl: string
+  schedulingCancelUrl: string
+}) {
   const url = `${tenants.current.apiOrigin}/scheduling/generate-booking-url`
   const body = {
     formId: formSubmissionResult.definition.id,
@@ -52,7 +51,86 @@ function generateSchedulingConfiguration({
     ),
   }
   console.log('Attempting to generate scheduling configuration', url, body)
-  return postRequest<{ bookingUrl: string }>(url, body).catch((error) => {
+  return postRequest<{ bookingUrl: string }>(url, body)
+}
+
+async function startNylasBooking({
+  formSubmissionResult,
+  schedulingSubmissionEvent,
+  schedulingReceiptUrl,
+  schedulingCancelUrl,
+  schedulingRescheduleUrl,
+}: {
+  formSubmissionResult: FormSubmissionResult
+  schedulingSubmissionEvent: SubmissionEventTypes.NylasSubmissionEvent
+  schedulingReceiptUrl: string
+  schedulingCancelUrl: string
+  schedulingRescheduleUrl: string
+}): Promise<void> {
+  const url = `${tenants.current.apiOrigin}/nylas/start-booking`
+  const body = {
+    formId: formSubmissionResult.definition.id,
+    nylasConfigurationId:
+      schedulingSubmissionEvent.configuration.nylasConfigurationId,
+    submissionId: formSubmissionResult.submissionId,
+    schedulingReceiptUrl,
+    schedulingCancelUrl,
+    schedulingRescheduleUrl,
+    name: getBookingQuerystringValue(
+      schedulingSubmissionEvent.configuration.nameElementId,
+      formSubmissionResult,
+    ),
+    email: getBookingQuerystringValue(
+      schedulingSubmissionEvent.configuration.emailElementId,
+      formSubmissionResult,
+    ),
+  }
+  console.log('Attempting to generate scheduling configuration', url, body)
+
+  await postRequest(url, body)
+}
+
+async function generateSchedulingConfiguration({
+  formSubmissionResult,
+  schedulingSubmissionEvent,
+  schedulingUrlConfiguration: {
+    schedulingReceiptUrl,
+    schedulingCancelUrl,
+    schedulingRescheduleUrl,
+  },
+}: {
+  formSubmissionResult: FormSubmissionResult
+  schedulingSubmissionEvent: SubmissionEventTypes.FormSchedulingEvent
+  schedulingUrlConfiguration: {
+    schedulingReceiptUrl: string
+    schedulingCancelUrl: string
+    schedulingRescheduleUrl: string
+  }
+}): Promise<string | undefined> {
+  try {
+    switch (schedulingSubmissionEvent.type) {
+      case 'SCHEDULING': {
+        const { bookingUrl } = await generateLegacySchedulingConfiguration({
+          formSubmissionResult,
+          schedulingSubmissionEvent,
+          schedulingReceiptUrl,
+          schedulingCancelUrl,
+        })
+        return bookingUrl
+      }
+      case 'NYLAS': {
+        await startNylasBooking({
+          formSubmissionResult,
+          schedulingSubmissionEvent,
+          schedulingReceiptUrl,
+          schedulingCancelUrl,
+          schedulingRescheduleUrl,
+        })
+        return
+      }
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     Sentry.captureException(error)
     console.warn(
       'Error occurred while attempting to generate configuration for scheduling submission event',
@@ -99,7 +177,7 @@ function generateSchedulingConfiguration({
         )
       }
     }
-  })
+  }
 }
 
 /**

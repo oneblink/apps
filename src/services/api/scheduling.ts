@@ -65,7 +65,7 @@ async function startNylasBooking({
   schedulingSubmissionEvent: SubmissionEventTypes.NylasSubmissionEvent
   schedulingReceiptUrl: string
   schedulingCancelUrl: string
-  schedulingRescheduleUrl: string
+  schedulingRescheduleUrl?: string
 }): Promise<void> {
   const url = `${tenants.current.apiOrigin}/nylas/start-booking`
   const body = {
@@ -104,7 +104,7 @@ async function generateSchedulingConfiguration({
   schedulingUrlConfiguration: {
     schedulingReceiptUrl: string
     schedulingCancelUrl: string
-    schedulingRescheduleUrl: string
+    schedulingRescheduleUrl?: string
   }
 }): Promise<string | undefined> {
   try {
@@ -233,6 +233,7 @@ function createNylasSession(submissionId: string, abortSignal?: AbortSignal) {
       }
       case 400:
         throw new OneBlinkAppsError(error.message, {
+          title: 'Invalid Request',
           originalError: error,
           httpStatusCode: error.status,
         })
@@ -240,6 +241,7 @@ function createNylasSession(submissionId: string, abortSignal?: AbortSignal) {
         throw new OneBlinkAppsError(
           'We could not find a booking to create a session',
           {
+            title: 'Invalid Request',
             originalError: error,
             httpStatusCode: error.status,
           },
@@ -249,6 +251,7 @@ function createNylasSession(submissionId: string, abortSignal?: AbortSignal) {
         throw new OneBlinkAppsError(
           'An unknown error has occurred. Please contact support if the problem persists.',
           {
+            title: 'Unknown Erorr',
             originalError: error,
             httpStatusCode: error.status,
           },

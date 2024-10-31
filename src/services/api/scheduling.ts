@@ -67,7 +67,7 @@ async function startNylasBooking({
   schedulingCancelUrl: string
   schedulingRescheduleUrl?: string
 }): Promise<void> {
-  const url = `${tenants.current.apiOrigin}/nylas/start-booking`
+  const url = `${tenants.current.apiOrigin}/scheduling/nylas/start-booking`
   const body = {
     formId: formSubmissionResult.definition.id,
     nylasConfigurationId:
@@ -197,7 +197,7 @@ async function generateSchedulingConfiguration({
  * @returns
  */
 function createNylasSession(submissionId: string, abortSignal?: AbortSignal) {
-  const url = `${tenants.current.apiOrigin}/nylas/authorise-booking`
+  const url = `${tenants.current.apiOrigin}/scheduling/nylas/authorise-booking`
   return postRequest<{
     sessionId: string
     configurationId: string

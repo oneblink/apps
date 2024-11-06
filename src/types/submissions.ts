@@ -138,7 +138,7 @@ export type FormSubmissionResult = FormSubmission & {
     /** The URL to redirect the user to to complete the booking process */
     bookingUrl?: string
     /** The scheduling submission event */
-    submissionEvent: SubmissionEventTypes.SchedulingSubmissionEvent
+    submissionEvent: SubmissionEventTypes.FormSchedulingEvent
   } | null
   /**
    * `true` if the submission was not submitted yet and was added to the pending

@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-- `createNylasSession` to `schedulingService`
+- `schedulingService.createNylasExistingBookingSession()`
+- `schedulingService.createNylasNewBookingSession()`
 - Nylas Calendar Booking form workflow event to support Nylas v3 API
 
 ## [17.0.0] - 2024-10-29

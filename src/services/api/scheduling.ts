@@ -1,5 +1,5 @@
 import { SubmissionEventTypes } from '@oneblink/types'
-import { postRequest } from '../fetch'
+import { HTTPError, postRequest } from '../fetch'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import tenants from '../../tenants'
 import Sentry from '../../Sentry'
@@ -129,54 +129,55 @@ async function generateSchedulingConfiguration({
         return
       }
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    Sentry.captureException(error)
+  } catch (error) {
     console.warn(
       'Error occurred while attempting to generate configuration for scheduling submission event',
       error,
     )
-    switch (error.status) {
-      case 401: {
-        throw new OneBlinkAppsError(
-          'You cannot make bookings until you have logged in. Please login and try again.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-            requiresLogin: true,
-          },
-        )
-      }
-      case 403: {
-        throw new OneBlinkAppsError(
-          'You do not have access to make bookings. Please contact your administrator to gain the correct level of access.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-            requiresAccessRequest: true,
-          },
-        )
-      }
-      case 400:
-      case 404: {
-        throw new OneBlinkAppsError(
-          'We could not find the configuration required to make a booking. Please contact your administrator to verify your configuration.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      default: {
-        throw new OneBlinkAppsError(
-          'An unknown error has occurred. Please contact support if the problem persists.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
+    Sentry.captureException(error)
+    if (error instanceof OneBlinkAppsError) {
+      throw error
+    }
+    if (error instanceof HTTPError) {
+      switch (error.status) {
+        case 401: {
+          throw new OneBlinkAppsError(
+            'You cannot make bookings until you have logged in. Please login and try again.',
+            {
+              originalError: error,
+              httpStatusCode: error.status,
+              requiresLogin: true,
+            },
+          )
+        }
+        case 403: {
+          throw new OneBlinkAppsError(
+            'You do not have access to make bookings. Please contact your administrator to gain the correct level of access.',
+            {
+              originalError: error,
+              httpStatusCode: error.status,
+              requiresAccessRequest: true,
+            },
+          )
+        }
+        case 400:
+        case 404: {
+          throw new OneBlinkAppsError(
+            'We could not find the configuration required to make a booking. Please contact your administrator to verify your configuration.',
+            {
+              originalError: error,
+              httpStatusCode: error.status,
+            },
+          )
+        }
       }
     }
+    throw new OneBlinkAppsError(
+      'An unknown error has occurred. Please contact support if the problem persists.',
+      {
+        originalError: error instanceof Error ? error : undefined,
+      },
+    )
   }
 }
 
@@ -187,29 +188,37 @@ async function generateSchedulingConfiguration({
  *
  * ```js
  * const { sessionId, configurationId, bookingRef, name, email } =
- *   await schedulingService.createNylasSession(
+ *   await schedulingService.createNylasExistingBookingSession(
  *     '89c6e98e-f56f-45fc-84fe-c4fc62331d34',
  *   )
  * // use sessionId and configurationId/bookingRef to create or modify nylas bookings
  * ```
  *
  * @param submissionId
+ * @param abortSignal
  * @returns
  */
-function createNylasSession(submissionId: string, abortSignal?: AbortSignal) {
+async function createNylasExistingBookingSession(
+  submissionId: string,
+  abortSignal: AbortSignal,
+) {
   const url = `${tenants.current.apiOrigin}/scheduling/nylas/authorise-booking`
-  return postRequest<{
-    sessionId: string
-    configurationId: string
-    name: string | undefined
-    email: string | undefined
-    bookingRef: string | undefined
-  }>(url, { submissionId }, abortSignal).catch((error) => {
-    Sentry.captureException(error)
-    console.warn(
-      'Error occurred while attempting to create a nylas session',
-      error,
-    )
+  try {
+    return await postRequest<{
+      sessionId: string
+      configurationId: string
+      name: string | undefined
+      email: string | undefined
+      bookingRef: string | undefined
+    }>(url, { submissionId }, abortSignal)
+  } catch (e) {
+    console.warn('Error occurred while attempting to create a nylas session', e)
+    Sentry.captureException(e)
+    if (e instanceof OneBlinkAppsError) {
+      throw e
+    }
+
+    const error = e as HTTPError
     switch (error.status) {
       case 401: {
         throw new OneBlinkAppsError(
@@ -258,7 +267,7 @@ function createNylasSession(submissionId: string, abortSignal?: AbortSignal) {
         )
       }
     }
-  })
+  }
 }
 
 /**
@@ -278,7 +287,7 @@ function createNylasSession(submissionId: string, abortSignal?: AbortSignal) {
  * @param details
  * @returns
  */
-function cancelSchedulingBooking(details: {
+async function cancelSchedulingBooking(details: {
   /** The unique identifier for the submission associated with the booking */
   submissionId: string
   /** The nylas edit hash associated with the booking */
@@ -289,12 +298,18 @@ function cancelSchedulingBooking(details: {
   const url = `${tenants.current.apiOrigin}/scheduling/cancel-booking`
   console.log('Attempting to cancel scheduling booking', url, details)
 
-  return postRequest<void>(url, details).catch((error) => {
-    Sentry.captureException(error)
+  try {
+    return await postRequest<void>(url, details)
+  } catch (e) {
     console.warn(
       'Error occurred while attempting to cancel scheduling booking',
-      error,
+      e,
     )
+    Sentry.captureException(e)
+    if (e instanceof OneBlinkAppsError) {
+      throw e
+    }
+    const error = e as HTTPError
     switch (error.status) {
       case 401: {
         throw new OneBlinkAppsError(
@@ -336,11 +351,11 @@ function cancelSchedulingBooking(details: {
         )
       }
     }
-  })
+  }
 }
 
 export {
   generateSchedulingConfiguration,
   cancelSchedulingBooking,
-  createNylasSession,
+  createNylasExistingBookingSession,
 }

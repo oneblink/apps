@@ -1,7 +1,7 @@
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import {
   cancelSchedulingBooking,
-  createNylasSession,
+  createNylasExistingBookingSession,
 } from './services/api/scheduling'
 import utilsService from './services/utils'
 import {
@@ -22,6 +22,58 @@ type SchedulingBooking = {
   location: string
   /** `true` if the booking has been rescheduled, otherwise `false` */
   isReschedule: boolean
+}
+
+async function getSchedulingFormSubmissionResult(submissionId: string) {
+  const schedulingSubmissionResultConfiguration =
+    await utilsService.getLocalForageItem<{
+      formSubmissionResult: FormSubmissionResult
+      paymentReceiptUrl: string | undefined
+      paymentFormUrl: string | undefined
+    } | null>(KEY)
+  // If the current transaction does not match the submission
+  // we will display message to user indicating
+  // they are looking for the wrong transaction receipt.
+  if (!schedulingSubmissionResultConfiguration) {
+    throw new OneBlinkAppsError(
+      'It looks like you are attempting to view a scheduling receipt for an unknown booking.',
+    )
+  }
+
+  const { formSubmissionResult, paymentReceiptUrl, paymentFormUrl } =
+    schedulingSubmissionResultConfiguration
+  if (
+    !formSubmissionResult ||
+    !formSubmissionResult.scheduling ||
+    !formSubmissionResult.scheduling.submissionEvent
+  ) {
+    throw new OneBlinkAppsError(
+      'It looks like you are attempting to view a scheduling receipt for a misconfigured booking.',
+    )
+  }
+
+  if (formSubmissionResult.submissionId !== submissionId) {
+    throw new OneBlinkAppsError(
+      'It looks like you are attempting to view a scheduling receipt for the incorrect booking.',
+    )
+  }
+
+  if (paymentReceiptUrl) {
+    const paymentSubmissionEventConfiguration =
+      checkForPaymentSubmissionEvent(formSubmissionResult)
+    if (paymentSubmissionEventConfiguration) {
+      formSubmissionResult.payment = await handlePaymentSubmissionEvent({
+        ...paymentSubmissionEventConfiguration,
+        formSubmissionResult,
+        paymentReceiptUrl,
+        paymentFormUrl,
+      })
+    }
+  }
+
+  await utilsService.removeLocalForageItem(KEY)
+
+  return formSubmissionResult
 }
 
 /**
@@ -80,53 +132,8 @@ async function handleSchedulingQuerystring({
     }
   }
 
-  const schedulingSubmissionResultConfiguration =
-    await utilsService.getLocalForageItem<{
-      formSubmissionResult: FormSubmissionResult
-      paymentReceiptUrl: string | undefined
-      paymentFormUrl: string | undefined
-    } | null>(KEY)
-  // If the current transaction does not match the submission
-  // we will display message to user indicating
-  // they are looking for the wrong transaction receipt.
-  if (!schedulingSubmissionResultConfiguration) {
-    throw new OneBlinkAppsError(
-      'It looks like you are attempting to view a scheduling receipt for an unknown booking.',
-    )
-  }
-
-  const { formSubmissionResult, paymentReceiptUrl, paymentFormUrl } =
-    schedulingSubmissionResultConfiguration
-  if (
-    !formSubmissionResult ||
-    !formSubmissionResult.scheduling ||
-    !formSubmissionResult.scheduling.submissionEvent
-  ) {
-    throw new OneBlinkAppsError(
-      'It looks like you are attempting to view a scheduling receipt for a misconfigured booking.',
-    )
-  }
-
-  if (formSubmissionResult.submissionId !== submissionId) {
-    throw new OneBlinkAppsError(
-      'It looks like you are attempting to view a scheduling receipt for the incorrect booking.',
-    )
-  }
-
-  if (paymentReceiptUrl) {
-    const paymentSubmissionEventConfiguration =
-      checkForPaymentSubmissionEvent(formSubmissionResult)
-    if (paymentSubmissionEventConfiguration) {
-      formSubmissionResult.payment = await handlePaymentSubmissionEvent({
-        ...paymentSubmissionEventConfiguration,
-        formSubmissionResult,
-        paymentReceiptUrl,
-        paymentFormUrl,
-      })
-    }
-  }
-
-  await utilsService.removeLocalForageItem(KEY)
+  const formSubmissionResult =
+    await getSchedulingFormSubmissionResult(submissionId)
 
   return {
     formSubmissionResult,
@@ -212,10 +219,53 @@ function handleCancelSchedulingBookingQuerystring({
   return booking
 }
 
+/**
+ * Create a Nylas Session
+ *
+ * #### Example
+ *
+ * ```js
+ * const {
+ *   sessionId,
+ *   configurationId,
+ *   bookingRef,
+ *   name,
+ *   email,
+ *   formSubmissionResult,
+ * } = await schedulingService.createNylasNewBookingSession(
+ *   '89c6e98e-f56f-45fc-84fe-c4fc62331d34',
+ * )
+ * // use sessionId and configurationId/bookingRef to create or modify nylas bookings
+ * // use formSubmissionResult to execute post submission action for form
+ * ```
+ *
+ * @param submissionId
+ * @param abortSignal
+ * @returns
+ */
+async function createNylasNewBookingSession(
+  submissionId: string,
+  abortSignal: AbortSignal,
+) {
+  const session = await createNylasExistingBookingSession(
+    submissionId,
+    abortSignal,
+  )
+
+  const formSubmissionResult =
+    await getSchedulingFormSubmissionResult(submissionId)
+
+  return {
+    ...session,
+    formSubmissionResult,
+  }
+}
+
 export {
   SchedulingBooking,
   handleSchedulingQuerystring,
   cancelSchedulingBooking,
-  createNylasSession,
   handleCancelSchedulingBookingQuerystring,
+  createNylasExistingBookingSession,
+  createNylasNewBookingSession,
 }

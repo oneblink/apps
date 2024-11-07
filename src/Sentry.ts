@@ -1,11 +1,10 @@
 import * as Sentry from '@sentry/browser'
-import { Integrations } from '@sentry/tracing'
 import tenants from './tenants'
 
 export default {
   init: (formsAppId: number, options: Sentry.BrowserOptions) => {
     Sentry.init({
-      integrations: [new Integrations.BrowserTracing()],
+      integrations: [Sentry.browserTracingIntegration()],
       ...options,
     })
     Sentry.setTag('hostname', window.location.hostname)

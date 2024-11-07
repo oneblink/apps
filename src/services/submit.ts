@@ -58,16 +58,16 @@ export default async function submit({
   abortSignal,
   pendingTimestamp,
 }: SubmissionParams): Promise<FormSubmissionResult> {
+  const paymentSubmissionEventConfiguration =
+    checkForPaymentSubmissionEvent(formSubmission)
+
+  const schedulingSubmissionEvent =
+    checkForSchedulingSubmissionEvent(formSubmission)
+
   try {
     if (pendingTimestamp) {
       await deletePendingQueueSubmission(pendingTimestamp)
     }
-    const paymentSubmissionEventConfiguration =
-      checkForPaymentSubmissionEvent(formSubmission)
-
-    const schedulingSubmissionEvent =
-      checkForSchedulingSubmissionEvent(formSubmission)
-
     if (isOffline()) {
       if (paymentSubmissionEventConfiguration || schedulingSubmissionEvent) {
         console.log(
@@ -215,9 +215,13 @@ export default async function submit({
   } catch (error: OneBlinkAppsError | unknown) {
     if (error instanceof OneBlinkAppsError) {
       if (error.isOffline) {
-        if (!isPendingQueueEnabled) {
+        if (
+          !isPendingQueueEnabled ||
+          schedulingSubmissionEvent ||
+          paymentSubmissionEventConfiguration
+        ) {
           console.warn(
-            'Offline error thrown - app does not support pending queue, return offline',
+            'Offline error thrown - app or form does not support pending queue, return offline',
             error,
           )
           return Object.assign({}, formSubmission, {

@@ -71,8 +71,6 @@ async function getSchedulingFormSubmissionResult(submissionId: string) {
     }
   }
 
-  await utilsService.removeLocalForageItem(KEY)
-
   return formSubmissionResult
 }
 
@@ -134,6 +132,8 @@ async function handleSchedulingQuerystring({
 
   const formSubmissionResult =
     await getSchedulingFormSubmissionResult(submissionId)
+
+  await utilsService.removeLocalForageItem(KEY)
 
   return {
     formSubmissionResult,
@@ -246,7 +246,23 @@ function handleCancelSchedulingBookingQuerystring({
 async function createNylasNewBookingSession(
   submissionId: string,
   abortSignal: AbortSignal,
-) {
+): Promise<{
+  /** Information about the submission */
+  formSubmissionResult: FormSubmissionResult
+  /**
+   * A callback function run after the booking has been confirmed to prevent the
+   * user from making another booking against this form submission
+   */
+  onBookingConfirmed: () => Promise<void>
+  /** The identifier to allow the user to make a booking */
+  sessionId: string
+  /** The identifier for the configuration the user will make a booking with */
+  configurationId: string
+  /** The name of the current user to prefill into the booking form */
+  name: string | undefined
+  /** The email address of the current user to prefill into the booking form */
+  email: string | undefined
+}> {
   const session = await createNylasExistingBookingSession(
     submissionId,
     abortSignal,
@@ -258,6 +274,9 @@ async function createNylasNewBookingSession(
   return {
     ...session,
     formSubmissionResult,
+    onBookingConfirmed: async () => {
+      await utilsService.removeLocalForageItem(KEY)
+    },
   }
 }
 

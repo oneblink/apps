@@ -57,7 +57,6 @@ function generateLegacySchedulingConfiguration({
 async function startNylasBooking({
   formSubmissionResult,
   schedulingSubmissionEvent,
-  schedulingReceiptUrl,
   schedulingCancelUrl,
   schedulingRescheduleUrl,
 }: {
@@ -73,7 +72,6 @@ async function startNylasBooking({
     nylasConfigurationId:
       schedulingSubmissionEvent.configuration.nylasConfigurationId,
     submissionId: formSubmissionResult.submissionId,
-    schedulingReceiptUrl,
     schedulingCancelUrl,
     schedulingRescheduleUrl,
     name: getBookingQuerystringValue(

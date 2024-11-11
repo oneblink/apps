@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `schedulingService.createNylasExistingBookingSession()`
 - `schedulingService.createNylasNewBookingSession()`
 - Nylas Calendar Booking form workflow event to support Nylas v3 API
+- `mfaEnabled` prop to `authService.getCurrentFormsAppUser`
 
 ### Dependencies
 

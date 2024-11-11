@@ -199,16 +199,21 @@ async function generateSchedulingConfiguration({
 async function createNylasExistingBookingSession(
   submissionId: string,
   abortSignal: AbortSignal,
-) {
+): Promise<{
+  /** The identifier to allow the user to make a booking */
+  sessionId: string
+  /** The identifier for the configuration the user will make a booking with */
+  configurationId: string
+  /** The name of the current user to prefill into the booking form */
+  name: string | undefined
+  /** The email address of the current user to prefill into the booking form */
+  email: string | undefined
+  /** The unique reference for an existing booking to reschedule or cancel */
+  bookingRef: string | undefined
+}> {
   const url = `${tenants.current.apiOrigin}/scheduling/nylas/authorise-booking`
   try {
-    return await postRequest<{
-      sessionId: string
-      configurationId: string
-      name: string | undefined
-      email: string | undefined
-      bookingRef: string | undefined
-    }>(url, { submissionId }, abortSignal)
+    return await postRequest(url, { submissionId }, abortSignal)
   } catch (e) {
     console.warn('Error occurred while attempting to create a nylas session', e)
     Sentry.captureException(e)

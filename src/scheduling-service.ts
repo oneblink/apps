@@ -3,13 +3,15 @@ import {
   cancelSchedulingBooking,
   createNylasExistingBookingSession,
 } from './services/api/scheduling'
-import utilsService from './services/utils'
 import {
   checkForPaymentSubmissionEvent,
   handlePaymentSubmissionEvent,
 } from './payment-service'
 import { FormSubmissionResult } from './types/submissions'
-import { KEY } from './services/schedulingHandlers'
+import {
+  getSchedulingSubmissionResult,
+  removeSchedulingSubmissionResult,
+} from './services/schedulingHandlers'
 
 type SchedulingBooking = {
   /** The unique identifier for the submission associated with the booking */
@@ -26,11 +28,7 @@ type SchedulingBooking = {
 
 async function getSchedulingFormSubmissionResult(submissionId: string) {
   const schedulingSubmissionResultConfiguration =
-    await utilsService.getLocalForageItem<{
-      formSubmissionResult: FormSubmissionResult
-      paymentReceiptUrl: string | undefined
-      paymentFormUrl: string | undefined
-    } | null>(KEY)
+    await getSchedulingSubmissionResult()
   // If the current transaction does not match the submission
   // we will display message to user indicating
   // they are looking for the wrong transaction receipt.
@@ -70,6 +68,8 @@ async function getSchedulingFormSubmissionResult(submissionId: string) {
       })
     }
   }
+
+  await removeSchedulingSubmissionResult()
 
   return formSubmissionResult
 }
@@ -132,8 +132,6 @@ async function handleSchedulingQuerystring({
 
   const formSubmissionResult =
     await getSchedulingFormSubmissionResult(submissionId)
-
-  await utilsService.removeLocalForageItem(KEY)
 
   return {
     formSubmissionResult,
@@ -246,36 +244,25 @@ function handleCancelSchedulingBookingQuerystring({
 async function createNylasNewBookingSession(
   submissionId: string,
   abortSignal: AbortSignal,
-): Promise<{
-  /** Information about the submission */
-  formSubmissionResult: FormSubmissionResult
-  /**
-   * A callback function run after the booking has been confirmed to prevent the
-   * user from making another booking against this form submission
-   */
-  onBookingConfirmed: () => Promise<void>
-  /** The identifier to allow the user to make a booking */
-  sessionId: string
-  /** The identifier for the configuration the user will make a booking with */
-  configurationId: string
-  /** The name of the current user to prefill into the booking form */
-  name: string | undefined
-  /** The email address of the current user to prefill into the booking form */
-  email: string | undefined
-}> {
+): Promise<
+  Awaited<ReturnType<typeof createNylasExistingBookingSession>> & {
+    /**
+     * A callback function run after the booking has been confirmed to prevent
+     * the user from making another booking against this form submission and
+     * execute post submission action.
+     */
+    onBookingConfirmed: () => Promise<FormSubmissionResult>
+  }
+> {
   const session = await createNylasExistingBookingSession(
     submissionId,
     abortSignal,
   )
 
-  const formSubmissionResult =
-    await getSchedulingFormSubmissionResult(submissionId)
-
   return {
     ...session,
-    formSubmissionResult,
     onBookingConfirmed: async () => {
-      await utilsService.removeLocalForageItem(KEY)
+      return await getSchedulingFormSubmissionResult(submissionId)
     },
   }
 }

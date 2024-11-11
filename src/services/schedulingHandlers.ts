@@ -6,7 +6,24 @@ import {
   FormSubmissionResult,
   BaseNewFormSubmission,
 } from '../types/submissions'
-export const KEY = 'SCHEDULING_SUBMISSION_RESULT'
+
+const KEY = 'SCHEDULING_SUBMISSION_RESULT'
+type SchedulingSubmissionResult = {
+  formSubmissionResult: FormSubmissionResult
+  paymentReceiptUrl: string | undefined
+  paymentFormUrl: string | undefined
+}
+export async function getSchedulingSubmissionResult(): Promise<SchedulingSubmissionResult | null> {
+  return await utilsService.getLocalForageItem(KEY)
+}
+export async function removeSchedulingSubmissionResult() {
+  await utilsService.removeLocalForageItem(KEY)
+}
+async function setSchedulingSubmissionResult(
+  schedulingSubmissionResult: SchedulingSubmissionResult,
+) {
+  await utilsService.setLocalForageItem(KEY, schedulingSubmissionResult)
+}
 
 type SchedulingBooking = {
   startTime: Date
@@ -62,7 +79,7 @@ async function handleSchedulingSubmissionEvent({
     bookingUrl,
   }
   console.log('Created scheduling configuration to start booking', scheduling)
-  await utilsService.setLocalForageItem(KEY, {
+  await setSchedulingSubmissionResult({
     formSubmissionResult: {
       ...formSubmissionResult,
       scheduling,

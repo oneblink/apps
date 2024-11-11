@@ -16,7 +16,7 @@ type SchedulingBooking = {
 
 function checkForSchedulingSubmissionEvent(
   baseFormSubmission: BaseNewFormSubmission,
-): SubmissionEventTypes.SchedulingSubmissionEvent | undefined {
+): SubmissionEventTypes.FormSchedulingEvent | undefined {
   const schedulingSubmissionEvent = schedulingService.checkForSchedulingEvent(
     baseFormSubmission.definition,
     baseFormSubmission.submission,
@@ -37,7 +37,7 @@ async function handleSchedulingSubmissionEvent({
   paymentReceiptUrl,
 }: {
   formSubmissionResult: FormSubmissionResult
-  schedulingSubmissionEvent: SubmissionEventTypes.SchedulingSubmissionEvent
+  schedulingSubmissionEvent: SubmissionEventTypes.FormSchedulingEvent
   schedulingUrlConfiguration: {
     schedulingReceiptUrl: string
     schedulingCancelUrl: string

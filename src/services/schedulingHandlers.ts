@@ -35,6 +35,7 @@ async function handleSchedulingSubmissionEvent({
   schedulingSubmissionEvent,
   schedulingUrlConfiguration,
   paymentReceiptUrl,
+  paymentFormUrl,
 }: {
   formSubmissionResult: FormSubmissionResult
   schedulingSubmissionEvent: SubmissionEventTypes.FormSchedulingEvent
@@ -67,6 +68,7 @@ async function handleSchedulingSubmissionEvent({
       scheduling,
     },
     paymentReceiptUrl,
+    paymentFormUrl,
   })
 
   return scheduling

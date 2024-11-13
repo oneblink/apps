@@ -7,11 +7,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [17.1.0] - 2024-11-13
+
 ### Added
 
 - `schedulingService.createNylasExistingBookingSession()`
 - `schedulingService.createNylasNewBookingSession()`
 - Nylas Calendar Booking form workflow event to support Nylas v3 API
+
+### Dependencies
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [7.3.1-beta.1](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [7.3.0-beta.2](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
 
 ## [17.0.0] - 2024-10-29
 

@@ -7,10 +7,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-### Added
-
-- `mfaEnabled` prop to `authService.getCurrentFormsAppUser`
-
 ## [17.1.0] - 2024-11-13
 
 ### Added

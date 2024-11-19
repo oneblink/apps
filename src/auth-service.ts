@@ -165,7 +165,6 @@ export async function getCurrentFormsAppUser(
       userProfile?: MiscTypes.UserProfile
       formsAppId: number
       groups: string[]
-      mfaEnabled: boolean
     }
   | undefined
 > {
@@ -173,7 +172,6 @@ export async function getCurrentFormsAppUser(
     return {
       formsAppId,
       groups: [],
-      mfaEnabled: false,
     }
   }
 
@@ -188,7 +186,6 @@ export async function getCurrentFormsAppUser(
     userProfile?: MiscTypes.UserProfile
     formsAppId: number
     groups: string[]
-    mfaEnabled: boolean
   }>(url, abortSignal)
 }
 

@@ -413,6 +413,32 @@ function getUserFriendlyName(): string | undefined {
 }
 
 /**
+ * Generate a QR code link to display to a user after they have initiated MFA
+ * setup.
+ *
+ * #### Example
+ *
+ * ```js
+ * const mfaSetupQrCodeUrl = authService.generateMfaQrCodeUrl()
+ * if (mfaSetupQrCodeUrl) {
+ *   // use mfaSetupQrCodeUrl to display QR code to user
+ * }
+ * ```
+ *
+ * @returns
+ */
+function generateMfaQrCodeUrl(
+  mfaSetupConfiguration: Awaited<ReturnType<typeof setupMfa>>,
+): string | undefined {
+  const profile = getUserProfile()
+  if (!profile || !mfaSetupConfiguration) {
+    return
+  }
+
+  return `otpauth://totp/${tenants.current.productShortName}:${profile.email}?secret=${mfaSetupConfiguration.secretCode}&issuer=${tenants.current.productShortName}`
+}
+
+/**
  * Check if MFA is enabled for this current user.
  *
  * #### Example
@@ -503,4 +529,5 @@ export {
   checkIsMfaEnabled,
   disableMfa,
   setupMfa,
+  generateMfaQrCodeUrl,
 }

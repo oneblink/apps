@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `productShortName` to `OneBlinkAppsTenant`
+- `authService.generateMfaQrCodeUrl()`
+
 ## [17.1.0] - 2024-11-13
 
 ### Added

@@ -23,6 +23,7 @@ import {
   checkIsMfaEnabled,
   disableMfa,
   setupMfa,
+  generateMfaQrCodeUrl,
 } from './services/cognito'
 import { getRequest, postRequest, HTTPError } from './services/fetch'
 import tenants from './tenants'
@@ -49,6 +50,7 @@ export {
   checkIsMfaEnabled,
   disableMfa,
   setupMfa,
+  generateMfaQrCodeUrl,
 }
 import Sentry from './Sentry'
 

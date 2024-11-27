@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - `productShortName` to `OneBlinkAppsTenant`
 - `authService.generateMfaQrCodeUrl()`
+- `Cache-Control: no-cache` to all fetch requests
 
 ## [17.1.0] - 2024-11-13
 

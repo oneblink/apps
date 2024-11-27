@@ -80,11 +80,12 @@ export async function getRequest<T>(
   url: string,
   abortSignal?: AbortSignal,
 ): Promise<T> {
+  const headers = await generateHeaders()
+  headers['Cache-Control'] = 'no-store'
   return fetchJSON(url, {
     method: 'GET',
-    headers: await generateHeaders(),
+    headers,
     signal: abortSignal,
-    cache: 'no-cache',
   })
 }
 

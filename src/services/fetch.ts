@@ -8,7 +8,6 @@ export async function generateHeaders() {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     Accept: 'application/json',
-    'Cache-Control': 'no-cache',
   }
 
   // Check auth service for a token if user is logged in
@@ -81,13 +80,12 @@ export async function getRequest<T>(
   url: string,
   abortSignal?: AbortSignal,
 ): Promise<T> {
-  const options = {
+  return fetchJSON(url, {
     method: 'GET',
     headers: await generateHeaders(),
     signal: abortSignal,
-  }
-
-  return fetchJSON(url, options)
+    cache: 'no-cache',
+  })
 }
 
 export async function postRequest<OutT>(

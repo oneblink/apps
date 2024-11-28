@@ -29,7 +29,7 @@ export type VerifiedPaymentTransaction = {
 }
 
 export type HandlePaymentResult = VerifiedPaymentTransaction & {
-  schedulingBooking: SchedulingBooking | null
+  schedulingBooking: SchedulingBooking | undefined
 }
 
 export type BasePaymentConfigurationPayload = {

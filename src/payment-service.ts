@@ -107,7 +107,7 @@ export async function handlePaymentQuerystring(
     await paymentProvider.verifyPaymentTransaction(query)
 
   const schedulingBooking = await getSchedulingBooking()
-  if (schedulingBooking) {
+  if (schedulingBooking && verifiedPaymentTransaction.transaction.isSuccess) {
     await removeSchedulingBooking()
   }
 

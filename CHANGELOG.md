@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `schedulingBooking` to response from `paymentService.handlePaymentQuerystring()` to support displaying calendar booking details along with payment receipt details
+
 ## [17.2.0] - 2024-11-27
 
 ### Added

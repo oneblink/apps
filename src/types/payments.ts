@@ -1,5 +1,6 @@
 import { SubmissionEventTypes } from '@oneblink/types'
 import { FormSubmissionResult } from './submissions'
+import { SchedulingBooking } from '../scheduling-service'
 
 export type PaymentReceiptItem = {
   /** The label to represent the value */
@@ -16,7 +17,7 @@ export type PaymentReceiptItem = {
   allowCopyToClipboard: boolean
 }
 
-export type HandlePaymentResult = {
+export type VerifiedPaymentTransaction = {
   receiptItems: PaymentReceiptItem[]
   transaction: {
     /** `true` if the transaction was successful */
@@ -25,6 +26,10 @@ export type HandlePaymentResult = {
     errorMessage: string | undefined | null
   }
   submissionResult: FormSubmissionResult
+}
+
+export type HandlePaymentResult = VerifiedPaymentTransaction & {
+  schedulingBooking: SchedulingBooking | null
 }
 
 export type BasePaymentConfigurationPayload = {
@@ -47,5 +52,5 @@ export interface PaymentProvider<
 
   verifyPaymentTransaction(
     query: Record<string, unknown>,
-  ): Promise<HandlePaymentResult>
+  ): Promise<VerifiedPaymentTransaction>
 }

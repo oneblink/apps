@@ -41,20 +41,48 @@ type SchedulingBooking = {
   /** `true` if the booking has been rescheduled, otherwise `false` */
   isReschedule: boolean
 }
-export async function getSchedulingBooking(): Promise<SchedulingBooking | null> {
-  return await utilsService.getLocalForageItem(SCHEDULING_BOOKING_KEY)
+
+async function getSchedulingBookingMap() {
+  return await utilsService.getLocalForageItem<
+    Record<string, SchedulingBooking>
+  >(SCHEDULING_BOOKING_KEY)
 }
-export async function removeSchedulingBooking() {
-  await utilsService.removeLocalForageItem(SCHEDULING_BOOKING_KEY)
-}
-export async function setSchedulingBooking(
-  schedulingBooking: SchedulingBooking,
+
+async function setSchedulingBookingMap(
+  schedulingBookingMap: Record<string, SchedulingBooking>,
 ) {
   await utilsService.setLocalForageItem(
     SCHEDULING_BOOKING_KEY,
-    schedulingBooking,
+    schedulingBookingMap,
   )
 }
+
+export async function getSchedulingBooking(
+  submissionId: string | null,
+): Promise<SchedulingBooking | undefined> {
+  if (!submissionId) {
+    return
+  }
+  const schedulingBookingMap = await getSchedulingBookingMap()
+  return schedulingBookingMap?.[submissionId]
+}
+
+export async function removeSchedulingBooking(submissionId: string) {
+  const schedulingBookingMap = await getSchedulingBookingMap()
+  if (schedulingBookingMap?.[submissionId]) {
+    delete schedulingBookingMap[submissionId]
+    await setSchedulingBookingMap(schedulingBookingMap)
+  }
+}
+
+export async function setSchedulingBooking(
+  schedulingBooking: SchedulingBooking,
+) {
+  const schedulingBookingMap = (await getSchedulingBookingMap()) || {}
+  schedulingBookingMap[schedulingBooking.submissionId] = schedulingBooking
+  await setSchedulingBookingMap(schedulingBookingMap)
+}
+
 function checkForSchedulingSubmissionEvent(
   baseFormSubmission: BaseNewFormSubmission,
 ): SubmissionEventTypes.FormSchedulingEvent | undefined {

@@ -9,24 +9,16 @@ import {
 } from './payment-service'
 import { FormSubmissionResult } from './types/submissions'
 import {
+  SchedulingBooking,
   getSchedulingSubmissionResult,
   removeSchedulingSubmissionResult,
+  setSchedulingBooking,
 } from './services/schedulingHandlers'
 
-type SchedulingBooking = {
-  /** The unique identifier for the submission associated with the booking */
-  submissionId: string
-  /** Date and time the booking starts */
-  startTime: Date
-  /** Date and time the booking ends */
-  endTime: Date
-  /** Location of booking */
-  location: string
-  /** `true` if the booking has been rescheduled, otherwise `false` */
-  isReschedule: boolean
-}
-
-async function getSchedulingFormSubmissionResult(submissionId: string) {
+async function getSchedulingFormSubmissionResult(
+  submissionId: string,
+  schedulingBooking: SchedulingBooking,
+) {
   const schedulingSubmissionResultConfiguration =
     await getSchedulingSubmissionResult()
   // If the current transaction does not match the submission
@@ -57,6 +49,7 @@ async function getSchedulingFormSubmissionResult(submissionId: string) {
   }
 
   if (paymentReceiptUrl) {
+    await setSchedulingBooking(schedulingBooking)
     const paymentSubmissionEventConfiguration =
       checkForPaymentSubmissionEvent(formSubmissionResult)
     if (paymentSubmissionEventConfiguration) {
@@ -115,7 +108,7 @@ async function handleSchedulingQuerystring({
       'Scheduling receipts cannot be displayed unless navigating here directly after a booking.',
     )
   }
-  const booking = {
+  const booking: SchedulingBooking = {
     submissionId,
     startTime: new Date(parseInt(start_time) * 1000),
     endTime: new Date(parseInt(end_time) * 1000),
@@ -130,8 +123,10 @@ async function handleSchedulingQuerystring({
     }
   }
 
-  const formSubmissionResult =
-    await getSchedulingFormSubmissionResult(submissionId)
+  const formSubmissionResult = await getSchedulingFormSubmissionResult(
+    submissionId,
+    booking,
+  )
 
   return {
     formSubmissionResult,
@@ -251,7 +246,9 @@ async function createNylasNewBookingSession(
      * the user from making another booking against this form submission and
      * execute post submission action.
      */
-    onBookingConfirmed: () => Promise<FormSubmissionResult>
+    onBookingConfirmed: (
+      schedulingBooking: SchedulingBooking,
+    ) => Promise<FormSubmissionResult>
   }
 > {
   const session = await createNylasExistingBookingSession(
@@ -261,8 +258,11 @@ async function createNylasNewBookingSession(
 
   return {
     ...session,
-    onBookingConfirmed: async () => {
-      return await getSchedulingFormSubmissionResult(submissionId)
+    async onBookingConfirmed(schedulingBooking: SchedulingBooking) {
+      return await getSchedulingFormSubmissionResult(
+        submissionId,
+        schedulingBooking,
+      )
     },
   }
 }

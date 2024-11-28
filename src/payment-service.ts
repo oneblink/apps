@@ -14,6 +14,10 @@ import CPPayPaymentProvider from './services/payment-providers/CPPayPaymentProvi
 import NSWGovPayPaymentProvider from './services/payment-providers/NSWGovPayPaymentProvider'
 import WestpacQuickStreamPaymentProvider, * as westpacQuickStream from './services/payment-providers/WestpacQuickStreamPaymentProvider'
 import { replaceSubmissionFormatters } from './localisation-service'
+import {
+  getSchedulingBooking,
+  removeSchedulingBooking,
+} from './services/schedulingHandlers'
 
 const KEY = 'PAYMENT_SUBMISSION_RESULT'
 
@@ -98,7 +102,19 @@ export async function handlePaymentQuerystring(
       'It looks like you are attempting to view a receipt for an unsupported payment.',
     )
   }
-  return await paymentProvider.verifyPaymentTransaction(query)
+
+  const verifiedPaymentTransaction =
+    await paymentProvider.verifyPaymentTransaction(query)
+
+  const schedulingBooking = await getSchedulingBooking()
+  if (schedulingBooking) {
+    await removeSchedulingBooking()
+  }
+
+  return {
+    ...verifiedPaymentTransaction,
+    schedulingBooking,
+  }
 }
 
 export function checkForPaymentSubmissionEvent(formSubmission: FormSubmission):

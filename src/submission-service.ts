@@ -410,10 +410,12 @@ async function executeCancelAction(
  *
  * @param submissionResult
  * @param push
+ * @param replaceLocation
  */
 async function executePostSubmissionAction(
   submissionResult: FormSubmissionResult,
   push: (url: string) => void,
+  replaceLocation?: boolean,
 ): Promise<void> {
   console.log('Attempting to run post submission action')
   let postSubmissionAction = submissionResult.definition.postSubmissionAction
@@ -430,7 +432,13 @@ async function executePostSubmissionAction(
     redirectUrl = submissionResult.taskCompletion.redirectUrl
   }
 
-  await executeAction(submissionResult, postSubmissionAction, redirectUrl, push)
+  await executeAction(
+    submissionResult,
+    postSubmissionAction,
+    redirectUrl,
+    push,
+    replaceLocation,
+  )
 }
 
 async function executeAction(
@@ -438,6 +446,7 @@ async function executeAction(
   action: FormTypes.FormPostSubmissionAction,
   redirectUrl: string | undefined,
   push: (url: string) => void,
+  replaceLocation?: boolean,
 ): Promise<void> {
   switch (action) {
     case 'CLOSE':
@@ -456,7 +465,11 @@ async function executeAction(
         return
       }
 
-      window.location.href = newUrl
+      if (replaceLocation) {
+        window.location.replace(newUrl)
+      } else {
+        window.location.href = newUrl
+      }
 
       // If we are in cordova land, we will navigate
       // back to the home screen after redirect

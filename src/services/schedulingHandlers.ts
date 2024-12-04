@@ -6,6 +6,7 @@ import {
   FormSubmissionResult,
   BaseNewFormSubmission,
 } from '../types/submissions'
+import { SchedulingUrlConfiguration } from '../types/scheduling'
 
 const SCHEDULING_SUBMISSION_RESULT_KEY = 'SCHEDULING_SUBMISSION_RESULT'
 type SchedulingSubmissionResult = {
@@ -108,27 +109,31 @@ async function handleSchedulingSubmissionEvent({
 }: {
   formSubmissionResult: FormSubmissionResult
   schedulingSubmissionEvent: SubmissionEventTypes.FormSchedulingEvent
-  schedulingUrlConfiguration: {
-    schedulingReceiptUrl: string
-    schedulingCancelUrl: string
-    schedulingRescheduleUrl?: string
-  }
+  schedulingUrlConfiguration: SchedulingUrlConfiguration
   paymentReceiptUrl: string | undefined
   paymentFormUrl: string | undefined
-}): Promise<FormSubmissionResult['scheduling']> {
+}): Promise<NonNullable<FormSubmissionResult['scheduling']>> {
   console.log(
     'Attempting to handle submission with scheduling submission event',
   )
+  if (!formSubmissionResult.submissionId) {
+    throw Error(
+      'Cannot generate calendar booking configuration.  Form Submission is missing "submissionId"',
+    )
+  }
 
-  const bookingUrl = await generateSchedulingConfiguration({
+  await generateSchedulingConfiguration({
     formSubmissionResult,
     schedulingSubmissionEvent,
     schedulingUrlConfiguration,
   })
 
+  const bookingUrl = new URL(schedulingUrlConfiguration.schedulingBookingUrl)
+  bookingUrl.searchParams.set('submissionId', formSubmissionResult.submissionId)
+
   const scheduling = {
     submissionEvent: schedulingSubmissionEvent,
-    bookingUrl,
+    bookingUrl: bookingUrl.toString(),
   }
   console.log('Created scheduling configuration to start booking', scheduling)
   await setSchedulingSubmissionResult({

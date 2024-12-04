@@ -5,6 +5,7 @@ import tenants from '../../tenants'
 import Sentry from '../../Sentry'
 import { FormSubmissionResult } from '../../types/submissions'
 import { submissionService } from '@oneblink/sdk-core'
+import { SchedulingUrlConfiguration } from '../../types/scheduling'
 
 function getBookingQuerystringValue(
   elementId: string | undefined,
@@ -22,38 +23,6 @@ function getBookingQuerystringValue(
   }
 }
 
-function generateLegacySchedulingConfiguration({
-  formSubmissionResult,
-  schedulingSubmissionEvent,
-  schedulingReceiptUrl,
-  schedulingCancelUrl,
-}: {
-  formSubmissionResult: FormSubmissionResult
-  schedulingSubmissionEvent: SubmissionEventTypes.SchedulingSubmissionEvent
-  schedulingReceiptUrl: string
-  schedulingCancelUrl: string
-}) {
-  const url = `${tenants.current.apiOrigin}/scheduling/generate-booking-url`
-  const body = {
-    formId: formSubmissionResult.definition.id,
-    nylasSchedulingPageId:
-      schedulingSubmissionEvent.configuration.nylasSchedulingPageId,
-    submissionId: formSubmissionResult.submissionId,
-    schedulingReceiptUrl,
-    schedulingCancelUrl,
-    name: getBookingQuerystringValue(
-      schedulingSubmissionEvent.configuration.nameElementId,
-      formSubmissionResult,
-    ),
-    email: getBookingQuerystringValue(
-      schedulingSubmissionEvent.configuration.emailElementId,
-      formSubmissionResult,
-    ),
-  }
-  console.log('Attempting to generate scheduling configuration', url, body)
-  return postRequest<{ bookingUrl: string }>(url, body)
-}
-
 async function startNylasBooking({
   formSubmissionResult,
   schedulingSubmissionEvent,
@@ -62,7 +31,6 @@ async function startNylasBooking({
 }: {
   formSubmissionResult: FormSubmissionResult
   schedulingSubmissionEvent: SubmissionEventTypes.NylasSubmissionEvent
-  schedulingReceiptUrl: string
   schedulingCancelUrl: string
   schedulingRescheduleUrl?: string
 }): Promise<void> {
@@ -91,42 +59,20 @@ async function startNylasBooking({
 async function generateSchedulingConfiguration({
   formSubmissionResult,
   schedulingSubmissionEvent,
-  schedulingUrlConfiguration: {
-    schedulingReceiptUrl,
-    schedulingCancelUrl,
-    schedulingRescheduleUrl,
-  },
+  schedulingUrlConfiguration: { schedulingCancelUrl, schedulingRescheduleUrl },
 }: {
   formSubmissionResult: FormSubmissionResult
   schedulingSubmissionEvent: SubmissionEventTypes.FormSchedulingEvent
-  schedulingUrlConfiguration: {
-    schedulingReceiptUrl: string
-    schedulingCancelUrl: string
-    schedulingRescheduleUrl?: string
-  }
-}): Promise<string | undefined> {
+  schedulingUrlConfiguration: SchedulingUrlConfiguration
+}): Promise<void> {
   try {
-    switch (schedulingSubmissionEvent.type) {
-      case 'SCHEDULING': {
-        const { bookingUrl } = await generateLegacySchedulingConfiguration({
-          formSubmissionResult,
-          schedulingSubmissionEvent,
-          schedulingReceiptUrl,
-          schedulingCancelUrl,
-        })
-        return bookingUrl
-      }
-      case 'NYLAS': {
-        await startNylasBooking({
-          formSubmissionResult,
-          schedulingSubmissionEvent,
-          schedulingReceiptUrl,
-          schedulingCancelUrl,
-          schedulingRescheduleUrl,
-        })
-        return
-      }
-    }
+    await startNylasBooking({
+      formSubmissionResult,
+      schedulingSubmissionEvent,
+      schedulingCancelUrl,
+      schedulingRescheduleUrl,
+    })
+    return
   } catch (error) {
     console.warn(
       'Error occurred while attempting to generate configuration for scheduling submission event',
@@ -273,92 +219,4 @@ async function createNylasExistingBookingSession(
   }
 }
 
-/**
- * Cancel a booking
- *
- * #### Example
- *
- * ```js
- * await schedulingService.cancelSchedulingBooking({
- *   submissionId: '89c6e98e-f56f-45fc-84fe-c4fc62331d34',
- *   nylasEditHash: '123abc321abcCBA456abcabc123456',
- *   reason: 'Busy at time of booking.',
- * })
- * // Booking Cancelled
- * ```
- *
- * @param details
- * @returns
- */
-async function cancelSchedulingBooking(details: {
-  /** The unique identifier for the submission associated with the booking */
-  submissionId: string
-  /** The nylas edit hash associated with the booking */
-  nylasEditHash: string
-  /** Reason for cancelling the booking */
-  reason: string
-}): Promise<void> {
-  const url = `${tenants.current.apiOrigin}/scheduling/cancel-booking`
-  console.log('Attempting to cancel scheduling booking', url, details)
-
-  try {
-    return await postRequest<void>(url, details)
-  } catch (e) {
-    console.warn(
-      'Error occurred while attempting to cancel scheduling booking',
-      e,
-    )
-    Sentry.captureException(e)
-    if (e instanceof OneBlinkAppsError) {
-      throw e
-    }
-    const error = e as HTTPError
-    switch (error.status) {
-      case 401: {
-        throw new OneBlinkAppsError(
-          'You cannot cancel this booking until you have logged in. Please login and try again.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-            requiresLogin: true,
-          },
-        )
-      }
-      case 403: {
-        throw new OneBlinkAppsError(
-          'You do not have access to cancel bookings. Please contact your administrator to gain the correct level of access.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-            requiresAccessRequest: true,
-          },
-        )
-      }
-      case 400:
-      case 404: {
-        throw new OneBlinkAppsError(
-          'We could not find the booking to be cancelled. It may have already been cancelled, otherwise please contact your administrator.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      default: {
-        throw new OneBlinkAppsError(
-          'An unknown error has occurred. Please contact support if the problem persists.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-    }
-  }
-}
-
-export {
-  generateSchedulingConfiguration,
-  cancelSchedulingBooking,
-  createNylasExistingBookingSession,
-}
+export { generateSchedulingConfiguration, createNylasExistingBookingSession }

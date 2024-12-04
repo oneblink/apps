@@ -19,6 +19,7 @@ import {
   ProgressListener,
   ProgressListenerEvent,
 } from '../types/submissions'
+import { SchedulingUrlConfiguration } from '../types/scheduling'
 import { checkIfAttachmentsAreUploading } from '../attachments-service'
 import tenants from '../tenants'
 import externalIdGeneration from './external-id-generation'
@@ -34,11 +35,7 @@ type SubmissionParams = {
   shouldRunExternalIdGeneration: boolean
   paymentReceiptUrl: string | undefined
   paymentFormUrl: string | undefined
-  schedulingUrlConfiguration?: {
-    schedulingReceiptUrl: string
-    schedulingCancelUrl: string
-    schedulingRescheduleUrl?: string
-  }
+  schedulingUrlConfiguration?: SchedulingUrlConfiguration
   pendingTimestamp?: string
   onProgress?: ProgressListener
   abortSignal?: AbortSignal

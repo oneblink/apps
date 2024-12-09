@@ -7,10 +7,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [17.3.0] - 2024-12-09
+
 ### Added
 
 - `schedulingBooking` to response from `paymentService.handlePaymentQuerystring()` to support displaying calendar booking details along with payment receipt details
 - `replace` argument to `executePostSubmissionAction`
+
+### Dependencies
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [7.3.2-beta.1](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [7.3.1-beta.1](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
+
+- update [@oneblink/storage](https://www.npmjs.com/package/@oneblink/storage) to [2.1.2-beta.3](https://github.com/oneblink/storage/blob/master/CHANGELOG.md) (from [2.1.1-beta.1](https://github.com/oneblink/storage/blob/master/CHANGELOG.md))
 
 ## [17.2.0] - 2024-11-27
 

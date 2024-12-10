@@ -199,7 +199,7 @@ async function processPendingQueue({
  * // Pass schedulingBookingUrlConfiguration if submission utilise scheduling
  * const schedulingBookingUrlConfiguration = {
  *   schedulingBookingUrl: 'https://my-website.com/booking',
- *   schedulingReceiptUrl: 'https://my-website.com/receipt',
+ *   schedulingRescheduleUrl: 'https://my-website.com/reschedule',
  *   schedulingCancelUrl: 'https://my-website.com/cancel',
  * }
  * const submissionResult = await submissionService.submit({

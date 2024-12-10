@@ -320,8 +320,14 @@ async function goBackOrCloseWindow(): Promise<void> {
  * const pushRelativePath = (path) => {
  *   window.location.href = path
  * }
+ * // Only used for aboslute URLS
+ * const replaceAbsolutePath = window.location.replace
+ *
  * try {
- *   await submissionService.executeCancelAction(options, pushRelativePath)
+ *   await submissionService.executeCancelAction(options, {
+ *     onRedirectToRelativeUrl: pushRelativePath,
+ *     onRedirectToAbsoluteUrl: replaceAbsolutePath,
+ *   })
  * } catch (error) {
  *   // Handle error while closing browser tab.
  *   // Display message to user to close it manually
@@ -329,7 +335,7 @@ async function goBackOrCloseWindow(): Promise<void> {
  * ```
  *
  * @param options
- * @param push
+ * @param redirectConfig
  */
 async function executeCancelAction(
   formSubmissionResultOptions: {
@@ -407,8 +413,14 @@ async function executeCancelAction(
  * const pushRelativePath = (path) => {
  *   window.location.href = path
  * }
+ * // Only used for aboslute URLS
+ * const replaceAbsolutePath = window.location.replace
+ *
  * try {
- *   await submissionService.executePostSubmissionAction(formSubmissionResult, pushRelativePath)
+ *   await submissionService.executePostSubmissionAction(formSubmissionResult, {
+ *     onRedirectToRelativeUrl: pushRelativePath,
+ *     onRedirectToAbsoluteUrl: replaceAbsolutePath,
+ *   })
  * } catch (error) {
  *   // Handle error while closing browser tab.
  *   // Display message to user to close it manually
@@ -416,8 +428,7 @@ async function executeCancelAction(
  * ```
  *
  * @param submissionResult
- * @param push
- * @param replaceLocation
+ * @param redirectConfig
  */
 async function executePostSubmissionAction(
   submissionResult: FormSubmissionResult,

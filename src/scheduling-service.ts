@@ -1,8 +1,5 @@
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
-import {
-  cancelSchedulingBooking,
-  createNylasExistingBookingSession,
-} from './services/api/scheduling'
+import { createNylasExistingBookingSession } from './services/api/scheduling'
 import {
   checkForPaymentSubmissionEvent,
   handlePaymentSubmissionEvent,
@@ -270,7 +267,6 @@ async function createNylasNewBookingSession(
 export {
   SchedulingBooking,
   handleSchedulingQuerystring,
-  cancelSchedulingBooking,
   handleCancelSchedulingBookingQuerystring,
   createNylasExistingBookingSession,
   createNylasNewBookingSession,

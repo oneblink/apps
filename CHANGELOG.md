@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
--- arg
+- added `onRedirectToRelativeUrl` and `onRedirectToAbsoluteUrl` props to `executePostSubmissionAction` and `executeCancelAction`
 
 ### Removed
 

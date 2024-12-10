@@ -198,7 +198,8 @@ async function processPendingQueue({
  *
  * // Pass schedulingBookingUrlConfiguration if submission utilise scheduling
  * const schedulingBookingUrlConfiguration = {
- *   schedulingReceiptUrl: 'https://my-website.com/receipt',
+ *   schedulingBookingUrl: 'https://my-website.com/booking',
+ *   schedulingRescheduleUrl: 'https://my-website.com/reschedule',
  *   schedulingCancelUrl: 'https://my-website.com/cancel',
  * }
  * const submissionResult = await submissionService.submit({
@@ -319,8 +320,14 @@ async function goBackOrCloseWindow(): Promise<void> {
  * const pushRelativePath = (path) => {
  *   window.location.href = path
  * }
+ * // Only used for aboslute URLS
+ * const replaceAbsolutePath = window.location.replace
+ *
  * try {
- *   await submissionService.executeCancelAction(options, pushRelativePath)
+ *   await submissionService.executeCancelAction(options, {
+ *     onRedirectToRelativeUrl: pushRelativePath,
+ *     onRedirectToAbsoluteUrl: replaceAbsolutePath,
+ *   })
  * } catch (error) {
  *   // Handle error while closing browser tab.
  *   // Display message to user to close it manually
@@ -328,18 +335,24 @@ async function goBackOrCloseWindow(): Promise<void> {
  * ```
  *
  * @param options
- * @param push
+ * @param redirectConfig
  */
 async function executeCancelAction(
-  options: {
+  formSubmissionResultOptions: {
     definition: FormTypes.Form
     externalId: string | null
     taskCompletion?: FormSubmissionResult['taskCompletion']
   },
-  push: (url: string) => void,
+  {
+    onRedirectToRelativeUrl,
+    onRedirectToAbsoluteUrl,
+  }: {
+    onRedirectToRelativeUrl: (url: string) => void
+    onRedirectToAbsoluteUrl: (url: string) => void
+  },
 ): Promise<void> {
   const formSubmissionResult: FormSubmissionResult = {
-    ...options,
+    ...formSubmissionResultOptions,
     formsAppId: NaN,
     formSubmissionDraftId: undefined,
     jobId: undefined,
@@ -364,12 +377,12 @@ async function executeCancelAction(
     cancelRedirectUrl = formSubmissionResult.taskCompletion.redirectUrl
   }
 
-  await executeAction(
-    formSubmissionResult,
-    cancelAction,
-    cancelRedirectUrl,
-    push,
-  )
+  await executeAction(formSubmissionResult, {
+    action: cancelAction,
+    redirectUrl: cancelRedirectUrl,
+    onRedirectToRelativeUrl: onRedirectToRelativeUrl,
+    onRedirectToAbsoluteUrl,
+  })
 }
 
 /**
@@ -400,8 +413,14 @@ async function executeCancelAction(
  * const pushRelativePath = (path) => {
  *   window.location.href = path
  * }
+ * // Only used for aboslute URLS
+ * const replaceAbsolutePath = window.location.replace
+ *
  * try {
- *   await submissionService.executePostSubmissionAction(formSubmissionResult, pushRelativePath)
+ *   await submissionService.executePostSubmissionAction(formSubmissionResult, {
+ *     onRedirectToRelativeUrl: pushRelativePath,
+ *     onRedirectToAbsoluteUrl: replaceAbsolutePath,
+ *   })
  * } catch (error) {
  *   // Handle error while closing browser tab.
  *   // Display message to user to close it manually
@@ -409,13 +428,17 @@ async function executeCancelAction(
  * ```
  *
  * @param submissionResult
- * @param push
- * @param replaceLocation
+ * @param redirectConfig
  */
 async function executePostSubmissionAction(
   submissionResult: FormSubmissionResult,
-  push: (url: string) => void,
-  replaceLocation?: boolean,
+  {
+    onRedirectToRelativeUrl,
+    onRedirectToAbsoluteUrl,
+  }: {
+    onRedirectToRelativeUrl: (url: string) => void
+    onRedirectToAbsoluteUrl: (url: string) => void
+  },
 ): Promise<void> {
   console.log('Attempting to run post submission action')
   let postSubmissionAction = submissionResult.definition.postSubmissionAction
@@ -432,27 +455,33 @@ async function executePostSubmissionAction(
     redirectUrl = submissionResult.taskCompletion.redirectUrl
   }
 
-  await executeAction(
-    submissionResult,
-    postSubmissionAction,
+  await executeAction(submissionResult, {
+    action: postSubmissionAction,
     redirectUrl,
-    push,
-    replaceLocation,
-  )
+    onRedirectToRelativeUrl,
+    onRedirectToAbsoluteUrl,
+  })
 }
 
 async function executeAction(
   submissionResult: FormSubmissionResult,
-  action: FormTypes.FormPostSubmissionAction,
-  redirectUrl: string | undefined,
-  push: (url: string) => void,
-  replaceLocation?: boolean,
+  {
+    action,
+    redirectUrl,
+    onRedirectToRelativeUrl,
+    onRedirectToAbsoluteUrl,
+  }: {
+    action: FormTypes.FormPostSubmissionAction
+    redirectUrl: string | undefined
+    onRedirectToRelativeUrl: (url: string) => void
+    onRedirectToAbsoluteUrl: (url: string) => void
+  },
 ): Promise<void> {
   switch (action) {
     case 'CLOSE':
       return closeWindow()
     case 'FORMS_LIBRARY':
-      push('/')
+      onRedirectToRelativeUrl('/')
       break
     case 'URL': {
       const newUrl = replaceInjectablesWithSubmissionValues(
@@ -461,15 +490,11 @@ async function executeAction(
       ).text
       // Relative URLs can be navigated to internally
       if (newUrl[0] === '/') {
-        push(newUrl)
+        onRedirectToRelativeUrl(newUrl)
         return
       }
 
-      if (replaceLocation) {
-        window.location.replace(newUrl)
-      } else {
-        window.location.href = newUrl
-      }
+      onRedirectToAbsoluteUrl(newUrl)
 
       // If we are in cordova land, we will navigate
       // back to the home screen after redirect
@@ -477,7 +502,7 @@ async function executeAction(
         // Wait a couple of seconds to ensure the browser has
         // been opened before navigating away from form.
         setTimeout(() => {
-          push('/')
+          onRedirectToRelativeUrl('/')
         }, 2000)
       }
       break

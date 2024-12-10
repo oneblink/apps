@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- added `onRedirectToRelativeUrl` and `onRedirectToAbsoluteUrl` props to `executePostSubmissionAction` and `executeCancelAction`
+
+### Removed
+
+- **[BREAKING]** `schedulingService.cancelSchedulingBooking`
+
 ## [17.3.0] - 2024-12-09
 
 ### Added

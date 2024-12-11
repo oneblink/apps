@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [18.0.0] - 2024-12-11
+
 ### Changed
 
 - added `onRedirectToRelativeUrl` and `onRedirectToAbsoluteUrl` props to `executePostSubmissionAction` and `executeCancelAction`

@@ -31,8 +31,6 @@ export type NewFormSubmission = BaseNewFormSubmission & {
 }
 
 export type BaseFormSubmission = {
-  /** The id of the Forms App submitting for */
-  formsAppId: number
   /** The id of the job to submit */
   jobId?: string
   /** The id of the Forms App submitting for */
@@ -65,6 +63,8 @@ export type BaseFormSubmission = {
 
 export type DraftSubmissionInput = NewDraftSubmission &
   BaseFormSubmission & {
+    /** The id of the Forms App submitting for */
+    formsAppId: number
     /** The title input by a user to identify the draft. */
     title: string
   }
@@ -100,6 +100,8 @@ export type LocalFormSubmissionDraft = Omit<
 
 export type FormSubmission = NewFormSubmission &
   BaseFormSubmission & {
+    /** The id of the Forms App submitting for */
+    formsAppId?: number
     /** The id of the draft to clean up after successful submission */
     formSubmissionDraftId?: string
     /** The id of the prefill data to clean up after successful submission */

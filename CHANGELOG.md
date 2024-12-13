@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- support for appless form submission
+
 ## [18.0.0] - 2024-12-11
 
 ### Changed

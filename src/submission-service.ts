@@ -380,7 +380,7 @@ async function executeCancelAction(
   await executeAction(formSubmissionResult, {
     action: cancelAction,
     redirectUrl: cancelRedirectUrl,
-    onRedirectToRelativeUrl: onRedirectToRelativeUrl,
+    onRedirectToRelativeUrl,
     onRedirectToAbsoluteUrl,
   })
 }

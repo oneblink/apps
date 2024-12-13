@@ -236,6 +236,16 @@ export * as attachmentsService from './attachments-service'
  * ```
  */
 export * as scheduledTasksService from './scheduled-tasks-service'
+/**
+ * ## Forms App Environment Service
+ *
+ * Helper functions for forms app environments
+ *
+ * ```js
+ * import { formsAppEnvironmentService } from '@oneblink/apps'
+ * ```
+ */
+export * as formsAppEnvironmentService from './forms-app-environment-service'
 
 export { default as OneBlinkAppsError } from './services/errors/oneBlinkAppsError'
 import tenants from './tenants'

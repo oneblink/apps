@@ -197,7 +197,8 @@ export default async function submit({
       })
     }
 
-    if (formSubmission.formSubmissionDraftId) {
+    //currently cannot have drafts without a forms app
+    if (formSubmission.formSubmissionDraftId && formSubmission.formsAppId) {
       await removeLocalDraftSubmission(formSubmission.formSubmissionDraftId)
       syncDrafts({
         formsAppId: formSubmission.formsAppId,

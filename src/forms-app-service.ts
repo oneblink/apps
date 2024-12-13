@@ -1,4 +1,4 @@
-import { FormsAppsTypes } from '@oneblink/types'
+import { FormsAppsTypes, EnvironmentTypes } from '@oneblink/types'
 import tenants from './tenants'
 import { HTTPError, getRequest } from './services/fetch'
 import { isOffline } from './offline-service'
@@ -6,7 +6,7 @@ import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import Sentry from './Sentry'
 
 export type FormsAppConfigurationResponse =
-  FormsAppsTypes.FormsAppConfiguration<FormsAppsTypes.BaseFormsAppStyles>
+  FormsAppsTypes.FormsAppConfiguration<EnvironmentTypes.FormsAppEnvironmentStyles>
 
 /**
  * Get configuration for a OneBlink Forms App.

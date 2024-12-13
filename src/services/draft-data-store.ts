@@ -134,10 +134,13 @@ export async function getDraftSubmission(
     return undefined
   }
 
-  const s3SubmissionData = await downloadDraftData(
+  //drafts will always have a formsAppId
+  const s3SubmissionData = (await downloadDraftData(
     latestFormSubmissionDraftVersion.id,
     abortSignal,
-  )
+  )) as Omit<SubmissionTypes.S3SubmissionData, 'formsAppId'> & {
+    formsAppId: number
+  }
   return await setLocalDraftSubmission({
     definition: s3SubmissionData.definition,
     submission: s3SubmissionData.submission,

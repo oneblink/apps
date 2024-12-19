@@ -110,15 +110,26 @@ async function getForms(
  * const form = await formService.getForm({
  *   formId: 1,
  *   formAppId: 1, // `formsAppId` is optional
+ *   formsAppEnvironmentId: undefined,
  *   formSlug: undefined,
  * })
  *
  * // OR
  *
  * const form = await formService.getForm({
- *   formId: undefined,
- *   formAppId: 1,
  *   formSlug: 'audit',
+ *   formAppId: 1,
+ *   formsAppEnvironmentId: undefined,
+ *   formId: undefined,
+ * })
+ *
+ * // OR
+ *
+ * const form = await formService.getForm({
+ *   formSlug: 'audit',
+ *   formsAppEnvironmentId: 1,
+ *   formAppId: undefined,
+ *   formId: undefined,
  * })
  * ```
  *
@@ -127,6 +138,7 @@ async function getForms(
  */
 async function getForm({
   formsAppId,
+  formsAppEnvironmentId,
   abortSignal,
   formSlug,
   formId,
@@ -134,15 +146,25 @@ async function getForm({
   formSlug: string | undefined
   formId: number | undefined
   formsAppId: number | undefined
+  formsAppEnvironmentId: number | undefined
   abortSignal?: AbortSignal
 }): Promise<FormTypes.Form> {
   return (
     (() => {
-      if (formSlug && !Number.isNaN(formsAppId)) {
-        return getRequest<FormTypes.Form>(
-          `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms/${formSlug}`,
-          abortSignal,
-        )
+      if (formSlug) {
+        if (!Number.isNaN(formsAppEnvironmentId)) {
+          return getRequest<FormTypes.Form>(
+            `${tenants.current.apiOrigin}/forms-app-environments/${formsAppEnvironmentId}/forms/${formSlug}`,
+            abortSignal,
+          )
+        }
+
+        if (!Number.isNaN(formsAppId)) {
+          return getRequest<FormTypes.Form>(
+            `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms/${formSlug}`,
+            abortSignal,
+          )
+        }
       }
 
       return searchRequest<FormTypes.Form>(

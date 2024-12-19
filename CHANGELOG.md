@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - support for appless form submission
 - `formService.getFormConfiguration()`
 - `formsAppEnvironmentService`
+- `formsAppEnvironmentId` to `formService.getForm()`
 
 ## [18.0.0] - 2024-12-11
 

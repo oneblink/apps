@@ -26,8 +26,13 @@ export type NewDraftSubmission = BaseNewFormSubmission & {
 }
 
 export type NewFormSubmission = BaseNewFormSubmission & {
-  /** Captcha tokens gathered by a `captcha` Form Element */
-  captchaTokens: string[]
+  /** The reCAPTCHA tokens to validate the submission */
+  recaptchas?: Array<{
+    /** The site key that was used to generate the reCAPTCHA token */
+    siteKey: string
+    /** A reCAPTCHA token */
+    token: string
+  }>
 }
 
 export type BaseFormSubmission = {

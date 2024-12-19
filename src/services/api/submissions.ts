@@ -109,9 +109,7 @@ export async function uploadFormSubmission(
       taskActionId: formSubmission.taskCompletion?.taskAction.taskActionId,
       taskGroupInstanceId:
         formSubmission.taskCompletion?.taskGroupInstance?.taskGroupInstanceId,
-      recaptchas: formSubmission.captchaTokens.map((token) => ({
-        token,
-      })),
+      recaptchas: formSubmission.recaptchas,
       onProgress,
       abortSignal,
       formSubmissionDraftId: formSubmission.formSubmissionDraftId,

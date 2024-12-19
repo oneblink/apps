@@ -7,12 +7,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Removed
+
+- **[BREAKING]** `NewFormSubmission.captchaTokens` (replaced by `NewFormSubmission.recaptchas`)
+
 ### Added
 
 - support for appless form submission
 - `formService.getFormConfiguration()`
 - `formsAppEnvironmentService`
 - `formsAppEnvironmentId` to `formService.getForm()`
+- `NewFormSubmission.recaptchas` to support a reCAPTCHA site key
 
 ## [18.0.0] - 2024-12-11
 

@@ -358,7 +358,7 @@ async function executeCancelAction(
     jobId: undefined,
     externalId: undefined,
     preFillFormDataId: null,
-    captchaTokens: [],
+    recaptchas: [],
     submission: {},
     isInPendingQueue: false,
     isOffline: false,

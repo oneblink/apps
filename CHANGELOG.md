@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- scheduled task properties to form store filtering
+
 ## [19.0.0] - 2025-01-12
 
 ### Removed

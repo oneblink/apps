@@ -37,6 +37,26 @@ export type FormStoreFilters = {
   externalId?: FormStoreFilter<string>
   /** Filter results by the submission data */
   submission?: Record<string, FormStoreFilter<unknown> | undefined>
+  /** Filter results by the task that was completed by submitting a form */
+  task?: {
+    /** Filter results by the task name */
+    name?: FormStoreFilter<string>
+  }
+  /** Filter results by the task action that was used to complete a task */
+  taskAction?: {
+    /** Filter results by the task action label */
+    label?: FormStoreFilter<string>
+  }
+  /** Filter results by the task group that included the task */
+  taskGroup?: {
+    /** Filter results by the task group name */
+    name?: FormStoreFilter<string>
+  }
+  /** Filter results by the task group instance that included the task */
+  taskGroupInstance?: {
+    /** Filter results by the task group instance label */
+    label?: FormStoreFilter<string>
+  }
 }
 
 export type FormStoreParameters = {

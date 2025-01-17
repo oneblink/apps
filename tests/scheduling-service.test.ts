@@ -101,7 +101,6 @@ describe('sheduling service', () => {
         paymentReceiptUrl: 'RECEIPT_URL',
         paymentFormUrl: 'FORM_URL',
         formSubmissionResult: {
-          //@ts-expect-error update TYPES
           preventPayment: false,
           submissionId: SUBMISSION_ID,
           submission: {
@@ -174,7 +173,6 @@ describe('sheduling service', () => {
         paymentReceiptUrl: 'RECEIPT_URL',
         paymentFormUrl: 'FORM_URL',
         formSubmissionResult: {
-          //@ts-expect-error update TYPES
           preventPayment: false,
           submissionId: 'def456',
           submission: {
@@ -218,7 +216,6 @@ describe('sheduling service', () => {
         paymentReceiptUrl: 'RECEIPT_URL',
         paymentFormUrl: 'FORM_URL',
         formSubmissionResult: {
-          //@ts-expect-error update types
           preventPayment: true,
           submissionId: SUBMISSION_ID,
           submission: {
@@ -296,7 +293,6 @@ describe('sheduling service', () => {
         paymentReceiptUrl: undefined,
         paymentFormUrl: 'FORM_URL',
         formSubmissionResult: {
-          //@ts-expect-error update TYPES
           preventPayment: false,
           submissionId: SUBMISSION_ID,
           submission: {
@@ -374,7 +370,6 @@ describe('sheduling service', () => {
         paymentReceiptUrl: 'RECEIPT_URL',
         paymentFormUrl: 'FORM_URL',
         formSubmissionResult: {
-          //@ts-expect-error update TYPES
           preventPayment: false,
           submissionId: SUBMISSION_ID,
           submission: {
@@ -452,7 +447,6 @@ describe('sheduling service', () => {
         paymentReceiptUrl: 'RECEIPT_URL',
         paymentFormUrl: 'FORM_URL',
         formSubmissionResult: {
-          //@ts-expect-error update TYPES
           preventPayment: false,
           submissionId: SUBMISSION_ID,
           submission: {

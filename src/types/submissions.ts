@@ -158,6 +158,11 @@ export type FormSubmissionResult = FormSubmission & {
   isUploadingAttachments: boolean
   /** Exists if the form allows PDF download */
   downloadSubmissionPdfUrl?: string
+  /**
+   * `true` if true will skip payment even if the payment prop is supplied and a
+   * payment event exists
+   */
+  preventPayment: boolean
 }
 
 export type PendingFormSubmission = Omit<FormSubmission, 'submission'> & {

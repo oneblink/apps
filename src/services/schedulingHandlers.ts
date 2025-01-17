@@ -11,7 +11,6 @@ import { SchedulingUrlConfiguration } from '../types/scheduling'
 const SCHEDULING_SUBMISSION_RESULT_KEY = 'SCHEDULING_SUBMISSION_RESULT'
 type SchedulingSubmissionResult = {
   formSubmissionResult: FormSubmissionResult
-  preventPayment: boolean
   paymentReceiptUrl: string | undefined
   paymentFormUrl: string | undefined
 }
@@ -143,7 +142,6 @@ async function handleSchedulingSubmissionEvent({
     formSubmissionResult: {
       ...formSubmissionResult,
       scheduling,
-      //@ts-expect-error TODO update types
       preventPayment,
     },
     paymentReceiptUrl,

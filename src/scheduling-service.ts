@@ -23,7 +23,6 @@ async function getPaymentConfiguration({
   formSubmissionResult: FormSubmissionResult
   schedulingBooking: SchedulingBooking
 }) {
-  //@ts-expect-error TODO update types
   if (formSubmissionResult.preventPayment) {
     return null
   }

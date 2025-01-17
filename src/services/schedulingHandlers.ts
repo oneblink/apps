@@ -11,6 +11,7 @@ import { SchedulingUrlConfiguration } from '../types/scheduling'
 const SCHEDULING_SUBMISSION_RESULT_KEY = 'SCHEDULING_SUBMISSION_RESULT'
 type SchedulingSubmissionResult = {
   formSubmissionResult: FormSubmissionResult
+  preventPayment: boolean
   paymentReceiptUrl: string | undefined
   paymentFormUrl: string | undefined
 }
@@ -106,12 +107,14 @@ async function handleSchedulingSubmissionEvent({
   schedulingUrlConfiguration,
   paymentReceiptUrl,
   paymentFormUrl,
+  preventPayment,
 }: {
   formSubmissionResult: FormSubmissionResult
   schedulingSubmissionEvent: SubmissionEventTypes.FormSchedulingEvent
   schedulingUrlConfiguration: SchedulingUrlConfiguration
   paymentReceiptUrl: string | undefined
   paymentFormUrl: string | undefined
+  preventPayment: boolean
 }): Promise<NonNullable<FormSubmissionResult['scheduling']>> {
   console.log(
     'Attempting to handle submission with scheduling submission event',
@@ -140,6 +143,8 @@ async function handleSchedulingSubmissionEvent({
     formSubmissionResult: {
       ...formSubmissionResult,
       scheduling,
+      //@ts-expect-error TODO update types
+      preventPayment,
     },
     paymentReceiptUrl,
     paymentFormUrl,

@@ -45,7 +45,8 @@ async function getSchedulingFormSubmissionResult(
     )
   }
 
-  if (paymentReceiptUrl) {
+  //@ts-expect-error TODO update types
+  if (paymentReceiptUrl && !formSubmissionResult.preventPayment) {
     await setSchedulingBooking(schedulingBooking)
     const paymentSubmissionEventConfiguration =
       checkForPaymentSubmissionEvent(formSubmissionResult)

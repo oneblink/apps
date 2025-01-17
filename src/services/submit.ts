@@ -183,6 +183,7 @@ export default async function submit({
         schedulingUrlConfiguration,
         paymentReceiptUrl,
         paymentFormUrl,
+        preventPayment: data.preventPayment,
       })
     } else if (
       paymentSubmissionEventConfiguration &&

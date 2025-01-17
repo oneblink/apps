@@ -15,15 +15,17 @@ import {
 async function getPaymentConfiguration({
   paymentReceiptUrl,
   paymentFormUrl,
+  preventPayment,
   formSubmissionResult,
   schedulingBooking,
 }: {
   paymentReceiptUrl: string | undefined
   paymentFormUrl: string | undefined
+  preventPayment: boolean
   formSubmissionResult: FormSubmissionResult
   schedulingBooking: SchedulingBooking
 }) {
-  if (formSubmissionResult.preventPayment || !paymentReceiptUrl) {
+  if (preventPayment || !paymentReceiptUrl) {
     return null
   }
 
@@ -57,8 +59,12 @@ async function getSchedulingFormSubmissionResult(
     )
   }
 
-  const { formSubmissionResult, paymentReceiptUrl, paymentFormUrl } =
-    schedulingSubmissionResultConfiguration
+  const {
+    formSubmissionResult,
+    paymentReceiptUrl,
+    paymentFormUrl,
+    preventPayment,
+  } = schedulingSubmissionResultConfiguration
   if (
     !formSubmissionResult ||
     !formSubmissionResult.scheduling ||
@@ -78,6 +84,7 @@ async function getSchedulingFormSubmissionResult(
   formSubmissionResult.payment = await getPaymentConfiguration({
     paymentFormUrl,
     paymentReceiptUrl,
+    preventPayment,
     formSubmissionResult,
     schedulingBooking,
   })

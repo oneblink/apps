@@ -100,8 +100,8 @@ describe('sheduling service', () => {
       jest.mocked(getSchedulingSubmissionResult).mockResolvedValue({
         paymentReceiptUrl: 'RECEIPT_URL',
         paymentFormUrl: 'FORM_URL',
+        preventPayment: false,
         formSubmissionResult: {
-          preventPayment: false,
           submissionId: SUBMISSION_ID,
           submission: {
             calc: 10,
@@ -135,7 +135,6 @@ describe('sheduling service', () => {
         paymentReceiptUrl: 'RECEIPT_URL',
         paymentFormUrl: 'FORM_URL',
         formSubmissionResult: {
-          preventPayment: false,
           submissionId: SUBMISSION_ID,
           submission: {
             calc: 10,
@@ -172,8 +171,8 @@ describe('sheduling service', () => {
       jest.mocked(getSchedulingSubmissionResult).mockResolvedValue({
         paymentReceiptUrl: 'RECEIPT_URL',
         paymentFormUrl: 'FORM_URL',
+        preventPayment: false,
         formSubmissionResult: {
-          preventPayment: false,
           submissionId: 'def456',
           submission: {
             calc: 10,
@@ -215,8 +214,8 @@ describe('sheduling service', () => {
       jest.mocked(getSchedulingSubmissionResult).mockResolvedValue({
         paymentReceiptUrl: 'RECEIPT_URL',
         paymentFormUrl: 'FORM_URL',
+        preventPayment: true,
         formSubmissionResult: {
-          preventPayment: true,
           submissionId: SUBMISSION_ID,
           submission: {
             calc: 10,
@@ -263,7 +262,6 @@ describe('sheduling service', () => {
           isReschedule: false,
         }),
       ).toEqual({
-        preventPayment: true,
         submissionId: SUBMISSION_ID,
         submission: {
           calc: 10,
@@ -292,8 +290,8 @@ describe('sheduling service', () => {
       jest.mocked(getSchedulingSubmissionResult).mockResolvedValue({
         paymentReceiptUrl: undefined,
         paymentFormUrl: 'FORM_URL',
+        preventPayment: false,
         formSubmissionResult: {
-          preventPayment: false,
           submissionId: SUBMISSION_ID,
           submission: {
             calc: 10,
@@ -356,7 +354,6 @@ describe('sheduling service', () => {
             },
           },
         },
-        preventPayment: false,
         payment: null,
         submissionTimestamp: '2025-01-17T03:09:25.559Z',
         isInPendingQueue: false,
@@ -369,8 +366,8 @@ describe('sheduling service', () => {
       jest.mocked(getSchedulingSubmissionResult).mockResolvedValue({
         paymentReceiptUrl: 'RECEIPT_URL',
         paymentFormUrl: 'FORM_URL',
+        preventPayment: false,
         formSubmissionResult: {
-          preventPayment: false,
           submissionId: SUBMISSION_ID,
           submission: {
             calc: 10,
@@ -434,7 +431,6 @@ describe('sheduling service', () => {
           },
         },
         payment: null,
-        preventPayment: false,
         submissionTimestamp: '2025-01-17T03:09:25.559Z',
         isInPendingQueue: false,
         isOffline: false,
@@ -446,8 +442,8 @@ describe('sheduling service', () => {
       jest.mocked(getSchedulingSubmissionResult).mockResolvedValue({
         paymentReceiptUrl: 'RECEIPT_URL',
         paymentFormUrl: 'FORM_URL',
+        preventPayment: false,
         formSubmissionResult: {
-          preventPayment: false,
           submissionId: SUBMISSION_ID,
           submission: {
             calc: 10,
@@ -512,7 +508,6 @@ describe('sheduling service', () => {
             },
           },
         },
-        preventPayment: false,
         payment: {
           amount: 10,
           paymentFormUrl: 'FORM_URL',

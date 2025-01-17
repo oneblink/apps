@@ -23,23 +23,20 @@ async function getPaymentConfiguration({
   formSubmissionResult: FormSubmissionResult
   schedulingBooking: SchedulingBooking
 }) {
-  if (formSubmissionResult.preventPayment) {
+  if (formSubmissionResult.preventPayment || !paymentReceiptUrl) {
     return null
   }
 
-  if (paymentReceiptUrl) {
-    await setSchedulingBooking(schedulingBooking)
-    const paymentSubmissionEventConfiguration =
-      checkForPaymentSubmissionEvent(formSubmissionResult)
-    console.log(paymentSubmissionEventConfiguration)
-    if (paymentSubmissionEventConfiguration) {
-      return await handlePaymentSubmissionEvent({
-        ...paymentSubmissionEventConfiguration,
-        formSubmissionResult,
-        paymentReceiptUrl,
-        paymentFormUrl,
-      })
-    }
+  await setSchedulingBooking(schedulingBooking)
+  const paymentSubmissionEventConfiguration =
+    checkForPaymentSubmissionEvent(formSubmissionResult)
+  if (paymentSubmissionEventConfiguration) {
+    return await handlePaymentSubmissionEvent({
+      ...paymentSubmissionEventConfiguration,
+      formSubmissionResult,
+      paymentReceiptUrl,
+      paymentFormUrl,
+    })
   }
 
   return null

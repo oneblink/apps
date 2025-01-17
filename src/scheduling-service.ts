@@ -12,6 +12,40 @@ import {
   setSchedulingBooking,
 } from './services/schedulingHandlers'
 
+async function getPaymentConfiguration({
+  paymentReceiptUrl,
+  paymentFormUrl,
+  formSubmissionResult,
+  schedulingBooking,
+}: {
+  paymentReceiptUrl: string | undefined
+  paymentFormUrl: string | undefined
+  formSubmissionResult: FormSubmissionResult
+  schedulingBooking: SchedulingBooking
+}) {
+  //@ts-expect-error TODO update types
+  if (formSubmissionResult.preventPayment) {
+    return null
+  }
+
+  if (paymentReceiptUrl) {
+    await setSchedulingBooking(schedulingBooking)
+    const paymentSubmissionEventConfiguration =
+      checkForPaymentSubmissionEvent(formSubmissionResult)
+    console.log(paymentSubmissionEventConfiguration)
+    if (paymentSubmissionEventConfiguration) {
+      return await handlePaymentSubmissionEvent({
+        ...paymentSubmissionEventConfiguration,
+        formSubmissionResult,
+        paymentReceiptUrl,
+        paymentFormUrl,
+      })
+    }
+  }
+
+  return null
+}
+
 async function getSchedulingFormSubmissionResult(
   submissionId: string,
   schedulingBooking: SchedulingBooking,
@@ -45,20 +79,12 @@ async function getSchedulingFormSubmissionResult(
     )
   }
 
-  //@ts-expect-error TODO update types
-  if (paymentReceiptUrl && !formSubmissionResult.preventPayment) {
-    await setSchedulingBooking(schedulingBooking)
-    const paymentSubmissionEventConfiguration =
-      checkForPaymentSubmissionEvent(formSubmissionResult)
-    if (paymentSubmissionEventConfiguration) {
-      formSubmissionResult.payment = await handlePaymentSubmissionEvent({
-        ...paymentSubmissionEventConfiguration,
-        formSubmissionResult,
-        paymentReceiptUrl,
-        paymentFormUrl,
-      })
-    }
-  }
+  formSubmissionResult.payment = await getPaymentConfiguration({
+    paymentFormUrl,
+    paymentReceiptUrl,
+    formSubmissionResult,
+    schedulingBooking,
+  })
 
   await removeSchedulingSubmissionResult()
 
@@ -271,4 +297,5 @@ export {
   handleCancelSchedulingBookingQuerystring,
   createNylasExistingBookingSession,
   createNylasNewBookingSession,
+  getSchedulingFormSubmissionResult,
 }

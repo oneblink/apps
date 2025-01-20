@@ -12,6 +12,38 @@ import {
   setSchedulingBooking,
 } from './services/schedulingHandlers'
 
+async function getPaymentConfiguration({
+  paymentReceiptUrl,
+  paymentFormUrl,
+  preventPayment,
+  formSubmissionResult,
+  schedulingBooking,
+}: {
+  paymentReceiptUrl: string | undefined
+  paymentFormUrl: string | undefined
+  preventPayment: boolean
+  formSubmissionResult: FormSubmissionResult
+  schedulingBooking: SchedulingBooking
+}) {
+  if (preventPayment || !paymentReceiptUrl) {
+    return null
+  }
+
+  await setSchedulingBooking(schedulingBooking)
+  const paymentSubmissionEventConfiguration =
+    checkForPaymentSubmissionEvent(formSubmissionResult)
+  if (paymentSubmissionEventConfiguration) {
+    return await handlePaymentSubmissionEvent({
+      ...paymentSubmissionEventConfiguration,
+      formSubmissionResult,
+      paymentReceiptUrl,
+      paymentFormUrl,
+    })
+  }
+
+  return null
+}
+
 async function getSchedulingFormSubmissionResult(
   submissionId: string,
   schedulingBooking: SchedulingBooking,
@@ -27,8 +59,12 @@ async function getSchedulingFormSubmissionResult(
     )
   }
 
-  const { formSubmissionResult, paymentReceiptUrl, paymentFormUrl } =
-    schedulingSubmissionResultConfiguration
+  const {
+    formSubmissionResult,
+    paymentReceiptUrl,
+    paymentFormUrl,
+    preventPayment,
+  } = schedulingSubmissionResultConfiguration
   if (
     !formSubmissionResult ||
     !formSubmissionResult.scheduling ||
@@ -45,19 +81,13 @@ async function getSchedulingFormSubmissionResult(
     )
   }
 
-  if (paymentReceiptUrl) {
-    await setSchedulingBooking(schedulingBooking)
-    const paymentSubmissionEventConfiguration =
-      checkForPaymentSubmissionEvent(formSubmissionResult)
-    if (paymentSubmissionEventConfiguration) {
-      formSubmissionResult.payment = await handlePaymentSubmissionEvent({
-        ...paymentSubmissionEventConfiguration,
-        formSubmissionResult,
-        paymentReceiptUrl,
-        paymentFormUrl,
-      })
-    }
-  }
+  formSubmissionResult.payment = await getPaymentConfiguration({
+    paymentFormUrl,
+    paymentReceiptUrl,
+    preventPayment,
+    formSubmissionResult,
+    schedulingBooking,
+  })
 
   await removeSchedulingSubmissionResult()
 
@@ -270,4 +300,5 @@ export {
   handleCancelSchedulingBookingQuerystring,
   createNylasExistingBookingSession,
   createNylasNewBookingSession,
+  getSchedulingFormSubmissionResult,
 }

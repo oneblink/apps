@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - scheduled task properties to form store filtering
 
+### Fixed
+
+- `preventPayment` not being evaluated when completing a clarification with a calendar booking and payment
+
 ## [19.0.0] - 2025-01-12
 
 ### Removed

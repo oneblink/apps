@@ -105,6 +105,7 @@ export default async function submit({
         submissionTimestamp: null,
         submissionId: null,
         payment: null,
+        preventPayment: false,
         scheduling: null,
         isUploadingAttachments: false,
       })
@@ -127,6 +128,7 @@ export default async function submit({
           submissionTimestamp: null,
           submissionId: null,
           payment: null,
+          preventPayment: false,
           scheduling: null,
           isUploadingAttachments: true,
         })
@@ -141,6 +143,7 @@ export default async function submit({
         submissionTimestamp: null,
         submissionId: null,
         payment: null,
+        preventPayment: false,
         scheduling: null,
         isUploadingAttachments: true,
       })
@@ -183,6 +186,7 @@ export default async function submit({
         schedulingUrlConfiguration,
         paymentReceiptUrl,
         paymentFormUrl,
+        preventPayment: data.preventPayment,
       })
     } else if (
       paymentSubmissionEventConfiguration &&
@@ -230,6 +234,7 @@ export default async function submit({
             payment: null,
             scheduling: null,
             isUploadingAttachments: false,
+            preventPayment: false,
           })
         }
 
@@ -246,6 +251,7 @@ export default async function submit({
           payment: null,
           scheduling: null,
           isUploadingAttachments: false,
+          preventPayment: false,
         })
       }
 

@@ -13,6 +13,7 @@ type SchedulingSubmissionResult = {
   formSubmissionResult: FormSubmissionResult
   paymentReceiptUrl: string | undefined
   paymentFormUrl: string | undefined
+  preventPayment: boolean
 }
 export async function getSchedulingSubmissionResult(): Promise<SchedulingSubmissionResult | null> {
   return await utilsService.getLocalForageItem(SCHEDULING_SUBMISSION_RESULT_KEY)
@@ -106,12 +107,14 @@ async function handleSchedulingSubmissionEvent({
   schedulingUrlConfiguration,
   paymentReceiptUrl,
   paymentFormUrl,
+  preventPayment,
 }: {
   formSubmissionResult: FormSubmissionResult
   schedulingSubmissionEvent: SubmissionEventTypes.FormSchedulingEvent
   schedulingUrlConfiguration: SchedulingUrlConfiguration
   paymentReceiptUrl: string | undefined
   paymentFormUrl: string | undefined
+  preventPayment: boolean
 }): Promise<NonNullable<FormSubmissionResult['scheduling']>> {
   console.log(
     'Attempting to handle submission with scheduling submission event',
@@ -143,6 +146,7 @@ async function handleSchedulingSubmissionEvent({
     },
     paymentReceiptUrl,
     paymentFormUrl,
+    preventPayment,
   })
 
   return scheduling

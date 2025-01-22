@@ -1088,9 +1088,11 @@ export async function deleteApprovalAdditionalNote({
 export async function getFormSubmissionApprovalStatus(
   formSubmissionApprovalId: string,
   abortSignal?: AbortSignal,
-): Promise<FormSubmissionApprovalResponse> {
+): Promise<{ status: ApprovalTypes.NewFormSubmissionApproval['status'] }> {
   try {
-    const result = await getRequest<FormSubmissionApprovalResponse>(
+    const result = await getRequest<{
+      status: ApprovalTypes.NewFormSubmissionApproval['status']
+    }>(
       `${tenants.current.apiOrigin}/form-submission-approvals/${formSubmissionApprovalId}/status`,
       abortSignal,
     )

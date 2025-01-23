@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - `approvalsService.getFormSubmissionApprovalStatus()`
+- **[BREAKING]** required property `captchaSiteKey` to `paymentService.westpacQuickStream.completeTransaction()`
 
 ## [19.1.0] - 2025-01-22
 

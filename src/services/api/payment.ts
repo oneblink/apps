@@ -8,6 +8,7 @@ import {
   PaymentProvider,
 } from '../../types/payments'
 import { isOffline } from '../../offline-service'
+import { NewFormSubmission } from '../../submission-service'
 
 async function getCustomFormPaymentConfiguration<T>(
   path: string,
@@ -84,9 +85,7 @@ async function completeWestpacQuickStreamTransaction(
     integrationEnvironmentId: string
     customerReferenceNumber: string
     principalAmount: number
-    recaptcha: {
-      token: string
-    }
+    recaptcha: NonNullable<NewFormSubmission['recaptchas']>[number]
   },
   abortSignal?: AbortSignal,
 ) {

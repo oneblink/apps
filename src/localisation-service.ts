@@ -79,31 +79,6 @@ export function getDateFnsFormats() {
   }
 }
 
-export function getFlatpickrFormats() {
-  const time = 'h:i K'
-  switch (tenants.locale) {
-    case 'en-US': {
-      return generateFormats({
-        time,
-        shortDate: 'm/d/Y',
-        shortYearlessDate: 'm/d',
-        longDate: 'M J, Y',
-        longYearlessDate: 'M J',
-      })
-    }
-    case 'en-AU':
-    default: {
-      return generateFormats({
-        time,
-        shortDate: 'd/m/Y',
-        shortYearlessDate: 'dd/MM',
-        longDate: 'J M, Y',
-        longYearlessDate: 'J M',
-      })
-    }
-  }
-}
-
 /**
  * Format a `Date` as a `string` that just contains the date portion e.g.
  * _31/01/2020_

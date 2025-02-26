@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Removed
+
+- **[BREAKING]** `localisationService.getFlatpickrFormats()`
+
 ## [20.0.0] - 2025-01-29
 
 ### Added

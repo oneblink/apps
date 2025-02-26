@@ -21,8 +21,6 @@ test.skip('it should format currency, date and times correctly', () => {
   expect(localisationService.formatCurrency(amount3)).toBe('$9.91')
   expect(localisationService.formatCurrency(amount4)).toBe('$10.00')
 
-  expect(localisationService.getFlatpickrFormats().shortDate).toBe('d/m/Y')
-
   expect(localisationService.formatDate(date1)).toBe('21/12/2020')
   expect(localisationService.formatDate(date2)).toBe('02/01/2020')
 
@@ -54,8 +52,6 @@ test.skip('it should format currency, date and times correctly', () => {
   expect(localisationService.formatCurrency(amount2)).toBe('$0.12')
   expect(localisationService.formatCurrency(amount3)).toBe('$9.91')
   expect(localisationService.formatCurrency(amount4)).toBe('$10.00')
-
-  expect(localisationService.getFlatpickrFormats().shortDate).toBe('m/d/Y')
 
   expect(localisationService.formatDate(date1)).toBe('12/21/2020')
   expect(localisationService.formatDate(date2)).toBe('01/02/2020')

@@ -257,7 +257,6 @@ export function generateDate({
 }: {
   daysOffset: number | undefined
   value: string
-  dateOnly: boolean
 }): Date | undefined {
   if (value === 'NOW') {
     const date = new Date()
@@ -296,7 +295,6 @@ export const replaceSubmissionFormatters: submissionService.ReplaceInjectablesFo
     formatDate: (v) => {
       const date = generateDate({
         value: v,
-        dateOnly: true,
         daysOffset: undefined,
       })
       if (date) {

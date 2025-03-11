@@ -7,10 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [21.0.0] - 2025-03-11
+
 ### Removed
 
 - **[BREAKING]** `localisationService.getFlatpickrFormats()`
 - unused `dateOnly` from `localisationService.generateDate()`
+
+### Dependencies
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [7.4.0-beta.3](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [7.3.2-beta.1](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
 
 ## [20.0.0] - 2025-01-29
 

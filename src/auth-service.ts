@@ -122,10 +122,14 @@ export function init({ oAuthClientId }: { oAuthClientId: string }) {
  * ```
  *
  * @param formsAppId
+ * @param abortSignal
  * @returns
  */
-export async function isAuthorised(formsAppId: number): Promise<boolean> {
-  return getCurrentFormsAppUser(formsAppId)
+export async function isAuthorised(
+  formsAppId: number,
+  abortSignal?: AbortSignal,
+): Promise<boolean> {
+  return getCurrentFormsAppUser(formsAppId, abortSignal)
     .then(() => true)
     .catch((error) => {
       if (error.status >= 400 && error.status < 500) {
@@ -184,7 +188,7 @@ export async function getCurrentFormsAppUser(
   }
 
   const url = `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/my-forms-app-user`
-  return getRequest<{
+  return await getRequest<{
     userProfile?: MiscTypes.UserProfile
     formsAppId: number
     groups: string[]

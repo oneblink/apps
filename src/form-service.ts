@@ -112,6 +112,7 @@ async function getForms(
  *   formAppId: 1, // `formsAppId` is optional
  *   formsAppEnvironmentId: undefined,
  *   formSlug: undefined,
+ *   toCompleteTask: false,
  * })
  *
  * // OR
@@ -121,6 +122,7 @@ async function getForms(
  *   formAppId: 1,
  *   formsAppEnvironmentId: undefined,
  *   formId: undefined,
+ *   toCompleteTask: false,
  * })
  *
  * // OR
@@ -130,6 +132,7 @@ async function getForms(
  *   formsAppEnvironmentId: 1,
  *   formAppId: undefined,
  *   formId: undefined,
+ *   toCompleteTask: false,
  * })
  * ```
  *
@@ -141,37 +144,43 @@ async function getForm({
   formsAppEnvironmentId,
   abortSignal,
   formSlug,
+  toCompleteTask,
   formId,
 }: {
   formSlug: string | undefined
   formId: number | undefined
   formsAppId: number | undefined
   formsAppEnvironmentId: number | undefined
+  toCompleteTask?: boolean
   abortSignal?: AbortSignal
 }): Promise<FormTypes.Form> {
   return (
     (() => {
+      const queryParams = {
+        toCompleteTask,
+      }
       if (formSlug) {
         if (!Number.isNaN(formsAppEnvironmentId)) {
-          return getRequest<FormTypes.Form>(
+          return searchRequest<FormTypes.Form>(
             `${tenants.current.apiOrigin}/forms-app-environments/${formsAppEnvironmentId}/forms/${formSlug}`,
+            queryParams,
             abortSignal,
           )
         }
 
         if (!Number.isNaN(formsAppId)) {
-          return getRequest<FormTypes.Form>(
+          return searchRequest<FormTypes.Form>(
             `${tenants.current.apiOrigin}/forms-apps/${formsAppId}/forms/${formSlug}`,
+            queryParams,
             abortSignal,
           )
         }
       }
 
       return searchRequest<FormTypes.Form>(
-        `${tenants.current.apiOrigin}/forms/${formId}`,
-        {
-          injectForms: true,
-        },
+        `${tenants.current.apiOrigin}/form-definitions/${formId}`,
+        queryParams,
+        abortSignal,
       )
     })()
       // If we could not find a form by Id for any reason,
@@ -200,7 +209,13 @@ async function getForm({
       .catch((error) => {
         Sentry.captureException(error)
         console.warn(
-          `Error retrieving form (${formId || formSlug}) from API`,
+          'Error retrieving form from API',
+          {
+            formsAppId,
+            formsAppEnvironmentId,
+            formSlug,
+            formId,
+          },
           error,
         )
         if (isOffline()) {

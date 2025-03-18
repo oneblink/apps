@@ -115,6 +115,7 @@ class Tenants {
   }
 
   get current(): OneBlinkAppsTenant {
+    console.log(this.tenant)
     switch (this.tenant) {
       case 'civicplus':
         return this.isTestEnvironment
@@ -143,6 +144,7 @@ class Tenants {
   }
 
   useCivicPlus() {
+    console.log('triggered')
     this.tenant = 'civicplus'
   }
 }

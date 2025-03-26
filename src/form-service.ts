@@ -495,13 +495,19 @@ type FormElementOptionsSetResult =
  *
  * @param formElementOptionsSet The form element options set to generate options
  *   from
- * @param formsAppEnvironmentId The environment to pull options from
+ * @param options The environment and form to pull options from
  * @param abortSignal A signal to abort any asynchronous processing
  * @returns A result object containing potential options or a predictable error
  */
 async function getFormElementOptionsSetOptions(
   formElementOptionsSet: FormTypes.FormElementOptionSet,
-  formsAppEnvironmentId: number,
+  {
+    formsAppEnvironmentId,
+    formId,
+  }: {
+    formsAppEnvironmentId: number
+    formId: number
+  },
   abortSignal: AbortSignal,
 ): Promise<FormElementOptionsSetResult> {
   switch (formElementOptionsSet.type) {
@@ -537,6 +543,81 @@ async function getFormElementOptionsSetOptions(
             ),
           },
         ),
+      }
+    }
+    case 'SHAREPOINT_LIST_COLUMN': {
+      const formElementOptionSetEnvironmentSharePointListColumn =
+        formElementOptionsSet.environments.find(
+          (environment) =>
+            environment.formsAppEnvironmentId === formsAppEnvironmentId,
+        )
+      if (!formElementOptionSetEnvironmentSharePointListColumn) {
+        return {
+          type: 'ERROR',
+          error: new OneBlinkAppsError(
+            `Dynamic list configuration has not been completed yet. Please contact your administrator to rectify the issue.`,
+            {
+              title: 'Misconfigured Dynamic List',
+              originalError: new Error(
+                JSON.stringify(
+                  {
+                    formElementOptionsSetId: formElementOptionsSet.id,
+                    formElementOptionsSetName: formElementOptionsSet.name,
+                    formsAppEnvironmentId,
+                  },
+                  null,
+                  2,
+                ),
+              ),
+            },
+          ),
+        }
+      }
+
+      try {
+        const { options } = await getRequest<{ options: unknown }>(
+          `${tenants.current.apiOrigin}/forms/${formId}/sharepoint-list-column-options`,
+          abortSignal,
+        )
+        return {
+          type: 'OPTIONS',
+          options,
+        }
+      } catch (error) {
+        Sentry.captureException(error)
+        return {
+          type: 'ERROR',
+          error: new OneBlinkAppsError(
+            `Options could not be loaded. Please contact your administrator to rectify the issue.`,
+            {
+              title: 'Invalid List Response',
+              httpStatusCode: (error as HTTPError).status,
+              originalError: new OneBlinkAppsError(
+                JSON.stringify(
+                  {
+                    formsAppEnvironmentId,
+                    formElementOptionsSetId: formElementOptionsSet.id,
+                    formElementOptionsSetName: formElementOptionsSet.name,
+                    sharepointSite:
+                      formElementOptionSetEnvironmentSharePointListColumn
+                        .sharepointSite.displayName,
+                    sharepointList:
+                      formElementOptionSetEnvironmentSharePointListColumn
+                        .sharepointList.displayName,
+                    sharepointColumn:
+                      formElementOptionSetEnvironmentSharePointListColumn
+                        .sharepointColumn.displayName,
+                  },
+                  null,
+                  2,
+                ),
+                {
+                  originalError: error as HTTPError,
+                },
+              ),
+            },
+          ),
+        }
       }
     }
     case 'HOSTED_API':
@@ -773,7 +854,10 @@ async function loadFormElementDynamicOptions(
         formElementOptionsSets.map(async (formElementOptionsSet) => {
           await getFormElementOptionsSetOptions(
             formElementOptionsSet,
-            forms[0].formsAppEnvironmentId,
+            {
+              formsAppEnvironmentId: forms[0].formsAppEnvironmentId,
+              formId: forms[0].id,
+            },
             abortSignal,
           )
         }),

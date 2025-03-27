@@ -576,7 +576,7 @@ async function getFormElementOptionsSetOptions(
 
       try {
         const { options } = await getRequest<{ options: unknown }>(
-          `${tenants.current.apiOrigin}/forms/${formId}/sharepoint-list-column-options`,
+          `${tenants.current.apiOrigin}/forms/${formId}/sharepoint-list-column-options?formElementOptionsSetId=${formElementOptionsSet.id}`,
           abortSignal,
         )
         return {

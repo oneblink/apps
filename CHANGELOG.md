@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `formService.searchPointAddressesV3`
+- `formService.getPointAddressV3`
+
+### Deprecated
+
+- `formService.searchPointAddresses`
+- `formService.getPointAddress`
+
 ## [22.0.0] - 2025-04-04
 
 ### Changed

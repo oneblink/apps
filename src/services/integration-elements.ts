@@ -23,6 +23,60 @@ import {
 import tenants from '../tenants'
 import Sentry from '../Sentry'
 
+const generateError = (err: unknown, abortSignal?: AbortSignal) => {
+  if (!abortSignal?.aborted) {
+    Sentry.captureException(err)
+  }
+  const error = err as HTTPError
+  if (isOffline()) {
+    throw new OneBlinkAppsError(
+      'You are currently offline, please connect to the internet and try again',
+      {
+        originalError: error,
+        isOffline: true,
+      },
+    )
+  }
+  switch (error.status) {
+    case 401: {
+      return new OneBlinkAppsError('Please login and try again.', {
+        originalError: error,
+        requiresLogin: true,
+        httpStatusCode: error.status,
+      })
+    }
+    case 403: {
+      return new OneBlinkAppsError(
+        'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
+        {
+          originalError: error,
+          requiresAccessRequest: true,
+          httpStatusCode: error.status,
+        },
+      )
+    }
+    case 400:
+    case 404: {
+      return new OneBlinkAppsError(
+        "Please contact your administrator to ensure this application's configuration has been completed successfully.",
+        {
+          originalError: error,
+          title: 'Unknown Application',
+          httpStatusCode: error.status,
+        },
+      )
+    }
+    default: {
+      return new OneBlinkAppsError(
+        'An unknown error has occurred. Please contact support if the problem persists.',
+        {
+          originalError: error,
+          httpStatusCode: error.status,
+        },
+      )
+    }
+  }
+}
 /**
  * Search for geoscape addresses based on a partial address.
  *
@@ -61,58 +115,7 @@ export async function searchGeoscapeAddresses(
       abortSignal,
     )
   } catch (err) {
-    if (!abortSignal?.aborted) {
-      Sentry.captureException(err)
-    }
-    const error = err as HTTPError
-    if (isOffline()) {
-      throw new OneBlinkAppsError(
-        'You are currently offline, please connect to the internet and try again',
-        {
-          originalError: error,
-          isOffline: true,
-        },
-      )
-    }
-    switch (error.status) {
-      case 401: {
-        throw new OneBlinkAppsError('Please login and try again.', {
-          originalError: error,
-          requiresLogin: true,
-          httpStatusCode: error.status,
-        })
-      }
-      case 403: {
-        throw new OneBlinkAppsError(
-          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
-          {
-            originalError: error,
-            requiresAccessRequest: true,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      case 400:
-      case 404: {
-        throw new OneBlinkAppsError(
-          "Please contact your administrator to ensure this application's configuration has been completed successfully.",
-          {
-            originalError: error,
-            title: 'Unknown Application',
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      default: {
-        throw new OneBlinkAppsError(
-          'An unknown error has occurred. Please contact support if the problem persists.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-    }
+    throw generateError(err, abortSignal)
   }
 }
 
@@ -144,58 +147,7 @@ export async function getGeoscapeAddress(
       abortSignal,
     )
   } catch (err) {
-    if (!abortSignal?.aborted) {
-      Sentry.captureException(err)
-    }
-    const error = err as HTTPError
-    if (isOffline()) {
-      throw new OneBlinkAppsError(
-        'You are currently offline, please connect to the internet and try again',
-        {
-          originalError: error,
-          isOffline: true,
-        },
-      )
-    }
-    switch (error.status) {
-      case 401: {
-        throw new OneBlinkAppsError('Please login and try again.', {
-          originalError: error,
-          requiresLogin: true,
-          httpStatusCode: error.status,
-        })
-      }
-      case 403: {
-        throw new OneBlinkAppsError(
-          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
-          {
-            originalError: error,
-            requiresAccessRequest: true,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      case 400:
-      case 404: {
-        throw new OneBlinkAppsError(
-          "Please contact your administrator to ensure this application's configuration has been completed successfully.",
-          {
-            originalError: error,
-            title: 'Unknown Application',
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      default: {
-        throw new OneBlinkAppsError(
-          'An unknown error has occurred. Please contact support if the problem persists.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-    }
+    throw generateError(err, abortSignal)
   }
 }
 
@@ -310,6 +262,7 @@ export async function getGeoscapeReverseGeocoding({
  * })
  * ```
  *
+ * @deprecated Use `searchPointAddressesV3` instead.
  * @param formId
  * @param queryParams
  * @param abortSignal
@@ -333,61 +286,51 @@ export async function searchPointAddresses(
       abortSignal,
     )
   } catch (err) {
-    if (!abortSignal?.aborted) {
-      Sentry.captureException(err)
-    }
-    const error = err as HTTPError
-    if (isOffline()) {
-      throw new OneBlinkAppsError(
-        'You are currently offline, please connect to the internet and try again',
-        {
-          originalError: error,
-          isOffline: true,
-        },
-      )
-    }
-    switch (error.status) {
-      case 401: {
-        throw new OneBlinkAppsError('Please login and try again.', {
-          originalError: error,
-          requiresLogin: true,
-          httpStatusCode: error.status,
-        })
-      }
-      case 403: {
-        throw new OneBlinkAppsError(
-          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
-          {
-            originalError: error,
-            requiresAccessRequest: true,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      case 400:
-      case 404: {
-        throw new OneBlinkAppsError(
-          "Please contact your administrator to ensure this application's configuration has been completed successfully.",
-          {
-            originalError: error,
-            title: 'Unknown Application',
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      default: {
-        throw new OneBlinkAppsError(
-          'An unknown error has occurred. Please contact support if the problem persists.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-    }
+    throw generateError(err, abortSignal)
   }
 }
 
+/**
+ * Search for Point addresses based on a partial address.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formId = 1
+ * const result = await formService.searchPointAddressesV3(formId, {
+ *   address: '123 N',
+ *   maxResults: 10
+ *   stateTerritory: 'NSW'
+ * })
+ * ```
+ *
+ * @param formId
+ * @param queryParams
+ * @param abortSignal
+ * @returns
+ */
+export async function searchPointAddressesV3(
+  formId: number,
+  queryParams: {
+    address: string
+    maxResults?: number
+    stateFilter?: string
+    dataset?: string
+    addressType?: 'physical' | 'mailing' | 'all'
+    excludeAliases?: boolean
+  },
+  abortSignal?: AbortSignal,
+): Promise<PointTypes.PointAddressesSearchResultV3> {
+  try {
+    return await searchRequest(
+      `${tenants.current.apiOrigin}/forms/${formId}/point/v3/addresses`,
+      queryParams,
+      abortSignal,
+    )
+  } catch (err) {
+    throw generateError(err, abortSignal)
+  }
+}
 /**
  * Get the details for a single Point address based on the Id of a Point address
  * resource.
@@ -400,6 +343,7 @@ export async function searchPointAddresses(
  * const result = await formService.getPointAddress(formId, addressId)
  * ```
  *
+ * @deprecated Use `getPointAddressV3` instead.
  * @param formId
  * @param addressId
  * @param abortSignal
@@ -416,58 +360,39 @@ export async function getPointAddress(
       abortSignal,
     )
   } catch (err) {
-    if (!abortSignal?.aborted) {
-      Sentry.captureException(err)
-    }
-    const error = err as HTTPError
-    if (isOffline()) {
-      throw new OneBlinkAppsError(
-        'You are currently offline, please connect to the internet and try again',
-        {
-          originalError: error,
-          isOffline: true,
-        },
-      )
-    }
-    switch (error.status) {
-      case 401: {
-        throw new OneBlinkAppsError('Please login and try again.', {
-          originalError: error,
-          requiresLogin: true,
-          httpStatusCode: error.status,
-        })
-      }
-      case 403: {
-        throw new OneBlinkAppsError(
-          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
-          {
-            originalError: error,
-            requiresAccessRequest: true,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      case 400:
-      case 404: {
-        throw new OneBlinkAppsError(
-          "Please contact your administrator to ensure this application's configuration has been completed successfully.",
-          {
-            originalError: error,
-            title: 'Unknown Application',
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      default: {
-        throw new OneBlinkAppsError(
-          'An unknown error has occurred. Please contact support if the problem persists.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-    }
+    throw generateError(err, abortSignal)
+  }
+}
+
+/**
+ * Get the details for a single Point address based on the Id of a Point address
+ * resource.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formId = 1
+ * const addressId = 'ABC123'
+ * const result = await formService.getPointAddressV3(formId, addressId)
+ * ```
+ *
+ * @param formId
+ * @param addressId
+ * @param abortSignal
+ * @returns
+ */
+export async function getPointAddressV3(
+  formId: number,
+  addressId: string,
+  abortSignal?: AbortSignal,
+): Promise<PointTypes.PointAddressResponseV3> {
+  try {
+    return await getRequest(
+      `${tenants.current.apiOrigin}/forms/${formId}/point/v3/addresses/${addressId}`,
+      abortSignal,
+    )
+  } catch (err) {
+    throw generateError(err, abortSignal)
   }
 }
 
@@ -508,58 +433,7 @@ export async function searchCivicaStreetNames(
       abortSignal,
     )
   } catch (err) {
-    if (!abortSignal?.aborted) {
-      Sentry.captureException(err)
-    }
-    const error = err as HTTPError
-    if (isOffline()) {
-      throw new OneBlinkAppsError(
-        'You are currently offline, please connect to the internet and try again',
-        {
-          originalError: error,
-          isOffline: true,
-        },
-      )
-    }
-    switch (error.status) {
-      case 401: {
-        throw new OneBlinkAppsError('Please login and try again.', {
-          originalError: error,
-          requiresLogin: true,
-          httpStatusCode: error.status,
-        })
-      }
-      case 403: {
-        throw new OneBlinkAppsError(
-          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
-          {
-            originalError: error,
-            requiresAccessRequest: true,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      case 400:
-      case 404: {
-        throw new OneBlinkAppsError(
-          "Please contact your administrator to ensure this application's configuration has been completed successfully.",
-          {
-            originalError: error,
-            title: 'Unknown Application',
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      default: {
-        throw new OneBlinkAppsError(
-          'An unknown error has occurred. Please contact support if the problem persists.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-    }
+    throw generateError(err, abortSignal)
   }
 }
 
@@ -587,58 +461,7 @@ export async function getCivicaTitleCodes(
       abortSignal,
     )
   } catch (err) {
-    if (!abortSignal?.aborted) {
-      Sentry.captureException(err)
-    }
-    const error = err as HTTPError
-    if (isOffline()) {
-      throw new OneBlinkAppsError(
-        'You are currently offline, please connect to the internet and try again',
-        {
-          originalError: error,
-          isOffline: true,
-        },
-      )
-    }
-    switch (error.status) {
-      case 401: {
-        throw new OneBlinkAppsError('Please login and try again.', {
-          originalError: error,
-          requiresLogin: true,
-          httpStatusCode: error.status,
-        })
-      }
-      case 403: {
-        throw new OneBlinkAppsError(
-          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
-          {
-            originalError: error,
-            requiresAccessRequest: true,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      case 400:
-      case 404: {
-        throw new OneBlinkAppsError(
-          "Please contact your administrator to ensure this application's configuration has been completed successfully.",
-          {
-            originalError: error,
-            title: 'Unknown Application',
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      default: {
-        throw new OneBlinkAppsError(
-          'An unknown error has occurred. Please contact support if the problem persists.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-    }
+    throw generateError(err, abortSignal)
   }
 }
 
@@ -812,58 +635,7 @@ export async function searchAPINSWLiquorLicences(
       },
     )
   } catch (err) {
-    if (!abortSignal?.aborted) {
-      Sentry.captureException(err)
-    }
-    const error = err as HTTPError
-    if (isOffline()) {
-      throw new OneBlinkAppsError(
-        'You are currently offline, please connect to the internet and try again',
-        {
-          originalError: error,
-          isOffline: true,
-        },
-      )
-    }
-    switch (error.status) {
-      case 401: {
-        throw new OneBlinkAppsError('Please login and try again.', {
-          originalError: error,
-          requiresLogin: true,
-          httpStatusCode: error.status,
-        })
-      }
-      case 403: {
-        throw new OneBlinkAppsError(
-          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
-          {
-            originalError: error,
-            requiresAccessRequest: true,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      case 400:
-      case 404: {
-        throw new OneBlinkAppsError(
-          "Please contact your administrator to ensure this application's configuration has been completed successfully.",
-          {
-            originalError: error,
-            title: 'Unknown Application',
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      default: {
-        throw new OneBlinkAppsError(
-          'An unknown error has occurred. Please contact support if the problem persists.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-    }
+    throw generateError(err, abortSignal)
   }
 }
 
@@ -909,58 +681,7 @@ export async function getAPINSWLiquorLicence(
       },
     )
   } catch (err) {
-    if (!abortSignal?.aborted) {
-      Sentry.captureException(err)
-    }
-    const error = err as HTTPError
-    if (isOffline()) {
-      throw new OneBlinkAppsError(
-        'You are currently offline, please connect to the internet and try again',
-        {
-          originalError: error,
-          isOffline: true,
-        },
-      )
-    }
-    switch (error.status) {
-      case 401: {
-        throw new OneBlinkAppsError('Please login and try again.', {
-          originalError: error,
-          requiresLogin: true,
-          httpStatusCode: error.status,
-        })
-      }
-      case 403: {
-        throw new OneBlinkAppsError(
-          'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
-          {
-            originalError: error,
-            requiresAccessRequest: true,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      case 400:
-      case 404: {
-        throw new OneBlinkAppsError(
-          "Please contact your administrator to ensure this application's configuration has been completed successfully.",
-          {
-            originalError: error,
-            title: 'Unknown Application',
-            httpStatusCode: error.status,
-          },
-        )
-      }
-      default: {
-        throw new OneBlinkAppsError(
-          'An unknown error has occurred. Please contact support if the problem persists.',
-          {
-            originalError: error,
-            httpStatusCode: error.status,
-          },
-        )
-      }
-    }
+    throw generateError(err, abortSignal)
   }
 }
 

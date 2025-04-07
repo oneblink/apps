@@ -37,6 +37,7 @@ type SubmissionParams = {
   paymentFormUrl: string | undefined
   schedulingUrlConfiguration?: SchedulingUrlConfiguration
   pendingTimestamp?: string
+  alwaysSubmitViaPendingQueue?: boolean
   onProgress?: ProgressListener
   abortSignal?: AbortSignal
 }
@@ -54,6 +55,7 @@ export default async function submit({
   shouldRunExternalIdGeneration,
   abortSignal,
   pendingTimestamp,
+  alwaysSubmitViaPendingQueue,
 }: SubmissionParams): Promise<FormSubmissionResult> {
   const paymentSubmissionEventConfiguration =
     checkForPaymentSubmissionEvent(formSubmission)
@@ -65,10 +67,10 @@ export default async function submit({
     if (pendingTimestamp) {
       await deletePendingQueueSubmission(pendingTimestamp)
     }
-    if (isOffline()) {
+    if (isOffline() || alwaysSubmitViaPendingQueue) {
       if (paymentSubmissionEventConfiguration || schedulingSubmissionEvent) {
         console.log(
-          'Offline - form has a payment/scheduling submission event that has not been processed yet, return offline',
+          'Offline or always submitting via pending queue - form has a payment/scheduling submission event that has not been processed yet, return offline',
           { paymentSubmissionEventConfiguration, schedulingSubmissionEvent },
         )
         return Object.assign({}, formSubmission, {
@@ -82,7 +84,7 @@ export default async function submit({
         })
       }
 
-      if (!isPendingQueueEnabled) {
+      if (!alwaysSubmitViaPendingQueue && !isPendingQueueEnabled) {
         console.log(
           'Offline - app does not support pending queue, return offline',
         )
@@ -97,10 +99,12 @@ export default async function submit({
         })
       }
 
-      console.log('Offline - saving submission to pending queue..')
+      console.log(
+        'Offline or always submitting via pending queue - saving submission to pending queue..',
+      )
       await addFormSubmissionToPendingQueue(formSubmission)
       return Object.assign({}, formSubmission, {
-        isOffline: true,
+        isOffline: isOffline(),
         isInPendingQueue: true,
         submissionTimestamp: null,
         submissionId: null,

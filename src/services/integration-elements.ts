@@ -38,6 +38,12 @@ const generateError = (err: unknown, abortSignal?: AbortSignal) => {
     )
   }
   switch (error.status) {
+    case 400: {
+      return new OneBlinkAppsError(error.message, {
+        title: 'Invalid',
+        httpStatusCode: error.status,
+      })
+    }
     case 401: {
       return new OneBlinkAppsError('Please login and try again.', {
         originalError: error,
@@ -55,7 +61,6 @@ const generateError = (err: unknown, abortSignal?: AbortSignal) => {
         },
       )
     }
-    case 400:
     case 404: {
       return new OneBlinkAppsError(
         "Please contact your administrator to ensure this application's configuration has been completed successfully.",

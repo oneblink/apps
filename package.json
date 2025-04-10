@@ -25,7 +25,7 @@
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.23.0",
     "@microsoft/eslint-plugin-sdl": "^0.2.0",
-    "@oneblink/release-cli": "^3.3.1-beta.1",
+    "@oneblink/release-cli": "^3.3.1-beta.3",
     "@oneblink/types": "github:oneblink/types",
     "@types/file-saver": "^2.0.6",
     "@types/jest": "^27.5.0",

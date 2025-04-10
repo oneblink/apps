@@ -262,7 +262,6 @@ export async function getGeoscapeReverseGeocoding({
  * })
  * ```
  *
- * @deprecated Use `searchPointAddressesV3` instead.
  * @param formId
  * @param queryParams
  * @param abortSignal
@@ -291,47 +290,6 @@ export async function searchPointAddresses(
 }
 
 /**
- * Search for Point addresses based on a partial address.
- *
- * #### Example
- *
- * ```js
- * const formId = 1
- * const result = await formService.searchPointAddressesV3(formId, {
- *   address: '123 N',
- *   maxResults: 10
- *   stateTerritory: 'NSW'
- * })
- * ```
- *
- * @param formId
- * @param queryParams
- * @param abortSignal
- * @returns
- */
-export async function searchPointAddressesV3(
-  formId: number,
-  queryParams: {
-    address: string
-    maxResults?: number
-    stateFilter?: string
-    dataset?: string
-    addressType?: 'physical' | 'mailing' | 'all'
-    excludeAliases?: boolean
-  },
-  abortSignal?: AbortSignal,
-): Promise<PointTypes.PointAddressesSearchResultV3> {
-  try {
-    return await searchRequest(
-      `${tenants.current.apiOrigin}/forms/${formId}/point/v3/addresses`,
-      queryParams,
-      abortSignal,
-    )
-  } catch (err) {
-    throw generateError(err, abortSignal)
-  }
-}
-/**
  * Get the details for a single Point address based on the Id of a Point address
  * resource.
  *
@@ -343,7 +301,6 @@ export async function searchPointAddressesV3(
  * const result = await formService.getPointAddress(formId, addressId)
  * ```
  *
- * @deprecated Use `getPointAddressV3` instead.
  * @param formId
  * @param addressId
  * @param abortSignal
@@ -365,30 +322,35 @@ export async function getPointAddress(
 }
 
 /**
- * Get the details for a single Point address based on the Id of a Point address
- * resource.
+ * Get the details for a single NSW Point Cadastral Parcel record.
  *
  * #### Example
  *
  * ```js
  * const formId = 1
- * const addressId = 'ABC123'
- * const result = await formService.getPointAddressV3(formId, addressId)
+ * const parcelId = '1/234567'
+ * const result = await formService.getPointCadastralParcel(
+ *   formId,
+ *   addressId,
+ * )
  * ```
  *
  * @param formId
- * @param addressId
+ * @param parcelId
  * @param abortSignal
  * @returns
  */
-export async function getPointAddressV3(
+export async function getPointCadastralParcel(
   formId: number,
-  addressId: string,
+  parcelId: string,
   abortSignal?: AbortSignal,
-): Promise<PointTypes.PointAddressResponseV3> {
+): Promise<PointTypes.PointCadastralParcelResponse> {
   try {
+    const urlSearchParams = new URLSearchParams([['parcelId', parcelId]])
     return await getRequest(
-      `${tenants.current.apiOrigin}/forms/${formId}/point/v3/addresses/${addressId}`,
+      `${
+        tenants.current.apiOrigin
+      }/forms/${formId}/point/cadastral-parcels?${urlSearchParams.toString()}`,
       abortSignal,
     )
   } catch (err) {

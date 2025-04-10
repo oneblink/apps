@@ -9,14 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-- `formService.searchPointAddressesV3`
-- `formService.getPointAddressV3`
+- `formService.getPointCadastralParcel`
 - `alwaysSubmitViaPendingQueue` option when submitting forms
-
-### Deprecated
-
-- `formService.searchPointAddresses`
-- `formService.getPointAddress`
 
 ## [22.0.0] - 2025-04-04
 

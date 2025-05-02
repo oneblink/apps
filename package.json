@@ -1,7 +1,7 @@
 {
   "name": "@oneblink/apps",
   "description": "Helper functions for OneBlink apps in JavaScript.",
-  "version": "22.1.1-beta.1",
+  "version": "22.1.1-beta.2",
   "author": "OneBlink <developers@oneblink.io> (https://oneblink.io)",
   "bugs": {
     "url": "https://github.com/oneblink/apps/issues"
@@ -25,7 +25,7 @@
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.23.0",
     "@microsoft/eslint-plugin-sdl": "^0.2.0",
-    "@oneblink/release-cli": "^3.3.1-beta.3",
+    "@oneblink/release-cli": "^3.3.1-beta.4",
     "@oneblink/types": "github:oneblink/types",
     "@types/file-saver": "^2.0.6",
     "@types/jest": "^27.5.0",

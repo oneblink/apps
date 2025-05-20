@@ -55,9 +55,7 @@ function init(cognitoServiceData: CognitoServiceData) {
  */
 function registerAuthListener(listener: () => unknown): () => void {
   if (!awsCognitoClient) {
-    throw new Error(
-      '"authService" has not been initiated. You must call the init() function before attempting to register a listener.',
-    )
+    return () => undefined
   }
   return awsCognitoClient.registerListener(listener)
 }

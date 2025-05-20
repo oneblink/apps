@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- `authService.registerAuthListener()` throwing errors before initialisation
+
 ## [22.1.1] - 2025-05-06
 
 ### Dependencies

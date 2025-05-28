@@ -191,8 +191,7 @@ const asSubmissionAttachmentDetail = (
   if (
     typeof record.type === 'string' &&
     typeof record.fileName === 'string' &&
-    typeof record._id === 'string' &&
-    record.data instanceof Blob
+    typeof record._id === 'string'
   ) {
     return {
       needsToUpload: true,

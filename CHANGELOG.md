@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- attachment not being available if data is not stored locally successfully
+
 ## [22.1.2] - 2025-05-22
 
 ### Dependencies

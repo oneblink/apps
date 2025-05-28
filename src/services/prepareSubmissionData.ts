@@ -2,6 +2,7 @@ import { FormTypes } from '@oneblink/types'
 import { BaseNewFormSubmission } from '../types/submissions'
 import { executePendingQueueAttachmentProgressListeners } from './pending-queue'
 import uploadAttachment from './uploadAttachment'
+import { Attachment } from '../attachments-service'
 
 export default async function prepareSubmissionData({
   definition,
@@ -16,28 +17,36 @@ async function maybeUploadAttachment(
   value: unknown,
 ) {
   if (value && typeof value === 'object') {
-    const record = value as Record<string, unknown>
+    const record = value as Attachment
     // If the value matches the properties required for an attachment
     // that was never uploaded, we need to upload it.
     if (
-      typeof record.type === 'string' &&
+      record.type &&
       typeof record.fileName === 'string' &&
-      typeof record._id === 'string' &&
-      record.data instanceof Blob
+      typeof record._id === 'string'
     ) {
-      const attachmentId = record._id
-      return await uploadAttachment({
-        formId,
-        fileName: record.fileName,
-        contentType: record.data.type,
-        isPrivate: formElement.storageType !== 'public',
-        data: record.data,
-        onProgress: (event) =>
-          executePendingQueueAttachmentProgressListeners({
-            ...event,
-            attachmentId,
-          }),
-      })
+      if (record.data instanceof Blob) {
+        const attachmentId = record._id
+        return await uploadAttachment({
+          formId,
+          fileName: record.fileName,
+          contentType: record.data.type,
+          isPrivate: formElement.storageType !== 'public',
+          data: record.data,
+          onProgress: (event) =>
+            executePendingQueueAttachmentProgressListeners({
+              ...event,
+              attachmentId,
+            }),
+        })
+      } else if (record.type === 'NEW') {
+        return {
+          ...record,
+          type: 'ERROR',
+          errorMessage:
+            'We were unable to read this file from your file system. Please try again. If the problem persists, please contact your application administrators.',
+        }
+      }
     }
   }
   return value

@@ -36,6 +36,7 @@ import {
 } from './types/submissions'
 import { deleteAutoSaveData } from './auto-save-service'
 import { downloadFormSubmission } from './services/api/submissions'
+import { getSubmissionAttachmentDetails } from './attachments-service'
 
 let _isProcessingPendingQueue = false
 
@@ -120,6 +121,20 @@ async function processPendingQueue({
       )
 
       const submission = await prepareSubmissionData(formSubmission)
+      const attachments = getSubmissionAttachmentDetails(
+        formSubmission.definition.elements,
+        submission,
+      )
+      const failedAttachments = attachments.filter(
+        (attachment) => attachment.value.type === 'ERROR',
+      )
+      if (failedAttachments.length) {
+        throw new Error(
+          `Failed to upload ${failedAttachments.length} attachment${
+            failedAttachments.length > 1 ? 's' : ''
+          }.`,
+        )
+      }
       await submit({
         isPendingQueueEnabled: true,
         formSubmission: { ...formSubmission, submission },

@@ -24,6 +24,8 @@ function errorHandler(error: Error): Error {
   return error
 }
 
+const PENDING_QUEUE_SUBMISSIONS_KEY = 'PENDING_QUEUE_SUBMISSIONS'
+
 export type PendingQueueAction =
   | 'SUBMIT_STARTED'
   | 'SUBMIT_FAILED'
@@ -90,18 +92,16 @@ export async function addFormSubmissionToPendingQueue(
 ) {
   const pendingTimestamp = new Date().toISOString()
   try {
-    await utilsService.setLocalForageItem(
-      `SUBMISSION_${pendingTimestamp}`,
-      formSubmission,
-    )
     const submissions: PendingFormSubmission[] =
       await getPendingQueueSubmissions()
     submissions.push({
       ...formSubmission,
       pendingTimestamp,
-      submission: undefined,
     } as PendingFormSubmission)
-    await utilsService.localForage.setItem('submissions', submissions)
+    await utilsService.setLocalForageItem(
+      PENDING_QUEUE_SUBMISSIONS_KEY,
+      submissions,
+    )
     executePendingQueueListeners(submissions, 'ADDITION')
   } catch (error) {
     Sentry.captureException(error)
@@ -127,7 +127,10 @@ export async function updatePendingQueueSubmission(
       }
       return submission
     })
-    await utilsService.localForage.setItem('submissions', newSubmissions)
+    await utilsService.setLocalForageItem(
+      PENDING_QUEUE_SUBMISSIONS_KEY,
+      newSubmissions,
+    )
     executePendingQueueListeners(newSubmissions, action)
   } catch (error) {
     if (!skipSentry) {
@@ -192,15 +195,9 @@ export async function cancelEditingPendingQueueSubmission(
  * @returns
  */
 export function getPendingQueueSubmissions(): Promise<PendingFormSubmission[]> {
-  return utilsService.localForage
-    .getItem('submissions')
+  return utilsService
+    .getLocalForageItem(PENDING_QUEUE_SUBMISSIONS_KEY)
     .then((submissions) => (Array.isArray(submissions) ? submissions : []))
-}
-
-export function getFormSubmission(
-  pendingTimestamp: string,
-): Promise<FormSubmission | null> {
-  return utilsService.getLocalForageItem(`SUBMISSION_${pendingTimestamp}`)
 }
 
 /**
@@ -241,9 +238,13 @@ export async function editPendingQueueSubmission(
   pendingTimestamp: string,
 ): Promise<{ preFillFormDataId: string; formId: number }> {
   try {
-    const formSubmission = await getFormSubmission(pendingTimestamp)
+    const pendingQueueSubmissions = await getPendingQueueSubmissions()
+    const formSubmission = pendingQueueSubmissions.find(
+      (pendingQueueSubmission) =>
+        pendingQueueSubmission.pendingTimestamp === pendingTimestamp,
+    )
     if (!formSubmission) {
-      throw new Error('Could not find formSubmision to edit')
+      throw new Error('Could not find form submission to edit')
     }
     const preFillFormDataId = `PENDING_SUBMISSION_${pendingTimestamp}`
     const key = getPrefillKey(preFillFormDataId)
@@ -273,12 +274,14 @@ export async function removePendingQueueSubmission(
   action: 'SUBMIT_SUCCEEDED' | 'DELETION',
 ) {
   try {
-    await utilsService.removeLocalForageItem(`SUBMISSION_${pendingTimestamp}`)
     const submissions = await getPendingQueueSubmissions()
     const newSubmissions = submissions.filter(
       (submission) => submission.pendingTimestamp !== pendingTimestamp,
     )
-    await utilsService.localForage.setItem('submissions', newSubmissions)
+    await utilsService.setLocalForageItem(
+      PENDING_QUEUE_SUBMISSIONS_KEY,
+      newSubmissions,
+    )
     executePendingQueueListeners(newSubmissions, action)
   } catch (error) {
     Sentry.captureException(error)

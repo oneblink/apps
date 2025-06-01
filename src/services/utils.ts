@@ -87,11 +87,11 @@ function generateKeyValuesReducer(
       value instanceof Blob
     ) {
       const newKey = `${key}_${property}`
-      keyValues.keys.push(newKey)
-      keyValues.items.push({
-        key: newKey,
-        value,
-      })
+      // keyValues.keys.push(newKey)
+      // keyValues.items.push({
+      //   key: newKey,
+      //   value,
+      // })
       // @ts-expect-error
       data[property] = newKey
     } else if (value !== null && typeof value === 'object') {

@@ -24,6 +24,8 @@ function errorHandler(error: Error): Error {
   return error
 }
 
+const PENDING_QUEUE_SUBMISSIONS_KEY = 'submissions'
+
 export type PendingQueueAction =
   | 'SUBMIT_STARTED'
   | 'SUBMIT_FAILED'
@@ -90,18 +92,16 @@ export async function addFormSubmissionToPendingQueue(
 ) {
   const pendingTimestamp = new Date().toISOString()
   try {
-    await utilsService.setLocalForageItem(
-      `SUBMISSION_${pendingTimestamp}`,
-      formSubmission,
-    )
     const submissions: PendingFormSubmission[] =
       await getPendingQueueSubmissions()
     submissions.push({
       ...formSubmission,
       pendingTimestamp,
-      submission: undefined,
     } as PendingFormSubmission)
-    await utilsService.localForage.setItem('submissions', submissions)
+    await utilsService.setLocalForageItem(
+      PENDING_QUEUE_SUBMISSIONS_KEY,
+      submissions,
+    )
     executePendingQueueListeners(submissions, 'ADDITION')
   } catch (error) {
     Sentry.captureException(error)
@@ -127,7 +127,10 @@ export async function updatePendingQueueSubmission(
       }
       return submission
     })
-    await utilsService.localForage.setItem('submissions', newSubmissions)
+    await utilsService.setLocalForageItem(
+      PENDING_QUEUE_SUBMISSIONS_KEY,
+      newSubmissions,
+    )
     executePendingQueueListeners(newSubmissions, action)
   } catch (error) {
     if (!skipSentry) {
@@ -191,16 +194,40 @@ export async function cancelEditingPendingQueueSubmission(
  *
  * @returns
  */
-export function getPendingQueueSubmissions(): Promise<PendingFormSubmission[]> {
-  return utilsService.localForage
-    .getItem('submissions')
-    .then((submissions) => (Array.isArray(submissions) ? submissions : []))
-}
+export async function getPendingQueueSubmissions(): Promise<
+  PendingFormSubmission[]
+> {
+  const pendingQueueSubmissionsInStorage =
+    await utilsService.getLocalForageItem<PendingFormSubmission[]>(
+      PENDING_QUEUE_SUBMISSIONS_KEY,
+    )
 
-export function getFormSubmission(
-  pendingTimestamp: string,
-): Promise<FormSubmission | null> {
-  return utilsService.getLocalForageItem(`SUBMISSION_${pendingTimestamp}`)
+  if (!pendingQueueSubmissionsInStorage) {
+    return []
+  }
+
+  // Form submission data use to be stored separate to the array of pending records
+  // so to ensure all pending records have submission data we will pull it from
+  // where it use to be stored if there is isn't any form submission data.
+  // This is could only happen if a user had the latest code (I.e. they are online)
+  // and they have a submission in the pending queue that cannot be submitted
+  // (E.g. they need to login or one of the attachments could not be uploaded).
+  const pendingQueueSubmissions: PendingFormSubmission[] = []
+  for (const pendingQueueSubmission of pendingQueueSubmissionsInStorage) {
+    if (pendingQueueSubmission.submission) {
+      pendingQueueSubmissions.push(pendingQueueSubmission)
+    } else {
+      const formSubmission =
+        await utilsService.getLocalForageItem<FormSubmission>(
+          `SUBMISSION_${pendingQueueSubmission.pendingTimestamp}`,
+        )
+      if (formSubmission) {
+        pendingQueueSubmission.submission = formSubmission.submission
+        pendingQueueSubmissions.push(pendingQueueSubmission)
+      }
+    }
+  }
+  return pendingQueueSubmissions
 }
 
 /**
@@ -241,9 +268,13 @@ export async function editPendingQueueSubmission(
   pendingTimestamp: string,
 ): Promise<{ preFillFormDataId: string; formId: number }> {
   try {
-    const formSubmission = await getFormSubmission(pendingTimestamp)
+    const pendingQueueSubmissions = await getPendingQueueSubmissions()
+    const formSubmission = pendingQueueSubmissions.find(
+      (pendingQueueSubmission) =>
+        pendingQueueSubmission.pendingTimestamp === pendingTimestamp,
+    )
     if (!formSubmission) {
-      throw new Error('Could not find formSubmision to edit')
+      throw new Error('Could not find form submission to edit')
     }
     const preFillFormDataId = `PENDING_SUBMISSION_${pendingTimestamp}`
     const key = getPrefillKey(preFillFormDataId)
@@ -278,7 +309,10 @@ export async function removePendingQueueSubmission(
     const newSubmissions = submissions.filter(
       (submission) => submission.pendingTimestamp !== pendingTimestamp,
     )
-    await utilsService.localForage.setItem('submissions', newSubmissions)
+    await utilsService.setLocalForageItem(
+      PENDING_QUEUE_SUBMISSIONS_KEY,
+      newSubmissions,
+    )
     executePendingQueueListeners(newSubmissions, action)
   } catch (error) {
     Sentry.captureException(error)

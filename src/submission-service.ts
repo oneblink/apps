@@ -3,7 +3,6 @@ import { isLoggedIn } from './auth-service'
 import {
   registerPendingQueueListener,
   getPendingQueueSubmissions,
-  getFormSubmission,
   updatePendingQueueSubmission,
   cancelEditingPendingQueueSubmission,
   deletePendingQueueSubmission,
@@ -100,17 +99,6 @@ async function processPendingQueue({
         'Attempting to process submission from pending queue:',
         pendingQueueSubmission,
       )
-      // Get Submission again to get ensure we are submitting all the data
-      const formSubmission = await getFormSubmission(
-        pendingQueueSubmission.pendingTimestamp,
-      )
-      if (!formSubmission) {
-        console.log(
-          'Skipping submission as it has already been processed',
-          pendingQueueSubmission,
-        )
-        continue
-      }
 
       pendingQueueSubmission.isSubmitting = true
       pendingQueueSubmission.error = undefined
@@ -120,10 +108,15 @@ async function processPendingQueue({
         'SUBMIT_STARTED',
       )
 
-      const submission = await prepareSubmissionData(formSubmission)
+      const preparedSubmission = await prepareSubmissionData(
+        pendingQueueSubmission,
+      )
+      pendingQueueSubmission.submission = {
+        ...preparedSubmission,
+      }
       const attachments = getSubmissionAttachmentDetails(
-        formSubmission.definition.elements,
-        submission,
+        pendingQueueSubmission.definition.elements,
+        pendingQueueSubmission.submission,
       )
       const failedAttachments = attachments.filter(
         (attachment) => attachment.value.type === 'ERROR',
@@ -137,7 +130,7 @@ async function processPendingQueue({
       }
       await submit({
         isPendingQueueEnabled: true,
-        formSubmission: { ...formSubmission, submission },
+        formSubmission: pendingQueueSubmission,
         onProgress: (event) => {
           executePendingQueueProgressListeners({
             ...event,

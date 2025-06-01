@@ -160,7 +160,7 @@ export type FormSubmissionResult = FormSubmission & {
   downloadSubmissionPdfUrl?: string
 }
 
-export type PendingFormSubmission = Omit<FormSubmission, 'submission'> & {
+export type PendingFormSubmission = FormSubmission & {
   /** The date and time (in ISO format) the submission was attempted */
   pendingTimestamp: string
   /** `true` if the submission is currently being processed by the pending queue */

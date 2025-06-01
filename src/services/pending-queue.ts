@@ -24,7 +24,7 @@ function errorHandler(error: Error): Error {
   return error
 }
 
-const PENDING_QUEUE_SUBMISSIONS_KEY = 'PENDING_QUEUE_SUBMISSIONS'
+const PENDING_QUEUE_SUBMISSIONS_KEY = 'submissions'
 
 export type PendingQueueAction =
   | 'SUBMIT_STARTED'
@@ -194,10 +194,40 @@ export async function cancelEditingPendingQueueSubmission(
  *
  * @returns
  */
-export function getPendingQueueSubmissions(): Promise<PendingFormSubmission[]> {
-  return utilsService
-    .getLocalForageItem(PENDING_QUEUE_SUBMISSIONS_KEY)
-    .then((submissions) => (Array.isArray(submissions) ? submissions : []))
+export async function getPendingQueueSubmissions(): Promise<
+  PendingFormSubmission[]
+> {
+  const pendingQueueSubmissionsInStorage =
+    await utilsService.getLocalForageItem<PendingFormSubmission[]>(
+      PENDING_QUEUE_SUBMISSIONS_KEY,
+    )
+
+  if (!pendingQueueSubmissionsInStorage) {
+    return []
+  }
+
+  // Form submission data use to be stored separate to the array of pending records
+  // so to ensure all pending records have submission data we will pull it from
+  // where it use to be stored if there is isn't any form submission data.
+  // This is could only happen if a user had the latest code (I.e. they are online)
+  // and they have a submission in the pending queue that cannot be submitted
+  // (E.g. they need to login or one of the attachments could not be uploaded).
+  const pendingQueueSubmissions: PendingFormSubmission[] = []
+  for (const pendingQueueSubmission of pendingQueueSubmissionsInStorage) {
+    if (pendingQueueSubmission.submission) {
+      pendingQueueSubmissions.push(pendingQueueSubmission)
+    } else {
+      const formSubmission =
+        await utilsService.getLocalForageItem<FormSubmission>(
+          `SUBMISSION_${pendingQueueSubmission.pendingTimestamp}`,
+        )
+      if (formSubmission) {
+        pendingQueueSubmission.submission = formSubmission.submission
+        pendingQueueSubmissions.push(pendingQueueSubmission)
+      }
+    }
+  }
+  return pendingQueueSubmissions
 }
 
 /**
@@ -274,6 +304,7 @@ export async function removePendingQueueSubmission(
   action: 'SUBMIT_SUCCEEDED' | 'DELETION',
 ) {
   try {
+    await utilsService.removeLocalForageItem(`SUBMISSION_${pendingTimestamp}`)
     const submissions = await getPendingQueueSubmissions()
     const newSubmissions = submissions.filter(
       (submission) => submission.pendingTimestamp !== pendingTimestamp,

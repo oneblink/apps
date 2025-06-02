@@ -98,7 +98,7 @@ export async function addFormSubmissionToPendingQueue(
       ...formSubmission,
       pendingTimestamp,
     } as PendingFormSubmission)
-    await utilsService.setLocalForageItem(
+    await utilsService.localForage.setItem(
       PENDING_QUEUE_SUBMISSIONS_KEY,
       submissions,
     )
@@ -127,7 +127,7 @@ export async function updatePendingQueueSubmission(
       }
       return submission
     })
-    await utilsService.setLocalForageItem(
+    await utilsService.localForage.setItem(
       PENDING_QUEUE_SUBMISSIONS_KEY,
       newSubmissions,
     )
@@ -198,7 +198,7 @@ export async function getPendingQueueSubmissions(): Promise<
   PendingFormSubmission[]
 > {
   const pendingQueueSubmissionsInStorage =
-    await utilsService.getLocalForageItem<PendingFormSubmission[]>(
+    await utilsService.localForage.getItem<PendingFormSubmission[]>(
       PENDING_QUEUE_SUBMISSIONS_KEY,
     )
 
@@ -309,7 +309,7 @@ export async function removePendingQueueSubmission(
     const newSubmissions = submissions.filter(
       (submission) => submission.pendingTimestamp !== pendingTimestamp,
     )
-    await utilsService.setLocalForageItem(
+    await utilsService.localForage.setItem(
       PENDING_QUEUE_SUBMISSIONS_KEY,
       newSubmissions,
     )

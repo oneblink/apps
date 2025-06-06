@@ -1318,6 +1318,9 @@ export function getFlowInstanceNodesWithMeta(
 
     let isDeniedInConcurrentStep = false
     let isClarificationRequiredInConcurrentStep = false
+    let formSubmissionApproval:
+      | ApprovalTypes.FormSubmissionApproval
+      | undefined = undefined
     if (status?.value === 'PENDING') {
       const siblingNodes = formApprovalFlowInstanceNodes.filter(
         ({ parentStepLabelsId, label }) =>
@@ -1325,7 +1328,7 @@ export function getFlowInstanceNodesWithMeta(
           label !== step.label,
       )
       for (const siblingNode of siblingNodes) {
-        const formSubmissionApproval = findLatestFormSubmissionApproval(
+        formSubmissionApproval = findLatestFormSubmissionApproval(
           siblingNode,
           formSubmissionApprovals,
         )
@@ -1364,6 +1367,7 @@ export function getFlowInstanceNodesWithMeta(
 
     return {
       ...step,
+      ...formSubmissionApproval,
       status,
       isDeniedInConcurrentStep,
       isAfterDeniedStep,

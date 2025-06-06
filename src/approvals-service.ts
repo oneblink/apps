@@ -1253,7 +1253,7 @@ function getFormApprovalFlowInstanceNodes(
  *       group: 'oneblink:administrator',
  *       isSkipped: false,
  *       label: 'Manager Approval',
- *       approvalFormId: 'user123',
+ *       approvalFormId: '1234',
  *     },
  *     {
  *       type: 'CONCURRENT',
@@ -1262,13 +1262,13 @@ function getFormApprovalFlowInstanceNodes(
  *           label: 'HR Review',
  *           group: 'oneblink:administrator',
  *           isSkipped: false,
- *           approvalFormId: 'hr123',
+ *           approvalFormId: '1234',
  *         },
  *         {
  *           label: 'Finance Review',
  *           group: 'oneblink:administrator',
  *           isSkipped: false,
- *           approvalFormId: 'finance123',
+ *           approvalFormId: '1234',
  *         },
  *       ],
  *     },
@@ -1282,9 +1282,9 @@ function getFormApprovalFlowInstanceNodes(
  *     status: 'APPROVED',
  *     createdAt: '2024-03-20T10:00:00Z',
  *     updatedAt: '2024-03-20T10:00:00Z',
- *     updatedBy: 'user123',
+ *     updatedBy: 'fake@fake.com',
  *     group: 'oneblink:administrator',
- *     approvalFormId: 'finance123',
+ *     approvalFormId: '1234',
  *   },
  * ]
  *
@@ -1318,9 +1318,6 @@ export function getFlowInstanceNodesWithMeta(
 
     let isDeniedInConcurrentStep = false
     let isClarificationRequiredInConcurrentStep = false
-    let formSubmissionApproval:
-      | ApprovalTypes.FormSubmissionApproval
-      | undefined = undefined
     if (status?.value === 'PENDING') {
       const siblingNodes = formApprovalFlowInstanceNodes.filter(
         ({ parentStepLabelsId, label }) =>
@@ -1328,7 +1325,7 @@ export function getFlowInstanceNodesWithMeta(
           label !== step.label,
       )
       for (const siblingNode of siblingNodes) {
-        formSubmissionApproval = findLatestFormSubmissionApproval(
+        const formSubmissionApproval = findLatestFormSubmissionApproval(
           siblingNode,
           formSubmissionApprovals,
         )
@@ -1367,7 +1364,6 @@ export function getFlowInstanceNodesWithMeta(
 
     return {
       ...step,
-      ...formSubmissionApproval,
       status,
       isDeniedInConcurrentStep,
       isAfterDeniedStep,

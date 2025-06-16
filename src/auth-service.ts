@@ -239,32 +239,6 @@ export async function requestAccess(formsAppId: number): Promise<void> {
 }
 
 /**
- * Determine if the current user is a OneBlink App User administrator for a
- * OneBlink Forms App. Returns `false` if the current user is not.
- *
- * #### Example
- *
- * ```js
- * const formsAppId = 1
- * const isAdministrator = await authService.isAdministrator(formsAppId)
- * if (isAdministrator) {
- *   // handle administator user
- * }
- * ```
- *
- * @param formsAppId
- * @param abortSignal
- * @returns
- */
-export async function isAdministrator(
-  formsAppId: number,
-  abortSignal: AbortSignal,
-): Promise<boolean> {
-  const appUser = await getCurrentFormsAppUser(formsAppId, abortSignal)
-  return !!appUser?.groups.some((group) => group === 'oneblink:administrator')
-}
-
-/**
  * Allow a user to sign up to a forms app.
  *
  * #### Example

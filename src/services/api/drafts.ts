@@ -40,6 +40,7 @@ async function uploadDraftData(
       createdAt: draftSubmission.createdAt,
       title: draftSubmission.title,
       lastElementUpdated: draftSubmission.lastElementUpdated,
+      sectionState: draftSubmission.sectionState,
       onProgress,
       abortSignal,
     })

@@ -23,6 +23,8 @@ export type NewDraftSubmission = BaseNewFormSubmission & {
   backgroundUpload?: boolean
   /** The element that was last updated before the draft was saved */
   lastElementUpdated?: FormElement
+  /** The state of sections before the draft was saved */
+  sectionState?: SubmissionTypes.NewS3SubmissionData['sectionState']
 }
 
 export type NewFormSubmission = BaseNewFormSubmission & {

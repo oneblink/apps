@@ -161,5 +161,6 @@ export async function getDraftSubmission(
     title: latestFormSubmissionDraftVersion.title,
     createdAt: latestFormSubmissionDraftVersion.createdAt,
     formSubmissionDraftId: formSubmissionDraft.id,
+    sectionState: s3SubmissionData.sectionState,
   })
 }

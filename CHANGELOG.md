@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+- `dateTimeCompleted` filter to form store
+
+### Added
+
 - `sectionState` to `NewDraftSubmission`
 
 ### Removed

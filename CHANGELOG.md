@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [23.0.0] - 2025-07-01
+
 ### Added
 
 - `sectionState` to `NewDraftSubmission`
@@ -14,6 +16,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 
 - **[BREAKING]** `authService.isAdministrator()`
+
+### Dependencies
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [8.5.0-beta.1](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [8.4.0-beta.2](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
+
+- update [@oneblink/storage](https://www.npmjs.com/package/@oneblink/storage) to [3.1.0-beta.1](https://github.com/oneblink/storage/blob/master/CHANGELOG.md) (from [3.0.0-beta.1](https://github.com/oneblink/storage/blob/master/CHANGELOG.md))
 
 ## [22.2.0] - 2025-06-16
 

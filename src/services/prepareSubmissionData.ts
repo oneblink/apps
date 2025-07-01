@@ -17,7 +17,7 @@ async function maybeUploadAttachment(
   value: unknown,
   maxFileSize?: number,
 ) {
-  console.log('maybeUploadAttachment', maxFileSize)
+  console.log('maybeUploadAttachment.maxFileSize', maxFileSize)
   if (value && typeof value === 'object') {
     const record = value as Attachment
     // If the value matches the properties required for an attachment

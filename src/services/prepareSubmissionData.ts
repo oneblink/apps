@@ -27,6 +27,17 @@ async function maybeUploadAttachment(
     ) {
       if (record.data instanceof Blob) {
         const attachmentId = record._id
+        if ('maxFileSize' in formElement) {
+          const maxFileSize = (formElement as FormTypes.FilesElement)
+            .maxFileSize
+          if (maxFileSize && record.data.size / 1048576 > maxFileSize) {
+            return {
+              ...record,
+              type: 'ERROR',
+              errorMessage: 'File is too large',
+            }
+          }
+        }
         return await uploadAttachment({
           formId,
           fileName: record.fileName,

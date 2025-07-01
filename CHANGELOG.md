@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - `getFlowInstanceNodesWithMeta` to `approvals-service`
+- max file size validation to attachment uploads
 
 ## [22.1.3] - 2025-06-03
 

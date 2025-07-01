@@ -15,7 +15,9 @@ async function maybeUploadAttachment(
   formId: number,
   formElement: FormTypes.FormElementBinaryStorage,
   value: unknown,
+  maxFileSize?: number,
 ) {
+  console.log('maybeUploadAttachment.maxFileSize', maxFileSize)
   if (value && typeof value === 'object') {
     const record = value as Attachment
     // If the value matches the properties required for an attachment
@@ -26,6 +28,16 @@ async function maybeUploadAttachment(
       typeof record._id === 'string'
     ) {
       if (record.data instanceof Blob) {
+        console.log('maxFileSize', maxFileSize)
+        const fileSizeInMB = record.data.size / 1024 / 1024
+        console.log('fileSizeInMB', fileSizeInMB)
+        if (maxFileSize && fileSizeInMB > maxFileSize) {
+          return {
+            ...record,
+            type: 'ERROR',
+            errorMessage: `File size (${fileSizeInMB}MB exceeds the allowed maximum of ${maxFileSize}MB). Please try again with a smaller file.`,
+          }
+        }
         const attachmentId = record._id
         return await uploadAttachment({
           formId,
@@ -126,6 +138,7 @@ async function uploadAttachments(
                   formId,
                   formElement,
                   value[index],
+                  formElement.maxFileSize,
                 )
               }
             }

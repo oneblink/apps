@@ -68,7 +68,7 @@ const tenants = {
       intlFormats: generateFormatters('en-AU'),
       name: 'OneBlink',
       productShortName: 'OneBlink LcS',
-      distanceUnit: 'metres',
+      distanceUnit: 'meters',
       distanceUnitShortName: 'm',
     },
     civicplus: {
@@ -94,7 +94,7 @@ const tenants = {
       intlFormats: generateFormatters('en-AU'),
       name: 'OneBlink',
       productShortName: 'OneBlink LcS',
-      distanceUnit: 'metres',
+      distanceUnit: 'meters',
       distanceUnitShortName: 'm',
     },
     civicplus: {

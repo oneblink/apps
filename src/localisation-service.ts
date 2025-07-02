@@ -30,6 +30,25 @@ export function getLocale() {
   return tenants.locale
 }
 
+/**
+ * Get the distance units (e.g. `feet` & 'ft) for the current tenant.
+ *
+ * #### Example
+ *
+ * ```js
+ * const { distanceUnit, distanceUnitShortName } =
+ *   localisationService.getDistanceUnits()
+ * ```
+ *
+ * @returns
+ */
+export function getDistanceUnits() {
+  return {
+    distanceUnit: tenants.current.distanceUnit,
+    distanceUnitShortName: tenants.current.distanceUnitShortName,
+  }
+}
+
 function generateFormats({
   time,
   shortDate,

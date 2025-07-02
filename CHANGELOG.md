@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - `sectionState` to `NewDraftSubmission`
+- `localisationService.getDistanceUnits()`
 
 ### Removed
 

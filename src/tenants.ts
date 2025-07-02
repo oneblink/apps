@@ -13,6 +13,8 @@ interface OneBlinkAppsTenant {
   }
   name: string
   productShortName: string
+  distanceUnit: string
+  distanceUnitShortName: string
 }
 type Locale = 'en-AU' | 'en-US'
 
@@ -66,6 +68,8 @@ const tenants = {
       intlFormats: generateFormatters('en-AU'),
       name: 'OneBlink',
       productShortName: 'OneBlink LcS',
+      distanceUnit: 'metres',
+      distanceUnitShortName: 'm',
     },
     civicplus: {
       awsRegion: 'us-east-2',
@@ -76,6 +80,8 @@ const tenants = {
       intlFormats: generateFormatters('en-US'),
       name: 'CivicPlus',
       productShortName: 'CivicOptimize',
+      distanceUnit: 'feet',
+      distanceUnitShortName: 'ft',
     },
   },
   prod: {
@@ -88,6 +94,8 @@ const tenants = {
       intlFormats: generateFormatters('en-AU'),
       name: 'OneBlink',
       productShortName: 'OneBlink LcS',
+      distanceUnit: 'metres',
+      distanceUnitShortName: 'm',
     },
     civicplus: {
       awsRegion: 'us-east-2',
@@ -98,6 +106,8 @@ const tenants = {
       intlFormats: generateFormatters('en-US'),
       name: 'CivicPlus',
       productShortName: 'CivicOptimize',
+      distanceUnit: 'feet',
+      distanceUnitShortName: 'ft',
     },
   },
 }

@@ -10,13 +10,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - `dateTimeCompleted` filter to form store
+- `localisationService.getDistanceUnits()`
 
 ## [23.0.0] - 2025-07-01
 
 ### Added
 
 - `sectionState` to `NewDraftSubmission`
-- `localisationService.getDistanceUnits()`
 
 ### Removed
 

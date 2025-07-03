@@ -86,6 +86,11 @@ const handleError = (error: OneBlinkStorageError) => {
 
 export async function uploadFormSubmission(
   formSubmission: FormSubmission,
+  /**
+   * The date and time (in ISO format) the form was completed I.e. when the user
+   * clicked the submit button
+   */
+  completionTimestamp: string,
   onProgress?: ProgressListener,
   abortSignal?: AbortSignal,
 ) {
@@ -96,6 +101,7 @@ export async function uploadFormSubmission(
 
     console.log('Uploading submission')
     return await oneblinkUploader.uploadSubmission({
+      completionTimestamp,
       submission: formSubmission.submission,
       definition: formSubmission.definition,
       device: getDeviceInformation(),

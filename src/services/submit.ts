@@ -56,7 +56,10 @@ export default async function submit({
   abortSignal,
   pendingTimestamp,
   alwaysSubmitViaPendingQueue,
-}: SubmissionParams): Promise<FormSubmissionResult> {
+  completionTimestamp,
+}: SubmissionParams & {
+  completionTimestamp: string
+}): Promise<FormSubmissionResult> {
   const paymentSubmissionEventConfiguration =
     checkForPaymentSubmissionEvent(formSubmission)
 
@@ -165,6 +168,7 @@ export default async function submit({
 
     const data = await uploadFormSubmission(
       formSubmission,
+      completionTimestamp,
       onProgress,
       abortSignal,
     )

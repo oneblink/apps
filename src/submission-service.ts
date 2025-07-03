@@ -128,7 +128,7 @@ async function processPendingQueue({
           }.`,
         )
       }
-      await submit({
+      await submitWithCompletionTimestamp({
         isPendingQueueEnabled: true,
         formSubmission: pendingQueueSubmission,
         onProgress: (event) => {
@@ -141,6 +141,7 @@ async function processPendingQueue({
         shouldRunServerValidation,
         paymentFormUrl: undefined,
         paymentReceiptUrl: undefined,
+        completionTimestamp: pendingQueueSubmission.pendingTimestamp,
       })
 
       await removePendingQueueSubmission(
@@ -246,11 +247,23 @@ async function processPendingQueue({
  * @param params
  * @returns
  */
-async function submit({
+async function submit(
+  params: SubmissionParams & {
+    autoSaveKey?: string
+  },
+): Promise<FormSubmissionResult> {
+  return await submitWithCompletionTimestamp({
+    ...params,
+    completionTimestamp: new Date().toISOString(),
+  })
+}
+
+async function submitWithCompletionTimestamp({
   autoSaveKey,
   ...params
 }: SubmissionParams & {
   autoSaveKey?: string
+  completionTimestamp: string
 }): Promise<FormSubmissionResult> {
   const formSubmissionResult = await submitForm(params)
   if (typeof autoSaveKey === 'string') {

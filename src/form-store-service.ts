@@ -27,6 +27,8 @@ export type FormStoreFilter<T> = {
 
 /** Filters available for filter Form Store Records */
 export type FormStoreFilters = {
+  /** Filter results by the date/time they were completed */
+  dateTimeCompleted?: FormStoreFilter<string>
   /** Filter results by the date/time they were submitted */
   dateTimeSubmitted?: FormStoreFilter<string>
   /** Filter results by the user that submitted */

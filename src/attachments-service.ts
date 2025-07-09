@@ -21,6 +21,7 @@ type AttachmentNew = AttachmentBase & {
 }
 type AttachmentError = AttachmentBase & {
   type: 'ERROR'
+  errorType?: 'EXCEEDS_MAX_SIZE' | 'EMPTY_FILE'
   errorMessage: string
 }
 

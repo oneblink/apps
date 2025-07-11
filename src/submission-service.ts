@@ -1,5 +1,5 @@
 import { isOffline } from './offline-service'
-import { isLoggedIn } from './auth-service'
+import { getFormsKeyId, isLoggedIn } from './auth-service'
 import {
   registerPendingQueueListener,
   getPendingQueueSubmissions,
@@ -86,7 +86,11 @@ async function processPendingQueue({
       continue
     }
 
-    if (pendingQueueSubmission.definition.isAuthenticated && !isLoggedIn()) {
+    if (
+      pendingQueueSubmission.definition.isAuthenticated &&
+      !isLoggedIn() &&
+      !getFormsKeyId()
+    ) {
       console.log(
         'Authentication is required for this form but the user does not have a valid token, leaving submission in the pending queue:',
         pendingQueueSubmission,

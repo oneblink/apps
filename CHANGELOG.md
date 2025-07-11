@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- authenticated pending queue submissions from being processed when an access key available
+
 ## [23.1.0] - 2025-07-10
 
 ### Added

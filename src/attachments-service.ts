@@ -1,4 +1,4 @@
-import { FormTypes } from '@oneblink/types'
+import { FormTypes, ArcGISTypes } from '@oneblink/types'
 import { FormSubmissionModel, FormElementKey } from './types/form'
 import uploadAttachment, {
   UploadAttachmentConfiguration,
@@ -131,6 +131,7 @@ export function getSubmissionAttachmentDetails(
         }
         break
       }
+      case 'arcGISWebMap':
       case 'camera':
       case 'draw':
       case 'compliance':
@@ -144,6 +145,17 @@ export function getSubmissionAttachmentDetails(
           case 'camera':
           case 'draw': {
             const attachment = asSubmissionAttachmentDetail(value)
+            if (attachment) {
+              submissionAttachmentDetails.push(attachment)
+            }
+            break
+          }
+          case 'arcGISWebMap': {
+            const arcGISWebMapElementValue =
+              value as ArcGISTypes.ArcGISWebMapElementValue
+            const attachment = asSubmissionAttachmentDetail(
+              arcGISWebMapElementValue.snapshotImage,
+            )
             if (attachment) {
               submissionAttachmentDetails.push(attachment)
             }

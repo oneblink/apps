@@ -110,12 +110,15 @@ async function uploadAttachments(
           case 'arcGISWebMap': {
             const arcGISWebMapElementValue =
               value as ArcGISTypes.ArcGISWebMapElementValue
-            const newValue = await maybeUploadAttachment(
+            const snapshotImage = await maybeUploadAttachment(
               formId,
               formElement,
               arcGISWebMapElementValue.snapshotImage,
             )
-            submission[formElement.name] = newValue
+            submission[formElement.name] = {
+              ...arcGISWebMapElementValue,
+              snapshotImage,
+            }
             break
           }
           case 'compliance': {

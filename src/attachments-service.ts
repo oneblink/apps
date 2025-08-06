@@ -153,11 +153,14 @@ export function getSubmissionAttachmentDetails(
           case 'arcGISWebMap': {
             const arcGISWebMapElementValue =
               value as ArcGISTypes.ArcGISWebMapElementValue
-            const attachment = asSubmissionAttachmentDetail(
-              arcGISWebMapElementValue.snapshotImage,
-            )
-            if (attachment) {
-              submissionAttachmentDetails.push(attachment)
+            const files = arcGISWebMapElementValue.snapshotImages
+            if (Array.isArray(files)) {
+              for (let index = 0; index < files.length; index++) {
+                const attachment = asSubmissionAttachmentDetail(files[index])
+                if (attachment) {
+                  submissionAttachmentDetails.push(attachment)
+                }
+              }
             }
             break
           }

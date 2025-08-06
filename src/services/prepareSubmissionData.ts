@@ -1,4 +1,4 @@
-import { ArcGISTypes, FormTypes } from '@oneblink/types'
+import { FormTypes } from '@oneblink/types'
 import { BaseNewFormSubmission } from '../types/submissions'
 import { executePendingQueueAttachmentProgressListeners } from './pending-queue'
 import uploadAttachment from './uploadAttachment'
@@ -108,16 +108,16 @@ async function uploadAttachments(
             break
           }
           case 'arcGISWebMap': {
-            const arcGISWebMapElementValue =
-              value as ArcGISTypes.ArcGISWebMapElementValue
-            const snapshotImage = await maybeUploadAttachment(
-              formId,
-              formElement,
-              arcGISWebMapElementValue.snapshotImage,
-            )
-            submission[formElement.name] = {
-              ...arcGISWebMapElementValue,
-              snapshotImage,
+            const files = (value as Record<string, unknown> | undefined)
+              ?.snapshotImages
+            if (Array.isArray(files)) {
+              for (let index = 0; index < files.length; index++) {
+                files[index] = await maybeUploadAttachment(
+                  formId,
+                  formElement,
+                  files[index],
+                )
+              }
             }
             break
           }

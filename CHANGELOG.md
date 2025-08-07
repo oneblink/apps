@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+- `attachmentsAccessToken` to `FormSubmissionResult`
+- `getPostSubmissionAttachmentURLs` to `submissionService`
+
+### Added
+
 - fetching of Good To Go custom fields
 - snapshot image uploading for Arc GIS form element
 

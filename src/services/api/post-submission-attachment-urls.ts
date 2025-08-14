@@ -1,3 +1,4 @@
+import tenants from '../../tenants'
 import { FormSubmissionResult } from '../../types/submissions'
 import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import { getRequest } from '../fetch'
@@ -19,7 +20,7 @@ const getPostSubmissionAttachments = async (
         contentType: string
       }[]
     >(
-      `${process.env.REACT_APP_API_URL}/forms/${formSumbissionResult.definition.id}/submissions/${formSumbissionResult.submissionId}/attachment-urls?accessToken=${formSumbissionResult.attachmentsAccessToken}`,
+      `${tenants.current.apiOrigin}/forms/${formSumbissionResult.definition.id}/submissions/${formSumbissionResult.submissionId}/attachment-urls?accessToken=${formSumbissionResult.attachmentsAccessToken}`,
     )
     return result
   } catch (err) {

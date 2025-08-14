@@ -3,7 +3,7 @@ import OneBlinkAppsError from '../errors/oneBlinkAppsError'
 import { getRequest } from '../fetch'
 import generateGenericError from '../generate-generic-error'
 
-const getPostSubmissionAttachmentURLs = async (
+const getPostSubmissionAttachments = async (
   formSumbissionResult: FormSubmissionResult,
 ) => {
   if (!formSumbissionResult.attachmentsAccessToken) {
@@ -31,4 +31,4 @@ const getPostSubmissionAttachmentURLs = async (
   }
 }
 
-export default getPostSubmissionAttachmentURLs
+export default getPostSubmissionAttachments

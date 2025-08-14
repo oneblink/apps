@@ -185,7 +185,7 @@ export default async function submit({
       downloadSubmissionPdfUrl: !data.pdfAccessToken
         ? undefined
         : `${tenants.current.apiOrigin}/forms/${formSubmission.definition.id}/submissions/${data.submissionId}/pdf-document?accessToken=${data.pdfAccessToken}`,
-      attachmentsAccessToken: 'TODO - Update after merging storage package',
+      attachmentsAccessToken: data.attachmentsAccessToken,
     }
 
     if (schedulingSubmissionEvent && schedulingUrlConfiguration) {

@@ -36,7 +36,7 @@ import {
 import { deleteAutoSaveData } from './auto-save-service'
 import { downloadFormSubmission } from './services/api/submissions'
 import { getSubmissionAttachmentDetails } from './attachments-service'
-import getPostSubmissionAttachmentURLs from './services/api/post-submission-attachment-urls'
+import getPostSubmissionAttachments from './services/api/post-submission-attachment-urls'
 
 let _isProcessingPendingQueue = false
 
@@ -603,5 +603,5 @@ export {
   PendingQueueListener,
   PendingQueueAction,
   getSubmissionData,
-  getPostSubmissionAttachmentURLs,
+  getPostSubmissionAttachments,
 }

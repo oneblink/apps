@@ -1,15 +1,15 @@
 {
   "name": "@oneblink/apps",
   "description": "Helper functions for OneBlink apps in JavaScript.",
-  "version": "23.2.0-beta.4",
+  "version": "23.2.0",
   "author": "OneBlink <developers@oneblink.io> (https://oneblink.io)",
   "bugs": {
     "url": "https://github.com/oneblink/apps/issues"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.637.0",
-    "@oneblink/sdk-core": "^8.7.0-beta.1",
-    "@oneblink/storage": "^3.2.1-beta.2",
+    "@oneblink/sdk-core": "^8.8.0-beta.1",
+    "@oneblink/storage": "^3.2.3-beta.1",
     "@sentry/browser": "^7.77.0",
     "@sentry/tracing": "^7.77.0",
     "date-fns": "^2.30.0",

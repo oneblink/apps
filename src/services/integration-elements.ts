@@ -22,66 +22,8 @@ import {
 } from '../services/fetch'
 import tenants from '../tenants'
 import Sentry from '../Sentry'
+import generateGenericError from './generate-generic-error'
 
-const generateError = (err: unknown, abortSignal?: AbortSignal) => {
-  if (!abortSignal?.aborted) {
-    Sentry.captureException(err)
-  }
-  const error = err as HTTPError
-  if (isOffline()) {
-    throw new OneBlinkAppsError(
-      'You are currently offline, please connect to the internet and try again',
-      {
-        originalError: error,
-        isOffline: true,
-      },
-    )
-  }
-  switch (error.status) {
-    case 400: {
-      return new OneBlinkAppsError(error.message, {
-        title: 'Invalid',
-        httpStatusCode: error.status,
-      })
-    }
-    case 401: {
-      return new OneBlinkAppsError('Please login and try again.', {
-        originalError: error,
-        requiresLogin: true,
-        httpStatusCode: error.status,
-      })
-    }
-    case 403: {
-      return new OneBlinkAppsError(
-        'You do not have access to this application. Please contact your administrator to gain the correct level of access.',
-        {
-          originalError: error,
-          requiresAccessRequest: true,
-          httpStatusCode: error.status,
-        },
-      )
-    }
-    case 404: {
-      return new OneBlinkAppsError(
-        "Please contact your administrator to ensure this application's configuration has been completed successfully.",
-        {
-          originalError: error,
-          title: 'Unknown Application',
-          httpStatusCode: error.status,
-        },
-      )
-    }
-    default: {
-      return new OneBlinkAppsError(
-        'An unknown error has occurred. Please contact support if the problem persists.',
-        {
-          originalError: error,
-          httpStatusCode: error.status,
-        },
-      )
-    }
-  }
-}
 /**
  * Search for geoscape addresses based on a partial address.
  *
@@ -120,7 +62,7 @@ export async function searchGeoscapeAddresses(
       abortSignal,
     )
   } catch (err) {
-    throw generateError(err, abortSignal)
+    throw generateGenericError(err, abortSignal)
   }
 }
 
@@ -152,7 +94,7 @@ export async function getGeoscapeAddress(
       abortSignal,
     )
   } catch (err) {
-    throw generateError(err, abortSignal)
+    throw generateGenericError(err, abortSignal)
   }
 }
 
@@ -290,7 +232,7 @@ export async function searchPointAddresses(
       abortSignal,
     )
   } catch (err) {
-    throw generateError(err, abortSignal)
+    throw generateGenericError(err, abortSignal)
   }
 }
 
@@ -322,7 +264,7 @@ export async function getPointAddress(
       abortSignal,
     )
   } catch (err) {
-    throw generateError(err, abortSignal)
+    throw generateGenericError(err, abortSignal)
   }
 }
 
@@ -359,7 +301,7 @@ export async function getPointCadastralParcel(
       abortSignal,
     )
   } catch (err) {
-    throw generateError(err, abortSignal)
+    throw generateGenericError(err, abortSignal)
   }
 }
 
@@ -400,7 +342,7 @@ export async function searchCivicaStreetNames(
       abortSignal,
     )
   } catch (err) {
-    throw generateError(err, abortSignal)
+    throw generateGenericError(err, abortSignal)
   }
 }
 
@@ -428,7 +370,7 @@ export async function getCivicaTitleCodes(
       abortSignal,
     )
   } catch (err) {
-    throw generateError(err, abortSignal)
+    throw generateGenericError(err, abortSignal)
   }
 }
 
@@ -602,7 +544,7 @@ export async function searchAPINSWLiquorLicences(
       },
     )
   } catch (err) {
-    throw generateError(err, abortSignal)
+    throw generateGenericError(err, abortSignal)
   }
 }
 
@@ -648,7 +590,7 @@ export async function getAPINSWLiquorLicence(
       },
     )
   } catch (err) {
-    throw generateError(err, abortSignal)
+    throw generateGenericError(err, abortSignal)
   }
 }
 

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `attachmentsAccessToken` to `FormSubmissionResult`
+- `getPostSubmissionAttachmentURLs` to `submissionService`
+
 ## [23.2.0] - 2025-08-11
 
 ### Added

@@ -160,6 +160,8 @@ export type FormSubmissionResult = FormSubmission & {
   isUploadingAttachments: boolean
   /** Exists if the form allows PDF download */
   downloadSubmissionPdfUrl?: string
+  /** The access token to download post-submission attachment urls and metadata. */
+  attachmentsAccessToken?: string
 }
 
 export type PendingFormSubmission = FormSubmission & {

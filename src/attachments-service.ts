@@ -47,37 +47,26 @@ export {
  * #### Example
  *
  * ```js
- * const isUploading =
- *   attachmentsService.checkIfAttachmentsAreUploadingForFormElements(
- *     formElements,
- *     submission,
- *   )
+ * const isUploading = attachmentsService.checkIfAttachmentsAreUploading(
+ *   form,
+ *   submission,
+ * )
  * // handle attachments still in progress
  * ```
  *
- * @param formElements
+ * @param form
  * @param submission
  * @returns
  */
-function checkIfAttachmentsAreUploadingForFormElements(
-  formElements: FormTypes.FormElement[],
-  submission: FormSubmissionModel,
-): boolean {
-  const submissionAttachments = getSubmissionAttachmentDetails(
-    formElements,
-    submission,
-  )
-  return submissionAttachments.some((a) => a.needsToUpload)
-}
-
 export function checkIfAttachmentsAreUploading(
   form: FormTypes.Form,
   submission: FormSubmissionModel,
 ): boolean {
-  return checkIfAttachmentsAreUploadingForFormElements(
+  const submissionAttachments = getSubmissionAttachmentDetails(
     form.elements,
     submission,
   )
+  return submissionAttachments.some((a) => a.needsToUpload)
 }
 
 export type SubmissionAttachmentDetail =

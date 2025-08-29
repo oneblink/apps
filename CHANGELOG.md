@@ -7,11 +7,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [23.3.0] - 2025-08-29
+
 ### Added
 
 - `attachmentsAccessToken` to `FormSubmissionResult`
 - `getPostSubmissionAttachments` to `submissionService`
 - `path` property to `FormSubmissionAttachment`
+
+### Dependencies
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [8.8.0-beta.1](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [8.7.0-beta.2](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
+
+- update [@oneblink/storage](https://www.npmjs.com/package/@oneblink/storage) to [3.2.3-beta.1](https://github.com/oneblink/storage/blob/master/CHANGELOG.md) (from [3.2.1-beta.2](https://github.com/oneblink/storage/blob/master/CHANGELOG.md))
 
 ## [23.2.0] - 2025-08-11
 

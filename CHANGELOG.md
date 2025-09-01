@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [23.3.1] - 2025-09-01
+
 ### Removed
 
 - `path` property from `FormSubmissionAttachment`

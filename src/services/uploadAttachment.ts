@@ -83,11 +83,9 @@ export default async function uploadAttachment(
     abortSignal,
     onProgress,
   })
-  const url = new URL(result.url)
   return {
     s3: result.s3,
     url: result.url,
-    path: url.pathname + url.search,
     contentType: _contentType,
     fileName,
     id: result.attachmentDataId,

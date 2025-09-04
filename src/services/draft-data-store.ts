@@ -9,6 +9,7 @@ import { SubmissionTypes } from '@oneblink/types'
 import Sentry from '../Sentry'
 import { DraftSubmission, ProgressListener } from '../types/submissions'
 import { deleteAutoSaveData } from '../auto-save-service'
+import { isLoggedIn } from './cognito'
 
 function getLocalDraftSubmissionKey(formSubmissionDraftId: string) {
   return `DRAFT_SUBMISSION_${formSubmissionDraftId}`
@@ -59,7 +60,9 @@ export async function saveDraftSubmission({
   }
 
   try {
-    return await uploadDraftData(draftSubmission, onProgress, abortSignal)
+    if (isLoggedIn()) {
+      return await uploadDraftData(draftSubmission, onProgress, abortSignal)
+    }
   } catch (error) {
     // Ignoring all errors here as we don't want draft submission data
     // being saved to the cloud to prevent drafts from being saved on the device

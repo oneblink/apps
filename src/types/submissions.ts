@@ -103,6 +103,8 @@ export type LocalFormSubmissionDraft = Omit<
    * locally yet.
    */
   draftSubmission: DraftSubmission | undefined
+  /** `true` if the draft was created by a public user (not logged in). */
+  isPublic?: boolean
 }
 
 export type FormSubmission = NewFormSubmission &

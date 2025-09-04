@@ -348,22 +348,19 @@ async function upsertDraft({
 
       await setAndBroadcastDrafts(localDraftsStorage)
     } else {
-      let publicDraftsStorage = await getPublicDrafts()
       let updated = false
-      if (formSubmissionDraftId) {
-        publicDraftsStorage = publicDraftsStorage.map(
-          (publicDraftSubmission) => {
-            if (
-              publicDraftSubmission.formSubmissionDraftId ===
-              formSubmissionDraftId
-            ) {
-              updated = true
-              return draftSubmission
-            }
-            return publicDraftSubmission
-          },
-        )
-      }
+      const publicDraftsStorage = (await getPublicDrafts()).map(
+        (publicDraftSubmission) => {
+          if (
+            publicDraftSubmission.formSubmissionDraftId ===
+            formSubmissionDraftId
+          ) {
+            updated = true
+            return draftSubmission
+          }
+          return publicDraftSubmission
+        },
+      )
       if (!updated) {
         publicDraftsStorage.push(draftSubmission)
       }

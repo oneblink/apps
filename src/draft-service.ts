@@ -31,36 +31,27 @@ function generateDraftsKey(username: string) {
   return `V2_DRAFTS_${username}`
 }
 
+function generatePublicDraftsKey() {
+  return `V2_DRAFTS_PUBLIC`
+}
+
 interface LocalDraftsStorage {
   deletedFormSubmissionDrafts: SubmissionTypes.FormSubmissionDraft[]
   unsyncedDraftSubmissions: DraftSubmission[]
   syncedFormSubmissionDrafts: SubmissionTypes.FormSubmissionDraft[]
 }
 
-async function generateLocalFormSubmissionDraftsFromStorage(
-  localDraftsStorage: LocalDraftsStorage,
-): Promise<LocalFormSubmissionDraft[]> {
-  // Get list of pending submissions
-  const pendingSubmissions = await getPendingQueueSubmissions()
-  const pendingSubmissionsDraftIds = pendingSubmissions.reduce<Set<string>>(
-    (memo, pendingSubmission) => {
-      if (pendingSubmission.formSubmissionDraftId) {
-        memo.add(pendingSubmission.formSubmissionDraftId)
-      }
-      return memo
-    },
-    new Set<string>(),
-  )
-  const deletedDraftIds = new Set(
-    localDraftsStorage.deletedFormSubmissionDrafts.map(({ id }) => id),
-  )
-
+function generateLocalFormSubmissionDraftsFromDraftSubmissions(
+  draftSubmissions: DraftSubmission[],
+  pendingSubmissionsDraftIds: Set<string>,
+  deletedDraftIds: Set<string>,
+) {
   const localFormSubmissionDraftsMap = new Map<
     string,
     LocalFormSubmissionDraft
   >()
 
-  for (const draftSubmission of localDraftsStorage.unsyncedDraftSubmissions) {
+  for (const draftSubmission of draftSubmissions) {
     if (
       // Remove drafts that are in the pending queue
       !pendingSubmissionsDraftIds.has(draftSubmission.formSubmissionDraftId) &&
@@ -84,6 +75,54 @@ async function generateLocalFormSubmissionDraftsFromStorage(
       })
     }
   }
+
+  return localFormSubmissionDraftsMap
+}
+
+async function getPendingSubmissionsDraftIds() {
+  const pendingSubmissions = await getPendingQueueSubmissions()
+  return pendingSubmissions.reduce<Set<string>>((memo, pendingSubmission) => {
+    if (pendingSubmission.formSubmissionDraftId) {
+      memo.add(pendingSubmission.formSubmissionDraftId)
+    }
+    return memo
+  }, new Set<string>())
+}
+
+async function generatePublicLocalFormSubmissionDraftsFromStorage(
+  publicDraftsStorage: DraftSubmission[],
+) {
+  const pendingSubmissionsDraftIds = await getPendingSubmissionsDraftIds()
+  const localFormSubmissionDraftsMap =
+    generateLocalFormSubmissionDraftsFromDraftSubmissions(
+      publicDraftsStorage,
+      pendingSubmissionsDraftIds,
+      new Set(),
+    )
+
+  const localFormSubmissionDrafts = Array.from(
+    localFormSubmissionDraftsMap.values(),
+  )
+
+  return _orderBy(localFormSubmissionDrafts, (localFormSubmissionDraft) => {
+    return localFormSubmissionDraft.draftSubmission?.createdAt
+  })
+}
+
+async function generateLocalFormSubmissionDraftsFromStorage(
+  localDraftsStorage: LocalDraftsStorage,
+): Promise<LocalFormSubmissionDraft[]> {
+  const pendingSubmissionsDraftIds = await getPendingSubmissionsDraftIds()
+  const deletedDraftIds = new Set(
+    localDraftsStorage.deletedFormSubmissionDrafts.map(({ id }) => id),
+  )
+
+  const localFormSubmissionDraftsMap =
+    generateLocalFormSubmissionDraftsFromDraftSubmissions(
+      localDraftsStorage.unsyncedDraftSubmissions,
+      pendingSubmissionsDraftIds,
+      deletedDraftIds,
+    )
 
   for (const formSubmissionDraft of localDraftsStorage.syncedFormSubmissionDrafts) {
     if (
@@ -172,10 +211,10 @@ function registerDraftsListener(
   }
 }
 
-async function executeDraftsListeners(localDraftsStorage: LocalDraftsStorage) {
-  console.log('Drafts have been updated', localDraftsStorage)
-  const localFormSubmissionDrafts =
-    await generateLocalFormSubmissionDraftsFromStorage(localDraftsStorage)
+async function executeDraftsListeners(
+  localFormSubmissionDrafts: LocalFormSubmissionDraft[],
+) {
+  console.log('Drafts have been updated', localFormSubmissionDrafts)
   for (const draftsListener of draftsListeners) {
     draftsListener(localFormSubmissionDrafts)
   }
@@ -251,71 +290,82 @@ async function upsertDraft({
     return
   }
 
-  const username = getUsername()
-  if (!username) {
-    throw new OneBlinkAppsError(
-      'You cannot update drafts until you have logged in. Please login and try again.',
-      {
-        requiresLogin: true,
-      },
-    )
-  }
-
   try {
-    const localDraftsStorage = await getLocalDrafts()
-
     const formSubmissionDraftVersion = await saveDraftSubmission({
       draftSubmission,
       autoSaveKey,
       onProgress,
     })
-    if (formSubmissionDraftVersion) {
-      console.log('Draft was saved on server', formSubmissionDraftVersion)
-      localDraftsStorage.syncedFormSubmissionDrafts =
-        await getFormSubmissionDrafts(draftSubmission.formsAppId, abortSignal)
-      // Remove draft from unsynced incase it was created offline
-      if (formSubmissionDraftId) {
-        localDraftsStorage.unsyncedDraftSubmissions =
-          localDraftsStorage.unsyncedDraftSubmissions.filter(
-            (unsyncedDraftSubmission) =>
-              unsyncedDraftSubmission.formSubmissionDraftId !==
-              formSubmissionDraftId,
-          )
-      }
-    } else {
-      console.log(
-        'Draft could not be saved on server, saving locally to sync later',
-        draftSubmission,
-      )
-      let updated = false
 
-      if (formSubmissionDraftId) {
-        localDraftsStorage.unsyncedDraftSubmissions =
-          localDraftsStorage.unsyncedDraftSubmissions.map(
-            (unsyncedDraftSubmission) => {
-              if (
-                unsyncedDraftSubmission.formSubmissionDraftId ===
-                formSubmissionDraftId
-              ) {
-                updated = true
-                return draftSubmission
-              }
-              return unsyncedDraftSubmission
-            },
-          )
-        // Remove draft from synced drafts incase it was retrieved while online
+    if (isLoggedIn()) {
+      const localDraftsStorage = await getLocalDrafts()
+
+      if (formSubmissionDraftVersion) {
+        console.log('Draft was saved on server', formSubmissionDraftVersion)
         localDraftsStorage.syncedFormSubmissionDrafts =
-          localDraftsStorage.syncedFormSubmissionDrafts.filter(
-            ({ id }) => id !== formSubmissionDraftId,
-          )
+          await getFormSubmissionDrafts(draftSubmission.formsAppId, abortSignal)
+        // Remove draft from unsynced incase it was created offline
+        if (formSubmissionDraftId) {
+          localDraftsStorage.unsyncedDraftSubmissions =
+            localDraftsStorage.unsyncedDraftSubmissions.filter(
+              (unsyncedDraftSubmission) =>
+                unsyncedDraftSubmission.formSubmissionDraftId !==
+                formSubmissionDraftId,
+            )
+        }
+      } else {
+        console.log(
+          'Draft could not be saved on server, saving locally to sync later',
+          draftSubmission,
+        )
+        let updated = false
+
+        if (formSubmissionDraftId) {
+          localDraftsStorage.unsyncedDraftSubmissions =
+            localDraftsStorage.unsyncedDraftSubmissions.map(
+              (unsyncedDraftSubmission) => {
+                if (
+                  unsyncedDraftSubmission.formSubmissionDraftId ===
+                  formSubmissionDraftId
+                ) {
+                  updated = true
+                  return draftSubmission
+                }
+                return unsyncedDraftSubmission
+              },
+            )
+          // Remove draft from synced drafts incase it was retrieved while online
+          localDraftsStorage.syncedFormSubmissionDrafts =
+            localDraftsStorage.syncedFormSubmissionDrafts.filter(
+              ({ id }) => id !== formSubmissionDraftId,
+            )
+        }
+
+        if (!updated) {
+          localDraftsStorage.unsyncedDraftSubmissions.push(draftSubmission)
+        }
       }
 
+      await setAndBroadcastDrafts(localDraftsStorage)
+    } else {
+      let updated = false
+      const publicDraftsStorage = (await getPublicDrafts()).map(
+        (publicDraftSubmission) => {
+          if (
+            publicDraftSubmission.formSubmissionDraftId ===
+            formSubmissionDraftId
+          ) {
+            updated = true
+            return draftSubmission
+          }
+          return publicDraftSubmission
+        },
+      )
       if (!updated) {
-        localDraftsStorage.unsyncedDraftSubmissions.push(draftSubmission)
+        publicDraftsStorage.push(draftSubmission)
       }
+      await setAndBroadcastPublicDrafts(publicDraftsStorage)
     }
-
-    await setAndBroadcastDrafts(localDraftsStorage)
 
     if (pendingTimestamp) {
       await deletePendingQueueSubmission(pendingTimestamp)
@@ -354,6 +404,22 @@ async function getLocalDrafts(): Promise<LocalDraftsStorage> {
   }
 }
 
+async function getPublicDrafts(): Promise<DraftSubmission[]> {
+  try {
+    const publicDrafts = await utilsService.localForage.getItem<
+      DraftSubmission[]
+    >(generatePublicDraftsKey())
+    if (publicDrafts) {
+      return publicDrafts
+    }
+  } catch (err) {
+    Sentry.captureException(err)
+    throw errorHandler(err as Error)
+  }
+
+  return []
+}
+
 /**
  * Get an array of Drafts for the currently logged in user.
  *
@@ -366,8 +432,17 @@ async function getLocalDrafts(): Promise<LocalDraftsStorage> {
  * @returns
  */
 async function getDrafts(): Promise<LocalFormSubmissionDraft[]> {
-  const localDraftsStorage = await getLocalDrafts()
-  return await generateLocalFormSubmissionDraftsFromStorage(localDraftsStorage)
+  if (isLoggedIn()) {
+    const localDraftsStorage = await getLocalDrafts()
+    return await generateLocalFormSubmissionDraftsFromStorage(
+      localDraftsStorage,
+    )
+  } else {
+    const publicDraftsStorage = await getPublicDrafts()
+    return await generatePublicLocalFormSubmissionDraftsFromStorage(
+      publicDraftsStorage,
+    )
+  }
 }
 
 async function tryGetFormSubmissionDrafts(
@@ -411,22 +486,28 @@ async function getDraftAndData(
     formsAppId,
     abortSignal,
   )
-  const localDraftsStorage = await getLocalDrafts()
-  if (formSubmissionDrafts) {
-    localDraftsStorage.syncedFormSubmissionDrafts = formSubmissionDrafts
-    await setAndBroadcastDrafts(localDraftsStorage)
+  if (isLoggedIn()) {
+    const localDraftsStorage = await getLocalDrafts()
+    if (formSubmissionDrafts) {
+      localDraftsStorage.syncedFormSubmissionDrafts = formSubmissionDrafts
+      await setAndBroadcastDrafts(localDraftsStorage)
+    } else {
+      formSubmissionDrafts = localDraftsStorage.syncedFormSubmissionDrafts
+    }
+
+    const formSubmissionDraft = formSubmissionDrafts.find(
+      ({ id }) => id === formSubmissionDraftId,
+    )
+    if (!formSubmissionDraft) {
+      return (await getLocalDraftSubmission(formSubmissionDraftId)) || undefined
+    }
+
+    return await getDraftSubmission(formSubmissionDraft)
   } else {
-    formSubmissionDrafts = localDraftsStorage.syncedFormSubmissionDrafts
+    if (formSubmissionDrafts) {
+      return (await getLocalDraftSubmission(formSubmissionDraftId)) || undefined
+    }
   }
-
-  const formSubmissionDraft = formSubmissionDrafts.find(
-    ({ id }) => id === formSubmissionDraftId,
-  )
-  if (!formSubmissionDraft) {
-    return (await getLocalDraftSubmission(formSubmissionDraftId)) || undefined
-  }
-
-  return await getDraftSubmission(formSubmissionDraft)
 }
 
 /**
@@ -448,40 +529,56 @@ async function deleteDraft(
   formsAppId: number,
   abortSignal?: AbortSignal,
 ): Promise<void> {
-  const username = getUsername()
-  if (!username) {
-    throw new OneBlinkAppsError(
-      'You cannot delete drafts until you have logged in. Please login and try again.',
-      {
-        requiresLogin: true,
-      },
-    )
-  }
   try {
     await removeLocalDraftSubmission(formSubmissionDraftId)
-    const localDraftsStorage = await getLocalDrafts()
-    const formSubmissionDraft =
-      localDraftsStorage.syncedFormSubmissionDrafts.find(
-        ({ id }) => id === formSubmissionDraftId,
-      )
-    if (formSubmissionDraft) {
-      const { hasDeletedRemoteDraft } = await deleteDraftData(
-        formSubmissionDraftId,
-        abortSignal,
-      )
-      localDraftsStorage.syncedFormSubmissionDrafts =
-        localDraftsStorage.syncedFormSubmissionDrafts.filter(
-          ({ id }) => id !== formSubmissionDraft.id,
+    if (isLoggedIn()) {
+      const localDraftsStorage = await getLocalDrafts()
+      const formSubmissionDraft =
+        localDraftsStorage.syncedFormSubmissionDrafts.find(
+          ({ id }) => id === formSubmissionDraftId,
         )
-      if (!hasDeletedRemoteDraft) {
-        localDraftsStorage.deletedFormSubmissionDrafts.push(formSubmissionDraft)
+      if (formSubmissionDraft) {
+        const { hasDeletedRemoteDraft } = await deleteDraftData(
+          formSubmissionDraftId,
+          abortSignal,
+        )
+        localDraftsStorage.syncedFormSubmissionDrafts =
+          localDraftsStorage.syncedFormSubmissionDrafts.filter(
+            ({ id }) => id !== formSubmissionDraft.id,
+          )
+        if (!hasDeletedRemoteDraft) {
+          localDraftsStorage.deletedFormSubmissionDrafts.push(
+            formSubmissionDraft,
+          )
+        }
+      } else {
+        console.log(
+          'Could not find existing draft in synced drafts to delete',
+          {
+            formSubmissionDraftId,
+            localDraftsStorage,
+          },
+        )
+        const draftSubmission =
+          localDraftsStorage.unsyncedDraftSubmissions.find(
+            (draftSubmission) =>
+              draftSubmission.formSubmissionDraftId === formSubmissionDraftId,
+          )
+        if (!draftSubmission) {
+          return
+        }
+
+        localDraftsStorage.unsyncedDraftSubmissions =
+          localDraftsStorage.unsyncedDraftSubmissions.filter(
+            (draftSubmission) =>
+              draftSubmission.formSubmissionDraftId !== formSubmissionDraftId,
+          )
       }
+
+      await setAndBroadcastDrafts(localDraftsStorage)
     } else {
-      console.log('Could not find existing draft in synced drafts to delete', {
-        formSubmissionDraftId,
-        localDraftsStorage,
-      })
-      const draftSubmission = localDraftsStorage.unsyncedDraftSubmissions.find(
+      let publicDraftsStorage = await getPublicDrafts()
+      const draftSubmission = publicDraftsStorage.find(
         (draftSubmission) =>
           draftSubmission.formSubmissionDraftId === formSubmissionDraftId,
       )
@@ -489,14 +586,13 @@ async function deleteDraft(
         return
       }
 
-      localDraftsStorage.unsyncedDraftSubmissions =
-        localDraftsStorage.unsyncedDraftSubmissions.filter(
-          (draftSubmission) =>
-            draftSubmission.formSubmissionDraftId !== formSubmissionDraftId,
-        )
-    }
+      publicDraftsStorage = publicDraftsStorage.filter(
+        (draftSubmission) =>
+          draftSubmission.formSubmissionDraftId !== formSubmissionDraftId,
+      )
 
-    await setAndBroadcastDrafts(localDraftsStorage)
+      await setAndBroadcastPublicDrafts(publicDraftsStorage)
+    }
 
     syncDrafts({
       throwError: false,
@@ -506,6 +602,20 @@ async function deleteDraft(
     Sentry.captureException(err)
     throw errorHandler(err as Error)
   }
+}
+
+async function setAndBroadcastPublicDrafts(publicDrafts: DraftSubmission[]) {
+  await utilsService.localForage.setItem(
+    generatePublicDraftsKey(),
+    publicDrafts,
+  )
+
+  console.log('Public drafts have been updated', publicDrafts)
+  const localFormSubmissionDrafts =
+    await generatePublicLocalFormSubmissionDraftsFromStorage(publicDrafts)
+  await executeDraftsListeners(
+    localFormSubmissionDrafts.map((draft) => ({ ...draft, isPublic: true })),
+  )
 }
 
 async function setAndBroadcastDrafts(
@@ -524,7 +634,11 @@ async function setAndBroadcastDrafts(
     generateDraftsKey(username),
     localDraftsStorage,
   )
-  await executeDraftsListeners(localDraftsStorage)
+
+  console.log('Drafts have been updated', localDraftsStorage)
+  const localFormSubmissionDrafts =
+    await generateLocalFormSubmissionDraftsFromStorage(localDraftsStorage)
+  await executeDraftsListeners(localFormSubmissionDrafts)
 }
 
 let _isSyncingDrafts = false
@@ -559,9 +673,12 @@ async function syncDrafts({
   abortSignal?: AbortSignal
 }): Promise<void> {
   if (!isLoggedIn()) {
-    console.log('Drafts cannot be synced until user has logged in.')
+    const publicDrafts = await getPublicDrafts()
+    setAndBroadcastPublicDrafts(publicDrafts)
     return
   }
+
+  // TODO - check for public drafts and sync with the logged in user's drafts
 
   if (_isSyncingDrafts) {
     console.log('Application is currently syncing drafts.')

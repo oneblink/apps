@@ -672,14 +672,6 @@ async function syncDrafts({
   /** Signal to abort the requests */
   abortSignal?: AbortSignal
 }): Promise<void> {
-  if (!isLoggedIn()) {
-    const publicDrafts = await getPublicDrafts()
-    setAndBroadcastPublicDrafts(publicDrafts)
-    return
-  }
-
-  // TODO - check for public drafts and sync with the logged in user's drafts
-
   if (_isSyncingDrafts) {
     console.log('Application is currently syncing drafts.')
     return
@@ -687,6 +679,24 @@ async function syncDrafts({
   _isSyncingDrafts = true
 
   console.log('Start attempting to sync drafts.')
+
+  if (!isLoggedIn()) {
+    const publicDrafts = await getPublicDrafts()
+    const filteredPublicDrafts = []
+    // remove any drafts that no longer have submissions in local storage
+    for (const publicDraft of publicDrafts) {
+      const localDraftSubmission = await getLocalDraftSubmission(
+        publicDraft.formSubmissionDraftId,
+      )
+      if (localDraftSubmission) {
+        filteredPublicDrafts.push(publicDraft)
+      }
+    }
+    await setAndBroadcastPublicDrafts(filteredPublicDrafts)
+    _isSyncingDrafts = false
+    return
+  }
+
   try {
     let localDraftsStorage = await getLocalDrafts()
     if (localDraftsStorage.deletedFormSubmissionDrafts.length) {
@@ -710,6 +720,14 @@ async function syncDrafts({
       localDraftsStorage = await getLocalDrafts()
       localDraftsStorage.deletedFormSubmissionDrafts =
         newDeletedFormSubmissionDrafts
+    }
+
+    const publicDraftsStorage = await getPublicDrafts()
+    // if public drafts exist, add them to the current logged in users' unsynced drafts
+    // and remove them from local storage
+    if (publicDraftsStorage.length) {
+      localDraftsStorage.unsyncedDraftSubmissions.push(...publicDraftsStorage)
+      await utilsService.localForage.setItem(generatePublicDraftsKey(), [])
     }
 
     if (localDraftsStorage.unsyncedDraftSubmissions.length) {

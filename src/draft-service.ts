@@ -683,7 +683,9 @@ async function syncDrafts({
   if (!isLoggedIn()) {
     const publicDrafts = await getPublicDrafts()
     const filteredPublicDrafts = []
-    // remove any drafts that no longer have submissions in local storage
+    // iterate through public draft records, and check if a draft submission exists for each record.
+    // If no draft submission exists for a record, the draft was likely submitted, so we must remove it
+    // from the list of public drafts so it no longer appears in the user's draft list.
     for (const publicDraft of publicDrafts) {
       const localDraftSubmission = await getLocalDraftSubmission(
         publicDraft.formSubmissionDraftId,

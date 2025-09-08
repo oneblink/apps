@@ -46,13 +46,13 @@ export async function saveDraftSubmission({
   autoSaveKey,
   onProgress,
   abortSignal,
-  isAuthorised,
+  skipUpload,
 }: {
   draftSubmission: DraftSubmission
   autoSaveKey: string | undefined
   onProgress?: ProgressListener
   abortSignal?: AbortSignal
-  isAuthorised?: boolean
+  skipUpload?: boolean
 }): Promise<SubmissionTypes.FormSubmissionDraftVersion | undefined> {
   await setLocalDraftSubmission(draftSubmission)
 
@@ -61,7 +61,7 @@ export async function saveDraftSubmission({
   }
 
   try {
-    if (isAuthorised) {
+    if (!skipUpload) {
       return await uploadDraftData(draftSubmission, onProgress, abortSignal)
     }
   } catch (error) {

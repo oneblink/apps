@@ -4,10 +4,7 @@ import utilsService from './services/utils'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { isOffline } from './offline-service'
 import { getUsername } from './services/cognito'
-import {
-  getFormsKeyId,
-  isAuthorised as isFormsAppUserAuthorised,
-} from './auth-service'
+import { getFormsKeyId, getCurrentFormsAppUser } from './auth-service'
 import { getFormSubmissionDrafts, uploadDraftData } from './services/api/drafts'
 import {
   getPendingQueueSubmissions,
@@ -42,6 +39,26 @@ interface LocalDraftsStorage {
   deletedFormSubmissionDrafts: SubmissionTypes.FormSubmissionDraft[]
   unsyncedDraftSubmissions: DraftSubmission[]
   syncedFormSubmissionDrafts: SubmissionTypes.FormSubmissionDraft[]
+}
+
+async function checkIfUsingPrivateDrafts(
+  formsAppId: number,
+  abortSignal?: AbortSignal,
+): Promise<boolean> {
+  return getCurrentFormsAppUser(formsAppId, abortSignal)
+    .then((user) => !!user)
+    .catch((error) => {
+      if (error.status >= 400 && error.status < 500) {
+        return false
+      } else {
+        Sentry.captureException(error)
+        console.log(
+          'Could not determine if the current user has access to this forms app',
+          error,
+        )
+        return false
+      }
+    })
 }
 
 function generateLocalFormSubmissionDraftsFromDraftSubmissions(
@@ -293,17 +310,17 @@ async function upsertDraft({
   }
 
   try {
-    const isAuthorised = await isFormsAppUserAuthorised(
+    const isUsingPrivateDrafts = await checkIfUsingPrivateDrafts(
       draftSubmission.formsAppId,
     )
     const formSubmissionDraftVersion = await saveDraftSubmission({
       draftSubmission,
       autoSaveKey,
       onProgress,
-      isAuthorised,
+      skipUpload: !isUsingPrivateDrafts,
     })
 
-    if (isAuthorised) {
+    if (isUsingPrivateDrafts) {
       const localDraftsStorage = await getLocalDraftsFromStorage()
 
       if (formSubmissionDraftVersion) {
@@ -501,8 +518,8 @@ async function getDraftAndData(
     formsAppId,
     abortSignal,
   )
-  const isAuthorised = await isFormsAppUserAuthorised(formsAppId)
-  if (isAuthorised) {
+  const isUsingPrivateDrafts = await checkIfUsingPrivateDrafts(formsAppId)
+  if (isUsingPrivateDrafts) {
     const localDraftsStorage = await getLocalDraftsFromStorage()
     if (formSubmissionDrafts) {
       localDraftsStorage.syncedFormSubmissionDrafts = formSubmissionDrafts
@@ -547,8 +564,8 @@ async function deleteDraft(
 ): Promise<void> {
   try {
     await removeLocalDraftSubmission(formSubmissionDraftId)
-    const isAuthorised = await isFormsAppUserAuthorised(formsAppId)
-    if (isAuthorised) {
+    const isUsingPrivateDrafts = await checkIfUsingPrivateDrafts(formsAppId)
+    if (isUsingPrivateDrafts) {
       const localDraftsStorage = await getLocalDraftsFromStorage()
       const formSubmissionDraft =
         localDraftsStorage.syncedFormSubmissionDrafts.find(
@@ -695,9 +712,9 @@ async function syncDrafts({
   }
   _isSyncingDrafts = true
 
-  const isAuthorised = await isFormsAppUserAuthorised(formsAppId)
+  const isUsingPrivateDrafts = await checkIfUsingPrivateDrafts(formsAppId)
 
-  if (!isAuthorised) {
+  if (!isUsingPrivateDrafts) {
     const publicDrafts = await getPublicDraftsFromStorage()
     const filteredPublicDrafts = []
     // iterate through public draft records, and check if a draft submission exists for each record.
@@ -764,7 +781,7 @@ async function syncDrafts({
           draftSubmission,
           autoSaveKey: undefined,
           abortSignal,
-          isAuthorised,
+          skipUpload: !isUsingPrivateDrafts,
         })
         if (!formSubmissionDraftVersion) {
           newUnsyncedDraftSubmissions.push(draftSubmission)

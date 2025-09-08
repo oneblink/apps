@@ -108,6 +108,44 @@ export function init({ oAuthClientId }: { oAuthClientId: string }) {
 }
 
 /**
+ * Determine if the current user is a OneBlink App User for a OneBlink Forms
+ * App. Returns `false` if the current user is not logged in.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formsAppId = 1
+ * const isAuthorised = await authService.isAuthorised(formsAppId)
+ * if (!isAuthorised) {
+ *   // handle unauthorised user
+ * }
+ * ```
+ *
+ * @param formsAppId
+ * @param abortSignal
+ * @returns
+ */
+export async function isAuthorised(
+  formsAppId: number,
+  abortSignal?: AbortSignal,
+): Promise<boolean> {
+  return getCurrentFormsAppUser(formsAppId, abortSignal)
+    .then(() => true)
+    .catch((error) => {
+      if (error.status >= 400 && error.status < 500) {
+        return false
+      } else {
+        Sentry.captureException(error)
+        console.log(
+          'Could not determine if the current user has access to this forms app',
+          error,
+        )
+        return false
+      }
+    })
+}
+
+/**
  * Get the current user's App User details for a OneBlink Forms App. Returns
  * `undefined` if the current user is not logged in.
  *

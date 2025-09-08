@@ -3,8 +3,8 @@ import _orderBy from 'lodash.orderby'
 import utilsService from './services/utils'
 import OneBlinkAppsError from './services/errors/oneBlinkAppsError'
 import { isOffline } from './offline-service'
-import { getUsername, isLoggedIn } from './services/cognito'
-import { getFormsKeyId } from './auth-service'
+import { getUsername } from './services/cognito'
+import { getFormsKeyId, getCurrentFormsAppUser } from './auth-service'
 import { getFormSubmissionDrafts, uploadDraftData } from './services/api/drafts'
 import {
   getPendingQueueSubmissions,
@@ -39,6 +39,26 @@ interface LocalDraftsStorage {
   deletedFormSubmissionDrafts: SubmissionTypes.FormSubmissionDraft[]
   unsyncedDraftSubmissions: DraftSubmission[]
   syncedFormSubmissionDrafts: SubmissionTypes.FormSubmissionDraft[]
+}
+
+async function checkIfUsingPrivateDrafts(
+  formsAppId: number,
+  abortSignal?: AbortSignal,
+): Promise<boolean> {
+  return getCurrentFormsAppUser(formsAppId, abortSignal)
+    .then((user) => !!user)
+    .catch((error) => {
+      if (error.status >= 400 && error.status < 500) {
+        return false
+      } else {
+        Sentry.captureException(error)
+        console.log(
+          'Could not determine if the current user has access to this forms app',
+          error,
+        )
+        return false
+      }
+    })
 }
 
 function generateLocalFormSubmissionDraftsFromDraftSubmissions(
@@ -214,7 +234,6 @@ function registerDraftsListener(
 async function executeDraftsListeners(
   localFormSubmissionDrafts: LocalFormSubmissionDraft[],
 ) {
-  console.log('Drafts have been updated', localFormSubmissionDrafts)
   for (const draftsListener of draftsListeners) {
     draftsListener(localFormSubmissionDrafts)
   }
@@ -291,14 +310,18 @@ async function upsertDraft({
   }
 
   try {
+    const isUsingPrivateDrafts = await checkIfUsingPrivateDrafts(
+      draftSubmission.formsAppId,
+    )
     const formSubmissionDraftVersion = await saveDraftSubmission({
       draftSubmission,
       autoSaveKey,
       onProgress,
+      skipUpload: !isUsingPrivateDrafts,
     })
 
-    if (isLoggedIn()) {
-      const localDraftsStorage = await getLocalDrafts()
+    if (isUsingPrivateDrafts) {
+      const localDraftsStorage = await getLocalDraftsFromStorage()
 
       if (formSubmissionDraftVersion) {
         console.log('Draft was saved on server', formSubmissionDraftVersion)
@@ -349,7 +372,7 @@ async function upsertDraft({
       await setAndBroadcastDrafts(localDraftsStorage)
     } else {
       let updated = false
-      const publicDraftsStorage = (await getPublicDrafts()).map(
+      const publicDraftsStorage = (await getPublicDraftsFromStorage()).map(
         (publicDraftSubmission) => {
           if (
             publicDraftSubmission.formSubmissionDraftId ===
@@ -380,7 +403,7 @@ async function upsertDraft({
   }
 }
 
-async function getLocalDrafts(): Promise<LocalDraftsStorage> {
+async function getLocalDraftsFromStorage(): Promise<LocalDraftsStorage> {
   const username = getUsername()
   if (username) {
     try {
@@ -404,7 +427,7 @@ async function getLocalDrafts(): Promise<LocalDraftsStorage> {
   }
 }
 
-async function getPublicDrafts(): Promise<DraftSubmission[]> {
+async function getPublicDraftsFromStorage(): Promise<DraftSubmission[]> {
   try {
     const publicDrafts = await utilsService.localForage.getItem<
       DraftSubmission[]
@@ -432,17 +455,26 @@ async function getPublicDrafts(): Promise<DraftSubmission[]> {
  * @returns
  */
 async function getDrafts(): Promise<LocalFormSubmissionDraft[]> {
-  if (isLoggedIn()) {
-    const localDraftsStorage = await getLocalDrafts()
-    return await generateLocalFormSubmissionDraftsFromStorage(
-      localDraftsStorage,
-    )
-  } else {
-    const publicDraftsStorage = await getPublicDrafts()
-    return await generatePublicLocalFormSubmissionDraftsFromStorage(
-      publicDraftsStorage,
-    )
-  }
+  const localDraftsStorage = await getLocalDraftsFromStorage()
+  return await generateLocalFormSubmissionDraftsFromStorage(localDraftsStorage)
+}
+
+/**
+ * Get an array of Drafts that have been submitted publicly on this device.
+ *
+ * #### Example
+ *
+ * ```js
+ * const drafts = await draftService.getPublicDrafts()
+ * ```
+ *
+ * @returns
+ */
+async function getPublicDrafts(): Promise<LocalFormSubmissionDraft[]> {
+  const publicDraftsStorage = await getPublicDraftsFromStorage()
+  return await generatePublicLocalFormSubmissionDraftsFromStorage(
+    publicDraftsStorage,
+  )
 }
 
 async function tryGetFormSubmissionDrafts(
@@ -486,8 +518,9 @@ async function getDraftAndData(
     formsAppId,
     abortSignal,
   )
-  if (isLoggedIn()) {
-    const localDraftsStorage = await getLocalDrafts()
+  const isUsingPrivateDrafts = await checkIfUsingPrivateDrafts(formsAppId)
+  if (isUsingPrivateDrafts) {
+    const localDraftsStorage = await getLocalDraftsFromStorage()
     if (formSubmissionDrafts) {
       localDraftsStorage.syncedFormSubmissionDrafts = formSubmissionDrafts
       await setAndBroadcastDrafts(localDraftsStorage)
@@ -531,8 +564,9 @@ async function deleteDraft(
 ): Promise<void> {
   try {
     await removeLocalDraftSubmission(formSubmissionDraftId)
-    if (isLoggedIn()) {
-      const localDraftsStorage = await getLocalDrafts()
+    const isUsingPrivateDrafts = await checkIfUsingPrivateDrafts(formsAppId)
+    if (isUsingPrivateDrafts) {
+      const localDraftsStorage = await getLocalDraftsFromStorage()
       const formSubmissionDraft =
         localDraftsStorage.syncedFormSubmissionDrafts.find(
           ({ id }) => id === formSubmissionDraftId,
@@ -577,7 +611,7 @@ async function deleteDraft(
 
       await setAndBroadcastDrafts(localDraftsStorage)
     } else {
-      let publicDraftsStorage = await getPublicDrafts()
+      let publicDraftsStorage = await getPublicDraftsFromStorage()
       const draftSubmission = publicDraftsStorage.find(
         (draftSubmission) =>
           draftSubmission.formSubmissionDraftId === formSubmissionDraftId,
@@ -678,10 +712,10 @@ async function syncDrafts({
   }
   _isSyncingDrafts = true
 
-  console.log('Start attempting to sync drafts.')
+  const isUsingPrivateDrafts = await checkIfUsingPrivateDrafts(formsAppId)
 
-  if (!isLoggedIn()) {
-    const publicDrafts = await getPublicDrafts()
+  if (!isUsingPrivateDrafts) {
+    const publicDrafts = await getPublicDraftsFromStorage()
     const filteredPublicDrafts = []
     // iterate through public draft records, and check if a draft submission exists for each record.
     // If no draft submission exists for a record, the draft was likely submitted, so we must remove it
@@ -700,7 +734,7 @@ async function syncDrafts({
   }
 
   try {
-    let localDraftsStorage = await getLocalDrafts()
+    let localDraftsStorage = await getLocalDraftsFromStorage()
     if (localDraftsStorage.deletedFormSubmissionDrafts.length) {
       console.log(
         'Removing local draft data for deleted drafts',
@@ -719,12 +753,12 @@ async function syncDrafts({
       }
 
       // Get local drafts again to ensure nothing has happened while processing
-      localDraftsStorage = await getLocalDrafts()
+      localDraftsStorage = await getLocalDraftsFromStorage()
       localDraftsStorage.deletedFormSubmissionDrafts =
         newDeletedFormSubmissionDrafts
     }
 
-    const publicDraftsStorage = await getPublicDrafts()
+    const publicDraftsStorage = await getPublicDraftsFromStorage()
     // if public drafts exist, add them to the current logged in users' unsynced drafts
     // and remove them from local storage
     if (publicDraftsStorage.length) {
@@ -747,13 +781,14 @@ async function syncDrafts({
           draftSubmission,
           autoSaveKey: undefined,
           abortSignal,
+          skipUpload: !isUsingPrivateDrafts,
         })
         if (!formSubmissionDraftVersion) {
           newUnsyncedDraftSubmissions.push(draftSubmission)
         }
       }
       // Get local drafts again to ensure nothing has happened while processing
-      localDraftsStorage = await getLocalDrafts()
+      localDraftsStorage = await getLocalDraftsFromStorage()
       localDraftsStorage.unsyncedDraftSubmissions = newUnsyncedDraftSubmissions
     }
 
@@ -807,6 +842,7 @@ export {
   upsertDraft,
   getDraftAndData,
   getDrafts,
+  getPublicDrafts,
   deleteDraft,
   syncDrafts,
   getLatestFormSubmissionDraftVersion,

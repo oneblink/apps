@@ -9,7 +9,6 @@ import { SubmissionTypes } from '@oneblink/types'
 import Sentry from '../Sentry'
 import { DraftSubmission, ProgressListener } from '../types/submissions'
 import { deleteAutoSaveData } from '../auto-save-service'
-import { isLoggedIn } from './cognito'
 
 function getLocalDraftSubmissionKey(formSubmissionDraftId: string) {
   return `DRAFT_SUBMISSION_${formSubmissionDraftId}`
@@ -47,11 +46,13 @@ export async function saveDraftSubmission({
   autoSaveKey,
   onProgress,
   abortSignal,
+  isAuthorised,
 }: {
   draftSubmission: DraftSubmission
   autoSaveKey: string | undefined
   onProgress?: ProgressListener
   abortSignal?: AbortSignal
+  isAuthorised?: boolean
 }): Promise<SubmissionTypes.FormSubmissionDraftVersion | undefined> {
   await setLocalDraftSubmission(draftSubmission)
 
@@ -60,7 +61,7 @@ export async function saveDraftSubmission({
   }
 
   try {
-    if (isLoggedIn()) {
+    if (isAuthorised) {
       return await uploadDraftData(draftSubmission, onProgress, abortSignal)
     }
   } catch (error) {

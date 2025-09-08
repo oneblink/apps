@@ -130,7 +130,7 @@ export async function isAuthorised(
   abortSignal?: AbortSignal,
 ): Promise<boolean> {
   return getCurrentFormsAppUser(formsAppId, abortSignal)
-    .then(() => true)
+    .then((user) => !!user)
     .catch((error) => {
       if (error.status >= 400 && error.status < 500) {
         return false

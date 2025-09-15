@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [23.4.0] - 2025-09-15
+
 ### Added
 
 - support for public drafts to `draftService`
+
+### Dependencies
+
+- update [@oneblink/sdk-core](https://www.npmjs.com/package/@oneblink/sdk-core) to [8.8.1-beta.3](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [8.8.0-beta.1](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
 
 ## [23.3.1] - 2025-09-01
 

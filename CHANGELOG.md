@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- `FORMS_LIBRARY` post submission and cancel action not refreshing the form when the form is the home screen of the app.
+
 ## [23.4.1] - 2025-10-13
 
 ## [23.4.0] - 2025-09-15

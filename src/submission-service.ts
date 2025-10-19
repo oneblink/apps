@@ -506,9 +506,14 @@ async function executeAction(
   switch (action) {
     case 'CLOSE':
       return closeWindow()
-    case 'FORMS_LIBRARY':
-      onRedirectToRelativeUrl('/')
+    case 'FORMS_LIBRARY': {
+      if (window.location.pathname === '/') {
+        onRedirectToAbsoluteUrl(window.location.origin)
+      } else {
+        onRedirectToRelativeUrl('/')
+      }
       break
+    }
     case 'URL': {
       const newUrl = replaceInjectablesWithSubmissionValues(
         redirectUrl || '/',

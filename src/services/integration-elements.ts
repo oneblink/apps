@@ -354,7 +354,6 @@ export async function searchPointV3Addresses(
  * const formId = 1
  * const result = await formService.getPointV3Address(formId, {
  *   addressId: 'ABC123',
- *   additionalProperties: 'parcelBundle,localGovernmentArea',
  *   'Accept-Crs': '<https://www.opengis.net/def/crs/EPSG/0/7844>',
  * })
  * ```
@@ -368,7 +367,6 @@ export async function getPointV3Address(
   formId: number,
   queryParams: {
     addressId: string
-    additionalProperties?: string
     'Accept-Crs'?: string
   },
   abortSignal?: AbortSignal,

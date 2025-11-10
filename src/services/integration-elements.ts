@@ -9,6 +9,7 @@ import {
   SubmissionTypes,
   CPHCMSTypes,
 } from '@oneblink/types'
+
 import OneBlinkAppsError from '../services/errors/oneBlinkAppsError'
 import { isOffline } from '../offline-service'
 import {
@@ -298,6 +299,84 @@ export async function getPointCadastralParcel(
       `${
         tenants.current.apiOrigin
       }/forms/${formId}/point/cadastral-parcels?${urlSearchParams.toString()}`,
+      abortSignal,
+    )
+  } catch (err) {
+    throw generateGenericError(err, abortSignal)
+  }
+}
+
+/**
+ * Search for Point addresses v3 based on a partial address.
+ *
+ * #### Example
+ *
+ * -
+ *
+ * Const formId = 1 const result = await
+ * formService.searchPointV3Addresses(formId, { address: '123 N', maxResults: 10
+ * stateFilter: 'NSW' })
+ *
+ * @param formId
+ * @param queryParams
+ * @param abortSignal
+ * @returns
+ */
+export async function searchPointV3Addresses(
+  formId: number,
+  queryParams: {
+    address: string
+    maxResults?: number
+    stateFilter?: string
+    dataset?: string
+    excludeAliases?: boolean
+  },
+  abortSignal?: AbortSignal,
+): Promise<PointTypes.PointAddressV3SearchResponse> {
+  try {
+    return await searchRequest(
+      `${tenants.current.apiOrigin}/forms/${formId}/point/v3/addresses`,
+      queryParams,
+      abortSignal,
+    )
+  } catch (err) {
+    throw generateGenericError(err, abortSignal)
+  }
+}
+
+/**
+ * Get the details for a single Point address based on the Id of a Point address
+ * resource.
+ *
+ * #### Example
+ *
+ * ```js
+ * const formId = 1
+ * const result = await formService.getPointV3Address(formId, {
+ *   addressId: 'ABC123',
+ *   additionalProperties: 'parcelBundle,localGovernmentArea',
+ *   'Accept-Crs': '<https://www.opengis.net/def/crs/EPSG/0/7844>',
+ * })
+ * ```
+ *
+ * @param formId
+ * @param queryParams
+ * @param abortSignal
+ * @returns
+ */
+export async function getPointV3Address(
+  formId: number,
+  queryParams: {
+    addressId: string
+    additionalProperties?: string
+    'Accept-Crs'?: string
+  },
+  abortSignal?: AbortSignal,
+): Promise<PointTypes.PointAddressV3GetAddressDetailsResponse> {
+  try {
+    return await searchRequest(
+      `${tenants.current.apiOrigin}/forms/${formId}/point/v3/address`,
+      queryParams,
       abortSignal,
     )
   } catch (err) {

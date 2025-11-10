@@ -375,7 +375,7 @@ export async function getPointV3Address(
 ): Promise<PointTypes.PointAddressV3GetAddressDetailsResponse> {
   try {
     return await searchRequest(
-      `${tenants.current.apiOrigin}/forms/${formId}/point/v3/address/`,
+      `${tenants.current.apiOrigin}/forms/${formId}/point/v3/address`,
       queryParams,
       abortSignal,
     )

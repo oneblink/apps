@@ -329,6 +329,7 @@ export async function searchPointV3Addresses(
     maxResults?: number
     stateFilter?: string
     dataset?: string
+    addressType?: 'physical' | 'mailing' | 'all'
     excludeAliases?: boolean
   },
   abortSignal?: AbortSignal,

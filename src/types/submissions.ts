@@ -161,7 +161,18 @@ export type FormSubmissionResult = FormSubmission & {
   /** True if the submission was attempted whilst attachments were uploading */
   isUploadingAttachments: boolean
   /** Exists if the form allows PDF download */
+  /**
+   * @deprecated Only returned when legacy post submission download
+   *   configuration is in use. For non legacy configured forms, use
+   *   `getDownloadSubmissionPdfUrl` instead.
+   */
   downloadSubmissionPdfUrl?: string
+  /**
+   * The URL to download the form submission PDF.
+   *
+   * @param configurationId - The configuration ID to use for the PDF download.
+   */
+  getDownloadSubmissionPdfUrl?: (configurationId: string) => string
   /** The access token to download post-submission attachment urls and metadata. */
   attachmentsAccessToken?: string
 }

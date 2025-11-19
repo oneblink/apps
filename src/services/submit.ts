@@ -173,6 +173,19 @@ export default async function submit({
       abortSignal,
     )
 
+    const downloadSubmissionPdfUrl = () => {
+      if (!data.pdfAccessToken) {
+        return undefined
+      }
+      if (
+        formSubmission.definition.postSubmissionReceipt?.allowPDFDownload &&
+        !Array.isArray(
+          formSubmission.definition.postSubmissionReceipt?.allowPDFDownload,
+        )
+      ) {
+        return `${tenants.current.apiOrigin}/forms/${formSubmission.definition.id}/submissions/${data.submissionId}/pdf-document?accessToken=${data.pdfAccessToken}`
+      }
+    }
     const formSubmissionResult: FormSubmissionResult = {
       ...formSubmission,
       payment: null,
@@ -182,9 +195,11 @@ export default async function submit({
       submissionTimestamp: data.submissionTimestamp,
       submissionId: data.submissionId,
       isUploadingAttachments: false,
-      downloadSubmissionPdfUrl: !data.pdfAccessToken
+      downloadSubmissionPdfUrl: downloadSubmissionPdfUrl(),
+      getDownloadSubmissionPdfUrl: !data.pdfAccessToken
         ? undefined
-        : `${tenants.current.apiOrigin}/forms/${formSubmission.definition.id}/submissions/${data.submissionId}/pdf-document?accessToken=${data.pdfAccessToken}`,
+        : (configurationId: string) =>
+            `${tenants.current.apiOrigin}/forms/${formSubmission.definition.id}/submissions/${data.submissionId}/pdf-document?accessToken=${data.pdfAccessToken}&configurationId=${configurationId}`,
       attachmentsAccessToken: data.attachmentsAccessToken,
     }
 

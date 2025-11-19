@@ -7,10 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [23.5.0] - 2025-11-19
+
 ### Added
 
 - `formService.searchPointV3Addresses`
 - `formService.getPointV3Address`
+
+### Dependencies
+
+- update @oneblink/sdk-core to [8.10.0-beta.1](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md) (from [8.9.0-beta.2](https://github.com/oneblink/sdk-core-js/blob/master/CHANGELOG.md))
 
 ## [23.4.2] - 2025-10-26
 

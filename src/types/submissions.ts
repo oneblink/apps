@@ -164,15 +164,15 @@ export type FormSubmissionResult = FormSubmission & {
   /**
    * @deprecated Only returned when legacy post submission download
    *   configuration is in use. For non legacy configured forms, use
-   *   `getDownloadSubmissionPdfUrl` instead.
+   *   `downloadSubmissionPdfs` instead.
    */
   downloadSubmissionPdfUrl?: string
-  /**
-   * The URL to download the form submission PDF.
-   *
-   * @param configurationId - The configuration ID to use for the PDF download.
-   */
-  getDownloadSubmissionPdfUrl?: (configurationId: string) => string
+
+  downloadSubmissionPdfs?: Array<{
+    id: string
+    configuration: SubmissionEventTypes.PDFConfiguration
+    url: string
+  }>
   /** The access token to download post-submission attachment urls and metadata. */
   attachmentsAccessToken?: string
 }

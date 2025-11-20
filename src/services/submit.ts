@@ -173,19 +173,45 @@ export default async function submit({
       abortSignal,
     )
 
-    const downloadSubmissionPdfUrl = () => {
-      if (!data.pdfAccessToken) {
-        return undefined
+    const getDownloadSubmissionPdfUrls = () => {
+      const allowPDFDownload =
+        formSubmission.definition.postSubmissionReceipt?.allowPDFDownload
+      if (!data.pdfAccessToken || !allowPDFDownload) {
+        return {
+          downloadSubmissionPdfUrl: undefined,
+          downloadSubmissionPdfs: undefined,
+        }
       }
-      if (
-        formSubmission.definition.postSubmissionReceipt?.allowPDFDownload &&
-        !Array.isArray(
-          formSubmission.definition.postSubmissionReceipt?.allowPDFDownload,
-        )
-      ) {
-        return `${tenants.current.apiOrigin}/forms/${formSubmission.definition.id}/submissions/${data.submissionId}/pdf-document?accessToken=${data.pdfAccessToken}`
+      if (allowPDFDownload && !Array.isArray(allowPDFDownload)) {
+        // Cater for legacy config
+        const url = `${tenants.current.apiOrigin}/forms/${formSubmission.definition.id}/submissions/${data.submissionId}/pdf-document?accessToken=${data.pdfAccessToken}`
+        return {
+          downloadSubmissionPdfUrl: url,
+          downloadSubmissionPdfs: [
+            {
+              id: 'default',
+              configuration: allowPDFDownload,
+              url,
+            },
+          ],
+        }
+      }
+
+      return {
+        downloadSubmissionPdfUrl: undefined,
+        downloadSubmissionPdfs: allowPDFDownload.map((pdfConfiguration) => {
+          const url = `${tenants.current.apiOrigin}/forms/${formSubmission.definition.id}/submissions/${data.submissionId}/pdf-document?accessToken=${data.pdfAccessToken}&configurationId=${pdfConfiguration.id}`
+          return {
+            ...pdfConfiguration,
+            url,
+          }
+        }),
       }
     }
+
+    const { downloadSubmissionPdfUrl, downloadSubmissionPdfs } =
+      getDownloadSubmissionPdfUrls()
+
     const formSubmissionResult: FormSubmissionResult = {
       ...formSubmission,
       payment: null,
@@ -195,11 +221,8 @@ export default async function submit({
       submissionTimestamp: data.submissionTimestamp,
       submissionId: data.submissionId,
       isUploadingAttachments: false,
-      downloadSubmissionPdfUrl: downloadSubmissionPdfUrl(),
-      getDownloadSubmissionPdfUrl: !data.pdfAccessToken
-        ? undefined
-        : (configurationId: string) =>
-            `${tenants.current.apiOrigin}/forms/${formSubmission.definition.id}/submissions/${data.submissionId}/pdf-document?accessToken=${data.pdfAccessToken}&configurationId=${configurationId}`,
+      downloadSubmissionPdfUrl,
+      downloadSubmissionPdfs,
       attachmentsAccessToken: data.attachmentsAccessToken,
     }
 

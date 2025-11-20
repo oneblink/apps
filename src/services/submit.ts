@@ -186,6 +186,27 @@ export default async function submit({
         return `${tenants.current.apiOrigin}/forms/${formSubmission.definition.id}/submissions/${data.submissionId}/pdf-document?accessToken=${data.pdfAccessToken}`
       }
     }
+
+    const downloadSubmissionPdfs = () => {
+      if (!data.pdfAccessToken) {
+        return undefined
+      }
+      if (
+        Array.isArray(
+          formSubmission.definition.postSubmissionReceipt?.allowPDFDownload,
+        )
+      ) {
+        return formSubmission.definition.postSubmissionReceipt?.allowPDFDownload.map(
+          (pdfConfiguration) => {
+            return {
+              ...pdfConfiguration,
+              url: `${tenants.current.apiOrigin}/forms/${formSubmission.definition.id}/submissions/${data.submissionId}/pdf-document?accessToken=${data.pdfAccessToken}&configurationId=${pdfConfiguration.id}`,
+            }
+          },
+        )
+      }
+    }
+
     const formSubmissionResult: FormSubmissionResult = {
       ...formSubmission,
       payment: null,
@@ -196,10 +217,7 @@ export default async function submit({
       submissionId: data.submissionId,
       isUploadingAttachments: false,
       downloadSubmissionPdfUrl: downloadSubmissionPdfUrl(),
-      getDownloadSubmissionPdfUrl: !data.pdfAccessToken
-        ? undefined
-        : (configurationId: string) =>
-            `${tenants.current.apiOrigin}/forms/${formSubmission.definition.id}/submissions/${data.submissionId}/pdf-document?accessToken=${data.pdfAccessToken}&configurationId=${configurationId}`,
+      downloadSubmissionPdfs: downloadSubmissionPdfs(),
       attachmentsAccessToken: data.attachmentsAccessToken,
     }
 

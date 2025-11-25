@@ -166,5 +166,7 @@ export async function getDraftSubmission(
     createdAt: latestFormSubmissionDraftVersion.createdAt,
     formSubmissionDraftId: formSubmissionDraft.id,
     sectionState: s3SubmissionData.sectionState,
+    previousElapsedDurationSeconds:
+      s3SubmissionData.previousElapsedDurationSeconds,
   })
 }

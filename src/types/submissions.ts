@@ -25,6 +25,11 @@ export type NewDraftSubmission = BaseNewFormSubmission & {
   lastElementUpdated?: FormElement
   /** The state of sections before the draft was saved */
   sectionState?: SubmissionTypes.NewS3SubmissionData['sectionState']
+  /**
+   * The elapsed duration in seconds the user took to complete the submission
+   * before the draft was saved
+   */
+  previousElapsedDurationSeconds?: SubmissionTypes.NewS3SubmissionData['previousElapsedDurationSeconds']
 }
 
 export type NewFormSubmission = BaseNewFormSubmission & {

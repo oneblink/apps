@@ -1,7 +1,7 @@
 {
   "name": "@oneblink/apps",
   "description": "Helper functions for OneBlink apps in JavaScript.",
-  "version": "23.6.0-beta.3",
+  "version": "23.6.0",
   "author": "OneBlink <developers@oneblink.io> (https://oneblink.io)",
   "bugs": {
     "url": "https://github.com/oneblink/apps/issues"
@@ -9,7 +9,7 @@
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.637.0",
     "@oneblink/sdk-core": "^8.10.0-beta.1",
-    "@oneblink/storage": "^3.3.0-beta.2",
+    "@oneblink/storage": "^3.4.0-beta.1",
     "@sentry/browser": "^7.77.0",
     "@sentry/tracing": "^7.77.0",
     "date-fns": "^2.30.0",
@@ -26,7 +26,7 @@
     "@babel/plugin-transform-modules-commonjs": "^7.23.0",
     "@microsoft/eslint-plugin-sdl": "^0.2.0",
     "@oneblink/release-cli": "^3.4.0",
-    "@oneblink/types": "github:oneblink/types#MS-1694",
+    "@oneblink/types": "github:oneblink/types",
     "@types/file-saver": "^2.0.6",
     "@types/jest": "^27.5.0",
     "@types/lodash.clonedeep": "^4.5.8",
@@ -81,7 +81,7 @@
     "release": "oneblink-release repository --no-name",
     "start": "tsc-watch",
     "test": "jest",
-    "types": "npm i --save-dev github:oneblink/types#MS-1694",
+    "types": "npm i --save-dev github:oneblink/types",
     "typescript": "tsc --noEmit",
     "update-dependents": "oneblink-release update-dependents --force"
   }

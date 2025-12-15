@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.637.0",
-    "@oneblink/sdk-core": "^8.10.0-beta.1",
+    "@oneblink/sdk-core": "^8.11.1-beta.4",
     "@oneblink/storage": "^3.4.0-beta.1",
     "@sentry/browser": "^7.77.0",
     "@sentry/tracing": "^7.77.0",

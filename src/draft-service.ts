@@ -43,7 +43,7 @@ interface LocalDraftsStorage {
 
 async function checkIfUsingPrivateDrafts(
   formsAppId: number,
-  abortSignal?: AbortSignal,
+  abortSignal: AbortSignal | undefined,
 ): Promise<boolean> {
   return getCurrentFormsAppUser(formsAppId, abortSignal)
     .then((user) => !!user)
@@ -312,6 +312,7 @@ async function upsertDraft({
   try {
     const isUsingPrivateDrafts = await checkIfUsingPrivateDrafts(
       draftSubmission.formsAppId,
+      abortSignal,
     )
     const formSubmissionDraftVersion = await saveDraftSubmission({
       draftSubmission,
@@ -396,6 +397,7 @@ async function upsertDraft({
     syncDrafts({
       throwError: false,
       formsAppId: draftSubmission.formsAppId,
+      abortSignal,
     })
   } catch (err) {
     Sentry.captureException(err)
@@ -518,7 +520,10 @@ async function getDraftAndData(
     formsAppId,
     abortSignal,
   )
-  const isUsingPrivateDrafts = await checkIfUsingPrivateDrafts(formsAppId)
+  const isUsingPrivateDrafts = await checkIfUsingPrivateDrafts(
+    formsAppId,
+    abortSignal,
+  )
   if (isUsingPrivateDrafts) {
     const localDraftsStorage = await getLocalDraftsFromStorage()
     if (formSubmissionDrafts) {
@@ -564,7 +569,10 @@ async function deleteDraft(
 ): Promise<void> {
   try {
     await removeLocalDraftSubmission(formSubmissionDraftId)
-    const isUsingPrivateDrafts = await checkIfUsingPrivateDrafts(formsAppId)
+    const isUsingPrivateDrafts = await checkIfUsingPrivateDrafts(
+      formsAppId,
+      abortSignal,
+    )
     if (isUsingPrivateDrafts) {
       const localDraftsStorage = await getLocalDraftsFromStorage()
       const formSubmissionDraft =
@@ -631,6 +639,7 @@ async function deleteDraft(
     syncDrafts({
       throwError: false,
       formsAppId,
+      abortSignal,
     })
   } catch (err) {
     Sentry.captureException(err)
@@ -675,8 +684,6 @@ async function setAndBroadcastDrafts(
   await executeDraftsListeners(localFormSubmissionDrafts)
 }
 
-let _isSyncingDrafts = false
-
 /**
  * Force a sync of remote drafts with locally stored drafts. This function will
  * swallow all errors thrown unless `true` is passed for the `throwError`
@@ -704,15 +711,22 @@ async function syncDrafts({
   /** `true` to throw errors while syncing */
   throwError?: boolean
   /** Signal to abort the requests */
-  abortSignal?: AbortSignal
+  abortSignal: AbortSignal | undefined
 }): Promise<void> {
-  if (_isSyncingDrafts) {
+  if (abortSignal?.aborted) {
     console.log('Application is currently syncing drafts.')
     return
   }
-  _isSyncingDrafts = true
 
-  const isUsingPrivateDrafts = await checkIfUsingPrivateDrafts(formsAppId)
+  const isUsingPrivateDrafts = await checkIfUsingPrivateDrafts(
+    formsAppId,
+    abortSignal,
+  )
+
+  if (abortSignal?.aborted) {
+    // TODO some cool console log maybe?
+    return
+  }
 
   if (!isUsingPrivateDrafts) {
     const publicDrafts = await getPublicDraftsFromStorage()
@@ -728,8 +742,11 @@ async function syncDrafts({
         filteredPublicDrafts.push(publicDraft)
       }
     }
+    if (abortSignal?.aborted) {
+      // TODO some cool console log maybe?
+      return
+    }
     await setAndBroadcastPublicDrafts(filteredPublicDrafts)
-    _isSyncingDrafts = false
     return
   }
 
@@ -742,6 +759,10 @@ async function syncDrafts({
       )
       const newDeletedFormSubmissionDrafts: SubmissionTypes.FormSubmissionDraft[] =
         []
+      if (abortSignal?.aborted) {
+        // TODO some cool console log maybe?
+        return
+      }
       for (const formSubmissionDraft of localDraftsStorage.deletedFormSubmissionDrafts) {
         const { hasDeletedRemoteDraft } = await deleteDraftData(
           formSubmissionDraft.id,
@@ -761,9 +782,14 @@ async function syncDrafts({
     const publicDraftsStorage = await getPublicDraftsFromStorage()
     // if public drafts exist, add them to the current logged in users' unsynced drafts
     // and remove them from local storage
-    if (publicDraftsStorage.length) {
+    if (publicDraftsStorage.length && !abortSignal?.aborted) {
       localDraftsStorage.unsyncedDraftSubmissions.push(...publicDraftsStorage)
       await utilsService.localForage.setItem(generatePublicDraftsKey(), [])
+    }
+
+    if (abortSignal?.aborted) {
+      // TODO some cool console log maybe?
+      return
     }
 
     if (localDraftsStorage.unsyncedDraftSubmissions.length) {
@@ -817,9 +843,7 @@ async function syncDrafts({
     }
 
     console.log('Finished syncing drafts.')
-    _isSyncingDrafts = false
   } catch (error) {
-    _isSyncingDrafts = false
     if (abortSignal?.aborted) {
       console.log('Syncing drafts has been aborted')
       return
